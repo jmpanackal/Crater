@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://terrain.gd" id="2_terrain"]
 [ext_resource type="Script" path="res://ore_hud.gd" id="3_ore_hud"]
+[ext_resource type="Script" path="res://upgrade_hud.gd" id="4_upgrade_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -35,8 +36,25 @@ position_smoothing_speed = 8.0
 [node name="OreLabel" type="Label" parent="UI"]
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 200.0
+offset_right = 220.0
 offset_bottom = 40.0
 theme_override_font_sizes/font_size = 20
 text = "Ore: 0"
 script = ExtResource("3_ore_hud")
+
+[node name="UpgradePanel" type="VBoxContainer" parent="UI"]
+offset_left = 12.0
+offset_top = 48.0
+offset_right = 420.0
+offset_bottom = 120.0
+theme_override_constants/separation = 6
+script = ExtResource("4_upgrade_hud")
+
+[node name="InfoLabel" type="Label" parent="UI/UpgradePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Dig Yield Lv 0 | Next: 5 Ore | Yield: 1/dig"
+
+[node name="BuyButton" type="Button" parent="UI/UpgradePanel"]
+layout_mode = 2
+text = "Buy Dig Yield (5 Ore) [U]"

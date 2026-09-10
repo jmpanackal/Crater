@@ -39,8 +39,9 @@ Detailed painterly pixel art (reference level: Eastward, Owlboy) — not minimal
 ## Current project state
 
 - Godot project at `E:\Coding\Projects\Crater`, GitHub: [jmpanackal/Crater](https://github.com/jmpanackal/Crater)
-- `main.tscn`: Player (`CharacterBody2D`) with move/jump, diggable `TileMapLayer` terrain, dig on **R** (aim with WASD/arrows), smooth `Camera2D` follow, Ore HUD
-- Autoload **`Resources`**: dictionary-backed resource wallet (Ore starts at 0; +1 per destroyed tile)
+- `main.tscn`: Player (`CharacterBody2D`) with move/jump, diggable `TileMapLayer` terrain, dig on **R** (aim with WASD/arrows), smooth `Camera2D` follow, Ore HUD + Dig Yield upgrade button (**U**)
+- Autoload **`Resources`**: dictionary-backed resource wallet (Ore starts at 0)
+- Autoload **`Upgrades`**: data-driven upgrade levels; Dig Yield increases Ore per dig; cost = ceil(base * 1.5^level)
 - Repo folder / GitHub name is **Crater**; game title is **Krater**
 
 ## Design constraints
@@ -53,6 +54,8 @@ Detailed painterly pixel art (reference level: Eastward, Owlboy) — not minimal
 ## Seed systems (extend later)
 
 - **Resources (`resources.gd` autoload):** tracks named resource amounts; emit `resource_changed` for UI/tech tree later
+- **Upgrades (`upgrades.gd` autoload):** dictionary of upgrade defs + levels; `try_buy` / `get_next_cost` / effect getters — add tech by extending `_defs`
 - **Terrain (`terrain.gd`):** owns the diggable grid; call `dig_in_direction` / `destroy_cell` here instead of erasing cells from random scripts
 - **Player dig (`player.gd`):** resolves dig direction (up/down/left/right via aim keys or last aim), then asks Terrain to remove the tile — same path will eventually support tools, stamina, and up-vs-down fiction layers
 - **Dig controls:** hold WASD/arrows to aim, press **R** to dig that adjacent tile; if no aim key is held, uses last aim direction
+- **Upgrade controls:** click the Dig Yield button or press **U** to spend Ore

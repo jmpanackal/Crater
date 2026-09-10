@@ -66,14 +66,14 @@ func has_tile(cell: Vector2i) -> bool:
 
 
 ## Remove a tile if present. Returns true when something was destroyed.
-## Grants Ore through the Resources autoload so any dig path shares the same payout.
+## Grants Ore through Resources; yield amount comes from Upgrades when present.
 func destroy_cell(cell: Vector2i) -> bool:
 	if not has_tile(cell):
 		return false
 	erase_cell(cell)
 	var wallet := _resource_wallet()
 	if wallet:
-		wallet.add(wallet.ORE, wallet.ORE_PER_TILE)
+		wallet.add(wallet.ORE, _ore_yield_for_dig())
 	return true
 
 
@@ -82,6 +82,18 @@ func _resource_wallet() -> Node:
 	if not is_inside_tree():
 		return null
 	return get_tree().root.get_node_or_null("Resources")
+
+
+## Prefer Upgrades dig yield so purchases visibly change payout; fall back to base.
+func _ore_yield_for_dig() -> int:
+	if is_inside_tree():
+		var upgrades := get_tree().root.get_node_or_null("Upgrades")
+		if upgrades and upgrades.has_method("get_dig_ore_yield"):
+			return int(upgrades.get_dig_ore_yield())
+	var wallet := _resource_wallet()
+	if wallet:
+		return int(wallet.ORE_PER_TILE)
+	return 1
 
 
 ## Convert a world-space point to a map cell on this layer.
