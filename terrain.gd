@@ -77,3 +77,25 @@ func destroy_cell(cell: Vector2i) -> bool:
 ## Convert a world-space point to a map cell on this layer.
 func world_to_cell(world_pos: Vector2) -> Vector2i:
 	return local_to_map(to_local(world_pos))
+
+
+## Dig the tile adjacent to a world-space origin in a cardinal direction.
+## `direction` should be one of: LEFT, RIGHT, UP, DOWN (Vector2i).
+## Same path for every direction — up/down fiction layers can wrap this later.
+func dig_in_direction(origin_world: Vector2, direction: Vector2i) -> bool:
+	var cardinal := _to_cardinal(direction)
+	if cardinal == Vector2i.ZERO:
+		return false
+
+	var target_world := origin_world + Vector2(cardinal) * float(TILE_SIZE)
+	return destroy_cell(world_to_cell(target_world))
+
+
+## Collapse any Vector2i into a single cardinal dig direction (no diagonals yet).
+## Vertical aim wins if both axes are set, so W/S clearly dig up/down while moving.
+func _to_cardinal(direction: Vector2i) -> Vector2i:
+	if direction.y != 0:
+		return Vector2i(0, signi(direction.y))
+	if direction.x != 0:
+		return Vector2i(signi(direction.x), 0)
+	return Vector2i.ZERO
