@@ -11,10 +11,13 @@ func _init() -> void:
 func _run_tests(terrain: TerrainLayer) -> void:
 	var wallet: Node = root.get_node_or_null("Resources")
 	var upgrades: Node = root.get_node_or_null("Upgrades")
+	var community: Node = root.get_node_or_null("Community")
 	if wallet == null:
 		push_error("FAIL Resources missing")
 		quit(1)
 		return
+	if community:
+		community.set_paused(true)
 
 	if upgrades:
 		upgrades.set_level(upgrades.DIG_YIELD, 0)

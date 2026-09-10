@@ -9,10 +9,16 @@ func _init() -> void:
 func _run_tests() -> void:
 	var wallet: Node = root.get_node_or_null("Resources")
 	var upgrades: Node = root.get_node_or_null("Upgrades")
+	var community: Node = root.get_node_or_null("Community")
+	var save_load: Node = root.get_node_or_null("SaveLoad")
 	if wallet == null or upgrades == null:
 		push_error("FAIL missing autoloads")
 		quit(1)
 		return
+	if community:
+		community.set_paused(true)
+	if save_load:
+		save_load.clear_save()
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	upgrades.set_siphon_station_open(true)

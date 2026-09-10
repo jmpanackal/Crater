@@ -95,7 +95,27 @@ func siphon_for_upgrade(upgrade_id: StringName) -> bool:
 	wallet.add(wallet.SALVAGE, -cost)
 	_levels[upgrade_id] = get_level(upgrade_id) + 1
 	upgrade_changed.emit(upgrade_id, get_level(upgrade_id))
+
+	var save_load := get_tree().root.get_node_or_null("SaveLoad")
+	if save_load and save_load.has_method("save_game"):
+		save_load.save_game()
 	return true
+
+
+## Snapshot of all upgrade levels for SaveLoad.
+func get_levels_snapshot() -> Dictionary:
+	var out := {}
+	for key in _levels.keys():
+		out[str(key)] = int(_levels[key])
+	return out
+
+
+## Restore levels from SaveLoad JSON.
+func apply_levels_snapshot(data: Dictionary) -> void:
+	for key in data.keys():
+		var id := StringName(str(key))
+		if _defs.has(id):
+			set_level(id, int(data[key]))
 
 
 ## Test helper: force a level without siphoning.

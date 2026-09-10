@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 Resources="*res://resources.gd"
 Upgrades="*res://upgrades.gd"
+Community="*res://community.gd"
+SaveLoad="*res://save_load.gd"
 
 [display]
 

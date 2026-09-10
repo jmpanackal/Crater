@@ -71,20 +71,21 @@ Detailed painterly pixel art (reference level: **Eastward**, **Owlboy**) — not
 - **Player** (`player.gd`): move / jump / dig in 4 directions (**R**); in group `player` for Hollow detection; camera follow.
 - **Resources** autoload: **`salvage`** / UI **"Salvage"** — carried haul from digging; useful only when siphoned at the Hollow.
 - **Upgrades** autoload: data-driven Dig Yield; spending is **`siphon_for_upgrade`** and only while **`set_siphon_station_open(true)`** (Hollow). Cost `ceil(base * 1.5^level)`.
+- **Community** autoload: **`harvest_timer`** (60s cycle), **`social_standing`** (default 50/100); Dig Site miss calls **`on_harvest_missed()`** (−5 Standing); Hollow attendance does not.
+- **SaveLoad** autoload: JSON at `user://krater_save.json` — Salvage, upgrade levels, Standing, harvest_timer (seeded here; was not present before).
 - **HollowZone** (`hollow_zone.gd`): opens/closes the siphon station when the player enters/exits.
-- **UI:** Salvage label always visible; siphon panel **only while in Hollow**; **U** = `siphon_upgrade`; button `focus_mode = None`.
+- **UI:** Salvage + Standing always visible; Hollow panel shows Harvest countdown + Standing + siphon controls (**U**); button `focus_mode = None`.
 - Dig payout: `destroy_cell` → `get_dig_salvage_yield()` → `Resources.add(SALVAGE, …)`.
-- Headless tests under `tests/` including Hollow vs dig-site siphon gating.
+- Headless tests under `tests/` including Hollow siphon gating and Harvest/Standing persistence.
 
 ### Explicitly not built yet
 
-- Communal **Harvest** simulation (siphon naming is the hook).
-- **Social Standing**, suspicion, lie / getting-caught / exposure penalties (hook on `siphon_for_upgrade`).
+- Communal Harvest *economy* (timer/miss is the seed; no shared pool simulation yet).
+- **Lie** mechanic / exposed-lie worse penalty.
+- Recruitment gated by Standing.
 - Sanctioned vs forbidden tech tiers as distinct systems.
 - Second upgrade **Dig Radius**.
-- Save/load persistence.
-- Real pixel art, surface Reef, campaign scripting, recruitment / settlement.
-- Full settlement art — Hollow is a colored placeholder zone for now.
+- Real pixel art, surface Reef, campaign scripting, settlement art beyond the Hollow placeholder.
 
 ---
 
@@ -94,11 +95,13 @@ Detailed painterly pixel art (reference level: **Eastward**, **Owlboy**) — not
 | --- | --- |
 | `resources.gd` | Autoload wallet (`SALVAGE`); `add` / `get_amount` / `resource_changed`. |
 | `upgrades.gd` | Autoload defs/levels; **`siphon_for_upgrade`** / `can_siphon` / Hollow station gate. |
+| `community.gd` | **`harvest_timer`**, **`social_standing`**, **`on_harvest_missed()`**, Harvest cycle. |
+| `save_load.gd` | Persist Salvage / upgrades / Standing / harvest_timer. |
 | `hollow_zone.gd` | Area2D that opens the siphon station while the player is home. |
 | `terrain.gd` | Dig site grid; `destroy_cell` / `dig_in_direction`. |
 | `player.gd` | Movement + dig request only (no spending). |
-| `salvage_hud.gd` | Carried Salvage readout (dig site + Hollow). |
-| `upgrade_hud.gd` | Hollow-only siphon UI. |
+| `salvage_hud.gd` / `standing_hud.gd` | Always-on readouts. |
+| `upgrade_hud.gd` | Hollow-only Harvest countdown + siphon UI. |
 | `tests/` | Headless regressions. |
 
 ### Controls (current)
