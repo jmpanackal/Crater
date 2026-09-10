@@ -2,7 +2,7 @@
 
 > **One line:** You're a kid in an underground society built into the walls of a massive, unexplored pit — forbidden from digging up, and quietly the only person who's ever wanted to. You break the taboo, reach a surface no one knew existed, and slowly uncover the truth: your people are crash-landed colonists on an alien moon, and the answer to everything was always waiting at the bottom of the pit everyone else spent generations staring into.
 
-*(This doc stays high-level. Every open decision — naming, mechanics, structure, art, production — lives in the companion **Decisions doc**, organized by category there.)*
+*(This doc stays high-level. Every open decision — naming, mechanics, structure, art, production — lives in the companion **Decisions doc**, organized by category there. Living narrative detail and story idea inbox: [`story.md`](story.md).)*
 
 ---
 
@@ -35,9 +35,9 @@ One loop, reused across the whole game so we're not building four separate games
 
 **⭐ Running underneath all of that: passive/idle generation, the same system reskinned three times, same as the core loop:**
 
-- **The Hollow:** the society is constantly working — farming, crafting, whatever sustains it — generating resources whether you're actively playing or not. The tech/upgrades you steal and find increase their generation rate. This is what funds and speeds up your secret digging, in both directions.
-- **The surface settlement:** recruited people auto-work here too, at a **higher rate** than the Hollow (because of the tech you've brought up) — direct, visible payoff for progress and recruitment.
-- **The ship:** same system, final skin — passive construction ticking upward while you're out on expeditions, until it's ready.
+- **The Hollow:** the society is constantly working across **different production districts** (farms, craft, water, etc.) — generating different resources whether you're actively digging or not. Efficiency/"safe magic" upgrades raise those rates over time. This funds and speeds your secret digging, and **healthier communal output makes siphoning safer** (people notice diversion less when the districts are thriving). This is Act 1's home economy — not scaffolding for later acts.
+- **The surface settlement:** recruited people auto-work here too, at a **higher rate** than the Hollow (because of the tech you've brought up) — direct, visible payoff for progress and recruitment. (Act 2 — same formula family, different skin.)
+- **The ship:** same system, final skin — passive construction ticking upward while you're out on expeditions, until it's ready. (Act 3.)
 
 This is deliberately one of the *cheapest* systems to build (a rate-per-tick number, modified by upgrades and headcount, no animation/combat-feel needed) — it's the same math idle-clicker games run on, and it's a well-worn enough pattern that AI-assisted coding handles it easily. It keeps the actual incremental/idle satisfaction (numbers climbing, checking in on growth) without making the *whole* game passive. Comparable to how Palworld's Pals work on tasks while you go explore.
 
@@ -66,12 +66,15 @@ You're a kid who never really bought the ceiling story. You don't hate your home
 Not all tech gets the same treatment, though. Anything mundane and utilitarian — fire-starting tools, water filtration, structural reinforcement — is sanctioned, openly used, "safe magic." Anything that could actually reveal the truth — navigation instruments, communication devices, ship logs, legible data of any kind — is hoarded, restricted, or quietly destroyed, because that's the tech that could unravel his story. Players won't know this distinction exists yet in Act 1 — it's just "some magic is common, some is rare and suspicious" — but it maps directly onto real mechanics below.
 
 **GAMEPLAY IN ACT 1:**
-- The **daily Harvest** — communal crop/resource gathering that keeps the society fed. It's the rhythm of life AND your clock: you dig during stolen time, but you have to show up or you're noticed.
+- **Production districts in the Hollow** — distinct areas that produce different communal resources. You upgrade those over time (mostly via sanctioned/"safe magic" efficiency tech) so the society generates faster. This is the Act 1 face of the passive/idle layer, not a placeholder for the surface settlement.
+- The **daily Harvest** — communal crop/resource gathering that keeps the society fed. It's the rhythm of life AND your clock: you dig during stolen time, but you have to show up or you're noticed. Harvest sits on top of the district economy (a pulse + accountability check), not instead of it.
+- **A living Hollow** — people who work those districts, live in the chambers, play, and talk. Act 1's home base must feel inhabited; an empty siphon booth fails the "might be the whole game" design goal.
 - **Dual-direction digging** — the same tools push both upward (the secret, forbidden project) and into the pit's upper walls (public, permitted, everyone does it a little — though going too far is genuinely dangerous rather than taboo). Cheap for us to build: one system, two frontiers.
 - **Fragments** are seeded in both directions but stay ambiguous everywhere this early (could be read as myth, religion, or history — never clearly "we're on an alien planet"). Two kinds, and each now has a diegetic reason for how it's used and by whom:
-  - **Salvage** = metal, machinery, hull → mechanical upgrades. Sanctioned/"safe magic" salvage becomes **efficiency upgrades** — it boosts the Harvest's passive generation rate openly, no secrecy required. Forbidden/"dangerous magic" salvage is what you're actually risking everything to dig for.
+  - **Salvage** = metal, machinery, hull → mechanical upgrades. Sanctioned/"safe magic" salvage becomes **efficiency upgrades** — it boosts district passive generation rates openly, no secrecy required. Forbidden/"dangerous magic" salvage is what you're actually risking everything to dig for.
   - **Records** = data-slates, audio logs, survivor journals → lore. Always forbidden-tier — this is the tech that could unravel the myth, so finding and using it becomes a **knowledge upgrade**, tied directly to the risk below rather than open daily life.
-- **Social Standing system (important, runs the whole game):** getting caught digging upward, caught in a lie about where you've been, or caught tinkering with tech beyond what's sanctioned, costs you standing. A lie mechanic lets you dodge suspicion — but if a lie is *later* exposed, the penalty is worse than getting caught honestly. Standing gates how many people you can recruit later. **Act 1's small personal risks become Act 3's payoff.**
+- **Siphoning** — personal dig upgrades divert materials/effort from communal life; you spend when you're back home, not at the dig site. **Stronger district output makes siphoning safer** — healthier production covers the diversion; thin production makes people notice. This is the mechanical link between "help the society" and "steal from it."
+- **Social Standing system (important, runs the whole game):** getting caught digging upward, caught in a lie about where you've been, caught siphoning when cover is thin, or caught tinkering with tech beyond what's sanctioned, costs you standing. A lie mechanic lets you dodge suspicion — but if a lie is *later* exposed, the penalty is worse than getting caught honestly. Standing gates how many people you can recruit later. **Act 1's small personal risks become Act 3's payoff.**
 
 **🎯 DESIGN GOAL: Act 1 should feel like it might be the whole game.** No visible "surface" tab, no locked branches hinting at more. The player should brace for punishment when they dig up, NOT anticipate a reveal — the world only turning out to be bigger than shown should land as a genuine surprise, not something the player was quietly expecting. The pit stays a constant, lived-with mystery throughout — never confirmed, never explained, just always there in the background the way it is for everyone else in the Hollow.
 
@@ -128,7 +131,7 @@ Using **records from below + salvage from above**, you finally have enough to re
 1. **Dual-purpose tech tree** — every unlock is a mechanic AND a lore fragment. Salvaged ship tech literally upgrades you and explains your origin. Solves Dome Keeper's "no story" + "thin content" at once.
 2. **Trade-off upgrades** — higher tiers cost something. Kills the "one obvious build order" problem. (How punishing: see Decisions doc #5.)
 3. **Social Standing** — one persistent stat driven by getting caught/lying/time-away, that gates recruitment and shapes the ending. Gives the game *memory* and makes choices matter.
-4. **Passive/idle generation, reskinned across three tiers (Hollow → settlement → ship)** — the incremental engine that keeps our idle-clicker DNA alive, and a thematic statement (surface life > the life you were told to fear, made visible in the numbers).
+4. **Passive/idle generation, reskinned across three tiers (Hollow districts → settlement → ship)** — Act 1's underground society has upgradable production areas; healthier output also covers siphoning. Later tiers reuse the same formula family. Incremental DNA + thematic statement (surface life > the life you were told to fear, made visible in the numbers once Act 2 exists).
 5. **One dig mechanic, two forbidden directions (up and down)** — the same growing toolset drives both the ceiling-breach story and the pit's slow-burn mystery, converging in Act 3. Two mysteries for the cost of one system.
 6. **One recruitment system, three narrative sources (Hollow, runaway settlers, aliens)** — same generic worker slot and standing-gated logic every time, but each source is a different relationship thread paying off into the same settlement number. Every major story choice ends up visible in your headcount.
 7. **"Magicians" — sanctioned vs. forbidden tech, as a diegetic skin on the tech tree.** Public "safe magic" tech maps to efficiency upgrades (openly boosts passive generation); hoarded "dangerous magic" — anything that could reveal the truth — maps to knowledge upgrades, tied to the risk/Social Standing system. Gives the villain a personal stake in Act 1 long before his reveal (he's the "greatest magician"), and turns an existing mechanical split into a piece of characterization for free.
@@ -140,7 +143,8 @@ Using **records from below + salvage from above**, you finally have enough to re
 **Yes, IF we're disciplined.** The trick: it's **one core loop reskinned three times, pointed in two directions**, not several separate games. Same underlying "venture / gather / return / upgrade" code runs underground, into the pit, on the surface, and into the endgame — what changes is the skin, the threats, and what the tech tree unlocks.
 
 Keep these LIGHT so we don't drown:
-- Settlement = headcount + passive bonuses, NOT Rimworld
+- Hollow Act 1 = production districts + rate upgrades + living NPCs with light talk, NOT Rimworld / full dialogue sim
+- Settlement (Act 2+) = headcount + passive bonuses, NOT Rimworld
 - Recruitment/persuasion = triggered story beats + a standing check, NOT a full dialogue sim
 - Three recruitment sources = same generic worker + different flavor text/recruitment beat each, NOT three distinct worker types or mechanics
 - Alien contact = a meaningful choice with a few consequences, NOT a branching faction system

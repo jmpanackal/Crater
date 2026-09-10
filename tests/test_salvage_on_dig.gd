@@ -26,7 +26,8 @@ func _run_tests(terrain: TerrainLayer) -> void:
 	wallet.set_amount(wallet.SALVAGE, 0)
 	terrain.clear()
 
-	var center := Vector2i(10, 10)
+	# Mid-band cell so DOWN is not a Pit bonus tile (avoids flaky +1 salvage).
+	var center := Vector2i(10, 6)
 	var targets := [
 		center + Vector2i.LEFT,
 		center + Vector2i.RIGHT,

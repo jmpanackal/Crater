@@ -21,6 +21,7 @@ func _run_tests() -> void:
 
 	save_load.clear_save()
 	community.set_paused(true)
+	community.skip_lie_prompt = true
 	community.set_social_standing(community.SOCIAL_STANDING_DEFAULT)
 	community.set_harvest_timer(community.HARVEST_INTERVAL_SEC)
 	upgrades.set_level(upgrades.DIG_YIELD, 0)

@@ -1,31 +1,80 @@
 extends Node
 ## Global upgrade / tech seed (autoload name: Upgrades).
-## Personal upgrades are NOT a neutral shop — they are Salvage secretly diverted
-## from the communal Harvest. Call siphon_for_upgrade() only at the Hollow.
-## Future Social Standing / "caught siphoning" hooks attach here.
+## Personal upgrades divert Salvage from communal life — siphon only in the Hollow.
+## Efficiency = sanctioned/"safe magic" (boosts districts, open).
+## Forbidden/Knowledge = Standing risk on siphon via district cover health.
 
 signal upgrade_changed(upgrade_id: StringName, new_level: int)
 ## Emitted when the Hollow siphon station opens/closes (player enters/leaves Hollow).
 signal siphon_station_changed(is_open: bool)
+signal siphon_result(upgrade_id: StringName, noticed: bool)
+
+const CATEGORY_EFFICIENCY := &"efficiency"
+const CATEGORY_FORBIDDEN := &"forbidden"
 
 const DIG_YIELD := &"dig_yield"
+const QUIET_DIG := &"quiet_dig"
+const FARMS_EFF := &"farms_eff"
+const WICKWORK_EFF := &"wickwork_eff"
+const CISTERN_EFF := &"cistern_eff"
 
 # true only while the player is physically in the Hollow (set by HollowZone).
 var _siphon_station_open := false
 
+## When true, forbidden siphons skip RNG (tests). Null = use cover chance.
+var force_siphon_notice: Variant = null
+
 var _defs: Dictionary = {
 	DIG_YIELD: {
 		"display_name": "Dig Yield",
+		"category": CATEGORY_FORBIDDEN,
 		"base_cost": 5,
 		"cost_growth": 1.5,
-		# Salvage granted per dig at level 0, then +effect_per_level each siphon.
 		"base_effect": 1,
 		"effect_per_level": 1,
+		"blurb": "More Salvage per dig — diverted for your secret work.",
+	},
+	QUIET_DIG: {
+		"display_name": "Quiet Dig",
+		"category": CATEGORY_FORBIDDEN,
+		"base_cost": 8,
+		"cost_growth": 1.6,
+		"base_effect": 0,
+		"effect_per_level": 1,
+		"blurb": "Softer Cap strikes. Harder to notice upward digs.",
+	},
+	FARMS_EFF: {
+		"display_name": "Farm Tending",
+		"category": CATEGORY_EFFICIENCY,
+		"district": &"farms",
+		"base_cost": 4,
+		"cost_growth": 1.45,
+		"blurb": "Safe magic for the glowcap beds. Raises Farm output.",
+	},
+	WICKWORK_EFF: {
+		"display_name": "Wickcraft",
+		"category": CATEGORY_EFFICIENCY,
+		"district": &"wickwork",
+		"base_cost": 4,
+		"cost_growth": 1.45,
+		"blurb": "Lantern-and-rope know-how. Raises Wickwork output.",
+	},
+	CISTERN_EFF: {
+		"display_name": "Cistern Flow",
+		"category": CATEGORY_EFFICIENCY,
+		"district": &"cistern",
+		"base_cost": 4,
+		"cost_growth": 1.45,
+		"blurb": "Filtration charms. Raises Cistern output.",
 	},
 }
 
 var _levels: Dictionary = {
 	DIG_YIELD: 0,
+	QUIET_DIG: 0,
+	FARMS_EFF: 0,
+	WICKWORK_EFF: 0,
+	CISTERN_EFF: 0,
 }
 
 
@@ -41,6 +90,13 @@ func set_siphon_station_open(is_open: bool) -> void:
 	siphon_station_changed.emit(_siphon_station_open)
 
 
+func get_upgrade_ids() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for id in _defs.keys():
+		out.append(id)
+	return out
+
+
 func get_level(upgrade_id: StringName) -> int:
 	return int(_levels.get(upgrade_id, 0))
 
@@ -51,6 +107,18 @@ func get_def(upgrade_id: StringName) -> Dictionary:
 
 func get_display_name(upgrade_id: StringName) -> String:
 	return str(get_def(upgrade_id).get("display_name", upgrade_id))
+
+
+func get_category(upgrade_id: StringName) -> StringName:
+	return StringName(str(get_def(upgrade_id).get("category", CATEGORY_FORBIDDEN)))
+
+
+func is_efficiency(upgrade_id: StringName) -> bool:
+	return get_category(upgrade_id) == CATEGORY_EFFICIENCY
+
+
+func is_forbidden(upgrade_id: StringName) -> bool:
+	return get_category(upgrade_id) == CATEGORY_FORBIDDEN
 
 
 ## Next siphon cost. cost = ceil(base_cost * growth^times_purchased).
@@ -72,6 +140,22 @@ func get_dig_salvage_yield() -> int:
 	return base_effect + get_level(DIG_YIELD) * per_level
 
 
+func get_quiet_dig_level() -> int:
+	return get_level(QUIET_DIG)
+
+
+func get_district_efficiency_level(district_id: StringName) -> int:
+	match district_id:
+		&"farms":
+			return get_level(FARMS_EFF)
+		&"wickwork":
+			return get_level(WICKWORK_EFF)
+		&"cistern":
+			return get_level(CISTERN_EFF)
+		_:
+			return 0
+
+
 func can_siphon(upgrade_id: StringName) -> bool:
 	if not _siphon_station_open:
 		return false
@@ -83,9 +167,7 @@ func can_siphon(upgrade_id: StringName) -> bool:
 	return wallet.get_amount(wallet.SALVAGE) >= get_next_cost(upgrade_id)
 
 
-## Divert Salvage from the communal Harvest into a personal upgrade.
-## Only works while the siphon station is open (player in the Hollow).
-## Hook for later: Social Standing risk / getting caught when this succeeds.
+## Divert Salvage into an upgrade. Forbidden siphons roll cover-based notice.
 func siphon_for_upgrade(upgrade_id: StringName) -> bool:
 	if not can_siphon(upgrade_id):
 		return false
@@ -96,10 +178,30 @@ func siphon_for_upgrade(upgrade_id: StringName) -> bool:
 	_levels[upgrade_id] = get_level(upgrade_id) + 1
 	upgrade_changed.emit(upgrade_id, get_level(upgrade_id))
 
+	var noticed := false
+	if is_forbidden(upgrade_id):
+		noticed = _roll_siphon_notice()
+		if noticed:
+			var community := get_tree().root.get_node_or_null("Community")
+			if community and community.has_method("on_siphon_noticed"):
+				community.on_siphon_noticed()
+
+	siphon_result.emit(upgrade_id, noticed)
+
 	var save_load := get_tree().root.get_node_or_null("SaveLoad")
 	if save_load and save_load.has_method("save_game"):
 		save_load.save_game()
 	return true
+
+
+func _roll_siphon_notice() -> bool:
+	if force_siphon_notice != null:
+		return bool(force_siphon_notice)
+	var districts := get_tree().root.get_node_or_null("Districts")
+	var chance := 0.25
+	if districts and districts.has_method("get_siphon_notice_chance"):
+		chance = float(districts.get_siphon_notice_chance())
+	return randf() < chance
 
 
 ## Snapshot of all upgrade levels for SaveLoad.

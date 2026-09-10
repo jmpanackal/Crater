@@ -1,0 +1,14 @@
+---
+description: Consult game-feel docs when polishing movement, dig, or feedback juice
+globs: player.gd,terrain.gd,community.gd,main.gd,upgrade_hud.gd,hollow_npc.gd
+alwaysApply: false
+---
+
+# Game feel / juice
+
+When polishing movement, dig impact, land/jump, pickup feedback, Harvest/Standing notices, siphon feedback, or Hollow presence:
+
+1. Read [`docs/game-feel-best-practices.md`](docs/game-feel-best-practices.md) before adding juice.
+2. Prefer subtle, Act 1 secrecy tone — not arcade carnival.
+3. Do not juice broken systems; fairness (e.g. coyote/buffer) before spectacle (freeze/shake).
+4. Cap digs quieter than Pit; social consequences stay UI/copy-led, not explosion FX.

@@ -24,6 +24,7 @@ func _run_tests(terrain: TerrainLayer) -> void:
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	upgrades.set_siphon_station_open(false)
+	upgrades.force_siphon_notice = false
 	wallet.set_amount(wallet.SALVAGE, 20)
 
 	# Dig site: cannot siphon even with plenty of Salvage.
@@ -67,7 +68,8 @@ func _run_tests(terrain: TerrainLayer) -> void:
 		return
 
 	terrain.clear()
-	var center := Vector2i(12, 12)
+	# Mid-band cell so DOWN is not a Pit bonus tile.
+	var center := Vector2i(12, 6)
 	terrain.set_cell(center + Vector2i.DOWN, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	wallet.set_amount(wallet.SALVAGE, 0)
 	var origin := terrain.to_global(terrain.map_to_local(center))

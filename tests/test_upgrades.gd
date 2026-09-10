@@ -22,6 +22,7 @@ func _run_tests() -> void:
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	upgrades.set_siphon_station_open(true)
+	upgrades.force_siphon_notice = false
 	wallet.set_amount(wallet.SALVAGE, 0)
 
 	if upgrades.get_next_cost(upgrades.DIG_YIELD) != 5:

@@ -1,31 +1,42 @@
 extends Node
 ## Minimal JSON save/load (autoload: SaveLoad).
-## Persists Salvage, upgrade levels, social_standing, and harvest_timer.
-## There was no save system in the repo yet — this is the seed for Act 1 persistence.
+## Persists Act 1: Salvage, upgrades, Standing, harvest, districts, journal, lies.
 
 const SAVE_PATH := "user://krater_save.json"
+const SAVE_VERSION := 2
 
 
 func _ready() -> void:
-	# Load after sibling autoloads exist.
+	# Load after sibling autoloads exist. Title screen may clear/reload explicitly.
 	call_deferred("load_game")
+
+
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
 
 
 func save_game() -> bool:
 	var wallet := get_tree().root.get_node_or_null("Resources")
 	var upgrades := get_tree().root.get_node_or_null("Upgrades")
 	var community := get_tree().root.get_node_or_null("Community")
+	var districts := get_tree().root.get_node_or_null("Districts")
+	var journal := get_tree().root.get_node_or_null("Journal")
 	if wallet == null or upgrades == null or community == null:
 		push_warning("SaveLoad: missing autoload; skip save")
 		return false
 
 	var data := {
-		"version": 1,
+		"version": SAVE_VERSION,
 		"salvage": wallet.get_amount(wallet.SALVAGE),
 		"upgrade_levels": upgrades.get_levels_snapshot(),
 		"social_standing": community.get_social_standing(),
 		"harvest_timer": community.get_harvest_seconds_remaining(),
+		"pending_lie": community.has_pending_lie(),
 	}
+	if districts and districts.has_method("get_stocks_snapshot"):
+		data["district_stocks"] = districts.get_stocks_snapshot()
+	if journal and journal.has_method("get_snapshot"):
+		data["journal_records"] = journal.get_snapshot()
 
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -54,6 +65,8 @@ func load_game() -> bool:
 	var wallet := get_tree().root.get_node_or_null("Resources")
 	var upgrades := get_tree().root.get_node_or_null("Upgrades")
 	var community := get_tree().root.get_node_or_null("Community")
+	var districts := get_tree().root.get_node_or_null("Districts")
+	var journal := get_tree().root.get_node_or_null("Journal")
 	if wallet == null or upgrades == null or community == null:
 		return false
 
@@ -65,7 +78,42 @@ func load_game() -> bool:
 		community.set_social_standing(int(data["social_standing"]))
 	if data.has("harvest_timer"):
 		community.set_harvest_timer(float(data["harvest_timer"]))
+	if data.has("pending_lie") and community.has_method("set_pending_lie"):
+		community.set_pending_lie(bool(data["pending_lie"]))
+	if data.has("district_stocks") and districts and districts.has_method("apply_stocks_snapshot"):
+		if typeof(data["district_stocks"]) == TYPE_DICTIONARY:
+			districts.apply_stocks_snapshot(data["district_stocks"])
+	if data.has("journal_records") and journal and journal.has_method("apply_snapshot"):
+		if typeof(data["journal_records"]) == TYPE_ARRAY:
+			journal.apply_snapshot(data["journal_records"])
 	return true
+
+
+## Reset runtime state for a New Game (also clears the save file).
+func new_game() -> void:
+	clear_save()
+	var wallet := get_tree().root.get_node_or_null("Resources")
+	var upgrades := get_tree().root.get_node_or_null("Upgrades")
+	var community := get_tree().root.get_node_or_null("Community")
+	var districts := get_tree().root.get_node_or_null("Districts")
+	var journal := get_tree().root.get_node_or_null("Journal")
+
+	if wallet:
+		wallet.set_amount(wallet.SALVAGE, 0)
+	if upgrades:
+		for id in upgrades.get_upgrade_ids():
+			upgrades.set_level(id, 0)
+		upgrades.set_siphon_station_open(false)
+	if community:
+		community.set_social_standing(community.SOCIAL_STANDING_DEFAULT)
+		community.set_harvest_timer(community.HARVEST_INTERVAL_SEC)
+		community.set_pending_lie(false)
+		community.skip_lie_prompt = false
+	if districts:
+		for id in districts.get_district_ids():
+			districts.set_stock(id, 0.0)
+	if journal:
+		journal.clear_all()
 
 
 ## Test helper: wipe the save file.

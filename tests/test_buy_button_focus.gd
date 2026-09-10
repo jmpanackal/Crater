@@ -1,5 +1,5 @@
 extends SceneTree
-## Siphon button has no keyboard focus; click + U work only when Hollow is open.
+## Siphon buttons have no keyboard focus; click + U work only when Hollow is open.
 
 
 func _init() -> void:
@@ -17,6 +17,7 @@ func _run_tests() -> void:
 		return
 	if community:
 		community.set_paused(true)
+		community.skip_lie_prompt = true
 	if save_load:
 		save_load.clear_save()
 
@@ -28,9 +29,20 @@ func _run_tests() -> void:
 	var scene: Node = packed.instantiate()
 	root.add_child(scene)
 	await process_frame
+	await process_frame
 
-	var button: Button = scene.get_node("UI/UpgradePanel/SiphonButton")
 	var panel: CanvasItem = scene.get_node("UI/UpgradePanel")
+	var siphon_list: Node = scene.get_node("UI/UpgradePanel/SiphonList")
+	var button: Button = siphon_list.get_node_or_null("dig_yield") as Button
+	if button == null:
+		for child in siphon_list.get_children():
+			if child is Button and str(child.name) == "dig_yield":
+				button = child
+				break
+	if button == null:
+		push_error("FAIL dig_yield siphon button missing")
+		quit(1)
+		return
 
 	if button.focus_mode != Control.FOCUS_NONE:
 		push_error("FAIL focus_mode")

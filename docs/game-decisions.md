@@ -2,6 +2,8 @@
 
 *(Companion doc to the main pitch. Each item has 2-4 concrete options + my recommendation where I have one. Circle/edit as we talk. Numbers are stable references — grouped into categories below, but the numbering doesn't change.)*
 
+**Provenance:** When locking or leaning, prefer clear **USER** intent. Agents must not quietly promote their own suggestions into requirements — see [`ai-workflow.md`](ai-workflow.md) (USER vs AI tags).
+
 ---
 
 # 🏷️ NAMING DECISIONS
@@ -9,27 +11,25 @@
 ## 1. Name for the ceiling/taboo
 *(the rock overhead + the fear of digging into it)*
 
-- **The Cap** — simple, slightly casual, easy to say in dialogue
-- **The Crust** — more geological/serious
-- **The Lid** — casual, almost darkly funny, fits the comedy tone
-- **The Shroud** — more ominous, less "curiosity not fear"
-- **The Roof** — plainest, most naturalistic (how people would actually talk)
+**✅ Locked (USER):** **the Firmament** is the formal, sacred name. In ordinary speech, residents say **the Vault** or simply **the roof**.
 
-**Leaning:** The Cap or The Roof — both are things people would plausibly say out loud without sounding like fantasy-novel narration.
+The doctrine says the Firmament remains intact through shared work, obedience, and grace; an older “correction” supposedly buried a selfish, questioning generation beneath a collapse. This gives the taboo both religious force and a material-sounding threat, while later allowing the player to discover that the doctrine is manufactured control.
 
 ---
 
 ## 2. Names for Hollow subsections
-*(so dialogue doesn't lean on "the Hollow" constantly)*
+*(so dialogue doesn't lean on "the Hollow" constantly — and so Act 1 production districts have places to live)*
+
+**✅ Locked concept (see also #28):** Act 1 Hollow subsections are not flavor labels only — a small set of them are **production districts** that passively generate different communal resources and can be upgraded over time. Naming still open; the district *role* is locked.
 
 Need a small handful (3-6) of district/chamber names. Options for a naming *pattern* to pick from, then we fill in actual names later:
 
-- **Function-based:** named after what happens there (the Farms, the Wickwork, the Cistern)
+- **Function-based:** named after what happens there (the Farms, the Wickwork, the Cistern) — strongest fit for production districts
 - **Founder-based:** named after early settlers/families (Toren's Hall, the Marrow District)
 - **Descriptive/geological:** named after the physical space (the Low Reach, the Wide Cut, the Narrows)
 - **Mixed** — some function, some founder, some geological — most realistic, since real places rarely follow one naming logic
 
-**Leaning:** Mixed — feels the most lived-in and least "designed."
+**Leaning:** Mixed — feels the most lived-in and least "designed." Prefer at least some function-based names so production districts read clearly in UI and dialogue.
 
 ---
 
@@ -206,7 +206,7 @@ Each build should feel different to *play*, not just have different numbers:
 - **C) Full branching dialogue trees** (Mass Effect-style conversation wheels, many lines/paths per NPC) — expensive: heavy writing load, dedicated UI, every branch needs testing. Real scope trap for a 3-person team.
 - **D) Hybrid** — most NPCs just talk (lore, comedy, world-building, no choices needed); a small, deliberate set of key moments (lie mechanic, recruitment beats, alien contact, villain confrontation) get real discrete choices.
 
-**Leaning:** D — this is what we've actually already designed everywhere else in this doc, just not named as a dialogue system yet. Keep choice points rare and meaningful rather than building toward full branching trees everywhere, which would be a different, much bigger game than what we've scoped.
+**Leaning:** D — this is what we've actually already designed everywhere else in this doc, just not named as a dialogue system yet. Keep choice points rare and meaningful rather than building toward full branching trees everywhere, which would be a different, much bigger game than what we've scoped. **Act 1 requirement (locked via #28):** the Hollow needs ordinary NPCs who work/live/play/chat under option D's "most NPCs just talk" lane — presence and texture, not a full dialogue sim.
 
 ---
 
@@ -232,14 +232,32 @@ Each build should feel different to *play*, not just have different numbers:
 **The concept:** some Hollow residents operate old salvaged machinery by rote, inherited practice, without understanding it — everyone calls this magic, because that's what it genuinely looks like. This isn't just flavor: it's *why* the villain's power works. A settlement that thinks its tools are magic has no framework for questioning who controls them, so he encourages the framing rather than merely tolerating it, and likely positions himself as the most gifted magician of all — reads as harmless in Act 1, recontextualizes hard once his identity is revealed in Act 3.
 
 **The tech split, mapped onto existing systems (not a new one):**
-- **Sanctioned/"safe magic"** (mundane, utilitarian — fire-starting, filtration, structural) → **efficiency upgrades**, openly used, boosts passive generation (the Harvest, later the settlement)
+- **Sanctioned/"safe magic"** (mundane, utilitarian — fire-starting, filtration, structural) → **efficiency upgrades**, openly used, boosts **Hollow production-district** passive rates (and later the surface settlement)
 - **Forbidden/"dangerous magic"** (anything that could reveal the truth — navigation, comms, records, legible data) → **knowledge upgrades**, hoarded/restricted, tied directly to the risk/Social Standing system (#3, #16, #21)
 
-**Why it's worth it:** costs nothing new to build — it's a diegetic skin on the existing salvage/records split (#6) and the existing efficiency/knowledge upgrade categories already implied by the passive-generation and tech-tree systems. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic.
+**Why it's worth it:** costs nothing new to build — it's a diegetic skin on the existing salvage/records split (#6) and the existing efficiency/knowledge upgrade categories already implied by the passive-generation and tech-tree systems. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic. Efficiency upgrades also feed **siphon cover** (#28): healthier district output makes diversion harder to notice.
 
 **Open sub-questions:**
 - Exact term for this in-world ("magicians" works fine as a placeholder — worth revisiting once we're naming other Hollow-specific vocabulary)
 - How strictly the sanctioned/forbidden line is enforced in-fiction — is it an unspoken norm everyone just follows, or does the villain (or his allies) actively police it? Affects how much of a threat "getting caught with forbidden tech" should feel like in Act 1 versus just a stronger Social Standing risk (#21's social consequence category already covers the mechanical side either way).
+
+---
+
+## 28. Act 1 Hollow society layer — production districts, siphon cover, living NPCs
+*(✅ locked — corrects underweighted Act 1 scope; do not treat as Act 2 settlement work)*
+
+**The concept:** Act 1's Hollow is a working underground society, not an empty home hub.
+
+1. **Production districts** — a small set of named areas (#2) that passively generate *different* communal resources. Player efficiency/"safe magic" upgrades raise those rates over time. Harvest remains the communal rhythm/clock; districts are the ongoing economy underneath.
+2. **Siphon cover** — diverting materials/effort for personal dig upgrades is safer when district output is healthy, and riskier when production is thin. Helping the society and stealing from it are the same economy viewed two ways.
+3. **Living NPCs** — characters who work, live, play, and chat in those spaces. Required for Act 1's "might be the whole game" feel. Dialogue stays lightweight per #20 (most NPCs just talk; rare choice prompts only).
+
+**Scope guardrails:**
+- Same passive formula family as later settlement/ship tiers (pitch guardrail) — different flavor numbers and district outputs, not a second prestige economy.
+- Districts + NPCs stay simple: rates, presence, light talk — **not** RimWorld, schedule sims, or full branching dialogue trees.
+- Do **not** invent Act 2 surface settlement/recruitment features here; this is the underground society only.
+
+**Why lock it now:** passive generation was already in the pitch, but districts-as-upgradable-areas, siphon-safety-from-healthy-output, and a populated Hollow were easy to underweight into "timer + empty siphon booth." Those three are Act 1 canon.
 
 ---
 
@@ -265,7 +283,7 @@ Each build should feel different to *play*, not just have different numbers:
 - **C) Story/mystery delivery** — the dual-purpose lore system, pacing of reveals
 - **D) Settlement/passive generation** — the incremental economy layer
 
-**Leaning:** A. It's the thing we're most excited about AND the thing that most directly differentiates us from Dome Keeper. B still needs to feel good but doesn't need to be the deepest system; C and D should support A rather than compete with it for dev time.
+**Leaning:** A. It's the thing we're most excited about AND the thing that most directly differentiates us from Dome Keeper. B still needs to feel good but doesn't need to be the deepest system; C and D should support A rather than compete with it for dev time. **Clarification (locked via #28):** "D stays simple" does **not** mean Act 1 ships without Hollow production districts or living NPCs — those are required Act 1 content, just intentionally lighter than the tech tree.
 
 ---
 
@@ -287,6 +305,8 @@ Each build should feel different to *play*, not just have different numbers:
 - **C) Isometric** — visually distinct, but harder to do well in pixel art and adds real complexity to digging/terrain mechanics.
 
 **Leaning:** A — matches everything else we've already locked in (art style, comps, digging mechanic).
+
+**✅ Locked (2026-09):** Stay **A**. Sea of Stars–style oblique JRPG camera evaluated and rejected for Act 1 (fights Cap↑/Pit↓ dig; wrong cost). Steal SoS lighting/layering craft only — **no camera hybrid**. Full visual bible: [`art-direction.md`](art-direction.md).
 
 ---
 
@@ -314,7 +334,9 @@ Each build should feel different to *play*, not just have different numbers:
 
 **Leaning:** A. It's the only option with direct precedent at our exact team size AND team skill level, and it gives us a concrete design tool for free: **use a deliberate palette shift for the reveal** — dark, warm, earthy tones underground vs. vivid, strange colors on the surface. The art style itself can help sell the "the world doesn't end, it explodes into color" moment, which is a cheap, high-impact way to reinforce the twist.
 
-**✅ Where we're leaning as a team: detailed pixel art** (mid-to-high resolution, more expressive than 8-bit — Eastward/Dead Cells territory, not minimalist). AI-assisted for concept art and static single-frame sprites; human hand-finishing for tileset seams and animation frames, since those are AI's current weak points.
+**✅ Where we're leaning as a team: detailed pixel art** (mid-to-high resolution, more expressive than 8-bit — Eastward/Owlboy / Dead Cells territory, not minimalist). AI-assisted for concept art and static single-frame sprites; human hand-finishing for tileset seams and animation frames, since those are AI's current weak points.
+
+**Craft refs (steal craft, not tone):** INMOST (ink voids, lantern light, quiet UI) + Blasphemous 2 (screen density, parallax, ambient micro-life) — not grief-horror or Catholic body-horror. See [`art-direction.md`](art-direction.md).
 
 ---
 
@@ -356,6 +378,6 @@ Things to actually assign out loud:
 
 ## ✅ Fastest path through this doc if we're short on time
 
-Priority decisions (need answers to actually start building): **#3, #4, #6, #9, #10, #13, #14, #15, #20, #21, #22, #23, #24, #25, #26**
-Can defer safely to later: **#1, #2, #11, #12, #16, #18, #19, #27**
+Priority decisions (need answers to actually start building): **#3, #4, #6, #9, #10, #13, #14, #15, #20, #21, #22, #23, #24, #25, #26, #28**
+Can defer safely to later: **#1, #2 (names only — district *role* locked in #28), #11, #12, #16, #18, #19, #27**
 Decide explicitly regardless of time: **#17** (team roles/workflow — can't skip this one)
