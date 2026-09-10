@@ -1,22 +1,20 @@
 extends Node
 ## Global resource wallet for Krater (autoload name: Resources).
-## Stores named amounts in a dictionary so new resource types are just new ids —
-## no need for a new variable per resource when the tech tree grows.
+## Stores named amounts in a dictionary so new resource types are just new ids.
 ##
-## Note: this script is an autoload only (no class_name) so other class_name
-## scripts can safely reach it via get_tree().root.get_node("Resources").
+## Salvage carried at the dig site is only useful once siphoned back at the Hollow.
+## Access via get_tree().root.get_node("Resources") (no class_name on this autoload).
 
 signal resource_changed(resource_id: StringName, new_amount: int)
 
-# Stable ids for known resources. Add more consts here as types appear.
-const ORE := &"ore"
+# Personal haul from digging — spent only by siphoning at the Hollow (not at dig site).
+const SALVAGE := &"salvage"
 
-# Placeholder dig yield: fixed +1 keeps early balancing/tests predictable.
-# Later, tile types can request different amounts (or roll ranges) via add().
-const ORE_PER_TILE := 1
+# Fallback dig payout if Upgrades is missing.
+const SALVAGE_PER_TILE := 1
 
 var _amounts: Dictionary = {
-	ORE: 0,
+	SALVAGE: 0,
 }
 
 

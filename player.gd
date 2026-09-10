@@ -14,6 +14,7 @@ var _aim_dir := Vector2i.RIGHT
 
 
 func _ready() -> void:
+	add_to_group("player")
 	if terrain == null:
 		terrain = get_node_or_null("../Terrain") as TerrainLayer
 

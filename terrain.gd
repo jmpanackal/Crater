@@ -54,8 +54,8 @@ func _build_tileset() -> TileSet:
 
 
 func _fill_ground() -> void:
-	# Placeholder dirt bed under the spawn area (several rows for dig depth).
-	for x in range(0, 40):
+	# Dig site starts to the right of the Hollow (tiles x>=10 ≈ world x>=320).
+	for x in range(10, 40):
 		for y in range(11, 24):
 			set_cell(Vector2i(x, y), 0, PLACEHOLDER_ATLAS)
 
@@ -66,14 +66,15 @@ func has_tile(cell: Vector2i) -> bool:
 
 
 ## Remove a tile if present. Returns true when something was destroyed.
-## Grants Ore through Resources; yield amount comes from Upgrades when present.
+## Grants Salvage through Resources; yield comes from Upgrades when present.
+## Salvage is carried haul — it only becomes useful when siphoned at the Hollow.
 func destroy_cell(cell: Vector2i) -> bool:
 	if not has_tile(cell):
 		return false
 	erase_cell(cell)
 	var wallet := _resource_wallet()
 	if wallet:
-		wallet.add(wallet.ORE, _ore_yield_for_dig())
+		wallet.add(wallet.SALVAGE, _salvage_yield_for_dig())
 	return true
 
 
@@ -84,15 +85,15 @@ func _resource_wallet() -> Node:
 	return get_tree().root.get_node_or_null("Resources")
 
 
-## Prefer Upgrades dig yield so purchases visibly change payout; fall back to base.
-func _ore_yield_for_dig() -> int:
+## Prefer Upgrades dig yield so Hollow siphons visibly change payout.
+func _salvage_yield_for_dig() -> int:
 	if is_inside_tree():
 		var upgrades := get_tree().root.get_node_or_null("Upgrades")
-		if upgrades and upgrades.has_method("get_dig_ore_yield"):
-			return int(upgrades.get_dig_ore_yield())
+		if upgrades and upgrades.has_method("get_dig_salvage_yield"):
+			return int(upgrades.get_dig_salvage_yield())
 	var wallet := _resource_wallet()
 	if wallet:
-		return int(wallet.ORE_PER_TILE)
+		return int(wallet.SALVAGE_PER_TILE)
 	return 1
 
 

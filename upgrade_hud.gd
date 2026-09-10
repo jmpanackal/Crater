@@ -1,9 +1,10 @@
 extends VBoxContainer
-## Placeholder upgrade shop UI: shows dig-yield level/cost and a buy button.
-## Also listens for the "buy_upgrade" input action (U) as a keyboard shortcut.
+## Hollow-only siphon UI. Hidden at the dig site — personal upgrades are not
+## a neutral shop; they divert Salvage meant for the communal Harvest.
+## Shortcut: "siphon_upgrade" action (U), only while the Hollow station is open.
 
 @onready var _info: Label = $InfoLabel
-@onready var _buy_button: Button = $BuyButton
+@onready var _siphon_button: Button = $SiphonButton
 
 var _upgrades: Node
 var _wallet: Node
@@ -13,13 +14,14 @@ func _ready() -> void:
 	_upgrades = get_tree().root.get_node_or_null("Upgrades")
 	_wallet = get_tree().root.get_node_or_null("Resources")
 
-	if _buy_button:
-		# Space/ui_accept must not activate this button when jumping.
-		_buy_button.focus_mode = Control.FOCUS_NONE
-		_buy_button.pressed.connect(_on_buy_pressed)
+	if _siphon_button:
+		# Space/ui_accept must not activate this when jumping.
+		_siphon_button.focus_mode = Control.FOCUS_NONE
+		_siphon_button.pressed.connect(_on_siphon_pressed)
 
 	if _upgrades:
 		_upgrades.upgrade_changed.connect(_on_upgrade_changed)
+		_upgrades.siphon_station_changed.connect(_on_siphon_station_changed)
 	if _wallet:
 		_wallet.resource_changed.connect(_on_resource_changed)
 
@@ -27,19 +29,20 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("buy_upgrade"):
-		_try_buy_dig_yield()
+	if event.is_action_pressed("siphon_upgrade"):
+		_try_siphon_dig_yield()
 		get_viewport().set_input_as_handled()
 
 
-func _on_buy_pressed() -> void:
-	_try_buy_dig_yield()
+func _on_siphon_pressed() -> void:
+	_try_siphon_dig_yield()
 
 
-func _try_buy_dig_yield() -> void:
+func _try_siphon_dig_yield() -> void:
 	if _upgrades == null:
 		return
-	_upgrades.try_buy(_upgrades.DIG_YIELD)
+	# Hard gate: siphon_for_upgrade refuses unless Hollow station is open.
+	_upgrades.siphon_for_upgrade(_upgrades.DIG_YIELD)
 	_refresh()
 
 
@@ -51,22 +54,34 @@ func _on_resource_changed(_resource_id: StringName, _new_amount: int) -> void:
 	_refresh()
 
 
+func _on_siphon_station_changed(_is_open: bool) -> void:
+	_refresh()
+
+
 func _refresh() -> void:
 	if _upgrades == null:
-		if _info:
-			_info.text = "Upgrades unavailable"
+		visible = false
+		return
+
+	# Siphon UI only exists while the player is in the Hollow.
+	var in_hollow: bool = _upgrades.is_siphon_station_open()
+	visible = in_hollow
+	if not in_hollow:
 		return
 
 	var id: StringName = _upgrades.DIG_YIELD
 	var level: int = _upgrades.get_level(id)
 	var cost: int = _upgrades.get_next_cost(id)
-	var yield_now: int = _upgrades.get_dig_ore_yield()
-	var name: String = _upgrades.get_display_name(id)
-	var can_afford: bool = _upgrades.can_buy(id)
+	var yield_now: int = _upgrades.get_dig_salvage_yield()
+	var upgrade_name: String = _upgrades.get_display_name(id)
+	var can_afford: bool = _upgrades.can_siphon(id)
 
 	if _info:
-		_info.text = "%s Lv %d | Next: %d Ore | Yield: %d/dig" % [name, level, cost, yield_now]
+		_info.text = (
+			"Siphon %s Lv %d | Next: %d Salvage | Yield: %d/dig"
+			% [upgrade_name, level, cost, yield_now]
+		)
 
-	if _buy_button:
-		_buy_button.text = "Buy %s (%d Ore) [U]" % [name, cost]
-		_buy_button.disabled = not can_afford
+	if _siphon_button:
+		_siphon_button.text = "Siphon %s (%d Salvage) [U]" % [upgrade_name, cost]
+		_siphon_button.disabled = not can_afford

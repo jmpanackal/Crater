@@ -1,20 +1,74 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://terrain.gd" id="2_terrain"]
-[ext_resource type="Script" path="res://ore_hud.gd" id="3_ore_hud"]
+[ext_resource type="Script" path="res://salvage_hud.gd" id="3_salvage_hud"]
 [ext_resource type="Script" path="res://upgrade_hud.gd" id="4_upgrade_hud"]
+[ext_resource type="Script" path="res://hollow_zone.gd" id="5_hollow"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hollow_floor"]
+size = Vector2(320, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hollow_area"]
+size = Vector2(320, 400)
+
 [node name="root" type="Node2D"]
+
+[node name="Hollow" type="Node2D" parent="."]
+
+[node name="Backdrop" type="ColorRect" parent="Hollow"]
+offset_right = 320.0
+offset_bottom = 400.0
+color = Color(0.22, 0.28, 0.32, 1)
+
+[node name="Title" type="Label" parent="Hollow"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 300.0
+offset_bottom = 48.0
+theme_override_font_sizes/font_size = 22
+text = "The Hollow"
+
+[node name="Floor" type="StaticBody2D" parent="Hollow"]
+position = Vector2(0, 352)
+
+[node name="ColorRect" type="ColorRect" parent="Hollow/Floor"]
+offset_right = 320.0
+offset_bottom = 32.0
+color = Color(0.35, 0.42, 0.48, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/Floor"]
+position = Vector2(160, 16)
+shape = SubResource("RectangleShape2D_hollow_floor")
+
+[node name="HollowZone" type="Area2D" parent="Hollow"]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("5_hollow")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/HollowZone"]
+position = Vector2(160, 200)
+shape = SubResource("RectangleShape2D_hollow_area")
+
+[node name="DigSiteLabel" type="Label" parent="."]
+offset_left = 360.0
+offset_top = 16.0
+offset_right = 560.0
+offset_bottom = 48.0
+theme_override_font_sizes/font_size = 22
+text = "Dig Site"
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 script = ExtResource("2_terrain")
 
 [node name="Player" type="CharacterBody2D" parent="."]
-position = Vector2(304, 280)
+position = Vector2(400, 280)
+collision_layer = 1
+collision_mask = 1
 script = ExtResource("1_player")
 terrain = NodePath("../Terrain")
 
@@ -33,30 +87,30 @@ position_smoothing_speed = 8.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="OreLabel" type="Label" parent="UI"]
+[node name="SalvageLabel" type="Label" parent="UI"]
 offset_left = 12.0
 offset_top = 12.0
-offset_right = 220.0
+offset_right = 260.0
 offset_bottom = 40.0
 theme_override_font_sizes/font_size = 20
-text = "Ore: 0"
-script = ExtResource("3_ore_hud")
+text = "Salvage: 0"
+script = ExtResource("3_salvage_hud")
 
 [node name="UpgradePanel" type="VBoxContainer" parent="UI"]
+visible = false
 offset_left = 12.0
 offset_top = 48.0
-offset_right = 420.0
-offset_bottom = 120.0
+offset_right = 460.0
+offset_bottom = 130.0
 theme_override_constants/separation = 6
 script = ExtResource("4_upgrade_hud")
 
 [node name="InfoLabel" type="Label" parent="UI/UpgradePanel"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "Dig Yield Lv 0 | Next: 5 Ore | Yield: 1/dig"
+text = "Siphon Dig Yield Lv 0 | Next: 5 Salvage | Yield: 1/dig"
 
-[node name="BuyButton" type="Button" parent="UI/UpgradePanel"]
+[node name="SiphonButton" type="Button" parent="UI/UpgradePanel"]
 layout_mode = 2
 focus_mode = 0
-text = "Buy Dig Yield (5 Ore) [U]"
-
+text = "Siphon Dig Yield (5 Salvage) [U]"
