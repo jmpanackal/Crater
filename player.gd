@@ -1,23 +1,28 @@
 extends CharacterBody2D
+## Placeholder player controller.
+## Movement is simple for now; digging is the important seed system —
+## direction is always a Vector2i so up/down expeditions can reuse the same path.
 
 const SPEED := 200.0
 const JUMP_VELOCITY := -400.0
 const TILE := 32.0
 
-@export var terrain: TileMapLayer
+@export var terrain: TerrainLayer
 
+# Last horizontal facing (left/right). Used when dig is pressed with no aim keys.
 var _facing := Vector2i.RIGHT
 
 
 func _ready() -> void:
 	if terrain == null:
-		terrain = get_node_or_null("../Terrain") as TileMapLayer
+		terrain = get_node_or_null("../Terrain") as TerrainLayer
 
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
+	# Space / ui_accept = jump (dig is a separate "dig" action on E).
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
@@ -37,30 +42,32 @@ func _physics_process(delta: float) -> void:
 		_try_dig()
 
 
+## Dig one adjacent tile. Aim with WASD / arrows; otherwise use facing.
+## Up and down are first-class directions (same dig call as left/right).
 func _try_dig() -> void:
 	if terrain == null:
 		return
 
-	var dig_dir := _facing
-	if Input.is_action_pressed("ui_down") or Input.is_physical_key_pressed(KEY_S):
-		dig_dir = Vector2i.DOWN
-	elif Input.is_action_pressed("ui_up") or Input.is_physical_key_pressed(KEY_W):
-		dig_dir = Vector2i.UP
-	elif Input.is_action_pressed("ui_left") or Input.is_physical_key_pressed(KEY_A):
-		dig_dir = Vector2i.LEFT
-	elif Input.is_action_pressed("ui_right") or Input.is_physical_key_pressed(KEY_D):
-		dig_dir = Vector2i.RIGHT
-
-	# Aim from player center one tile in the dig direction.
+	var dig_dir := _resolve_dig_direction()
 	var origin := global_position + Vector2(TILE * 0.5, TILE * 0.5)
-	var target := origin + Vector2(dig_dir) * TILE
-	var cell := terrain.local_to_map(terrain.to_local(target))
+	var target_cell := terrain.world_to_cell(origin + Vector2(dig_dir) * TILE)
 
-	# On flat ground, left/right often points at empty air — dig down instead.
-	if terrain.get_cell_source_id(cell) == -1 and dig_dir.y == 0:
+	# Flat ground: left/right often aims at empty air — fall back to digging down.
+	if not terrain.has_tile(target_cell) and dig_dir.y == 0:
 		dig_dir = Vector2i.DOWN
-		target = origin + Vector2(dig_dir) * TILE
-		cell = terrain.local_to_map(terrain.to_local(target))
+		target_cell = terrain.world_to_cell(origin + Vector2(dig_dir) * TILE)
 
-	if terrain.get_cell_source_id(cell) != -1:
-		terrain.erase_cell(cell)
+	terrain.destroy_cell(target_cell)
+
+
+## Prefer explicit aim (including up/down), else last left/right facing.
+func _resolve_dig_direction() -> Vector2i:
+	if Input.is_action_pressed("ui_down") or Input.is_physical_key_pressed(KEY_S):
+		return Vector2i.DOWN
+	if Input.is_action_pressed("ui_up") or Input.is_physical_key_pressed(KEY_W):
+		return Vector2i.UP
+	if Input.is_action_pressed("ui_left") or Input.is_physical_key_pressed(KEY_A):
+		return Vector2i.LEFT
+	if Input.is_action_pressed("ui_right") or Input.is_physical_key_pressed(KEY_D):
+		return Vector2i.RIGHT
+	return _facing
