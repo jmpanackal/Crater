@@ -14,6 +14,8 @@ func _ready() -> void:
 	_wallet = get_tree().root.get_node_or_null("Resources")
 
 	if _buy_button:
+		# Space/ui_accept must not activate this button when jumping.
+		_buy_button.focus_mode = Control.FOCUS_NONE
 		_buy_button.pressed.connect(_on_buy_pressed)
 
 	if _upgrades:

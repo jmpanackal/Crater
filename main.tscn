@@ -57,4 +57,6 @@ text = "Dig Yield Lv 0 | Next: 5 Ore | Yield: 1/dig"
 
 [node name="BuyButton" type="Button" parent="UI/UpgradePanel"]
 layout_mode = 2
+focus_mode = 0
 text = "Buy Dig Yield (5 Ore) [U]"
+
