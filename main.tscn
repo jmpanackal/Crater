@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://terrain.gd" id="2_terrain"]
 [ext_resource type="Script" path="res://salvage_hud.gd" id="3_salvage_hud"]
 [ext_resource type="Script" path="res://upgrade_hud.gd" id="4_upgrade_hud"]
 [ext_resource type="Script" path="res://hollow_zone.gd" id="5_hollow"]
+[ext_resource type="Texture2D" uid="uid://ddrnksfkq3siy" path="res://sprites/hollow_bg.png" id="6_hollow_bg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -19,10 +20,14 @@ size = Vector2(320, 400)
 
 [node name="Hollow" type="Node2D" parent="."]
 
-[node name="Backdrop" type="ColorRect" parent="Hollow"]
+[node name="Backdrop" type="TextureRect" parent="Hollow"]
+texture_filter = 1
+texture_repeat = 2
 offset_right = 320.0
 offset_bottom = 400.0
-color = Color(0.22, 0.28, 0.32, 1)
+texture = ExtResource("6_hollow_bg")
+expand_mode = 1
+stretch_mode = 1
 
 [node name="Title" type="Label" parent="Hollow"]
 offset_left = 16.0
