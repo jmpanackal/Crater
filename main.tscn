@@ -1,11 +1,10 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://terrain.gd" id="2_terrain"]
 [ext_resource type="Script" path="res://salvage_hud.gd" id="3_salvage_hud"]
 [ext_resource type="Script" path="res://upgrade_hud.gd" id="4_upgrade_hud"]
 [ext_resource type="Script" path="res://hollow_zone.gd" id="5_hollow"]
-[ext_resource type="Script" path="res://standing_hud.gd" id="6_standing"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -73,9 +72,8 @@ collision_mask = 1
 script = ExtResource("1_player")
 terrain = NodePath("../Terrain")
 
-[node name="ColorRect" type="ColorRect" parent="Player"]
-offset_right = 32.0
-offset_bottom = 32.0
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
+position = Vector2(16, 16)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
 position = Vector2(16, 16)
@@ -97,21 +95,12 @@ theme_override_font_sizes/font_size = 20
 text = "Salvage: 0"
 script = ExtResource("3_salvage_hud")
 
-[node name="StandingLabel" type="Label" parent="UI"]
-offset_left = 12.0
-offset_top = 40.0
-offset_right = 280.0
-offset_bottom = 68.0
-theme_override_font_sizes/font_size = 18
-text = "Standing: 50/100"
-script = ExtResource("6_standing")
-
 [node name="UpgradePanel" type="VBoxContainer" parent="UI"]
 visible = false
 offset_left = 12.0
-offset_top = 76.0
+offset_top = 48.0
 offset_right = 460.0
-offset_bottom = 220.0
+offset_bottom = 200.0
 theme_override_constants/separation = 6
 script = ExtResource("4_upgrade_hud")
 

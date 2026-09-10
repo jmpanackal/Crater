@@ -1,0 +1,36 @@
+{
+  "group_id": "e62c3bee-090a-4903-88bf-4de0e41f0230",
+  "states": [
+    {
+      "character": {
+        "id": "3a24577c-c887-4ab6-8c52-e49e664e4549",
+        "name": "Idle",
+        "prompt": "A small pixel art character sprite of a young person, front-facing, in detailed painterly pixel art style (Eastward/Owlboy level of detail, not minimalist 8-bit). Practical, worn clothing made from patched fabric and reused scrap materials \u2014 a small satchel or pouch at the hip, simple sturdy boots, sleeves rolled up. No armor, no weapons \u2014 this is a curious kid, not a warrior. Muted, earthy color palette (browns, rust, faded blues) with one small accent of warm amber or teal to stand out against dark underground backgrounds. Simple, clean silhouette that reads clearly at small size. Transparent background, no ground shadow baked in.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-10T07:41:23.346277+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-10T07:44:12.231037"
+}
