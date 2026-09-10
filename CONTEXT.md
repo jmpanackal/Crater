@@ -1,128 +1,137 @@
-# Krater — Project Context
+# Krater — Agent Context (Act 1 focus)
 
-Read this fully before making changes. Future prompts can say: *see CONTEXT.md for project background*.
+Read this before making changes. For the full pitch and open decisions, see:
 
-**Solo project.** Repo folder / GitHub name is **Crater** ([jmpanackal/Crater](https://github.com/jmpanackal/Crater)); game title is **Krater**. Local path: `E:\Coding\Projects\Crater`. Engine: **Godot 4.7.2** (GDScript), 2D side-view, eventual premium Steam release.
+- [`docs/game-pitch.md`](docs/game-pitch.md) — full game vision (Acts 1–3)
+- [`docs/game-decisions.md`](docs/game-decisions.md) — open/locked design choices
 
----
+**We are only building Act 1 right now.** Acts 2–3 exist so systems we seed (Standing, siphon, dual dig, sanctioned/forbidden tech) stay compatible — do not implement surface/Reef/settlement/ship features unless asked.
 
-## Game overview
-
-Krater is a 2D pixel-art expedition/mining game (closest comp: **Dome Keeper**) with a tech tree, a growing settlement, idle-style passive generation, and a story campaign.
-
----
-
-## Story premise
-
-A kid in an underground society (**"the Hollow"**) built into the walls of a massive crater is forbidden from digging upward. They break the taboo, discover a surface no one knew existed, and slowly uncover that their people are crash-landed colonists on an alien moon — with the truth waiting at the bottom of the crater everyone else has stared into for generations.
-
-**Tone:** curiosity and wonder over fear/horror. Two mysteries (what's above, what's below) converge into one by the end.
+**Solo project.** Repo: [jmpanackal/Crater](https://github.com/jmpanackal/Crater) · path `E:\Coding\Projects\Crater` · title **Krater** · Godot **4.7.2** GDScript · 2D side-view · eventual premium Steam.
 
 ---
 
-## Core mechanical loop — IMPORTANT, DO NOT SIMPLIFY THIS AWAY
+## One-line pitch
 
-This is **NOT** "dig → get resource → spend resource → instantly repeat." That shape exists only as **placeholder scaffolding** in the current build.
+A kid in an underground society built into a massive pit is forbidden from digging up. They break the taboo, reach a surface no one knew existed, and uncover that their people are crash-landed colonists — with the answer waiting at the bottom of the pit everyone stared into for generations.
 
-The **real** loop:
+Closest comps: **Dome Keeper** (loop/team size), **SteamWorld Dig** (dig-and-open), **Inscryption** (mystery pacing). Tone: curiosity/wonder over fear.
 
-1. The player secretly digs at a **dig site**, separate from the Hollow itself — upward toward a forbidden ceiling, and into the crater.
-2. The Hollow runs on a communal daily **"Harvest"** — public, shared resource gathering that sustains the whole society.
-3. The player's personal upgrades are **not** bought neutrally. They represent secretly **siphoning** resources/effort away from the communal Harvest into the player's hidden operation. **Spending only happens back at the Hollow**, not at the dig site.
-4. Getting caught digging, caught with diverted resources, or caught in a lie costs **"Social Standing"** — a persistent stat that will later gate how many people can be recruited to the surface settlement. A **lie** mechanic can dodge suspicion, but if the lie is later exposed, the penalty is **worse** than getting caught honestly.
-5. Tech has two tiers:
-   - **Sanctioned** — mundane, public, openly used (called "magic" by people who don't understand it); boosts communal efficiency.
-   - **Forbidden** — anything that could reveal the truth; hoarded, secret, tied to personal risk/knowledge upgrades.
-6. Digging is **one system pointed in two directions**:
-   - **Up** — secret / forbidden (toward the ceiling).
-   - **Down** — into the crater (public but genuinely dangerous). Same tools drive both.
+---
 
-Passive/idle generation (society working when the player isn't actively digging) is intended later and reskins across tiers: Hollow → surface settlement → ship.
+## Act 1 — what we're building toward
+
+### Setting (the Hollow)
+
+- Society lives in/around a massive shaft (**the Pit**) torn by an ancient crash; truth rotted into myth.
+- Unbreakable rule the *other* way: **never dig upward** (ceiling myth = manufactured control). The Pit is *genuinely* dangerous without needing a myth — players should feel that asymmetry.
+- Working name for the society/world-as-known: **the Hollow**. In dialogue, prefer **named subsections** (districts/chambers) over constantly saying "the Hollow" (see decisions #1–#2).
+- Ceiling/taboo name still open (leaning Cap / Roof).
+- Folk comedy lightly: belly-of-a-beast theories, nursery rhymes, one guy who says "it's just rock."
+
+### Magicians (load-bearing lore → systems)
+
+Rote use of salvaged machinery is called **magic**. Villain encourages that framing.
+
+| Diegetic | Maps to |
+| --- | --- |
+| Sanctioned / "safe magic" (mundane tools) | **Efficiency** upgrades — boost Harvest/passive openly |
+| Forbidden / "dangerous magic" (nav, logs, legible data) | **Knowledge** upgrades — tied to risk / Social Standing |
+
+Act 1 players only feel "some magic is common, some is rare/suspicious."
+
+### Act 1 gameplay pillars
+
+1. **Harvest** — communal rhythm + clock; miss it (away digging) and you're noticed.
+2. **Dual-direction dig** — one toolset: **up** (secret taboo) and **down** into Pit walls (public-ish but dangerous if you go too far).
+3. **Fragments** stay ambiguous (myth/history, never clear "alien planet"):
+   - **Salvage** → mechanical upgrades (efficiency vs forbidden split above)
+   - **Records** → lore / knowledge upgrades (always forbidden-tier)
+4. **Social Standing** — caught digging up, lying, or using unsanctioned tech costs standing; lies can dodge but exposed lies hurt worse; gates later recruitment.
+5. **Siphon framing** — personal upgrades = diverting effort/materials from communal life; spending happens when back in the Hollow, not at the dig site.
+
+### Act 1 design goal (critical)
+
+**Act 1 should feel like it might be the whole game.** No visible surface tab, no locked branches hinting at "more world." Player braces for punishment when digging up — the breach is a surprise. The Pit stays an unexplained background mystery.
+
+### Structure honesty (locked leanings)
+
+- **Hybrid campaign** (decisions #13/#16): one persistent save; expedition/miss risk costs unbanked resources/time/Standing — **not** full permadeath.
+- **Deep pillar:** tech tree / builds (#9). Mining must feel good but stay simpler; settlement/passive stay thin.
+- **Camera:** 2D side-view (#14). **Art:** detailed pixel art (#10); underground earthy vs later Reef vivid (Act 2 — not now).
+- **Pit descent:** partial/gated (#22 leaning B) — reuse dig-down; true bottom is Act 3.
+
+---
+
+## Core loop — do not simplify away
+
+**Venture out → gather + fragments → return before missed → upgrade → go further.**
+
+This is **not** a neutral dig-shop. Scaffolding in code may look like dig→resource→upgrade; the **meaning** is secrecy, siphoning from Harvest, and Standing risk.
 
 ### When in doubt
 
-If a request seems to simplify away the **theft / return / consequence** framing above, **flag it back to the user** rather than silently building the generic dig-shop loop. The mechanical shape (dig → resource → upgrade) is intentional scaffolding; the **meaning** (secrecy, risk, community vs. self) is core to the game, not decoration to bolt on later.
+If a request erases theft / return / consequence / Act 1 "might be the whole game," **flag it** instead of building the generic version.
 
 ---
 
-## Art direction
+## Current build state (keep honest)
 
-Detailed painterly pixel art (reference level: **Eastward**, **Owlboy**) — not minimalist 8-bit.
+### Implemented
 
-- **Underground:** mineral-tinted rock (teal-green / copper-rust streaks), warm lantern light mixed with bioluminescent fungus glow, carved-not-shack dwellings, crude reused salvaged tech.
-- **Surface (not built yet):** dense alien **"Reef"** aesthetic — coral-like bioluminescent growth, drifting particles (denser atmosphere than Earth), awe/wonder tone.
+- Zones: **Hollow** (left) vs **Dig Site** (right) in `main.tscn`.
+- Player: move/jump/dig (**R**), 8-dir idle `AnimatedSprite2D`, dig aim still 4-cardinal.
+- **Salvage** wallet; dig grants Salvage; **siphon_for_upgrade** only in Hollow.
+- **Harvest timer** (60s) + **Social Standing** (50/100); Dig Site miss → `on_harvest_missed()` (−5).
+- **SaveLoad** (`user://krater_save.json`): Salvage, upgrades, Standing, harvest_timer.
+- Hollow UI: Harvest countdown, Social Standing, siphon controls (**U**); Salvage always visible.
 
----
+### Not built yet (Act 1 still)
 
-## Design constraints
+- Harvest *economy* / passive generation rates (timer/miss only).
+- Lie mechanic; exposed-lie worse penalty.
+- Sanctioned vs forbidden as real upgrade categories.
+- Records/fragments lore pipeline; Journal.
+- Dig Radius / richer tech tree / tradeoff upgrades.
+- Named Hollow districts; ceiling name locked in fiction.
+- Full tilesets/art beyond player idle + colored blocks.
 
-- Skill-based via **decisions**, not twitch-reflex.
-- **No full permadeath** — failure costs resources / time / standing, never destroys overall save progress.
-- Reuse existing systems/patterns rather than bespoke one-offs per feature.
-- Comment code so a GDScript beginner can follow it.
+### Later acts (do not build now)
 
----
-
-## Current build state (keep this section honest as things change)
-
-### Implemented now (in repo)
-
-- **Two zones in `main.tscn`:** left **Hollow** (backdrop + floor + `HollowZone` Area2D) and right **Dig Site** (`TerrainLayer` tiles from x≥10). Walk between them on the shared floor line.
-- **Player** (`player.gd`): move / jump / dig in 4 directions (**R**); in group `player` for Hollow detection; camera follow.
-- **Resources** autoload: **`salvage`** / UI **"Salvage"** — carried haul from digging; useful only when siphoned at the Hollow.
-- **Upgrades** autoload: data-driven Dig Yield; spending is **`siphon_for_upgrade`** and only while **`set_siphon_station_open(true)`** (Hollow). Cost `ceil(base * 1.5^level)`.
-- **Community** autoload: **`harvest_timer`** (60s cycle), **`social_standing`** (default 50/100); Dig Site miss calls **`on_harvest_missed()`** (−5 Standing); Hollow attendance does not.
-- **SaveLoad** autoload: JSON at `user://krater_save.json` — Salvage, upgrade levels, Standing, harvest_timer (seeded here; was not present before).
-- **HollowZone** (`hollow_zone.gd`): opens/closes the siphon station when the player enters/exits.
-- **UI:** Salvage + Standing always visible; Hollow panel shows Harvest countdown + Standing + siphon controls (**U**); button `focus_mode = None`.
-- Dig payout: `destroy_cell` → `get_dig_salvage_yield()` → `Resources.add(SALVAGE, …)`.
-- Headless tests under `tests/` including Hollow siphon gating and Harvest/Standing persistence.
-
-### Explicitly not built yet
-
-- Communal Harvest *economy* (timer/miss is the seed; no shared pool simulation yet).
-- **Lie** mechanic / exposed-lie worse penalty.
-- Recruitment gated by Standing.
-- Sanctioned vs forbidden tech tiers as distinct systems.
-- Second upgrade **Dig Radius**.
-- Real pixel art, surface Reef, campaign scripting, settlement art beyond the Hollow placeholder.
+Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation — see pitch Acts 2–3.
 
 ---
 
-## Seed systems (code map)
+## Code map (seeds)
 
-| Piece | Role |
+| File | Role |
 | --- | --- |
-| `resources.gd` | Autoload wallet (`SALVAGE`); `add` / `get_amount` / `resource_changed`. |
-| `upgrades.gd` | Autoload defs/levels; **`siphon_for_upgrade`** / `can_siphon` / Hollow station gate. |
-| `community.gd` | **`harvest_timer`**, **`social_standing`**, **`on_harvest_missed()`**, Harvest cycle. |
-| `save_load.gd` | Persist Salvage / upgrades / Standing / harvest_timer. |
-| `hollow_zone.gd` | Area2D that opens the siphon station while the player is home. |
-| `terrain.gd` | Dig site grid; `destroy_cell` / `dig_in_direction`. |
-| `player.gd` | Movement + dig request only (no spending). |
-| `salvage_hud.gd` / `standing_hud.gd` | Always-on readouts. |
-| `upgrade_hud.gd` | Hollow-only Harvest countdown + siphon UI. |
-| `tests/` | Headless regressions. |
+| `resources.gd` | Salvage wallet |
+| `upgrades.gd` | Data-driven upgrades; **`siphon_for_upgrade`** |
+| `community.gd` | `harvest_timer`, `social_standing`, `on_harvest_missed()` |
+| `save_load.gd` | Persist Act 1 progress |
+| `hollow_zone.gd` | Opens siphon station in Hollow |
+| `terrain.gd` | Diggable TileMapLayer |
+| `player.gd` | Move / dig / 8-dir idle visual |
+| `upgrade_hud.gd` | Hollow Harvest + Standing + siphon UI |
+| `docs/game-pitch.md` | Full narrative/systems pitch |
+| `docs/game-decisions.md` | Decision log |
 
-### Controls (current)
+### Controls
 
 | Action | Input |
 | --- | --- |
-| Move | A/D or Left/Right |
-| Aim dig (incl. up/down) | WASD / arrows |
+| Move | A/D or arrows |
+| Aim dig (4-dir; diagonals for sprite only) | WASD / arrows |
 | Dig | **R** |
 | Jump | **Space** |
-| Siphon Dig Yield (Hollow only) | Click button or **U** |
-
-### Implementation notes worth keeping
-
-- Autoloads via `get_tree().root.get_node("Resources"|"Upgrades")` from `class_name` scripts (no `class_name` on autoloads).
-- TileSet physics polygons after atlas source is on a TileSet that already has a physics layer.
-- Dig aim: held keys win; else last aim; vertical overrides horizontal if both held.
-- Spending API is intentionally named **siphon** so Standing/Harvest risk attaches later without a rename.
+| Siphon (Hollow only) | Click or **U** |
 
 ---
 
-## Naming note
+## Scope guardrails (from pitch)
 
-Prefer **Krater** in player-facing copy. Repo folder remains **Crater**. Resource id is **`salvage`**.
+- Settlement later = headcount + passives, **not** RimWorld.
+- Passive tiers share one formula — flag if a tier needs its own prestige system.
+- One dig system, two directions — not two tool trees.
+- Pick **tech tree** as the deep pillar; keep other Act 1 systems intentionally simple.

@@ -4,11 +4,18 @@ extends TileMapLayer
 ## Owns tile creation and destruction so digging stays one reusable system
 ## (player tools, later NPCs/cave-ins, etc. should call into here).
 
-const TILE_SIZE := 32
-const GROUND_COLOR := Color(0.45, 0.32, 0.22)
+## Matches sprites/dig_site_tiles.png (2x2 of 64px) and the 64px player art.
+const TILE_SIZE := 64
+const TILE_SHEET_PATH := "res://sprites/dig_site_tiles.png"
 
-# Atlas coords for the placeholder solid tile (source id 0).
-const PLACEHOLDER_ATLAS := Vector2i.ZERO
+# Atlas coords in dig_site_tiles.png (2x2 sheet).
+const ATLAS_SOLID := Vector2i(0, 0)
+const ATLAS_CRACKED := Vector2i(1, 0)
+const ATLAS_RUBBLE := Vector2i(0, 1)
+const ATLAS_DEBRIS := Vector2i(1, 1)
+
+# Default atlas used by tests / simple fills (solid mineral rock).
+const PLACEHOLDER_ATLAS := ATLAS_SOLID
 
 
 func _ready() -> void:
@@ -16,26 +23,55 @@ func _ready() -> void:
 	_fill_ground()
 
 
-## Build a one-tile TileSet at runtime (plain color + collision).
-## Real art later = swap the atlas texture; dig API stays the same.
+## Build TileSet from the dig-site sheet; every variant gets full-cell collision.
 func _build_tileset() -> TileSet:
-	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
-	image.fill(GROUND_COLOR)
-	var texture := ImageTexture.create_from_image(image)
+	var texture: Texture2D = load(TILE_SHEET_PATH)
+	if texture == null:
+		push_error("TerrainLayer: missing %s — using flat fallback" % TILE_SHEET_PATH)
+		return _build_fallback_tileset()
 
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	# Physics layer must exist before collision polygons are authored on tile data.
 	tileset.add_physics_layer()
 
 	var atlas := TileSetAtlasSource.new()
 	atlas.texture = texture
 	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	atlas.create_tile(PLACEHOLDER_ATLAS)
+
+	var coords := [ATLAS_SOLID, ATLAS_CRACKED, ATLAS_RUBBLE, ATLAS_DEBRIS]
+	for coord in coords:
+		atlas.create_tile(coord)
 
 	# Source must be on the TileSet before TileData physics edits are kept.
 	tileset.add_source(atlas)
 
+	var half := float(TILE_SIZE) / 2.0
+	var poly := PackedVector2Array([
+		Vector2(-half, -half),
+		Vector2(half, -half),
+		Vector2(half, half),
+		Vector2(-half, half),
+	])
+	for coord in coords:
+		var tile_data := atlas.get_tile_data(coord, 0)
+		tile_data.add_collision_polygon(0)
+		tile_data.set_collision_polygon_points(0, 0, poly)
+
+	return tileset
+
+
+func _build_fallback_tileset() -> TileSet:
+	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0.25, 0.4, 0.42))
+	var texture := ImageTexture.create_from_image(image)
+	var tileset := TileSet.new()
+	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	tileset.add_physics_layer()
+	var atlas := TileSetAtlasSource.new()
+	atlas.texture = texture
+	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	atlas.create_tile(PLACEHOLDER_ATLAS)
+	tileset.add_source(atlas)
 	var half := float(TILE_SIZE) / 2.0
 	var tile_data := atlas.get_tile_data(PLACEHOLDER_ATLAS, 0)
 	tile_data.add_collision_polygon(0)
@@ -49,15 +85,19 @@ func _build_tileset() -> TileSet:
 			Vector2(-half, half),
 		])
 	)
-
 	return tileset
 
 
 func _fill_ground() -> void:
-	# Dig site starts to the right of the Hollow (tiles x>=10 ≈ world x>=320).
-	for x in range(10, 40):
-		for y in range(11, 24):
-			set_cell(Vector2i(x, y), 0, PLACEHOLDER_ATLAS)
+	# Dig site to the right of the Hollow. Cell size 64 → x=5 is world x=320.
+	var variants := [ATLAS_SOLID, ATLAS_SOLID, ATLAS_CRACKED, ATLAS_CRACKED, ATLAS_RUBBLE]
+	for x in range(5, 20):
+		for y in range(5, 12):
+			var atlas_coords: Vector2i = variants[randi() % variants.size()]
+			# Deeper rows lean solid/cracked; surface can show rubble occasionally.
+			if y >= 8 and randf() < 0.15:
+				atlas_coords = ATLAS_DEBRIS
+			set_cell(Vector2i(x, y), 0, atlas_coords)
 
 
 ## True if this map cell currently has a diggable tile.
