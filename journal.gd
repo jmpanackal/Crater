@@ -7,20 +7,23 @@ signal record_unlocked(record_id: StringName)
 
 const RECORD_NURSERY := &"nursery_rhyme"
 const RECORD_SLATE := &"slate_shard"
-const RECORD_CAP_NOTE := &"cap_note"
+const RECORD_FIRMAMENT_NOTE := &"firmament_note"
+const LEGACY_RECORD_CAP_NOTE := &"cap_note"
 
 var _defs: Dictionary = {
 	RECORD_NURSERY: {
 		"title": "Nursery scrap",
-		"text": "Don't knock the Cap, don't wake the belly — dig down if you must, never up.",
+		"text": "Don't knock the Firmament, don't wake the belly — dig down if you must, never up.",
 	},
 	RECORD_SLATE: {
 		"title": "Slate shard",
 		"text": "…course correction failed. Hull breach. Seek—  [the rest is scored away]",
 	},
-	RECORD_CAP_NOTE: {
+	RECORD_FIRMAMENT_NOTE: {
 		"title": "Folded note",
 		"text": "If the Roof is only rock, why does the Wickwork hoard the bright tools?",
+		"unlocks_upgrade": &"quiet_dig",
+		"unlock_hint": "Quiet Dig — softer Firmament strikes, harder to notice.",
 	},
 }
 
@@ -51,7 +54,27 @@ func unlock_record(record_id: StringName) -> bool:
 	_unlocked[record_id] = true
 	record_unlocked.emit(record_id)
 	records_changed.emit()
+	_notify_knowledge_unlock(record_id)
 	return true
+
+
+## Soft social notice when a Record opens a forbidden siphon option.
+func _notify_knowledge_unlock(record_id: StringName) -> void:
+	var def := get_def(record_id)
+	var upgrade_id: StringName = StringName(str(def.get("unlocks_upgrade", "")))
+	if upgrade_id == StringName():
+		return
+	var hint := str(def.get("unlock_hint", ""))
+	var upgrades := get_tree().root.get_node_or_null("Upgrades")
+	var name := str(upgrade_id)
+	if upgrades and upgrades.has_method("get_display_name"):
+		name = str(upgrades.get_display_name(upgrade_id))
+	var text := "Knowledge unlocked: %s." % name
+	if hint != "":
+		text = "Knowledge unlocked: %s — %s" % [name, hint]
+	var community := get_tree().root.get_node_or_null("Community")
+	if community:
+		community.notice_message.emit(text)
 
 
 func get_unlocked_ids() -> Array[StringName]:
@@ -62,7 +85,7 @@ func get_unlocked_ids() -> Array[StringName]:
 	return out
 
 
-## Chance roll after a dig. Upward digs bias Cap-related scraps.
+## Chance roll after a dig. Upward digs bias Firmament-related scraps.
 func try_find_on_dig(dug_upward: bool) -> StringName:
 	var pool: Array[StringName] = []
 	for id in _defs.keys():
@@ -78,9 +101,9 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 		return StringName()
 
 	var pick: StringName = pool[randi() % pool.size()]
-	if dug_upward and pool.has(RECORD_CAP_NOTE) and not has_record(RECORD_CAP_NOTE):
+	if dug_upward and pool.has(RECORD_FIRMAMENT_NOTE) and not has_record(RECORD_FIRMAMENT_NOTE):
 		if randf() < 0.55:
-			pick = RECORD_CAP_NOTE
+			pick = RECORD_FIRMAMENT_NOTE
 	unlock_record(pick)
 	return pick
 
@@ -96,6 +119,8 @@ func apply_snapshot(ids: Array) -> void:
 	_unlocked.clear()
 	for item in ids:
 		var id := StringName(str(item))
+		if id == LEGACY_RECORD_CAP_NOTE:
+			id = RECORD_FIRMAMENT_NOTE
 		if _defs.has(id):
 			_unlocked[id] = true
 	records_changed.emit()

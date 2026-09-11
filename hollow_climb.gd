@@ -79,7 +79,19 @@ func _ensure_collision() -> void:
 func _build_visuals() -> void:
 	var w := shaft_size.x
 	var h := shaft_size.y
-	var rail_w := 4.0
+	var rail_w := 5.0
+	var wood_dark := rail_color.darkened(0.35)
+	wood_dark.a = 0.92
+
+	# Backboard reads as timber depth behind the climbable rails.
+	var back := ColorRect.new()
+	back.name = "WoodBack"
+	back.size = Vector2(w - 6, h)
+	back.position = Vector2(3, 0)
+	back.color = Color(0.22, 0.14, 0.09, 0.88)
+	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back.z_index = -1
+	add_child(back)
 
 	var left_rail := ColorRect.new()
 	left_rail.name = "RailLeft"
@@ -88,6 +100,7 @@ func _build_visuals() -> void:
 	left_rail.color = rail_color
 	left_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(left_rail)
+	_rail_grain(left_rail, wood_dark)
 
 	var right_rail := ColorRect.new()
 	right_rail.name = "RailRight"
@@ -96,14 +109,22 @@ func _build_visuals() -> void:
 	right_rail.color = rail_color
 	right_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(right_rail)
+	_rail_grain(right_rail, wood_dark)
 
 	var rung_count := maxi(3, int(h / 28.0))
 	for i in range(rung_count):
 		var t := (float(i) + 0.5) / float(rung_count)
+		var shadow := ColorRect.new()
+		shadow.name = "RungShadow%d" % i
+		shadow.size = Vector2(w - 8, 2)
+		shadow.position = Vector2(4, t * h + 1.5)
+		shadow.color = Color(0.05, 0.03, 0.02, 0.45)
+		shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(shadow)
 		var rung := ColorRect.new()
 		rung.name = "Rung%d" % i
-		rung.size = Vector2(w - 8, 3)
-		rung.position = Vector2(4, t * h - 1.5)
+		rung.size = Vector2(w - 8, 4)
+		rung.position = Vector2(4, t * h - 2.0)
 		rung.color = rung_color
 		rung.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(rung)
@@ -116,6 +137,16 @@ func _build_visuals() -> void:
 	_hint.modulate = Color(0.95, 0.85, 0.55, 0.9)
 	_hint.visible = false
 	add_child(_hint)
+
+
+func _rail_grain(rail: ColorRect, grain: Color) -> void:
+	var strip := ColorRect.new()
+	strip.name = "Grain"
+	strip.size = Vector2(1.5, rail.size.y)
+	strip.position = Vector2(rail.size.x * 0.45, 0)
+	strip.color = grain
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rail.add_child(strip)
 
 
 func _on_body_entered(body: Node2D) -> void:

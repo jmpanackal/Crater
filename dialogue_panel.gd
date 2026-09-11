@@ -4,6 +4,9 @@ extends CanvasLayer
 signal closed
 signal choice_made(accepted: bool)
 
+const UiStyleRef := preload("res://ui_style.gd")
+
+@onready var _panel: PanelContainer = $Panel
 @onready var _name_label: Label = $Panel/Margin/VBox/NameLabel
 @onready var _body: Label = $Panel/Margin/VBox/BodyLabel
 @onready var _continue: Button = $Panel/Margin/VBox/ContinueButton
@@ -19,6 +22,7 @@ var _awaiting_choice := false
 
 func _ready() -> void:
 	visible = false
+	_apply_chrome()
 	if _continue:
 		_continue.focus_mode = Control.FOCUS_NONE
 		_continue.pressed.connect(_on_continue)
@@ -30,6 +34,15 @@ func _ready() -> void:
 		_no.pressed.connect(func() -> void: _finish_choice(false))
 	if _choice_row:
 		_choice_row.visible = false
+
+
+func _apply_chrome() -> void:
+	UiStyleRef.apply_panel(_panel, &"copper", true)
+	UiStyleRef.apply_label(_name_label, &"accent")
+	UiStyleRef.apply_label(_body, &"body")
+	UiStyleRef.apply_button(_continue)
+	UiStyleRef.apply_button(_yes)
+	UiStyleRef.apply_button(_no)
 
 
 func open_talk(speaker: String, lines: PackedStringArray, choice_prompt: String = "") -> void:
@@ -44,6 +57,7 @@ func open_talk(speaker: String, lines: PackedStringArray, choice_prompt: String 
 		_choice_row.visible = false
 	if _continue:
 		_continue.visible = true
+		_continue.text = "Continue (Space / E)"
 	_show_current()
 
 
@@ -74,6 +88,10 @@ func _maybe_choice_or_close() -> void:
 			_continue.visible = false
 		if _choice_row:
 			_choice_row.visible = true
+		if _yes:
+			_yes.text = "Yes (Y)"
+		if _no:
+			_no.text = "No (N)"
 		return
 	_close()
 
@@ -92,9 +110,22 @@ func _close() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event.is_action_pressed("ui_accept") or (
-		event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SPACE
-	):
-		if not _awaiting_choice:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		if _awaiting_choice:
+			if key.keycode == KEY_Y:
+				_finish_choice(true)
+				get_viewport().set_input_as_handled()
+			elif key.keycode == KEY_N:
+				_finish_choice(false)
+				get_viewport().set_input_as_handled()
+			return
+		if key.keycode == KEY_SPACE or key.keycode == KEY_E:
 			_on_continue()
 			get_viewport().set_input_as_handled()
+			return
+	if not _awaiting_choice and (
+		event.is_action_pressed("ui_accept") or event.is_action_pressed("interact")
+	):
+		_on_continue()
+		get_viewport().set_input_as_handled()

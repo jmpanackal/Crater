@@ -10,6 +10,8 @@ const TILE := 32.0
 const WORLD_COLLISION_MASK := 1
 ## Body height used to convert deck-top Y → CharacterBody2D position (feet on deck).
 const BODY_HEIGHT := 32.0
+## Idle sheets are 64×64 (2× PixelLab); scale to match the 32×32 collider so feet sit on deck.
+const SPRITE_SCALE := 0.5
 ## Snap onto a landing if within this many px when climb ends.
 const CLIMB_LAND_SNAP_PX := 48.0
 
@@ -48,6 +50,10 @@ var _jump_buffer_timer := 0.0
 ## Last grounded stand — used when falling into the pit void.
 var _last_safe_pos := Vector2.ZERO
 var _has_safe_pos := false
+## Sprite-only squash/stretch (never scales collision).
+var _feel_scale := Vector2.ONE
+var _was_on_floor := false
+var _land_impact := 0.0
 
 
 func _ready() -> void:
@@ -56,9 +62,12 @@ func _ready() -> void:
 		terrain = get_node_or_null("../Terrain") as TerrainLayer
 	if _sprite:
 		_sprite.sprite_frames = _build_idle_frames()
+		_sprite.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
 		_play_idle_for_facing()
+		_ensure_contact_shadow()
 	_last_safe_pos = global_position
 	_has_safe_pos = true
+	_was_on_floor = is_on_floor()
 
 
 ## Test hooks — keep jump fairness verifiable without Input frame races.
@@ -76,6 +85,14 @@ func debug_coyote() -> float:
 
 func debug_jump_buffer() -> float:
 	return _jump_buffer_timer
+
+
+func debug_feel_scale() -> Vector2:
+	return _feel_scale
+
+
+func debug_force_land_feel(impact: float = 1.0) -> void:
+	_apply_land_feel(impact)
 
 
 func enter_climb_zone(ladder: Node = null) -> void:
@@ -164,7 +181,10 @@ func _physics_process(delta: float) -> void:
 		_facing_8 = Vector2i.RIGHT if move_x > 0.0 else Vector2i.LEFT
 
 	_apply_horizontal_move(move_x, delta)
+	if not is_on_floor() and velocity.y > 0.0:
+		_land_impact = maxf(_land_impact, velocity.y / 450.0)
 	move_and_slide()
+	_update_land_and_feel(delta)
 	_remember_safe_ground()
 	_soft_respawn_if_void()
 	_play_idle_for_facing()
@@ -200,7 +220,42 @@ func _try_consume_jump(in_zone: bool) -> bool:
 	_climbing = false
 	_climb_axis_release_required = false
 	velocity.y = JUMP_VELOCITY
+	_feel_scale = Vector2(0.88, 1.14) # stretch — sprite only
 	return true
+
+
+func _update_land_and_feel(delta: float) -> void:
+	var on_floor_now := is_on_floor() and not _climbing
+	if on_floor_now and not _was_on_floor:
+		_apply_land_feel(_land_impact)
+		_land_impact = 0.0
+	elif on_floor_now:
+		_land_impact = 0.0
+	_was_on_floor = on_floor_now or _climbing
+
+	_feel_scale = _feel_scale.lerp(Vector2.ONE, clampf(14.0 * delta, 0.0, 1.0))
+	if _sprite:
+		_sprite.scale = _feel_scale * SPRITE_SCALE
+
+
+func _apply_land_feel(impact: float) -> void:
+	var soft := clampf(impact, 0.2, 1.4)
+	_feel_scale = Vector2(1.0 + 0.16 * soft, 1.0 - 0.14 * soft)
+	FeelFx.spawn_land_dust(get_parent() if get_parent() else self, global_position + Vector2(16, 28), soft)
+
+
+func _ensure_contact_shadow() -> void:
+	if get_node_or_null("ContactShadow") != null:
+		return
+	var shadow := Polygon2D.new()
+	shadow.name = "ContactShadow"
+	shadow.z_index = -1
+	shadow.color = Color(0.02, 0.03, 0.04, 0.35)
+	# Soft oval under the 32×32 body (local origin = top-left of collider).
+	shadow.polygon = PackedVector2Array([
+		Vector2(6, 30), Vector2(26, 30), Vector2(24, 33), Vector2(8, 33),
+	])
+	add_child(shadow)
 
 
 func _apply_horizontal_move(move_x: float, delta: float) -> void:

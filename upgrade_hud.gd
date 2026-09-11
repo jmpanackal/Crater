@@ -1,18 +1,22 @@
-extends VBoxContainer
-## Hollow siphon panel: cover + compact district rates + upgrade buttons.
+extends PanelContainer
+## Slim Hollow chip (Cover + shop affordance). Siphon upgrades live in a bottom-sheet modal.
 ## Primary Harvest/Standing live on sibling StatusLabel (always visible).
 
 signal lie_choice(lied: bool)
 
-@onready var _cover_label: Label = $CoverLabel
-@onready var _district_label: Label = $DistrictLabel
-@onready var _siphon_list: VBoxContainer = $SiphonList
+const UiStyleRef := preload("res://ui_style.gd")
+
+@onready var _content: VBoxContainer = $Margin/Content
+@onready var _cover_label: Label = $Margin/Content/CoverLabel
 
 var _status_label: Label
 var _notice_label: Label
 var _lie_box: VBoxContainer
+var _lie_panel: PanelContainer
+var _lie_dimmer: ColorRect
 var _lie_yes: Button
 var _lie_no: Button
+var _lie_label: Label
 
 var _upgrades: Node
 var _wallet: Node
@@ -20,9 +24,23 @@ var _community: Node
 var _districts: Node
 var _siphon_buttons: Dictionary = {}
 var _notice_ttl := 0.0
-## Siphon buttons stay collapsed until U (or a click expand) — Cover/districts stay.
+## Shop modal starts closed — never dump upgrade rows over the pit.
 var _siphon_expanded := false
-var _expand_hint: Label
+var _district_expanded := false
+var _shop_open_btn: Button
+var _district_toggle: Button
+var _shop_dimmer: ColorRect
+var _shop_panel: PanelContainer
+var _shop_title: Label
+var _shop_cover: Label
+var _district_label: Label
+var _siphon_list: VBoxContainer
+var _shop_close: Button
+var _pulse_t := 0.0
+var _last_standing := -1
+var _standing_flash_ttl := 0.0
+var _standing_delta := 0
+var _last_notice_tone: StringName = &"neutral"
 
 
 func _ready() -> void:
@@ -31,14 +49,20 @@ func _ready() -> void:
 		_status_label = ui.get_node_or_null("StatusLabel") as Label
 		_notice_label = ui.get_node_or_null("NoticeLabel") as Label
 		_lie_box = ui.get_node_or_null("LiePrompt") as VBoxContainer
+		_lie_panel = ui.get_node_or_null("LiePromptPanel") as PanelContainer
+		_lie_dimmer = ui.get_node_or_null("LieDimmer") as ColorRect
 		if _lie_box:
 			_lie_yes = _lie_box.get_node_or_null("YesButton") as Button
 			_lie_no = _lie_box.get_node_or_null("NoButton") as Button
+			_lie_label = _lie_box.get_node_or_null("LieLabel") as Label
 
 	_upgrades = get_tree().root.get_node_or_null("Upgrades")
 	_wallet = get_tree().root.get_node_or_null("Resources")
 	_community = get_tree().root.get_node_or_null("Community")
 	_districts = get_tree().root.get_node_or_null("Districts")
+
+	_ensure_shop_modal()
+	_apply_chrome()
 
 	if _community:
 		_community.skip_lie_prompt = false
@@ -52,6 +76,9 @@ func _ready() -> void:
 		_upgrades.upgrade_changed.connect(_on_upgrade_changed)
 		_upgrades.siphon_station_changed.connect(_on_siphon_station_changed)
 		_upgrades.siphon_result.connect(_on_siphon_result)
+	var journal := get_tree().root.get_node_or_null("Journal")
+	if journal and journal.has_signal("records_changed"):
+		journal.records_changed.connect(_on_records_changed)
 
 	if _wallet:
 		_wallet.resource_changed.connect(_on_resource_changed)
@@ -67,36 +94,183 @@ func _ready() -> void:
 		_lie_no.pressed.connect(func() -> void: _resolve_lie(false))
 	if _lie_box:
 		_lie_box.visible = false
+	if _lie_panel:
+		_lie_panel.visible = false
+		UiStyleRef.apply_panel(_lie_panel, &"copper", true)
+	if _lie_dimmer:
+		_lie_dimmer.visible = false
 
-	_ensure_expand_hint()
+	_ensure_shop_open_btn()
 	_build_siphon_buttons()
+	if _community:
+		_last_standing = _community.get_social_standing()
 	_refresh_status()
 	_refresh()
 
 
-func _ensure_expand_hint() -> void:
-	if _expand_hint != null or _siphon_list == null:
+func _ensure_shop_modal() -> void:
+	var ui := get_parent()
+	if ui == null:
 		return
-	_expand_hint = Label.new()
-	_expand_hint.name = "SiphonExpandHint"
-	_expand_hint.text = "Siphon [U]"
-	_expand_hint.add_theme_font_size_override("font_size", 12)
-	_expand_hint.modulate = Color(0.9, 0.82, 0.55, 0.9)
-	# Insert above the button list.
-	add_child(_expand_hint)
-	move_child(_expand_hint, _siphon_list.get_index())
+
+	_shop_dimmer = ui.get_node_or_null("SiphonShopDimmer") as ColorRect
+	_shop_panel = ui.get_node_or_null("SiphonShopPanel") as PanelContainer
+	if _shop_panel == null:
+		push_error("UpgradeHud: SiphonShopPanel missing from UI")
+		return
+
+	_shop_title = _shop_panel.get_node_or_null("Margin/VBox/Title") as Label
+	_shop_cover = _shop_panel.get_node_or_null("Margin/VBox/ShopCover") as Label
+	_district_toggle = _shop_panel.get_node_or_null("Margin/VBox/DistrictToggle") as Button
+	_district_label = _shop_panel.get_node_or_null("Margin/VBox/DistrictLabel") as Label
+	_siphon_list = _shop_panel.get_node_or_null("Margin/VBox/SiphonList") as VBoxContainer
+	_shop_close = _shop_panel.get_node_or_null("Margin/VBox/CloseButton") as Button
+
+	if _shop_dimmer and not _shop_dimmer.gui_input.is_connected(_on_shop_dimmer_input):
+		_shop_dimmer.gui_input.connect(_on_shop_dimmer_input)
+	if _district_toggle and not _district_toggle.pressed.is_connected(_toggle_districts):
+		_district_toggle.focus_mode = Control.FOCUS_NONE
+		_district_toggle.pressed.connect(_toggle_districts)
+	if _shop_close and not _shop_close.pressed.is_connected(close_shop):
+		_shop_close.focus_mode = Control.FOCUS_NONE
+		_shop_close.pressed.connect(close_shop)
+
+	_set_shop_visible(false)
+
+
+func _apply_chrome() -> void:
+	UiStyleRef.apply_panel(self, &"teal", false)
+	custom_minimum_size = Vector2(UiStyleRef.HUD_CHIP_WIDTH, 0)
+	if _content:
+		_content.add_theme_constant_override("separation", 3)
+	var margin := get_node_or_null("Margin") as MarginContainer
+	if margin:
+		margin.add_theme_constant_override("margin_left", 8)
+		margin.add_theme_constant_override("margin_top", 5)
+		margin.add_theme_constant_override("margin_right", 8)
+		margin.add_theme_constant_override("margin_bottom", 5)
+	UiStyleRef.apply_label(_cover_label, &"teal")
+	UiStyleRef.tip(
+		_cover_label,
+		"How hidden your siphon is. Higher Cover = safer diversion of Salvage."
+	)
+	if _status_label:
+		UiStyleRef.apply_label(_status_label, &"stat")
+		UiStyleRef.tip(
+			_status_label,
+			"Harvest: return for the communal gathering.\nStanding: how trusted you are in the Hollow."
+		)
+	if _notice_label:
+		UiStyleRef.apply_label(_notice_label, &"body")
+	if _lie_label:
+		UiStyleRef.apply_label(_lie_label, &"body")
+	UiStyleRef.apply_button(_lie_yes)
+	UiStyleRef.apply_button(_lie_no)
+	if _shop_panel:
+		UiStyleRef.apply_panel(_shop_panel, &"copper", true)
+	if _shop_title:
+		UiStyleRef.apply_label(_shop_title, &"accent")
+		_shop_title.text = "Siphon shop"
+	if _shop_cover:
+		UiStyleRef.apply_label(_shop_cover, &"teal")
+		UiStyleRef.tip(
+			_shop_cover,
+			"How hidden your siphon is. Higher Cover = safer diversion of Salvage."
+		)
+	if _district_label:
+		UiStyleRef.apply_label(_district_label, &"muted")
+		UiStyleRef.tip(
+			_district_label,
+			"District stock and output. Healthy districts raise Cover."
+		)
+	if _district_toggle:
+		UiStyleRef.apply_button(_district_toggle, true)
+		UiStyleRef.tip(_district_toggle, "District stock and rates — raise Cover when healthy.")
+	if _shop_close:
+		UiStyleRef.apply_button(_shop_close, true)
+
+
+func _ensure_shop_open_btn() -> void:
+	if _content == null:
+		return
+	_shop_open_btn = _content.get_node_or_null("SiphonExpandHint") as Button
+	if _shop_open_btn == null:
+		_shop_open_btn = Button.new()
+		_shop_open_btn.name = "SiphonExpandHint"
+		_content.add_child(_shop_open_btn)
+	_shop_open_btn.focus_mode = Control.FOCUS_NONE
+	_shop_open_btn.text = "Shop  [U]"
+	_shop_open_btn.custom_minimum_size = Vector2(0, 22)
+	UiStyleRef.apply_button(_shop_open_btn, true)
+	UiStyleRef.tip(
+		_shop_open_btn,
+		"Spend Salvage on upgrades. Forbidden options risk Standing if Cover is thin."
+	)
+	if not _shop_open_btn.pressed.is_connected(open_shop):
+		_shop_open_btn.pressed.connect(open_shop)
+
+
+func is_shop_open() -> bool:
+	return _siphon_expanded and _shop_panel != null and _shop_panel.visible
+
+
+func open_shop() -> void:
+	if _upgrades == null or not _upgrades.is_siphon_station_open():
+		return
+	_siphon_expanded = true
+	_refresh()
+
+
+func close_shop() -> void:
+	_siphon_expanded = false
+	_district_expanded = false
+	_refresh()
+
+
+func _toggle_districts() -> void:
+	_district_expanded = not _district_expanded
+	_refresh_districts()
+
+
+func _on_shop_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		close_shop()
 
 
 func _process(delta: float) -> void:
+	_pulse_t += delta
+	if _standing_flash_ttl > 0.0:
+		_standing_flash_ttl = maxf(0.0, _standing_flash_ttl - delta)
 	if _notice_ttl > 0.0:
 		_notice_ttl -= delta
 		if _notice_ttl <= 0.0 and _notice_label:
 			_notice_label.visible = false
+	_refresh_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _lie_box != null and _lie_box.visible and event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_Y:
+			_resolve_lie(true)
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode == KEY_N:
+			_resolve_lie(false)
+			get_viewport().set_input_as_handled()
+			return
+
+	if is_shop_open() and event.is_action_pressed("ui_cancel"):
+		close_shop()
+		get_viewport().set_input_as_handled()
+		return
+
 	if event.is_action_pressed("siphon_upgrade"):
-		_try_siphon_default()
+		if _upgrades == null or not _upgrades.is_siphon_station_open():
+			return
+		if is_shop_open():
+			close_shop()
+		else:
+			open_shop()
 		get_viewport().set_input_as_handled()
 
 
@@ -112,27 +286,19 @@ func _build_siphon_buttons() -> void:
 		var btn := Button.new()
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.name = String(upgrade_id)
-		btn.custom_minimum_size = Vector2(0, 26)
-		btn.add_theme_font_size_override("font_size", 13)
+		btn.custom_minimum_size = Vector2(0, 24)
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		UiStyleRef.apply_button(btn, true)
 		btn.pressed.connect(_try_siphon.bind(upgrade_id))
 		_siphon_list.add_child(btn)
 		_siphon_buttons[upgrade_id] = btn
-
-
-func _try_siphon_default() -> void:
-	if _upgrades == null:
-		return
-	if not _siphon_expanded:
-		_siphon_expanded = true
-		_refresh()
-	_try_siphon(_upgrades.DIG_YIELD)
 
 
 func _try_siphon(upgrade_id: StringName) -> void:
 	if _upgrades == null:
 		return
 	if not _siphon_expanded:
-		_siphon_expanded = true
+		open_shop()
 	_upgrades.siphon_for_upgrade(upgrade_id)
 	_refresh()
 
@@ -148,6 +314,7 @@ func _on_resource_changed(_resource_id: StringName, _new_amount: int) -> void:
 func _on_siphon_station_changed(_is_open: bool) -> void:
 	if _upgrades and not _upgrades.is_siphon_station_open():
 		_siphon_expanded = false
+		_district_expanded = false
 	_refresh()
 
 
@@ -155,7 +322,11 @@ func _on_harvest_timer_changed(_seconds: float) -> void:
 	_refresh_status()
 
 
-func _on_standing_changed(_value: int) -> void:
+func _on_standing_changed(value: int) -> void:
+	if _last_standing >= 0 and value != _last_standing:
+		_standing_delta = value - _last_standing
+		_standing_flash_ttl = 0.95
+	_last_standing = value
 	_refresh_status()
 
 
@@ -178,14 +349,28 @@ func _on_siphon_result(_id: StringName, noticed: bool) -> void:
 	_show_notice("Siphon complete. Cover held.")
 
 
+func _on_records_changed() -> void:
+	_refresh()
+
+
 func _on_harvest_miss_prompt() -> void:
+	close_shop()
+	if _lie_dimmer:
+		_lie_dimmer.visible = true
+	if _lie_panel:
+		_lie_panel.visible = true
 	if _lie_box:
 		_lie_box.visible = true
+	_show_notice("Harvest missed — choose carefully.")
 
 
 func _resolve_lie(lied: bool) -> void:
 	if _lie_box:
 		_lie_box.visible = false
+	if _lie_panel:
+		_lie_panel.visible = false
+	if _lie_dimmer:
+		_lie_dimmer.visible = false
 	if _community and _community.has_method("resolve_harvest_miss"):
 		_community.resolve_harvest_miss(lied)
 	lie_choice.emit(lied)
@@ -199,71 +384,165 @@ func _show_notice(text: String) -> void:
 	_notice_label.text = text
 	_notice_label.visible = true
 	_notice_ttl = 4.5
+	_last_notice_tone = notice_tone_for(text)
+	_notice_label.modulate = notice_color_for(_last_notice_tone)
+
+
+## Classifies social toast copy for restrained color (tests + HUD).
+static func notice_tone_for(text: String) -> StringName:
+	var lower := text.to_lower()
+	# Gains first — "(+1 Standing)" must not match loss "standing)" heuristics.
+	if "+1 standing" in lower or "help in the farms" in lower:
+		return &"gain"
+	if "lied about" in lower or "choose carefully" in lower:
+		return &"caution"
+	if (
+		"−" in text
+		or "(-" in text
+		or "missed harvest" in lower
+		or "people noticed" in lower
+		or "someone noticed" in lower
+		or "caught digging" in lower
+		or "lie cracked" in lower
+		or "came apart" in lower
+		or "materials going missing" in lower
+	):
+		return &"loss"
+	return &"neutral"
+
+
+static func notice_color_for(tone: StringName) -> Color:
+	match tone:
+		&"loss":
+			return Color(1.0, 0.7, 0.55, 1.0)
+		&"gain":
+			return Color(0.72, 0.9, 0.78, 1.0)
+		&"caution":
+			return Color(0.95, 0.84, 0.62, 1.0)
+		_:
+			return Color(0.9, 0.88, 0.8, 1.0)
 
 
 func _refresh() -> void:
 	if _upgrades == null:
 		visible = false
+		_set_shop_visible(false)
 		return
 
 	var in_hollow: bool = _upgrades.is_siphon_station_open()
 	visible = in_hollow
 	if not in_hollow:
 		_siphon_expanded = false
+		_district_expanded = false
+		_set_shop_visible(false)
 		return
 
 	_refresh_districts()
 	_refresh_siphon_buttons()
-	if _siphon_list:
-		_siphon_list.visible = _siphon_expanded
-	if _expand_hint:
-		_expand_hint.visible = not _siphon_expanded
-		_expand_hint.text = "Siphon [U]"
+	_set_shop_visible(_siphon_expanded)
+	if _shop_open_btn:
+		_shop_open_btn.visible = true
+		_shop_open_btn.text = "Close shop  [U]" if _siphon_expanded else "Shop  [U]"
+	call_deferred("_fit_to_content")
+
+
+func _set_shop_visible(open_: bool) -> void:
+	if _shop_dimmer:
+		_shop_dimmer.visible = open_
+	if _shop_panel:
+		_shop_panel.visible = open_
+
+
+func _fit_to_content() -> void:
+	if _content == null or not visible:
+		return
+	var width := UiStyleRef.HUD_CHIP_WIDTH
+	var margins := 14.0
+	var needed: float = _content.get_combined_minimum_size().y + margins
+	size = Vector2(width, maxf(needed, 40.0))
+	offset_right = offset_left + width
+	offset_bottom = offset_top + size.y
 
 
 func _refresh_status() -> void:
 	if _status_label == null:
 		return
 	if _community == null:
-		_status_label.text = "Harvest ? · Standing ?"
+		_status_label.text = "Harvest ?  ·  Standing ?"
+		_status_label.modulate = UiStyleRef.TEXT_MUTED
 		return
 
+	var remaining: float = _community.get_harvest_seconds_remaining()
 	var lie_tag := ""
 	if _community.has_pending_lie():
-		lie_tag = " · lie pending"
-	_status_label.text = "Harvest %ds · Standing %d/%d%s" % [
-		int(ceil(_community.get_harvest_seconds_remaining())),
+		lie_tag = "  ·  lie pending"
+	var standing_tag := ""
+	if _standing_flash_ttl > 0.0 and _standing_delta != 0:
+		standing_tag = " (%+d)" % _standing_delta
+	_status_label.text = "Harvest %ds  ·  Standing %d/%d%s%s" % [
+		int(ceil(remaining)),
 		_community.get_social_standing(),
 		_community.SOCIAL_STANDING_MAX,
+		standing_tag,
 		lie_tag,
 	]
+	# Soft urgency — social clock pulse when low, not arcade alarm.
+	if remaining <= 10.0:
+		var pulse := 0.78 + 0.22 * (0.5 + 0.5 * sin(_pulse_t * 3.6))
+		_status_label.modulate = Color(1.0, 0.72, 0.42, pulse)
+	elif remaining <= 20.0:
+		_status_label.modulate = Color(0.98, 0.9, 0.7, 0.95)
+	elif _standing_flash_ttl > 0.0 and _standing_delta < 0:
+		_status_label.modulate = Color(1.0, 0.78, 0.62, 1.0)
+	elif _standing_flash_ttl > 0.0 and _standing_delta > 0:
+		_status_label.modulate = Color(0.78, 0.92, 0.8, 1.0)
+	elif lie_tag != "":
+		_status_label.modulate = Color(0.95, 0.82, 0.7, 0.95)
+	else:
+		_status_label.modulate = UiStyleRef.TEXT_PRIMARY
+
+
+## Test helper — true when harvest urgency pulse band is active.
+func is_harvest_urgent() -> bool:
+	if _community == null:
+		return false
+	return _community.get_harvest_seconds_remaining() <= 10.0
+
+
+func debug_notice_tone() -> StringName:
+	return _last_notice_tone
 
 
 func _refresh_districts() -> void:
-	if _districts == null:
-		if _cover_label:
-			_cover_label.text = "Cover ?"
-		if _district_label:
-			_district_label.text = ""
-		return
-
-	var cover: float = _districts.get_cover_health()
-	var notice: float = _districts.get_siphon_notice_chance()
-	if _cover_label:
-		_cover_label.text = "Cover %d%% · notice ~%d%%" % [
+	var cover_text := "Cover ?"
+	if _districts != null:
+		var cover: float = _districts.get_cover_health()
+		var notice: float = _districts.get_siphon_notice_chance()
+		cover_text = "Cover %d%%  ·  notice ~%d%%" % [
 			int(round(cover * 100.0)),
 			int(round(notice * 100.0)),
 		]
 
+	if _cover_label:
+		_cover_label.text = cover_text
+	if _shop_cover:
+		_shop_cover.text = cover_text
+
+	if _district_toggle:
+		_district_toggle.text = "Districts ▾" if _district_expanded else "Districts ▸"
+		_district_toggle.visible = _siphon_expanded
+
 	if _district_label:
-		var parts: PackedStringArray = PackedStringArray()
-		for id in _districts.get_district_ids():
-			var short_name := _short_district_name(id)
-			parts.append(
-				"%s %.0f (%.1f/s)"
-				% [short_name, _districts.get_stock(id), _districts.get_rate(id)]
-			)
-		_district_label.text = " · ".join(parts)
+		_district_label.visible = _siphon_expanded and _district_expanded
+		if _district_expanded and _districts != null:
+			var parts: PackedStringArray = PackedStringArray()
+			for id in _districts.get_district_ids():
+				var short_name := _short_district_name(id)
+				parts.append(
+					"%s %.0f (%.1f/s)"
+					% [short_name, _districts.get_stock(id), _districts.get_rate(id)]
+				)
+			_district_label.text = " · ".join(parts)
 
 
 func _short_district_name(id: StringName) -> String:
@@ -283,14 +562,22 @@ func _refresh_siphon_buttons() -> void:
 		return
 	for id in _siphon_buttons.keys():
 		var btn: Button = _siphon_buttons[id]
+		var kind := "Safe" if _upgrades.is_efficiency(id) else "Secret"
+		var def: Dictionary = _upgrades.get_def(id) if _upgrades.has_method("get_def") else {}
+		var blurb := str(def.get("blurb", ""))
+		if blurb != "":
+			btn.tooltip_text = blurb
+		if _upgrades.has_method("is_unlocked") and not _upgrades.is_unlocked(id):
+			btn.text = "%s  %s — locked" % [kind, _upgrades.get_display_name(id)]
+			btn.disabled = true
+			continue
 		var level: int = _upgrades.get_level(id)
 		var cost: int = _upgrades.get_next_cost(id)
-		var mark := "E" if _upgrades.is_efficiency(id) else "F"
 		var suffix := ""
 		if id == _upgrades.DIG_YIELD:
-			suffix = " · %d/dig [U]" % _upgrades.get_dig_salvage_yield()
-		btn.text = "%s %s Lv%d — %d%s" % [
-			mark,
+			suffix = "  ·  %d/dig" % _upgrades.get_dig_salvage_yield()
+		btn.text = "%s  %s  Lv%d — %d%s" % [
+			kind,
 			_upgrades.get_display_name(id),
 			level,
 			cost,

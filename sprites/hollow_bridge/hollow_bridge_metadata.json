@@ -1,0 +1,1251 @@
+{
+  "id": "1117b68b-39c4-4bc5-a6ed-2f125cb138d6",
+  "name": "rope-lashed weathered wood plank deck spanning a",
+  "tileset_data": {
+    "tiles": [
+      {
+        "id": "3b20cf37-6a40-4240-98fe-214188872cb9",
+        "name": "wang_13",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93"
+          ],
+          "west": [
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "north": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "8cf15932-b125-4474-bd39-b3d41953a01b"
+          ],
+          "south": [
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_13",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "e3d42b05-96fa-4909-8d42-e28f9e95a462",
+        "name": "wang_10",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "west": [
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "north": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "8cf15932-b125-4474-bd39-b3d41953a01b"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_10",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 6,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "743c443d-8fb4-4db8-b273-3320f5d6a49e",
+        "name": "wang_4",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "west": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "2947918b-c178-479d-8639-1da1c84aff74"
+          ],
+          "south": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_4",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "565c6024-55bd-4935-8087-bd389baba243",
+        "name": "wang_12",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93"
+          ],
+          "west": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "north": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "south": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_12",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 5,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "f93e1f8b-8ad6-46d1-8c73-177181ab990a",
+        "name": "wang_6",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd"
+          ],
+          "north": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "south": [
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_6",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 5
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "3ee22345-0aa7-45b0-a8f0-2aa74b887e2f",
+        "name": "wang_8",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3"
+          ],
+          "west": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ],
+          "north": [
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "south": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_8",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 6,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+        "name": "wang_0",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3"
+          ],
+          "west": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd"
+          ],
+          "north": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "2947918b-c178-479d-8639-1da1c84aff74"
+          ],
+          "south": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_0",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 6
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "3fff4038-93ef-46ff-a8c9-d383f7a26126",
+        "name": "wang_1",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93"
+          ],
+          "west": [
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ],
+          "north": [
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "8cf15932-b125-4474-bd39-b3d41953a01b"
+          ],
+          "south": [
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_1",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "a2f0346b-01e8-4533-9f04-8607b1308c76",
+        "name": "wang_11",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "west": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ],
+          "north": [
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "south": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_11",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "544013cc-6759-448f-8e2d-8c733eb4e9fb",
+        "name": "wang_3",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "2947918b-c178-479d-8639-1da1c84aff74"
+          ],
+          "south": [
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_3",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "8b96e23e-277a-4039-94c9-179b0db87e3b",
+        "name": "wang_2",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3"
+          ],
+          "west": [
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "north": [
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_2",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "5f78cee4-0200-4cf8-965d-14c06d527493",
+        "name": "wang_5",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3"
+          ],
+          "west": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "2947918b-c178-479d-8639-1da1c84aff74"
+          ],
+          "south": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_5",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "00c3fd6a-533a-4356-9897-3018a5f91a86",
+        "name": "wang_15",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "west": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "north": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "south": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_15",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "fc76a7c3-7743-4c49-8b0f-c66ff1c531e9",
+        "name": "wang_14",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "west": [
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "north": [
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "d291c768-70a6-41ad-a77f-654d3314911c",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ],
+          "south": [
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "65181f01-adbe-46c9-8cf2-f620e179b9f3",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "2ffff6e0-95e1-4527-9671-afb136eb4206"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_14",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "01736bef-d9a2-49be-b6cb-a5923eca848f",
+        "name": "wang_9",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "west": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "8cf15932-b125-4474-bd39-b3d41953a01b",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96"
+          ],
+          "north": [
+            "62ed06d7-f003-49ad-b6e5-156497fdf9e6",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "8cf15932-b125-4474-bd39-b3d41953a01b"
+          ],
+          "south": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "93098d70-9a25-4e9d-a125-98d2098587fd",
+            "c2a8f7fa-9449-4f12-a639-35d371211f93",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_9",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "19c56217-8531-4cbe-992f-dcfe68434c4c",
+        "name": "wang_7",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "2947918b-c178-479d-8639-1da1c84aff74",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "1464a3e1-943d-49c0-8133-96d873f83995",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938",
+            "93098d70-9a25-4e9d-a125-98d2098587fd"
+          ],
+          "north": [
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "027a5192-b827-4ba8-8286-dbbfce9f2945",
+            "970b7550-4a06-4c48-b0dd-34a4ea930c96",
+            "975fe351-2368-4491-bfa5-b760805685d7"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "60e73a7b-14d4-4f3f-8676-4d9b95d53022",
+            "b6c172e4-e619-47d3-833c-01f0578fd183",
+            "7cae5c7e-0103-4b47-a1bc-937a63f94938"
+          ]
+        },
+        "description": "transparent background and rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_7",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      }
+    ],
+    "tile_size": {
+      "width": 32,
+      "height": 32
+    },
+    "total_tiles": 16,
+    "tileset_type": "sidescroller",
+    "terrain_types": [
+      "central",
+      "background"
+    ],
+    "spritesheet_url": "https://backblaze.pixellab.ai/file/pixellab-tiles/ad5f943a-f15e-4105-867c-e0f24d1c120d/1117b68b-39c4-4bc5-a6ed-2f125cb138d6/spritesheet.png",
+    "spritesheet_grid": {
+      "cols": 4,
+      "rows": 4
+    },
+    "spritesheet_layout": "tileset15_4x4"
+  },
+  "base_tile_ids": {
+    "lower": "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0"
+  },
+  "created_at": "2026-09-11T01:32:47.329546+00:00",
+  "metadata": {
+    "terrain_prompts": {
+      "lower": "rope-lashed weathered wood plank deck spanning a dark void, visible plank seams and hemp lashings, subterranean Hollow settlement, teal and copper accents, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon",
+      "upper": "thin worn walking lip of packed dirt with rope-rail posts and hemp rope handrail hint, flat top for standing, faint bioluminescent teal flecks, warm wood matching planks below"
+    }
+  },
+  "format": "tileset15",
+  "layout": {
+    "type": "tileset15",
+    "description": "4x4 grid of 16 unique Wang tiles",
+    "grid_size": {
+      "width": 4,
+      "height": 4
+    },
+    "tile_count": 16
+  },
+  "pattern_system": {
+    "type": "4x4_wildcard",
+    "description": "4\u00d74 patterns with wildcards for flexible tile matching",
+    "wildcard_value": 255,
+    "pattern_layout": {
+      "description": "4\u00d74 grid where center 2\u00d72 matches tile corners, outer ring uses wildcards",
+      "example": {
+        "row_0": "All wildcards (*)",
+        "row_1": "Wildcard + NW corner + NE corner + Wildcard",
+        "row_2": "Wildcard + SW corner + SE corner + Wildcard",
+        "row_3": "All wildcards (*)"
+      }
+    },
+    "terrain_encoding": {
+      "lower": 0,
+      "upper": 1,
+      "transition": 2,
+      "wildcard": 255
+    },
+    "usage": {
+      "description": "Sample 4\u00d74 terrain around tile position, encode as pattern key, lookup in cache",
+      "benefits": [
+        "O(1) lookup performance",
+        "Flexible edge matching",
+        "Unified pattern system"
+      ]
+    }
+  },
+  "tileset_image": {
+    "filename": "tileset_1117b68b-39c4-4bc5-a6ed-2f125cb138d6.png",
+    "format": "PNG",
+    "dimensions": {
+      "width": 128,
+      "height": 128
+    }
+  },
+  "usage": {
+    "description": "Sidescroller tileset for 2D platformer games",
+    "sprite_sheet_url": "/mcp/sidescroller-tilesets/1117b68b-39c4-4bc5-a6ed-2f125cb138d6/image",
+    "game_engines": [
+      {
+        "name": "Godot",
+        "instructions": "Import PNG as texture, create TileMap node, configure tile collision shapes"
+      },
+      {
+        "name": "Unity",
+        "instructions": "Import PNG, create Tilemap and Grid, configure tile collision with TilemapCollider2D"
+      },
+      {
+        "name": "Generic",
+        "instructions": "Use sprite_sheet data to extract individual tiles by bounding_box coordinates"
+      }
+    ],
+    "tile_placement": "Use edge-based logic to select appropriate tiles based on neighboring terrain"
+  }
+}

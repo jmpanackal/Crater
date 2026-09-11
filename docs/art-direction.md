@@ -12,7 +12,7 @@ Living visual bible. Scannable locks from style evals + existing pipeline docs. 
 
 | Lock | Detail |
 | --- | --- |
-| **Camera** | **2D side-view only** (decisions #14). Dig Cap↑ / Pit↓, TileMap carve, Dome Keeper / SteamWorld Dig comps. |
+| **Camera** | **2D side-view only** (decisions #14). Dig Firmament↑ / Pit↓, TileMap carve, Dome Keeper / SteamWorld Dig comps. |
 | **Style bar** | Detailed **painterly pixel** — Eastward / Owlboy territory (not 8-bit minimal, not mushy upscale). |
 | **Tone** | Communal Hollow life + quiet secrecy. Curiosity over fear. Act 1 must feel like it could be the whole game. |
 | **Sea of Stars** | Evaluated → **rejected as camera**. Steal lighting / layered depth craft only. **No** oblique JRPG 2.5D. **No hybrid** (SoS hub + side dig = two pipelines; refuse). |
@@ -39,10 +39,11 @@ Side-view weakness (pit-as-space) is solved with **composition + parallax + ligh
 Primary ref: [`refs/hollow_concept.png`](refs/hollow_concept.png) (cliffside city around a deep central chasm). **Play layout matches that read** (placeholders OK):
 
 - **Center:** bottomless crash-pit — dark ink void, fog layers, emotional anchor (no hallway floor across the shaft; mid **bridge** only).
+- **Heart of the Hollow:** a layered civic cluster suspended over the void, not a ground-bound plaza: Upper Heart (ritual/Council), Mid Heart (market/allotments), Lower Heart (freight/dispatch). Retained hull trusses, rock-bolted underbeams, cables, hanging walkways, and selective transfer spans must visibly explain why it is safe enough to use while gaps, open edges, haze, and subtle sway/creaks keep the void emotionally present.
 - **Ring / cliffs:** settlement as **terrace levels** left *and* right of the void — bridges, ladders/stair steps, lantern hints.
 - **Districts as elevations:** Farms (upper left) / Wickwork (mid) / Cistern (lower right) on **different vertical bands**.
 - **Exit:** right mid deck continues to Dig Site past the Hollow (no dig-wall bleed into home).
-- **Cap↑** — quieter, calmer light, less FX drama (secrecy).
+- **Firmament↑** — quieter, calmer light, less FX drama (secrecy).
 - **Pit↓** — darker, heavier fog, stronger danger read (same dig tools, different frontier).
 
 Play frames should read: **foreground clutter → mid play strip → far pit wall/haze**.
@@ -63,7 +64,7 @@ Play frames should read: **foreground clutter → mid play strip → far pit wal
 **Light stops (keep to ~3–4):**
 
 1. **Lantern amber** — safe / social / terrace life  
-2. **Cool pit void** — depth, danger, Cap quieter than Pit  
+2. **Cool pit void** — depth, danger, Firmament quieter than Pit
 3. **Salvage metal sheen** — copper catch-lights, not neon chrome  
 4. **Soft haze** — far bridges fade; no flat ambient wash  
 
@@ -106,7 +107,7 @@ Full how-to: [`art-pipeline.md`](art-pipeline.md). Import / filter: [`godot-best
 
 ## Feel / juice
 
-Juice must read **fair and quiet** — dust, weight, Cap quieter than Pit. Prefer [`game-feel-best-practices.md`](game-feel-best-practices.md). Do not carnival the Hollow.
+Juice must read **fair and quiet** — dust, weight, Firmament quieter than Pit. Prefer [`game-feel-best-practices.md`](game-feel-best-practices.md). Do not carnival the Hollow.
 
 ---
 
@@ -118,11 +119,11 @@ Use before shipping a Hollow or dig visual pass:
 2. **Pit reads as ink void** — terraces hold detail; center stays dark/deep.
 3. **Terrace bands readable** — horizontal walk decks against the void before ornament.
 4. **Palette lock** — rock/dust + lantern amber + teal stone + copper metal; strip extra hues.
-5. **Light assigns space** — warm lamps on life; cool fill in the shaft; Cap quieter / Pit darker.
+5. **Light assigns space** — warm lamps on life; cool fill in the shaft; Firmament quieter / Pit darker.
 6. **Parallax fog** — far architecture silhouettes without new perspective.
 7. **Density + micro-life** — mid/far props + 2–3 ambient loops per district before more unique frames.
 8. **UI quiet** — cavern breathes; chrome collapses when not needed.
 9. **FX budget** — dig/land dust + rare lamp motes; no bloom/sparkle spam.
 10. **PixelLab** — env briefs first; one settler reuse; approve-before-gen; Eastward/Owlboy + `hollow_concept` in the brief.
 11. **Tone check** — communal + secrecy, not grief-horror or Catholic body-horror.
-12. **Feel align** — Cap quieter than Pit; social systems stay social ([`game-feel-best-practices.md`](game-feel-best-practices.md)).
+12. **Feel align** — Firmament quieter than Pit; social systems stay social ([`game-feel-best-practices.md`](game-feel-best-practices.md)).

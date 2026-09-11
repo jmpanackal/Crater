@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cm6wbktuv506"
-path="res://.godot/imported/dig_site_rubble.png-32ac2d1a868bebaf8f16e65bd83a026a.ctex"
+uid="uid://btqknhxbo6qwr"
+path="res://.godot/imported/hollow_ledge_tiles_64.png-f4b26752c07d283ac1203a33e5f70e11.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/dig_site_rubble.png"
-dest_files=["res://.godot/imported/dig_site_rubble.png-32ac2d1a868bebaf8f16e65bd83a026a.ctex"]
+source_file="res://sprites/hollow_ledge/hollow_ledge_tiles_64.png"
+dest_files=["res://.godot/imported/hollow_ledge_tiles_64.png-f4b26752c07d283ac1203a33e5f70e11.ctex"]
 
 [params]
 

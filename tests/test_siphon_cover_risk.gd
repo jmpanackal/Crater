@@ -57,12 +57,18 @@ func _run_tests() -> void:
 		return
 	print("PASS efficiency siphon is open (no notice)")
 
-	# Exposed lie worsens siphon penalty.
+	# Exposed lie worsens siphon penalty (Quiet Dig needs Firmament note Record).
+	var journal: Node = root.get_node_or_null("Journal")
+	if journal:
+		journal.unlock_record(journal.RECORD_FIRMAMENT_NOTE)
 	community.set_social_standing(50)
 	community.set_pending_lie(true)
 	upgrades.force_siphon_notice = true
 	before = community.get_social_standing()
-	upgrades.siphon_for_upgrade(upgrades.QUIET_DIG)
+	if not upgrades.siphon_for_upgrade(upgrades.QUIET_DIG):
+		push_error("FAIL Quiet Dig siphon after Firmament note")
+		quit(1)
+		return
 	var after: int = community.get_social_standing()
 	var expected_drop: int = community.SIPHON_NOTICE_PENALTY + community.LIE_EXPOSED_EXTRA_PENALTY
 	if before - after != expected_drop:

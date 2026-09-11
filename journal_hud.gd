@@ -1,17 +1,23 @@
 extends CanvasLayer
 ## Modal Journal for unlocked Records (toggle with J / Esc to close).
 
+const UiStyleRef := preload("res://ui_style.gd")
+
 @onready var _dimmer: ColorRect = $Dimmer
 @onready var _panel: PanelContainer = $Panel
+@onready var _title: Label = $Panel/Margin/VBox/Title
 @onready var _list: VBoxContainer = $Panel/Margin/VBox/List
 @onready var _empty: Label = $Panel/Margin/VBox/EmptyLabel
 @onready var _close_btn: Button = $Panel/Margin/VBox/CloseButton
+@onready var _subtitle: Label = $Panel/Margin/VBox/Subtitle
 
 var _journal: Node
+var _highlight_id: StringName = StringName()
 
 
 func _ready() -> void:
 	_journal = get_tree().root.get_node_or_null("Journal")
+	_apply_chrome()
 	_set_open(false)
 	if _close_btn:
 		_close_btn.focus_mode = Control.FOCUS_NONE
@@ -24,12 +30,25 @@ func _ready() -> void:
 	_refresh()
 
 
+func _apply_chrome() -> void:
+	UiStyleRef.apply_panel(_panel, &"copper", true)
+	UiStyleRef.apply_label(_title, &"title")
+	UiStyleRef.apply_label(_subtitle, &"muted")
+	UiStyleRef.apply_label(_empty, &"muted")
+	UiStyleRef.apply_button(_close_btn)
+	if _dimmer:
+		_dimmer.color = Color(0.02, 0.04, 0.05, 0.72)
+	if _subtitle:
+		_subtitle.text = "Ambiguous scraps — myth, work notes, or both. (J / Esc closes)"
+
+
 func is_open() -> bool:
 	return _panel != null and _panel.visible
 
 
 func close() -> void:
 	_set_open(false)
+	_highlight_id = StringName()
 
 
 func open() -> void:
@@ -72,7 +91,8 @@ func _on_dimmer_input(event: InputEvent) -> void:
 		close()
 
 
-func _on_unlocked(_id: StringName) -> void:
+func _on_unlocked(id: StringName) -> void:
+	_highlight_id = id
 	open()
 
 
@@ -86,22 +106,36 @@ func _refresh() -> void:
 		if _empty:
 			_empty.visible = true
 			_empty.text = "Journal unavailable."
+		if _title:
+			_title.text = "Journal — Records"
 		return
 
 	var ids: Array = _journal.get_unlocked_ids()
+	if _title:
+		_title.text = "Journal — %d Record%s" % [ids.size(), "" if ids.size() == 1 else "s"]
 	if _empty:
 		_empty.visible = ids.is_empty()
-		_empty.text = "No Records yet. Dig — especially toward the Cap."
+		_empty.text = "No Records yet. Firmament scraps surface more often than Pit walls."
 
 	for id in ids:
 		var def: Dictionary = _journal.get_def(id)
 		var title := Label.new()
-		title.text = str(def.get("title", id))
-		title.add_theme_font_size_override("font_size", 15)
+		var is_new: bool = id == _highlight_id
+		title.text = ("%s  · new" % str(def.get("title", id))) if is_new else str(def.get("title", id))
+		var role: StringName = &"accent" if is_new else &"stat"
+		UiStyleRef.apply_label(title, role)
+		if is_new:
+			title.modulate = Color(0.95, 0.88, 0.55, 1.0)
 		_list.add_child(title)
 		var body := Label.new()
 		body.text = str(def.get("text", ""))
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		body.add_theme_font_size_override("font_size", 12)
-		body.modulate = Color(0.9, 0.9, 0.9, 0.9)
+		UiStyleRef.apply_label(body, &"muted")
 		_list.add_child(body)
+		var unlock_hint := str(def.get("unlock_hint", ""))
+		if unlock_hint != "":
+			var gate := Label.new()
+			gate.text = "Unlocks: %s" % unlock_hint
+			gate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UiStyleRef.apply_label(gate, &"teal")
+			_list.add_child(gate)

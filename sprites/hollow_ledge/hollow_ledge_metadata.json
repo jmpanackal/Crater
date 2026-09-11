@@ -1,0 +1,1251 @@
+{
+  "id": "2a959e6f-d414-4723-9d14-7e0b49f1777c",
+  "name": "cool slate cliff rock face with timber joist and",
+  "tileset_data": {
+    "tiles": [
+      {
+        "id": "ad6403f6-b763-4276-ab3e-0e819f55ea8e",
+        "name": "wang_13",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c"
+          ],
+          "west": [
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "north": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b"
+          ],
+          "south": [
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_13",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "ebec4054-9bf7-4690-925e-fc4f7d80e847",
+        "name": "wang_10",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "west": [
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "north": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_10",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 6,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "50d1cb54-c764-4913-a2db-f994ccb61361",
+        "name": "wang_4",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "west": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724"
+          ],
+          "south": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_4",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "a45356c5-9774-4f13-b7a1-91d8e329fb5e",
+        "name": "wang_12",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c"
+          ],
+          "west": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "north": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "south": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_12",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 5,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "71b6004d-1d34-4c0d-8534-ae202d8f0a4a",
+        "name": "wang_6",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60"
+          ],
+          "north": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "south": [
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_6",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 5
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "40ba473f-7a3b-4153-8af9-0ea50daff6e5",
+        "name": "wang_8",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba"
+          ],
+          "west": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ],
+          "north": [
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "south": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_8",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 6,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+        "name": "wang_0",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba"
+          ],
+          "west": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60"
+          ],
+          "north": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724"
+          ],
+          "south": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_0",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 6
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "d8d5b5ef-39c6-4414-af83-59501a90819b",
+        "name": "wang_1",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c"
+          ],
+          "west": [
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ],
+          "north": [
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b"
+          ],
+          "south": [
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_1",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 32,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "78e193ea-747a-47f4-a0fd-81d888da1ec9",
+        "name": "wang_11",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "west": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ],
+          "north": [
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "south": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_11",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "c697a362-88ca-491a-9148-1f5840c81cc1",
+        "name": "wang_3",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724"
+          ],
+          "south": [
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_3",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "0802558f-e46b-4eaf-900e-2e60e45370ee",
+        "name": "wang_2",
+        "corners": {
+          "NE": "lower",
+          "NW": "lower",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba"
+          ],
+          "west": [
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "north": [
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_2",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 3,
+          "row": 1
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "0fe4304a-ccce-4250-a58c-2d78a2605eb5",
+        "name": "wang_5",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba"
+          ],
+          "west": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "north": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724"
+          ],
+          "south": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_5",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 1,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 64,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "bb1d195d-4bea-4a60-b19a-e9d53abba8e3",
+        "name": "wang_15",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "west": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "north": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "south": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_15",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 2,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 0,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "db398c83-4cfc-4820-be81-108ae2b87de9",
+        "name": "wang_14",
+        "corners": {
+          "NE": "upper",
+          "NW": "upper",
+          "SE": "lower",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "west": [
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "north": [
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "139e202f-5233-4b11-8e09-a71d563bc5c1",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ],
+          "south": [
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "29cb0b59-a5c4-46b8-9b01-84af62b0eeba",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "506db4f8-fddd-40fc-9bc4-61a4fd0d902f"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_14",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 3
+        },
+        "bounding_box": {
+          "x": 32,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "d6e3b038-b172-44ff-bea6-9c7be97105f2",
+        "name": "wang_9",
+        "corners": {
+          "NE": "lower",
+          "NW": "upper",
+          "SE": "upper",
+          "SW": "lower"
+        },
+        "connections": {
+          "east": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "west": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b",
+            "365fee51-dbbc-4088-abc6-754e921e2c70"
+          ],
+          "north": [
+            "99bae4b4-4d3d-482a-bf7a-29be68a5a6ab",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3a65e37b-3095-41b0-92c2-3307f71dec0b"
+          ],
+          "south": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60",
+            "eb34f1ec-2b67-4e1f-ad47-082ed463e34c",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_9",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            1,
+            0,
+            255
+          ],
+          "row_2": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 4
+        },
+        "bounding_box": {
+          "x": 64,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      },
+      {
+        "id": "be2d0c75-600d-425b-a6a9-81f005b3ccbd",
+        "name": "wang_7",
+        "corners": {
+          "NE": "upper",
+          "NW": "lower",
+          "SE": "upper",
+          "SW": "upper"
+        },
+        "connections": {
+          "east": [
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "3bd4fc53-8f67-4da0-adb8-7ceb13c9b724",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "west": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "99ecc909-34e8-4889-9a6d-d865bc0cd7dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586",
+            "44180ca3-9338-4979-952e-ee1bd1f0de60"
+          ],
+          "north": [
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "7ae31e30-dd3a-4130-883b-d141ad557b06",
+            "365fee51-dbbc-4088-abc6-754e921e2c70",
+            "3bcdd28e-f058-4ae1-942b-373f496b3f26"
+          ],
+          "south": [
+            "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0",
+            "02e01209-1482-41ce-b095-5619a88b9803",
+            "2fc74d4d-b993-43c6-9554-52d7d25607dc",
+            "d0d8eee4-1263-499e-8553-3998582fc586"
+          ]
+        },
+        "description": "transparent background and cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon - wang_7",
+        "pattern_4x4": {
+          "row_0": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "row_1": [
+            255,
+            0,
+            1,
+            255
+          ],
+          "row_2": [
+            255,
+            1,
+            1,
+            255
+          ],
+          "row_3": [
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        "original_position": {
+          "col": 4,
+          "row": 2
+        },
+        "bounding_box": {
+          "x": 96,
+          "y": 96,
+          "width": 32,
+          "height": 32
+        }
+      }
+    ],
+    "tile_size": {
+      "width": 32,
+      "height": 32
+    },
+    "total_tiles": 16,
+    "tileset_type": "sidescroller",
+    "terrain_types": [
+      "central",
+      "background"
+    ],
+    "spritesheet_url": "https://backblaze.pixellab.ai/file/pixellab-tiles/ad5f943a-f15e-4105-867c-e0f24d1c120d/2a959e6f-d414-4723-9d14-7e0b49f1777c/spritesheet.png",
+    "spritesheet_grid": {
+      "cols": 4,
+      "rows": 4
+    },
+    "spritesheet_layout": "tileset15_4x4"
+  },
+  "base_tile_ids": {
+    "lower": "04ff2c76-003b-4bf6-9cf1-4bd91c2a24e0"
+  },
+  "created_at": "2026-09-11T01:32:47.881121+00:00",
+  "metadata": {
+    "terrain_prompts": {
+      "lower": "cool slate cliff rock face with timber joist and brace underside beams under a terrace, warm wood joists against cool damp cave rock, subterranean Hollow settlement, earthy brown and slate palette with teal flecks, side-view platformer tile, readable silhouette, Eastward/Owlboy detailed pixel art, transparent background, no neon",
+      "upper": "warm packed earth walking lip with faint moss and bioluminescent teal flecks, flat top surface for standing, matches cool slate cliff below, extends hollow floor terrace language"
+    }
+  },
+  "format": "tileset15",
+  "layout": {
+    "type": "tileset15",
+    "description": "4x4 grid of 16 unique Wang tiles",
+    "grid_size": {
+      "width": 4,
+      "height": 4
+    },
+    "tile_count": 16
+  },
+  "pattern_system": {
+    "type": "4x4_wildcard",
+    "description": "4\u00d74 patterns with wildcards for flexible tile matching",
+    "wildcard_value": 255,
+    "pattern_layout": {
+      "description": "4\u00d74 grid where center 2\u00d72 matches tile corners, outer ring uses wildcards",
+      "example": {
+        "row_0": "All wildcards (*)",
+        "row_1": "Wildcard + NW corner + NE corner + Wildcard",
+        "row_2": "Wildcard + SW corner + SE corner + Wildcard",
+        "row_3": "All wildcards (*)"
+      }
+    },
+    "terrain_encoding": {
+      "lower": 0,
+      "upper": 1,
+      "transition": 2,
+      "wildcard": 255
+    },
+    "usage": {
+      "description": "Sample 4\u00d74 terrain around tile position, encode as pattern key, lookup in cache",
+      "benefits": [
+        "O(1) lookup performance",
+        "Flexible edge matching",
+        "Unified pattern system"
+      ]
+    }
+  },
+  "tileset_image": {
+    "filename": "tileset_2a959e6f-d414-4723-9d14-7e0b49f1777c.png",
+    "format": "PNG",
+    "dimensions": {
+      "width": 128,
+      "height": 128
+    }
+  },
+  "usage": {
+    "description": "Sidescroller tileset for 2D platformer games",
+    "sprite_sheet_url": "/mcp/sidescroller-tilesets/2a959e6f-d414-4723-9d14-7e0b49f1777c/image",
+    "game_engines": [
+      {
+        "name": "Godot",
+        "instructions": "Import PNG as texture, create TileMap node, configure tile collision shapes"
+      },
+      {
+        "name": "Unity",
+        "instructions": "Import PNG, create Tilemap and Grid, configure tile collision with TilemapCollider2D"
+      },
+      {
+        "name": "Generic",
+        "instructions": "Use sprite_sheet data to extract individual tiles by bounding_box coordinates"
+      }
+    ],
+    "tile_placement": "Use edge-based logic to select appropriate tiles based on neighboring terrain"
+  }
+}

@@ -13,7 +13,7 @@
 
 **✅ Locked (USER):** **the Firmament** is the formal, sacred name. In ordinary speech, residents say **the Vault** or simply **the roof**.
 
-The doctrine says the Firmament remains intact through shared work, obedience, and grace; an older “correction” supposedly buried a selfish, questioning generation beneath a collapse. This gives the taboo both religious force and a material-sounding threat, while later allowing the player to discover that the doctrine is manufactured control.
+The Firmament is natural crash-sealed rock, overburden, mineral growth, and alien surface geology. Doctrine says it remains intact through shared work, obedience, and grace; an older “correction” supposedly buried a selfish, questioning generation beneath a collapse. This gives the taboo both religious force and a material-sounding threat, while later allowing the player to discover that the doctrine is manufactured control. Act 1 culminates in a hidden route through the natural strata to the surface—not a discovery that the whole ceiling was artificially built.
 
 ---
 
@@ -235,7 +235,7 @@ Each build should feel different to *play*, not just have different numbers:
 - **Sanctioned/"safe magic"** (mundane, utilitarian — fire-starting, filtration, structural) → **efficiency upgrades**, openly used, boosts **Hollow production-district** passive rates (and later the surface settlement)
 - **Forbidden/"dangerous magic"** (anything that could reveal the truth — navigation, comms, records, legible data) → **knowledge upgrades**, hoarded/restricted, tied directly to the risk/Social Standing system (#3, #16, #21)
 
-**Why it's worth it:** costs nothing new to build — it's a diegetic skin on the existing salvage/records split (#6) and the existing efficiency/knowledge upgrade categories already implied by the passive-generation and tech-tree systems. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic. Efficiency upgrades also feed **siphon cover** (#28): healthier district output makes diversion harder to notice.
+**Why it's worth it:** costs nothing new to build — it's a diegetic skin on the existing Materials/Records split (#6, #29) and the existing efficiency/knowledge upgrade categories already implied by the passive-generation and tech-tree systems. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic. Efficiency upgrades also feed **siphon cover** (#28): healthier district output makes diversion harder to notice.
 
 **Open sub-questions:**
 - Exact term for this in-world ("magicians" works fine as a placeholder — worth revisiting once we're naming other Hollow-specific vocabulary)
@@ -258,6 +258,25 @@ Each build should feel different to *play*, not just have different numbers:
 - Do **not** invent Act 2 surface settlement/recruitment features here; this is the underground society only.
 
 **Why lock it now:** passive generation was already in the pitch, but districts-as-upgradable-areas, siphon-safety-from-healthy-output, and a populated Hollow were easy to underweight into "timer + empty siphon booth." Those three are Act 1 canon.
+
+---
+
+## 29. Act 1 Materials, inventory, and siphon spend
+*(✅ shape locked USER — names proposed in [`materials.md`](materials.md); confirm names before full code rename)*
+
+**✅ Locked (USER):** Go with what the story already suggests — **not** a Salvage-only upgrade shop.
+
+1. **Category:** dig finds are **Materials** (player-facing category). Drop “Salvage” as the economy label (too generic). Specific material *types* are what you find and hold.
+2. **Multi-type dig haul:** expeditions return several Material types that feed districts, craft/forbidden components, and later Tallies turn-in — plus separate **Records**.
+3. **Siphon** spends **communal District production** (Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Clearwater — names proposed), not a single dig wallet.
+4. **Efficiency / safe magic** raises production rates so healthier available production improves Siphon **Cover** (incentive to help society).
+5. **Inventory** is required for the demo economy (thin list/grid + soft carry caps OK).
+
+**Proposed dig Materials (confirm/edit):** Sporemeal, Lampwick, Brinecrystal, Verdigris, Hullbit — full table in [`materials.md`](materials.md).
+
+**Open (next, one at a time):** Efficiency UI placement (separate Requisition vs shared panel) — Decision follow-up after names OK. Dig Yield sanctioned vs forbidden still open (act1-demo-plan Q3).
+
+**Code backlog:** `resources.gd` / Salvage HUD still use old naming — rename path Salvage → Materials system after docs confirm; do not treat current Salvage wallet as canon fiction.
 
 ---
 
@@ -306,7 +325,7 @@ Each build should feel different to *play*, not just have different numbers:
 
 **Leaning:** A — matches everything else we've already locked in (art style, comps, digging mechanic).
 
-**✅ Locked (2026-09):** Stay **A**. Sea of Stars–style oblique JRPG camera evaluated and rejected for Act 1 (fights Cap↑/Pit↓ dig; wrong cost). Steal SoS lighting/layering craft only — **no camera hybrid**. Full visual bible: [`art-direction.md`](art-direction.md).
+**✅ Locked (2026-09):** Stay **A**. Sea of Stars–style oblique JRPG camera evaluated and rejected for Act 1 (fights Firmament↑/Pit↓ dig; wrong cost). Steal SoS lighting/layering craft only — **no camera hybrid**. Full visual bible: [`art-direction.md`](art-direction.md).
 
 ---
 
@@ -378,6 +397,6 @@ Things to actually assign out loud:
 
 ## ✅ Fastest path through this doc if we're short on time
 
-Priority decisions (need answers to actually start building): **#3, #4, #6, #9, #10, #13, #14, #15, #20, #21, #22, #23, #24, #25, #26, #28**
+Priority decisions (need answers to actually start building): **#3, #4, #6, #9, #10, #13, #14, #15, #20, #21, #22, #23, #24, #25, #26, #28, #29**
 Can defer safely to later: **#1, #2 (names only — district *role* locked in #28), #11, #12, #16, #18, #19, #27**
 Decide explicitly regardless of time: **#17** (team roles/workflow — can't skip this one)

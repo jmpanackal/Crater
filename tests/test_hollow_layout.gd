@@ -116,6 +116,10 @@ func _run() -> void:
 		push_error("FAIL camera limits lack vertical room top=%d bottom=%d" % [cam.limit_top, cam.limit_bottom])
 		quit(1)
 		return
+	if not cam.drag_vertical_enabled or cam.position_smoothing_speed > 7.0:
+		push_error("FAIL camera missing soft follow / deadzone polish")
+		quit(1)
+		return
 	print("PASS camera vertical limits")
 
 	var player: Node2D = scene.get_node("Player") as Node2D

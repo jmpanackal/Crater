@@ -23,6 +23,9 @@ const EXIT_RIGHT := 1024.0 # meets dig columns
 
 const FLOOR_THICKNESS := 32.0
 const BRIDGE_THICKNESS := 24.0
+## wang ledge tiles (FloorVisual) keep the top half transparent; rock lip is TILE/2 below the cell top.
+## Shift FloorVisual up by this so the painted surface meets StaticBody deck tops / stand Y.
+const FLOOR_VISUAL_INSET := 32.0
 
 ## Climb shafts — tile-aligned deck openings (FloorVisual + StaticBody leave a gap).
 const LADDER_OPENING := 64.0 # one TILE

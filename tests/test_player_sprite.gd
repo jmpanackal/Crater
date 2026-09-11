@@ -65,7 +65,7 @@ func _run_tests() -> void:
 	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
 	await process_frame
-	var player: Node = scene.get_node("Player")
+	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
 	if player.get_node_or_null("ColorRect") != null:
 		push_error("FAIL ColorRect placeholder still present")
 		quit(1)
@@ -79,7 +79,13 @@ func _run_tests() -> void:
 		push_error("FAIL sprite frames not built")
 		quit(1)
 		return
+	# 64px sheets must render at half scale so feet meet the 32px collider / deck.
+	if absf(sprite.scale.x - player.SPRITE_SCALE) > 0.01 or absf(sprite.scale.y - player.SPRITE_SCALE) > 0.01:
+		push_error("FAIL sprite scale %s expected %s" % [sprite.scale, player.SPRITE_SCALE])
+		quit(1)
+		return
 	print("PASS player uses AnimatedSprite2D with idle frames (", sprite.animation, ")")
+	print("PASS player sprite scale matches collider (", player.SPRITE_SCALE, ")")
 
 	print("PLAYER_SPRITE_TESTS_PASSED")
 	quit(0)

@@ -41,7 +41,9 @@ var _defs: Dictionary = {
 		"cost_growth": 1.6,
 		"base_effect": 0,
 		"effect_per_level": 1,
-		"blurb": "Softer Cap strikes. Harder to notice upward digs.",
+		"blurb": "Softer Firmament strikes. Harder to notice upward digs.",
+		## Knowledge gate — Firmament note must be found before this can be siphoned.
+		"requires_record": &"firmament_note",
 	},
 	FARMS_EFF: {
 		"display_name": "Farm Tending",
@@ -156,10 +158,32 @@ func get_district_efficiency_level(district_id: StringName) -> int:
 			return 0
 
 
+## True when any required Record has been unlocked (or none is required).
+func is_unlocked(upgrade_id: StringName) -> bool:
+	if not _defs.has(upgrade_id):
+		return false
+	var req: Variant = get_def(upgrade_id).get("requires_record", null)
+	if req == null or str(req) == "":
+		return true
+	var journal := get_tree().root.get_node_or_null("Journal")
+	if journal == null or not journal.has_method("has_record"):
+		return false
+	return bool(journal.has_record(StringName(str(req))))
+
+
+func get_required_record(upgrade_id: StringName) -> StringName:
+	var req: Variant = get_def(upgrade_id).get("requires_record", null)
+	if req == null or str(req) == "":
+		return StringName()
+	return StringName(str(req))
+
+
 func can_siphon(upgrade_id: StringName) -> bool:
 	if not _siphon_station_open:
 		return false
 	if not _defs.has(upgrade_id):
+		return false
+	if not is_unlocked(upgrade_id):
 		return false
 	var wallet := _wallet()
 	if wallet == null:

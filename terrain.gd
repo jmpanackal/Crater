@@ -3,7 +3,7 @@ extends TileMapLayer
 ## Terrain — diggable world grid for Krater.
 ## Owns tile creation and destruction so digging stays one reusable system
 ## (player tools, later NPCs/cave-ins, etc. should call into here).
-## Dual frontiers: upward Cap digs carry secrecy risk; downward Pit digs are
+## Dual frontiers: upward Firmament digs carry secrecy risk; downward Pit digs are
 ## public-ish danger (flavor + instability warning), same tools.
 
 signal dig_completed(cell: Vector2i, direction: Vector2i, found_record: StringName)
@@ -17,8 +17,8 @@ const TILE_SHEET_PATH := "res://sprites/dig_site_tiles.png"
 # Default atlas used by tests / simple fills (first SpriteFusion vein tile).
 const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 
-## Cells with y < this are Cap rock (secret upward frontier).
-const CAP_Y_MAX := 4
+## Cells with y < this are Firmament rock (secret upward frontier).
+const FIRMAMENT_Y_MAX := 4
 ## Cells with y >= this are Pit walls (public-ish downward frontier).
 const PIT_Y_MIN := 9
 
@@ -113,17 +113,17 @@ func _build_fallback_tileset() -> TileSet:
 ## Dig columns start past the Hollow exit ledge (world x = cell * TILE_SIZE).
 ## Hollow is pit-centered terraces ending at ~1024; dig must not bleed into home.
 const DIG_START_X := 16 # world 1024 — after Hollow exit ledge
-const DIG_END_X := 32 # exclusive; 16 columns of Cap/Pit
+const DIG_END_X := 32 # exclusive; 16 columns of Firmament/Pit
 
 
 func _fill_ground() -> void:
 	# Dig site past Hollow terraces + exit ledge (see HollowLayout.EXIT_RIGHT).
-	# Cap rock (secret) above the walk ledge; Pit walls deeper below.
+	# Firmament rock (secret) above the walk ledge; Pit walls deeper below.
 	if _atlas_coords.is_empty():
 		return
 	for x in range(DIG_START_X, DIG_END_X):
-		# Cap / ceiling rock — upward secret frontier.
-		for y in range(0, CAP_Y_MAX + 1):
+		# Firmament / ceiling rock — upward secret frontier.
+		for y in range(0, FIRMAMENT_Y_MAX + 1):
 			_place_random(Vector2i(x, y))
 		# Mid band + Pit walls — downward public-ish danger.
 		for y in range(5, 16):
@@ -140,8 +140,8 @@ func has_tile(cell: Vector2i) -> bool:
 	return get_cell_source_id(cell) != -1
 
 
-func is_cap_cell(cell: Vector2i) -> bool:
-	return cell.y <= CAP_Y_MAX
+func is_firmament_cell(cell: Vector2i) -> bool:
+	return cell.y <= FIRMAMENT_Y_MAX
 
 
 func is_pit_cell(cell: Vector2i) -> bool:
@@ -155,11 +155,19 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if not has_tile(cell):
 		return false
 	erase_cell(cell)
+	var is_firmament := is_firmament_cell(cell)
+	var is_pit := is_pit_cell(cell)
+	var yield_amt := _salvage_yield_for_dig(cell)
 	var wallet := _resource_wallet()
 	if wallet:
-		wallet.add(wallet.SALVAGE, _salvage_yield_for_dig(cell))
+		wallet.add(wallet.SALVAGE, yield_amt)
 	_apply_frontier_rules(cell, direction)
+	var world := to_global(map_to_local(cell))
+	FeelFx.spawn_dig_dust(self, world, direction, is_firmament, is_pit)
+	FeelFx.spawn_salvage_float(self, world, yield_amt, is_firmament, is_pit)
 	var found := _try_record_drop(cell, direction)
+	if found != StringName():
+		FeelFx.spawn_record_float(self, world, "Record")
 	dig_completed.emit(cell, direction, found)
 	return true
 
@@ -184,7 +192,7 @@ func _base_salvage_yield() -> int:
 
 
 func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
-	var dug_up := direction.y < 0 or is_cap_cell(cell)
+	var dug_up := direction.y < 0 or is_firmament_cell(cell)
 	var dug_down := direction.y > 0 or is_pit_cell(cell)
 
 	if dug_up and direction.y < 0:
@@ -209,7 +217,7 @@ func _try_record_drop(cell: Vector2i, direction: Vector2i) -> StringName:
 	var journal := get_tree().root.get_node_or_null("Journal")
 	if journal == null or not journal.has_method("try_find_on_dig"):
 		return StringName()
-	var dug_upward := direction.y < 0 or is_cap_cell(cell)
+	var dug_upward := direction.y < 0 or is_firmament_cell(cell)
 	var found: StringName = journal.try_find_on_dig(dug_upward)
 	if found != StringName():
 		var def: Dictionary = journal.get_def(found)
@@ -231,7 +239,7 @@ func world_to_cell(world_pos: Vector2) -> Vector2i:
 
 ## Dig the tile adjacent to a world-space origin in a cardinal direction.
 ## `direction` should be one of: LEFT, RIGHT, UP, DOWN (Vector2i).
-## Same path for every direction — Cap vs Pit fiction layers wrap outcomes.
+## Same path for every direction — Firmament vs Pit fiction layers wrap outcomes.
 func dig_in_direction(origin_world: Vector2, direction: Vector2i) -> bool:
 	var cardinal := _to_cardinal(direction)
 	if cardinal == Vector2i.ZERO:

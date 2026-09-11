@@ -83,10 +83,30 @@ func _run_tests() -> void:
 
 	# Journal unlock + persist.
 	journal.clear_all()
+	if upgrades and upgrades.has_method("is_unlocked"):
+		if upgrades.is_unlocked(upgrades.QUIET_DIG):
+			push_error("FAIL Quiet Dig unlocked without Firmament note")
+			quit(1)
+			return
 	if not journal.unlock_record(journal.RECORD_SLATE):
 		push_error("FAIL unlock slate")
 		quit(1)
 		return
+	if upgrades and upgrades.has_method("is_unlocked"):
+		if upgrades.is_unlocked(upgrades.QUIET_DIG):
+			push_error("FAIL Quiet Dig unlocked by wrong Record")
+			quit(1)
+			return
+	if not journal.unlock_record(journal.RECORD_FIRMAMENT_NOTE):
+		push_error("FAIL unlock Firmament note")
+		quit(1)
+		return
+	if upgrades and upgrades.has_method("is_unlocked"):
+		if not upgrades.is_unlocked(upgrades.QUIET_DIG):
+			push_error("FAIL Firmament note should unlock Quiet Dig")
+			quit(1)
+			return
+	print("PASS Firmament note gates Quiet Dig")
 	if not journal.has_record(journal.RECORD_SLATE):
 		push_error("FAIL has_record")
 		quit(1)
@@ -107,29 +127,37 @@ func _run_tests() -> void:
 		push_error("FAIL journal missing after load")
 		quit(1)
 		return
+	if not journal.has_record(journal.RECORD_FIRMAMENT_NOTE):
+		push_error("FAIL Firmament note missing after load")
+		quit(1)
+		return
+	if upgrades and upgrades.has_method("is_unlocked") and not upgrades.is_unlocked(upgrades.QUIET_DIG):
+		push_error("FAIL Quiet Dig locked after Firmament note load")
+		quit(1)
+		return
 	if community.get_social_standing() != 33:
 		push_error("FAIL standing after journal save load")
 		quit(1)
 		return
 	print("PASS journal + standing persist")
 
-	# Cap vs Pit cell helpers.
+	# Firmament vs Pit cell helpers.
 	var terrain := TerrainLayer.new()
 	root.add_child(terrain)
 	await process_frame
-	if not terrain.is_cap_cell(Vector2i(12, 2)):
-		push_error("FAIL cap cell")
+	if not terrain.is_firmament_cell(Vector2i(12, 2)):
+		push_error("FAIL Firmament cell")
 		quit(1)
 		return
 	if not terrain.is_pit_cell(Vector2i(12, 12)):
 		push_error("FAIL pit cell")
 		quit(1)
 		return
-	if terrain.is_cap_cell(Vector2i(12, 12)) or terrain.is_pit_cell(Vector2i(12, 2)):
+	if terrain.is_firmament_cell(Vector2i(12, 12)) or terrain.is_pit_cell(Vector2i(12, 2)):
 		push_error("FAIL frontier helpers crossed")
 		quit(1)
 		return
-	print("PASS Cap/Pit frontier helpers")
+	print("PASS Firmament/Pit frontier helpers")
 
 	if save_load:
 		save_load.clear_save()

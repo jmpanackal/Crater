@@ -44,6 +44,15 @@ func _run_tests() -> void:
 	await process_frame
 	await process_frame
 
+	if scene.get_node_or_null("UI/PrimaryHud") == null:
+		push_error("FAIL PrimaryHud chrome missing")
+		quit(1)
+		return
+	var primary: Control = scene.get_node("UI/PrimaryHud") as Control
+	if primary.size.x > 280.0 or (primary.offset_right - primary.offset_left) > 280.0:
+		push_error("FAIL PrimaryHud too wide (blocks Hollow)")
+		quit(1)
+		return
 	if scene.get_node_or_null("UI/StatusLabel") == null:
 		push_error("FAIL StatusLabel missing")
 		quit(1)
@@ -100,9 +109,13 @@ func _run_tests() -> void:
 		upgrades.set_siphon_station_open(true)
 		await process_frame
 		await process_frame
-		var panel: CanvasItem = scene.get_node("UI/UpgradePanel")
+		var panel: Control = scene.get_node("UI/UpgradePanel") as Control
 		if not panel.visible:
 			push_error("FAIL UpgradePanel hidden in Hollow")
+			quit(1)
+			return
+		if panel.size.x > 280.0 or (panel.offset_right - panel.offset_left) > 280.0:
+			push_error("FAIL Hollow chip too wide")
 			quit(1)
 			return
 		var status: Label = scene.get_node("UI/StatusLabel")
@@ -110,19 +123,83 @@ func _run_tests() -> void:
 			push_error("FAIL status text '%s'" % status.text)
 			quit(1)
 			return
+		if status.tooltip_text.strip_edges() == "":
+			push_error("FAIL StatusLabel missing meaning tooltip")
+			quit(1)
+			return
+		var cover: Label = scene.get_node("UI/UpgradePanel/Margin/Content/CoverLabel") as Label
+		if cover == null or cover.tooltip_text.strip_edges() == "":
+			push_error("FAIL CoverLabel missing meaning tooltip")
+			quit(1)
+			return
+		# Districts + upgrade rows live in the shop modal — not the slim chip.
+		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/DistrictToggle") != null:
+			push_error("FAIL DistrictToggle should not live on Hollow chip")
+			quit(1)
+			return
+		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/SiphonList") != null:
+			var legacy: CanvasItem = scene.get_node("UI/UpgradePanel/Margin/Content/SiphonList") as CanvasItem
+			if legacy.visible:
+				push_error("FAIL inline SiphonList visible on chip")
+				quit(1)
+				return
 	print("PASS compact Hollow HUD hierarchy")
 
-	var siphon_list: CanvasItem = scene.get_node("UI/UpgradePanel/SiphonList") as CanvasItem
-	if siphon_list.visible:
-		push_error("FAIL SiphonList should start collapsed until U")
+	var shop_panel: CanvasItem = scene.get_node_or_null("UI/SiphonShopPanel") as CanvasItem
+	var siphon_list: CanvasItem = scene.get_node_or_null("UI/SiphonShopPanel/Margin/VBox/SiphonList") as CanvasItem
+	if shop_panel == null or siphon_list == null:
+		push_error("FAIL SiphonShopPanel / SiphonList missing")
 		quit(1)
 		return
-	var hint: Label = scene.get_node_or_null("UI/UpgradePanel/SiphonExpandHint") as Label
+	if shop_panel.visible:
+		push_error("FAIL SiphonShop should start collapsed until U")
+		quit(1)
+		return
+	var hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/SiphonExpandHint") as Control
 	if hint == null or not hint.visible:
 		push_error("FAIL SiphonExpandHint missing/hidden while collapsed")
 		quit(1)
 		return
-	print("PASS siphon list collapsed by default")
+	if not ("Shop" in str(hint.get("text"))):
+		push_error("FAIL SiphonExpandHint text '%s'" % hint.get("text"))
+		quit(1)
+		return
+
+	var hud: Node = scene.get_node("UI/UpgradePanel")
+	if hud.has_method("open_shop"):
+		hud.open_shop()
+		await process_frame
+		if not shop_panel.visible:
+			push_error("FAIL open_shop did not show modal")
+			quit(1)
+			return
+		var district_toggle: BaseButton = scene.get_node_or_null(
+			"UI/SiphonShopPanel/Margin/VBox/DistrictToggle"
+		) as BaseButton
+		if district_toggle == null or not district_toggle.visible:
+			push_error("FAIL DistrictToggle missing in open shop")
+			quit(1)
+			return
+		hud.close_shop()
+		await process_frame
+		if shop_panel.visible:
+			push_error("FAIL close_shop left modal open")
+			quit(1)
+			return
+	print("PASS siphon shop modal collapsed by default")
+
+	var cam: Camera2D = scene.get_node("Player/Camera2D") as Camera2D
+	if cam.limit_right > 1100:
+		push_error("FAIL Hollow camera limit_right=%d exposes dig strip" % cam.limit_right)
+		quit(1)
+		return
+	print("PASS Hollow camera hides dig strip")
+
+	if ResourceLoader.exists("res://ui_style.gd") == false:
+		push_error("FAIL ui_style.gd missing")
+		quit(1)
+		return
+	print("PASS ui_style shared chrome")
 
 	print("DISPLAY_HUD_TESTS_PASSED")
 	quit(0)

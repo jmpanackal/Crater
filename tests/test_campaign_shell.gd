@@ -84,6 +84,15 @@ func _run_tests() -> void:
 		push_error("FAIL Continue button missing")
 		quit(1)
 		return
+	var blurb: Label = title.get_node_or_null("Center/VBox/Blurb") as Label
+	if blurb == null or not ("W/S" in blurb.text or "climb" in blurb.text.to_lower()):
+		push_error("FAIL title blurb missing climb hint")
+		quit(1)
+		return
+	if not title.has_method("has_quiet_atmosphere") or not title.has_quiet_atmosphere():
+		push_error("FAIL title quiet atmosphere missing")
+		quit(1)
+		return
 	print("PASS title screen scene loads")
 
 	print("CAMPAIGN_SHELL_TESTS_PASSED")

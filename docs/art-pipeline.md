@@ -1,6 +1,8 @@
 # Art pipeline — PixelLab MCP (Krater Act 1)
 
-How agents should use [PixelLab Vibe Coding / MCP](https://www.pixellab.ai/docs/ways-to-use-pixellab) for Act 1 assets. Setup: see project `.cursor/mcp.json` (token via `PIXELLAB_API_TOKEN` env var — never commit secrets).
+How agents should use [PixelLab Vibe Coding / MCP](https://www.pixellab.ai/docs/ways-to-use-pixellab) for Act 1 assets. Setup: see project `.cursor/mcp.json`.
+
+**Token safety:** set `PIXELLAB_API_TOKEN` in your user/system environment (or Cursor secrets). `.cursor/mcp.json` must reference `${env:PIXELLAB_API_TOKEN}` only — **never** commit a raw Bearer token. If a token was ever pasted into the file, rotate it on PixelLab and keep the env-var form.
 
 **Visual locks** (camera, palette, steal/don’t-steal, Hollow composition): [`art-direction.md`](art-direction.md). This doc is the *how* of generating and importing; that doc is the *what it should look like*. Agent role-split, player-camera sign-off, and approve-before-gen discipline: [`ai-workflow.md`](ai-workflow.md).
 

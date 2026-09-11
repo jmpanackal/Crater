@@ -2,10 +2,14 @@ extends Label
 ## Shows carried Salvage. Visible at dig site and Hollow —
 ## but Salvage only becomes useful when siphoned at the Hollow.
 
+const UiStyleRef := preload("res://ui_style.gd")
+
 var _wallet: Node
 
 
 func _ready() -> void:
+	UiStyleRef.apply_label(self, &"title")
+	UiStyleRef.tip(self, "Salvage you carry from digging. Spend it at the Hollow siphon shop [U].")
 	_wallet = get_tree().root.get_node_or_null("Resources")
 	if _wallet == null:
 		text = "Salvage: ?"

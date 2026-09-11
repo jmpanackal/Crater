@@ -119,7 +119,7 @@ func on_siphon_noticed() -> void:
 		notice_message.emit("Someone noticed materials going missing. (−%d Standing)" % penalty)
 
 
-## Chance of being caught digging toward the Cap. quiet_level reduces risk.
+## Chance of being caught digging toward the Firmament. quiet_level reduces risk.
 func roll_upward_dig_risk(quiet_level: int = 0) -> bool:
 	var chance := UPWARD_DIG_BASE_CHANCE * pow(0.65, float(maxi(0, quiet_level)))
 	if randf() >= chance:
@@ -136,7 +136,7 @@ func on_caught_upward_dig() -> void:
 		pending_lie = false
 	set_social_standing(social_standing - penalty)
 	if exposed:
-		notice_message.emit("Caught digging the Cap — and your lie cracked. (−%d Standing)" % penalty)
+		notice_message.emit("Caught digging the Firmament — and your lie cracked. (−%d Standing)" % penalty)
 	else:
 		notice_message.emit("Soft rock-fall above — someone asks why you dig that way. (−%d Standing)" % penalty)
 

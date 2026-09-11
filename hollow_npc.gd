@@ -17,9 +17,12 @@ signal talk_requested(npc: Node2D, lines: PackedStringArray, choice_prompt: Stri
 var _player: Node2D
 var _label: Label
 var _body: ColorRect
+var _head: ColorRect
 var _hint: Label
 var _wander_origin := Vector2.ZERO
 var _wander_t := 0.0
+## -1 left / +1 right — lean toward the player when nearby.
+var _face_sign := 1.0
 
 
 func _ready() -> void:
@@ -32,18 +35,29 @@ func _ready() -> void:
 func _build_visuals() -> void:
 	# Soft silhouette placeholders until NPC art lands — still read as people on decks.
 	_body = ColorRect.new()
+	_body.name = "Body"
 	_body.size = Vector2(14, 22)
 	_body.position = Vector2(-7, -22)
 	_body.color = Color(body_color.r, body_color.g, body_color.b, 0.72)
 	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_body)
 
-	var head := ColorRect.new()
-	head.size = Vector2(10, 10)
-	head.position = Vector2(-5, -32)
-	head.color = Color(body_color.lightened(0.12).r, body_color.lightened(0.12).g, body_color.lightened(0.12).b, 0.78)
-	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(head)
+	var shadow := ColorRect.new()
+	shadow.name = "ContactShadow"
+	shadow.size = Vector2(16, 3)
+	shadow.position = Vector2(-8, -1)
+	shadow.color = Color(0.02, 0.03, 0.04, 0.35)
+	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shadow.z_index = -1
+	add_child(shadow)
+
+	_head = ColorRect.new()
+	_head.name = "Head"
+	_head.size = Vector2(10, 10)
+	_head.position = Vector2(-5, -32)
+	_head.color = Color(body_color.lightened(0.12).r, body_color.lightened(0.12).g, body_color.lightened(0.12).b, 0.78)
+	_head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_head)
 
 	_label = Label.new()
 	_label.text = npc_name
@@ -64,13 +78,42 @@ func _build_visuals() -> void:
 func _process(delta: float) -> void:
 	_wander_t += delta
 	position.x = _wander_origin.x + sin(_wander_t * 0.7) * 10.0
+	# Quiet idle bob — life without arcade bounce.
+	var bob := sin(_wander_t * 2.1) * 1.4
+	if _body:
+		_body.position.y = -22.0 + bob
+	if _head:
+		_head.position.y = -32.0 + bob
 	if _player == null or not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group("player") as Node2D
+	_update_facing()
 	var near := _is_player_near()
 	if _label:
 		_label.visible = near
 	if _hint:
 		_hint.visible = near
+		if near:
+			# Soft pulse so talk affordance reads without arcade sparkle.
+			_hint.modulate.a = 0.55 + 0.35 * (0.5 + 0.5 * sin(_wander_t * 3.0))
+
+
+func _update_facing() -> void:
+	if _player == null:
+		return
+	var dx := _player.global_position.x - global_position.x
+	if absf(dx) < 6.0:
+		return
+	_face_sign = 1.0 if dx >= 0.0 else -1.0
+	# Lean silhouette toward the player; don't flip labels.
+	if _body:
+		_body.position.x = -7.0 + _face_sign * 1.5
+	if _head:
+		_head.position.x = -5.0 + _face_sign * 2.5
+
+
+## Test helper — face sign after update (-1 left / +1 right).
+func debug_face_sign() -> float:
+	return _face_sign
 
 
 func _unhandled_input(event: InputEvent) -> void:

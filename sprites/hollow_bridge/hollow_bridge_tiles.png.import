@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dmg44cbq47e1s"
-path="res://.godot/imported/dig_site_debris.png-7ab87cd9ca52c917d1a4ae589ba799e3.ctex"
+uid="uid://bu7gv206w46uw"
+path="res://.godot/imported/hollow_bridge_tiles.png-0fbf73caea9327cbea6c0fff9ab34212.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/dig_site_debris.png"
-dest_files=["res://.godot/imported/dig_site_debris.png-7ab87cd9ca52c917d1a4ae589ba799e3.ctex"]
+source_file="res://sprites/hollow_bridge/hollow_bridge_tiles.png"
+dest_files=["res://.godot/imported/hollow_bridge_tiles.png-0fbf73caea9327cbea6c0fff9ab34212.ctex"]
 
 [params]
 
