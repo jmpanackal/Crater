@@ -58,7 +58,7 @@ func unlock_record(record_id: StringName) -> bool:
 	return true
 
 
-## Soft social notice when a Record opens a forbidden siphon option.
+## Soft social notice when a Record opens a forbidden theft option.
 func _notify_knowledge_unlock(record_id: StringName) -> void:
 	var def := get_def(record_id)
 	var upgrade_id: StringName = StringName(str(def.get("unlocks_upgrade", "")))

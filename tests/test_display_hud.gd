@@ -53,14 +53,46 @@ func _run_tests() -> void:
 		push_error("FAIL PrimaryHud too wide (blocks Hollow)")
 		quit(1)
 		return
-	if scene.get_node_or_null("UI/StatusLabel") == null:
-		push_error("FAIL StatusLabel missing")
+	if scene.get_node_or_null("UI/HarvestLabel") == null:
+		push_error("FAIL HarvestLabel missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("UI/StandingLabel") == null:
+		push_error("FAIL StandingLabel missing")
 		quit(1)
 		return
 	if scene.get_node_or_null("UI/UpgradePanel/HarvestLabel") != null:
 		push_error("FAIL HarvestLabel still inside UpgradePanel")
 		quit(1)
 		return
+
+	# Harvest / Standing / Materials must be distinct non-overlapping rows.
+	var mats: Control = scene.get_node("UI/SalvageLabel") as Control
+	var harvest: Control = scene.get_node("UI/HarvestLabel") as Control
+	var standing: Control = scene.get_node("UI/StandingLabel") as Control
+	if mats == null or harvest == null or standing == null:
+		push_error("FAIL primary HUD rows missing")
+		quit(1)
+		return
+	var mats_r := mats.get_global_rect()
+	var harv_r := harvest.get_global_rect()
+	var stand_r := standing.get_global_rect()
+	if mats_r.intersects(harv_r) or harv_r.intersects(stand_r) or mats_r.intersects(stand_r):
+		push_error(
+			"FAIL HUD status rows overlap mats=%s harvest=%s standing=%s"
+			% [mats_r, harv_r, stand_r]
+		)
+		quit(1)
+		return
+	if harv_r.position.y < mats_r.end.y - 0.5:
+		push_error("FAIL HarvestLabel not below Materials row")
+		quit(1)
+		return
+	if stand_r.position.y < harv_r.end.y - 0.5:
+		push_error("FAIL StandingLabel not below Harvest row")
+		quit(1)
+		return
+	print("PASS HUD status rows non-overlapping")
 	if scene.get_node_or_null("UI/JournalHud/Dimmer") == null:
 		push_error("FAIL Journal Dimmer missing")
 		quit(1)
@@ -118,13 +150,18 @@ func _run_tests() -> void:
 			push_error("FAIL Hollow chip too wide")
 			quit(1)
 			return
-		var status: Label = scene.get_node("UI/StatusLabel")
-		if not str(status.text).begins_with("Harvest"):
-			push_error("FAIL status text '%s'" % status.text)
+		var harvest_lbl: Label = scene.get_node("UI/HarvestLabel") as Label
+		var standing_lbl: Label = scene.get_node("UI/StandingLabel") as Label
+		if not str(harvest_lbl.text).begins_with("Harvest"):
+			push_error("FAIL harvest text '%s'" % harvest_lbl.text)
 			quit(1)
 			return
-		if status.tooltip_text.strip_edges() == "":
-			push_error("FAIL StatusLabel missing meaning tooltip")
+		if not str(standing_lbl.text).begins_with("Standing"):
+			push_error("FAIL standing text '%s'" % standing_lbl.text)
+			quit(1)
+			return
+		if harvest_lbl.tooltip_text.strip_edges() == "" or standing_lbl.tooltip_text.strip_edges() == "":
+			push_error("FAIL Harvest/Standing missing meaning tooltips")
 			quit(1)
 			return
 		var cover: Label = scene.get_node("UI/UpgradePanel/Margin/Content/CoverLabel") as Label

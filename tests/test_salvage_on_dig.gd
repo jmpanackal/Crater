@@ -1,5 +1,5 @@
 extends SceneTree
-## Dig still grants Salvage; empty dig grants nothing.
+## Dig grants Salvage + Materials; empty dig grants nothing.
 
 
 func _init() -> void:
@@ -23,10 +23,10 @@ func _run_tests(terrain: TerrainLayer) -> void:
 		upgrades.set_level(upgrades.DIG_YIELD, 0)
 		upgrades.set_siphon_station_open(false)
 
-	wallet.set_amount(wallet.SALVAGE, 0)
+	wallet.reset_all()
 	terrain.clear()
 
-	# Mid-band cell so DOWN is not a Pit bonus tile (avoids flaky +1 salvage).
+	# Mid-band cell so DOWN is not a Mouth bonus tile (avoids flaky +1 salvage).
 	var center := Vector2i(10, 6)
 	var targets := [
 		center + Vector2i.LEFT,
@@ -45,6 +45,11 @@ func _run_tests(terrain: TerrainLayer) -> void:
 
 	for dig_dir in digs:
 		var before: int = wallet.get_amount(wallet.SALVAGE)
+		var mats_before: int = (
+			wallet.get_amount(wallet.SPOREMEAL)
+			+ wallet.get_amount(wallet.LAMPWICK)
+			+ wallet.get_amount(wallet.BRINECRYSTAL)
+		)
 		var ok := terrain.dig_in_direction(origin_world, dig_dir)
 		if not ok:
 			push_error("FAIL dig %s" % dig_dir)
@@ -52,15 +57,38 @@ func _run_tests(terrain: TerrainLayer) -> void:
 			return
 		expected += per_tile
 		var after: int = wallet.get_amount(wallet.SALVAGE)
+		var mats_after: int = (
+			wallet.get_amount(wallet.SPOREMEAL)
+			+ wallet.get_amount(wallet.LAMPWICK)
+			+ wallet.get_amount(wallet.BRINECRYSTAL)
+		)
 		if after != before + per_tile:
 			push_error("FAIL salvage %d -> %d" % [before, after])
+			quit(1)
+			return
+		if mats_after != mats_before + per_tile:
+			push_error("FAIL materials %d -> %d" % [mats_before, mats_after])
 			quit(1)
 			return
 		print("PASS dig ", dig_dir, " salvage ", before, " -> ", after)
 
 	var stuck: int = wallet.get_amount(wallet.SALVAGE)
-	if terrain.dig_in_direction(origin_world, Vector2i.UP) or wallet.get_amount(wallet.SALVAGE) != stuck:
-		push_error("FAIL empty dig granted salvage")
+	var mats_stuck: int = (
+		wallet.get_amount(wallet.SPOREMEAL)
+		+ wallet.get_amount(wallet.LAMPWICK)
+		+ wallet.get_amount(wallet.BRINECRYSTAL)
+	)
+	if (
+		terrain.dig_in_direction(origin_world, Vector2i.UP)
+		or wallet.get_amount(wallet.SALVAGE) != stuck
+		or (
+			wallet.get_amount(wallet.SPOREMEAL)
+			+ wallet.get_amount(wallet.LAMPWICK)
+			+ wallet.get_amount(wallet.BRINECRYSTAL)
+		)
+		!= mats_stuck
+	):
+		push_error("FAIL empty dig granted haul")
 		quit(1)
 		return
 

@@ -154,15 +154,18 @@ func _run() -> void:
 		push_error("FAIL harvest urgency not active at 8s")
 		quit(1)
 		return
-	var status: Label = scene.get_node("UI/StatusLabel") as Label
-	if status.modulate.r < 0.9 or status.modulate.a < 0.5:
-		push_error("FAIL harvest pulse modulate flat %s" % status.modulate)
+	var harvest_lbl: Label = scene.get_node("UI/HarvestLabel") as Label
+	if harvest_lbl == null or harvest_lbl.modulate.r < 0.9 or harvest_lbl.modulate.a < 0.5:
+		push_error(
+			"FAIL harvest pulse modulate flat %s"
+			% (harvest_lbl.modulate if harvest_lbl else Color())
+		)
 		quit(1)
 		return
 	print("PASS harvest clock urgent pulse band")
 
 	if panel.has_method("_show_notice"):
-	panel._show_notice("Caught digging the Firmament — and your lie cracked. (−12 Standing)")
+		panel._show_notice("Caught digging the Firmament — and your lie cracked. (−12 Standing)")
 		if panel.debug_notice_tone() != &"loss":
 			push_error("FAIL notice tone after show")
 			quit(1)

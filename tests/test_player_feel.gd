@@ -113,8 +113,8 @@ func _run() -> void:
 
 	# Nearest-deck helper sanity.
 	var near_cistern := HollowLayout.nearest_safe_stand(Vector2(800, 900))
-	if near_cistern.y > HollowLayout.CISTERN_Y:
-		push_error("FAIL nearest_safe_stand below cistern: %s" % near_cistern)
+	if near_cistern.y > HollowLayout.SEEP_Y:
+		push_error("FAIL nearest_safe_stand below seep: %s" % near_cistern)
 		quit(1)
 		return
 	print("PASS nearest_safe_stand helper")

@@ -23,8 +23,8 @@ const ACCEL := 1400.0
 const FRICTION := 1800.0
 const AIR_ACCEL := 1000.0
 const AIR_FRICTION := 400.0
-## Soft respawn if we drop past Hollow/dig void (camera limit_bottom is 900).
-const VOID_FALL_Y := 680.0
+## Soft respawn if we drop past Hollow/dig void (below seep band).
+const VOID_FALL_Y := 1200.0
 
 
 @export var terrain: TerrainLayer
@@ -58,6 +58,8 @@ var _land_impact := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
+	floor_max_angle = deg_to_rad(50.0)
+	floor_snap_length = 8.0
 	if terrain == null:
 		terrain = get_node_or_null("../Terrain") as TerrainLayer
 	if _sprite:

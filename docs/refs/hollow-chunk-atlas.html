@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hollow chunk atlas</title>
+  <style>
+    :root { color-scheme: dark; --ink:#091419; --rock:#263139; --rock-2:#3b403c; --panel:#152228; --line:#486269; --text:#e6dfc8; --muted:#9ba5a0; --teal:#5c9b82; --amber:#e3a65b; --blue:#8bb5c4; --draft:#9f8463; --planned:#5c6668; --red:#b46b5e; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--ink); color:var(--text); font:14px/1.4 system-ui, sans-serif; }
+    header { padding:18px 24px; border-bottom:1px solid var(--line); background:#0d1a1f; }
+    h1 { margin:0 0 4px; font-size:22px; }
+    header p { margin:0; color:var(--muted); max-width:1000px; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px; padding:12px 24px; border-bottom:1px solid #25373d; color:var(--muted); }
+    .legend span { display:inline-flex; gap:6px; align-items:center; }
+    .swatch { width:11px; height:11px; border-radius:2px; display:inline-block; }
+    .approved { background:var(--teal); } .draft { background:var(--draft); } .planned { background:var(--planned); } .revision { background:var(--red); }
+    .layout { display:grid; grid-template-columns:minmax(900px, 1fr) 320px; gap:0; min-height:calc(100vh - 125px); }
+    .viewport { overflow:auto; padding:22px; background:radial-gradient(ellipse at center, #10252d 0%, var(--ink) 71%); }
+    .map { position:relative; width:1500px; height:950px; overflow:hidden; border:1px solid #31494f; background:linear-gradient(90deg, rgba(27,45,50,.75) 0 40%, rgba(5,13,18,.92) 40% 65%, rgba(27,45,50,.75) 65% 100%); }
+    .void { position:absolute; left:600px; top:0; width:375px; height:950px; background:linear-gradient(90deg, rgba(5,14,19,.82), rgba(10,34,47,.74) 48%, rgba(5,14,19,.9)); border-left:1px dashed #315562; border-right:1px dashed #315562; }
+    .void::after { content:"DEVIL'S MOUTH\A open vertical impact crater\A no routine downward mining"; white-space:pre; position:absolute; top:45%; width:100%; text-align:center; color:#6a9aab; font-size:15px; letter-spacing:1px; line-height:1.75; }
+    .district { position:absolute; color:#93a6a3; font-size:12px; letter-spacing:.08em; text-transform:uppercase; border-left:2px solid #486269; padding-left:7px; }
+    .lift { position:absolute; width:27px; border:2px solid var(--blue); background:repeating-linear-gradient(0deg, rgba(139,181,196,.20) 0 18px, transparent 18px 38px); color:var(--blue); font-size:11px; writing-mode:vertical-rl; padding:5px 4px; text-align:center; }
+    .chunk { position:absolute; display:flex; flex-direction:column; justify-content:space-between; min-width:110px; min-height:70px; padding:9px; border:1px solid var(--planned); background:rgba(20,32,36,.92); box-shadow:0 7px 15px rgba(0,0,0,.25); cursor:pointer; overflow:hidden; }
+    .chunk:hover, .chunk:focus { outline:2px solid var(--amber); outline-offset:2px; }
+    .chunk.approved { border-color:var(--teal); background:#102d2d; }
+    .chunk.draft { border-color:var(--draft); }
+    .chunk.planned { border-style:dashed; }
+    .chunk.revision { border-color:var(--red); }
+    .chunk.with-image { padding:0; }
+    .chunk img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.68; }
+    .chunk .veil { position:absolute; inset:0; background:linear-gradient(0deg, rgba(4,13,16,.9) 0 42%, rgba(4,13,16,.12)); }
+    .chunk .content { position:relative; z-index:1; }
+    .chunk .id { color:var(--amber); font-weight:700; font-size:12px; letter-spacing:.08em; }
+    .chunk .name { font-weight:650; font-size:14px; }
+    .chunk .state { color:var(--muted); font-size:11px; margin-top:5px; }
+    .chunk.approved .state { color:#a8d6c4; }
+    .chunk.draft .state { color:#d5bb8f; }
+    .route { position:absolute; height:0; border-top:2px solid var(--amber); transform-origin:0 0; opacity:.9; z-index:0; }
+    .route::after { content:""; position:absolute; right:-1px; top:-5px; border-left:9px solid var(--amber); border-top:5px solid transparent; border-bottom:5px solid transparent; }
+    aside { border-left:1px solid var(--line); background:#0d1a1f; padding:20px; }
+    aside h2 { margin:0 0 6px; font-size:17px; } aside p { color:var(--muted); margin:0 0 15px; }
+    dl { margin:0; } dt { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; margin-top:13px; } dd { margin:2px 0 0; }
+    .empty { color:var(--muted); font-style:italic; }
+    .note { margin-top:22px; padding-top:15px; border-top:1px solid #25373d; color:var(--muted); font-size:12px; }
+    @media (max-width:1100px) { .layout { display:block; } aside { border-left:0; border-top:1px solid var(--line); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hollow chunk atlas</h1>
+    <p>Source-of-truth spatial board for player-scale chunks. An image appears only after approval; slots, seams, camera contracts, and system ownership remain visible from the beginning so this board can become the handoff map for game assembly.</p>
+  </header>
+  <div class="legend" aria-label="Atlas legend">
+    <span><i class="swatch approved"></i>Approved image</span><span><i class="swatch draft"></i>Draft awaiting approval</span><span><i class="swatch planned"></i>Planned empty slot</span><span><i class="swatch revision"></i>Approved, revision needed</span>
+  </div>
+  <main class="layout">
+    <section class="viewport" aria-label="Full Hollow chunk layout"><div id="map" class="map"><div class="void"></div></div></section>
+    <aside>
+      <h2 id="detail-title">Select a chunk</h2>
+      <p id="detail-summary">Click a slot to inspect the chunk contract. The position is a layout coordinate, not final Godot pixel geometry.</p>
+      <dl id="detail-list"></dl>
+      <p class="note">Assembly rule: every implementation chunk must match its listed entry/exit seam, camera boundary, band, and systemic owner before its art is considered approved.</p>
+    </aside>
+  </main>
+  <script id="atlas-data" type="application/json">
+[
+  {"id":"L-ASH","name":"Ashram Heights — west","state":"planned","x":330,"y":55,"w":210,"h":86,"band":"upper west","role":"Guarded prestigious/sacred residences; late home tier.","seams":"south: High-West; east: left lift upper landing","camera":"No Firmament-wide shot; controlled upper-wall slice.","systems":"Trust/Tallies relocation, Wardens, late-story scrutiny"},
+  {"id":"HW-01","name":"High-West approach","state":"planned","x":160,"y":155,"w":170,"h":82,"band":"upper west","role":"Guarded inhabited approach to official late dig.","seams":"east: left lift; north: Ashram; west: HW-02","camera":"Wall interior; no complete Heart view.","systems":"Warden gate, Trust requirement"},
+  {"id":"HW-02","name":"High-West Dig Front","state":"planned","x":34,"y":155,"w":120,"h":82,"band":"upper west","role":"Late official lateral excavation; rare Records/Hullbits.","seams":"east: HW-01; west: locked deeper continuation","camera":"No roof-route reveal.","systems":"Late work order, guarded dig"},
+  {"id":"WK-01","name":"Wickwork","state":"planned","x":275,"y":310,"w":220,"h":100,"band":"mid west","role":"Wicklamp and Bindcord production, repair bays, workbench access.","seams":"east: West Exchange; north: left lift mid stop; south: Mid Allotments","camera":"Long sideways workshop terrace plus carved bay.","systems":"District production, rig refit, repair intake"},
+  {"id":"MA-01","name":"Mid Allotments","state":"planned","x":175,"y":455,"w":210,"h":92,"band":"mid west","role":"Mid-band homes and allotment street; later apartment tier.","seams":"north: Wickwork; east: lower-west routes","camera":"Neighborhood slice, not Heart panorama.","systems":"Home upgrade, deliveries, visitors"},
+  {"id":"O3","name":"West Dispatch Yard","state":"planned","x":73,"y":610,"w":160,"h":98,"band":"lower west","role":"First Steward assignment, crew staging, tools and cart turntable.","seams":"east: O2; west: O4","camera":"Crowded civic terrace embedded in wall.","systems":"First Work Order; sanctioned expansion access"},
+  {"id":"O4","name":"Bottom-West Approach","state":"planned","x":25,"y":725,"w":145,"h":90,"band":"far lower west","role":"Long outward lived-in approach; Mouth no longer visible.","seams":"east: O3; west: O5","camera":"Thick wall corridor, lateral direction unmistakable.","systems":"Worker life, delivery/craft finds"},
+  {"id":"O5","name":"Bottom-West Threshold","state":"planned","x":25,"y":825,"w":130,"h":75,"band":"far lower west","role":"Checkpoint and crew staging at public excavation.","seams":"east: O4; west: O6","camera":"Braced gallery mouth, never Devil’s Mouth.","systems":"Work order access"},
+  {"id":"O6","name":"First Expansion Gallery","state":"planned","x":165,"y":825,"w":130,"h":75,"band":"far lower west","role":"Starter public Materials excavation.","seams":"east: O5; branch: O7; return: O8","camera":"Lateral civic gallery.","systems":"Materials, early safe mining"},
+  {"id":"O7","name":"Collapsed Side Chamber","state":"planned","x":165,"y":735,"w":120,"h":74,"band":"far lower west","role":"Optional ambiguity clue; deeper path locked.","seams":"south: O6","camera":"Small sealed side chamber.","systems":"Story record / contextual puzzle"},
+  {"id":"O8","name":"Lower Lift Landing","state":"planned","x":395,"y":735,"w":155,"h":84,"band":"lower west","role":"Return landing; first public vertical transport to Mid Heart.","seams":"west: O6 return route; north: left lift","camera":"Lower dock, partial void only.","systems":"Left Presswater lift; guaranteed route"},
+  {"id":"O2","name":"Lower Switchback","state":"draft","x":260,"y":620,"w":150,"h":100,"band":"lower west","role":"Worker route, maker nook, optional under-overhang loop.","seams":"east: O1; west: O3","camera":"Only a narrow eastward Mouth glimpse.","systems":"Traversal teaching; ambient lower-worker life"},
+  {"id":"O1","name":"Home Court","state":"approved","x":430,"y":645,"w":145,"h":130,"band":"lower west","role":"Starting home, storage, rest, wash/cook court and deliveries.","seams":"west: O2; north: ambient balcony; east: local void-facing edge","camera":"Intimate courtyard; fragments of city only.","systems":"Save/rest, storage, visitors, deliveries","image":"hollow-opening-home-court-approved-2026-09-11.png"},
+  {"id":"MH-W","name":"West Exchange Raft","state":"planned","x":625,"y":370,"w":135,"h":95,"band":"Mid Heart","role":"Joss turn-in, requisitions, Wickwork intake, freight receiving.","seams":"west: Wickwork/lift approach; east: Holding","camera":"Open gaps preserve the Mouth.","systems":"Materials, Tallies, repair intake"},
+  {"id":"MH-H","name":"Holding Raft","state":"planned","x":770,"y":320,"w":160,"h":122,"band":"Mid Heart","role":"Largest two-level public hall; daily Holding, announcements, queues and gathering.","seams":"west: West Exchange; east: East Service; south: Lower Freight","camera":"Local civic frame, never whole Hollow.","systems":"Council/Warden events, public Trust context"},
+  {"id":"MH-E","name":"East Service Raft","state":"planned","x":940,"y":370,"w":145,"h":95,"band":"Mid Heart","role":"Glowration, medic/care room, notices, small shops and offices.","seams":"west: Holding; east: right lift/service approach","camera":"Open gaps and dock views.","systems":"Care, notices, civic services"},
+  {"id":"MH-F","name":"Lower Freight Raft","state":"planned","x":750,"y":475,"w":185,"h":76,"band":"Mid Heart","role":"Carts, cargo transfer, maintenance access and lower loop.","seams":"north: Holding; west/east: service loop","camera":"Below public decks with void sightlines.","systems":"Freight, later shortcuts"},
+  {"id":"R-ASH","name":"Ashram Heights — east","state":"planned","x":1115,"y":55,"w":210,"h":86,"band":"upper east","role":"Guarded prestigious/sacred residences beneath the Firmament.","seams":"south: Glowbeds; west: right lift upper landing","camera":"No broad Firmament reveal.","systems":"Late home tier, Wardens, Trust/Tallies"},
+  {"id":"GL-01","name":"Glowbeds","state":"planned","x":1085,"y":160,"w":210,"h":105,"band":"upper east","role":"Tidy cultivation gallery; Glowrations and Glowfiber.","seams":"north: east Ashram; west: right lift; east: upper service rooms","camera":"Long terrace plus shallow carved cultivation bay.","systems":"District production, upper scrutiny"},
+  {"id":"ME-01","name":"Mid-East wall approach","state":"planned","x":1165,"y":330,"w":185,"h":88,"band":"mid east","role":"Inhabited lateral service/trade route to pressure-fault work.","seams":"west: right lift / East Service; east: ME-02","camera":"No Cistern or Heart panorama together.","systems":"Mid-Act progression"},
+  {"id":"ME-02","name":"Mid-East Dig Front","state":"planned","x":1350,"y":330,"w":130,"h":88,"band":"far mid east","role":"Mid-Act lateral dig; wet shock-fault and ambiguous remnants.","seams":"west: ME-01; east: locked deeper continuation","camera":"Public braced side gallery, not down the Mouth.","systems":"Stronger Cistern/Wickwork Materials; contextual puzzles"},
+  {"id":"LE-01","name":"Lower-East Service Band","state":"planned","x":1085,"y":535,"w":225,"h":100,"band":"lower east","role":"Housing, clinic/dock, repair alcoves, freight and service corridors.","seams":"north: ME approach; west: right lift; south: Cistern","camera":"Dense multi-level wall neighborhood.","systems":"Care, freight, secondary routes"},
+  {"id":"CI-01","name":"Cistern — upper service","state":"planned","x":1160,"y":690,"w":175,"h":85,"band":"deep lower east","role":"Pipes, freight alcove and maintenance access.","seams":"north: service band; south: CI-02; west: right lift lower stop","camera":"Cool utility light, not a sci-fi lab.","systems":"Presswater route and maintenance"},
+  {"id":"CI-02","name":"Cistern — pressure basin","state":"planned","x":1085,"y":790,"w":205,"h":100,"band":"deep lower east","role":"Basins, pressure apparatus, Sealbrine and Presswater production.","seams":"north: CI-01; east: Seep gallery","camera":"Multiple vertical utility levels.","systems":"Presswater; right lift health/thin/reserve"},
+  {"id":"SE-01","name":"Seep Service Gallery","state":"planned","x":1310,"y":795,"w":165,"h":90,"band":"deep lower east","role":"Sideways seep/service threshold alongside Cistern.","seams":"west: CI-02; east: later continuation","camera":"Never reads as routine descent into the Mouth.","systems":"Later maintenance/puzzle space"}
+]
+  </script>
+  <script>
+    const data = JSON.parse(document.getElementById('atlas-data').textContent);
+    const map = document.getElementById('map');
+    const title = document.getElementById('detail-title');
+    const summary = document.getElementById('detail-summary');
+    const list = document.getElementById('detail-list');
+    const stateLabel = { approved:'Approved image', draft:'Draft — image withheld', planned:'Planned empty slot', revision:'Revision needed' };
+    const detail = chunk => {
+      title.textContent = `${chunk.id} — ${chunk.name}`;
+      summary.textContent = stateLabel[chunk.state];
+      list.innerHTML = [['Band',chunk.band],['Purpose',chunk.role],['Seams',chunk.seams],['Camera',chunk.camera],['Systems',chunk.systems],['Image',chunk.image || 'None — placeholder stays visible until image approval']].map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+    };
+    const el = (tag, cls, text) => { const e=document.createElement(tag); e.className=cls; if(text) e.textContent=text; return e; };
+    data.forEach(chunk => {
+      const card=el('button',`chunk ${chunk.state}${chunk.image ? ' with-image' : ''}`);
+      card.type='button'; card.style.left=`${chunk.x}px`; card.style.top=`${chunk.y}px`; card.style.width=`${chunk.w}px`; card.style.height=`${chunk.h}px`;
+      card.setAttribute('aria-label',`${chunk.id} ${chunk.name}, ${stateLabel[chunk.state]}`);
+      if(chunk.image) { const image=document.createElement('img'); image.src=chunk.image; image.alt=''; card.append(image); card.append(el('div','veil')); }
+      const content=el('div','content'); content.append(el('div','id',chunk.id)); content.append(el('div','name',chunk.name)); content.append(el('div','state',stateLabel[chunk.state])); card.append(content);
+      card.addEventListener('click',()=>detail(chunk)); map.append(card);
+    });
+    const addDistrict=(text,x,y)=>{ const e=el('div','district',text); e.style.left=`${x}px`; e.style.top=`${y}px`; map.append(e); };
+    addDistrict('WEST WALL / OUTWARD PUBLIC EXCAVATION',38,25); addDistrict('MID HEART / MOORED WRECK CLUSTER',625,285); addDistrict('EAST WALL / DENSE SERVICE AND CULTIVATION',1085,25);
+    const addLift=(text,x,y,h)=>{ const e=el('div','lift',text); e.style.left=`${x}px`; e.style.top=`${y}px`; e.style.height=`${h}px`; map.append(e); };
+    addLift('LEFT CIVIC LIFT — ALWAYS RUNS',575,115,680); addLift('RIGHT PRESSWATER FREIGHT LIFT',1025,105,710);
+  </script>
+</body>
+</html>

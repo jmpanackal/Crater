@@ -111,7 +111,7 @@ func _run() -> void:
 		push_error("FAIL Firmament haze not quieter than Pit gloom")
 		quit(1)
 		return
-	if dressing.get_node_or_null("CapHaze") == null or dressing.get_node_or_null("PitGloom") == null:
+	if dressing.get_node_or_null("FirmamentHaze") == null or dressing.get_node_or_null("PitGloom") == null:
 		push_error("FAIL Firmament/Pit dressing rects missing")
 		quit(1)
 		return

@@ -22,7 +22,7 @@ func _ready() -> void:
 	if _blurb:
 		_blurb.text = (
 			"A secret dig in the Hollow.\n"
-			+ "Climb the terraces (W/S). Keep Harvest. Keep Standing."
+			+ "Climb the terraces (W/S). Keep Harvest. Keep Trust."
 		)
 	if _continue_btn:
 		_continue_btn.focus_mode = Control.FOCUS_ALL

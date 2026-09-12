@@ -1,6 +1,6 @@
 extends Area2D
 ## The Hollow — home settlement zone (placeholder geometry).
-## While the player is here, personal upgrades can be siphoned from Salvage.
+## While the player is here, personal upgrades can steal District production.
 ## Dig-site Salvage does nothing until they return here.
 
 @export var upgrades_path: NodePath = NodePath("/root/Upgrades")
@@ -41,5 +41,5 @@ func _is_player(body: Node2D) -> bool:
 
 func _set_station_open(is_open: bool) -> void:
 	var upgrades := get_node_or_null(upgrades_path)
-	if upgrades and upgrades.has_method("set_siphon_station_open"):
-		upgrades.set_siphon_station_open(is_open)
+	if upgrades and upgrades.has_method("set_theft_station_open"):
+		upgrades.set_theft_station_open(is_open)

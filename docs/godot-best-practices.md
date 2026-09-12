@@ -18,8 +18,8 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 | **Consistent tile / dig grid** | Dig cells = **64 px**. SpriteFusion sources often 32 px → nearest upscale into `dig_site_tiles.png`. Don’t mix 32/64 world scales casually. |
 | **Snap 2D transforms to pixel** | Enabled project-wide to reduce sub-pixel shimmer with smoothed cameras. |
 | **Stretch mode** | Current: `canvas_items` + `aspect=expand` @ 1152×648 — good for Eastward/Owlboy-ish detail + smooth camera (Hyper Light Drifter style). `viewport` + integer scale is the sharper “retro framebuffer” option if you later want chunkier UI pixels. |
-| **Readable silhouettes / palette** | Earthy Hollow, limited lantern warmth; Firmament quieter visually than Pit. See art-pipeline brief checklist. |
-| **Parallax / depth** | Prefer soft DepthBg + Mist + future layers over busy particle fog. Keep Firmament/Pit readable. |
+| **Readable silhouettes / palette** | Earthy Hollow, limited lantern warmth; Firmament quieter visually than Devil’s Mouth. See art-pipeline brief checklist. |
+| **Parallax / depth** | Prefer soft DepthBg + Mist + future layers over busy particle fog. Keep Firmament/Devil’s Mouth readable. |
 
 ---
 
@@ -27,7 +27,7 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 
 1. **Fairness first:** coyote + jump buffer before freeze frames / heavy shake.
 2. **Weight without mush:** accel/friction, but dig-aim (WASD + **R**) stays snappy on the 64 px grid.
-3. **Firmament quieter than Pit** for dust, shake, and SFX.
+3. **Firmament quieter than Devil’s Mouth** for dust, shake, and SFX.
 4. **Social systems stay social:** Harvest / Standing / siphon notice → copy + UI, not arcade juice.
 5. **Dome Keeper–ish loop pattern (borrow the structure, not the combat):** hub return → spend → venture out under a clock. Krater’s “wave” is Harvest + Standing, not dome defense.
 
@@ -40,7 +40,7 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 | Autoloads only for persistent Act 1 systems (wallet, upgrades, districts, community, journal, save) | Growing god-objects; every helper as an autoload |
 | Feature clusters as the tree grows (`hollow/`, `dig/`, `ui/`, `autoload/`) | Forever-flat `res://` root once NPC/prop scenes multiply |
 | Scenes own composition; scripts own one responsibility | Stuffing all Hollow art + UI + wiring into one mega-`main.tscn` |
-| `TileMapLayer` + one dig API (`TerrainLayer`) | Parallel dig systems for Firmament vs Pit |
+| `TileMapLayer` + one dig API (`TerrainLayer`) | Parallel dig systems for Firmament work vs lateral civic side galleries |
 | Tests as SceneTree scripts under `tests/` for each pillar | Untested Standing / siphon / save regressions |
 
 **Current shape:** flat root scripts + `main.tscn` play scene + `title_screen.tscn` shell is fine for a vertical slice. Split Hollow / Dig Site / UI into packed scenes when `main.tscn` or art iteration starts fighting itself.

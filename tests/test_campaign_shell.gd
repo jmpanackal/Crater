@@ -62,8 +62,8 @@ func _run_tests() -> void:
 		push_error("FAIL journal not cleared")
 		quit(1)
 		return
-	if districts.get_stock(districts.FARMS) != 0.0:
-		push_error("FAIL district stock not cleared")
+	if districts.get_good_amount(districts.GLOWRATIONS) != districts.PROTECTED_RESERVE:
+		push_error("FAIL district production not reset to reserve")
 		quit(1)
 		return
 	print("PASS new_game resets Act 1 state")

@@ -1,30 +1,30 @@
 extends Node
 ## Communal Hollow life (autoload: Community).
 ## harvest_timer counts down each Harvest cycle. Missing a Harvest (being at the
-## Dig Site when it completes) calls on_harvest_missed() and lowers social_standing.
+## Dig Site when it completes) calls on_harvest_missed() and lowers Trust.
 ## Optional lie prompt can dodge the miss; exposed lies hurt worse later.
-## Upward digs and thin-cover siphons also risk Standing.
+## Upward digs and thin-cover thefts also risk Trust.
 
 signal harvest_timer_changed(seconds_remaining: float)
 signal harvest_completed(player_missed: bool)
-signal social_standing_changed(new_standing: int)
+signal trust_changed(new_trust: int)
 signal harvest_miss_prompt
 signal notice_message(text: String)
 
 const HARVEST_INTERVAL_SEC := 60.0
-const SOCIAL_STANDING_MAX := 100
-const SOCIAL_STANDING_DEFAULT := 50
-const SOCIAL_STANDING_MISS_PENALTY := 5
+const TRUST_MAX := 100
+const TRUST_DEFAULT := 50
+const TRUST_MISS_PENALTY := 5
 const LIE_EXPOSED_EXTRA_PENALTY := 8
-const SIPHON_NOTICE_PENALTY := 3
+const THEFT_NOTICE_PENALTY := 3
 const UPWARD_DIG_PENALTY := 4
 const UPWARD_DIG_BASE_CHANCE := 0.1
 
 ## Seconds until the next communal Harvest completes.
 var harvest_timer: float = HARVEST_INTERVAL_SEC
 
-## Persistent reputation in the Hollow (0..SOCIAL_STANDING_MAX).
-var social_standing: int = SOCIAL_STANDING_DEFAULT
+## Persistent trust in the Hollow (0..TRUST_MAX).
+var trust: int = TRUST_DEFAULT
 
 ## True after a successful Harvest-miss lie until exposed.
 var pending_lie: bool = false
@@ -56,16 +56,16 @@ func get_harvest_seconds_remaining() -> float:
 	return harvest_timer
 
 
-func get_social_standing() -> int:
-	return social_standing
+func get_trust() -> int:
+	return trust
 
 
-func set_social_standing(value: int) -> void:
-	var next := clampi(value, 0, SOCIAL_STANDING_MAX)
-	if next == social_standing:
+func set_trust(value: int) -> void:
+	var next := clampi(value, 0, TRUST_MAX)
+	if next == trust:
 		return
-	social_standing = next
-	social_standing_changed.emit(social_standing)
+	trust = next
+	trust_changed.emit(trust)
 
 
 func set_harvest_timer(seconds: float) -> void:
@@ -73,19 +73,19 @@ func set_harvest_timer(seconds: float) -> void:
 	harvest_timer_changed.emit(harvest_timer)
 
 
-## True when the player is currently in the Hollow (reuse siphon-station presence).
+## True when the player is currently in the Hollow (reuse theft-station presence).
 func is_player_in_hollow() -> bool:
 	var upgrades := get_tree().root.get_node_or_null("Upgrades")
-	return upgrades != null and upgrades.is_siphon_station_open()
+	return upgrades != null and upgrades.is_theft_station_open()
 
 
 ## Player was at the Dig Site (or otherwise away) when Harvest completed.
 func on_harvest_missed() -> void:
-	set_social_standing(social_standing - SOCIAL_STANDING_MISS_PENALTY)
+	set_trust(trust - TRUST_MISS_PENALTY)
 	notice_message.emit("Missed Harvest. People noticed you were gone.")
 
 
-## Answer the Harvest-miss lie prompt. lied=true dodges Standing for now.
+## Answer the Harvest-miss lie prompt. lied=true dodges Trust for now.
 func resolve_harvest_miss(lied: bool) -> void:
 	if not _miss_awaiting_resolve:
 		return
@@ -105,18 +105,18 @@ func set_pending_lie(value: bool) -> void:
 	pending_lie = value
 
 
-## Forbidden siphon noticed — Standing drop; exposes a pending lie harder.
-func on_siphon_noticed() -> void:
-	var penalty := SIPHON_NOTICE_PENALTY
+## Forbidden theft noticed — Trust drop; exposes a pending lie harder.
+func on_theft_noticed() -> void:
+	var penalty := THEFT_NOTICE_PENALTY
 	var exposed := pending_lie
 	if exposed:
 		penalty += LIE_EXPOSED_EXTRA_PENALTY
 		pending_lie = false
-	set_social_standing(social_standing - penalty)
+	set_trust(trust - penalty)
 	if exposed:
-		notice_message.emit("Siphon noticed — and your earlier lie came apart. (−%d Standing)" % penalty)
+		notice_message.emit("The theft was noticed — and your earlier lie came apart. (−%d Trust)" % penalty)
 	else:
-		notice_message.emit("Someone noticed materials going missing. (−%d Standing)" % penalty)
+		notice_message.emit("Someone noticed District production going missing. (−%d Trust)" % penalty)
 
 
 ## Chance of being caught digging toward the Firmament. quiet_level reduces risk.
@@ -134,11 +134,11 @@ func on_caught_upward_dig() -> void:
 	if exposed:
 		penalty += LIE_EXPOSED_EXTRA_PENALTY
 		pending_lie = false
-	set_social_standing(social_standing - penalty)
+	set_trust(trust - penalty)
 	if exposed:
-		notice_message.emit("Caught digging the Firmament — and your lie cracked. (−%d Standing)" % penalty)
+		notice_message.emit("Caught digging the Firmament — and your lie cracked. (−%d Trust)" % penalty)
 	else:
-		notice_message.emit("Soft rock-fall above — someone asks why you dig that way. (−%d Standing)" % penalty)
+		notice_message.emit("Soft rock-fall above — someone asks why you dig that way. (−%d Trust)" % penalty)
 
 
 func _complete_harvest_cycle() -> void:
@@ -149,6 +149,11 @@ func _complete_harvest_cycle() -> void:
 		else:
 			_miss_awaiting_resolve = true
 			harvest_miss_prompt.emit()
+
+	var districts := get_tree().root.get_node_or_null("Districts")
+	if districts and districts.has_method("apply_harvest"):
+		districts.apply_harvest()
+
 	harvest_completed.emit(missed)
 	harvest_timer = HARVEST_INTERVAL_SEC
 	harvest_timer_changed.emit(harvest_timer)

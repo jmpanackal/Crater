@@ -40,7 +40,8 @@ func _ready() -> void:
 	collision_mask = 1
 	monitoring = true
 	monitorable = false
-	z_index = 2
+	# Above FloorVisual (z=1) so short shafts stay fully readable in openings.
+	z_index = 3
 	_ensure_collision()
 	_build_visuals()
 	body_entered.connect(_on_body_entered)
@@ -77,6 +78,13 @@ func _ensure_collision() -> void:
 
 
 func _build_visuals() -> void:
+	# Rebuild cleanly if scene was saved with stale children / half-height shafts.
+	for child in get_children():
+		if child is CollisionShape2D:
+			continue
+		remove_child(child)
+		child.free()
+
 	var w := shaft_size.x
 	var h := shaft_size.y
 	var rail_w := 5.0

@@ -1,5 +1,5 @@
 extends SceneTree
-## Salvage HUD text updates live.
+## Materials HUD text updates live.
 
 
 func _init() -> void:
@@ -13,18 +13,18 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	wallet.set_amount(wallet.SALVAGE, 0)
+	wallet.reset_all()
 	var label := Label.new()
 	label.set_script(load("res://salvage_hud.gd"))
 	root.add_child(label)
 
-	if str(label.text) != "Salvage: 0":
+	if str(label.text) != "Materials: 0":
 		push_error("FAIL initial '%s'" % label.text)
 		quit(1)
 		return
 
-	wallet.add(wallet.SALVAGE, 2)
-	if str(label.text) != "Salvage: 2":
+	wallet.add(wallet.SPOREMEAL, 2)
+	if str(label.text) != "Materials: Sporemeal 2":
 		push_error("FAIL after add '%s'" % label.text)
 		quit(1)
 		return

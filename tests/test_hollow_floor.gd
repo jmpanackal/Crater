@@ -64,28 +64,31 @@ func _run() -> void:
 		for cell in layer.get_used_cells():
 			if layer.get_cell_source_id(cell) != -1:
 				painted += 1
-	if painted < 20:
-		push_error("FAIL painted %d terrace cells (expected multi-deck span)" % painted)
+	if painted < 30:
+		push_error("FAIL painted %d terrace cells (expected expanded multi-deck span)" % painted)
 		quit(1)
 		return
 	print("PASS FloorVisual painted %d terrace cells" % painted)
 
-	# Mid-bridge cells must use bridge source (1); terrace lip uses ledge (0).
 	var pit_l := int(HollowLayout.PIT_LEFT / 64)
 	var pit_r := int(HollowLayout.PIT_RIGHT / 64)
 	var wick_y := int(HollowLayout.WICK_Y / 64)
-	var mid_x := int((pit_l + pit_r) * 0.5)
-	if layer.get_cell_source_id(Vector2i(mid_x, wick_y)) != 1:
-		push_error("FAIL mid-bridge cell not using bridge source")
+	var left_x := int(HollowLayout.HOLLOW_LEFT / 64)
+	var mid_heart_x := int((HollowLayout.HEART_MID.x + HollowLayout.HEART_MID.y) * 0.5 / 64.0)
+	if layer.get_cell_source_id(Vector2i(mid_heart_x, wick_y)) != 1:
+		push_error("FAIL Mid Heart cell not using bridge source")
 		quit(1)
 		return
 	if layer.get_cell_source_id(Vector2i(0, wick_y)) != 0:
 		push_error("FAIL wick terrace cell not using ledge source")
 		quit(1)
 		return
+	if layer.get_cell_source_id(Vector2i(left_x, wick_y)) != 0:
+		push_error("FAIL carved Wick bay cell missing at HOLLOW_LEFT")
+		quit(1)
+		return
 	print("PASS FloorVisual ledge/bridge source split")
 
-	# Ledge atlas art is inset TILE/2; layer must shift up so rock meets deck collision tops.
 	if absf(layer.position.y + HollowLayout.FLOOR_VISUAL_INSET) > 0.5:
 		push_error(
 			"FAIL FloorVisual Y inset expected %s got %s"
@@ -93,13 +96,19 @@ func _run() -> void:
 		)
 		quit(1)
 		return
-	if absf(HollowLayout.FLOOR_VISUAL_INSET - 32.0) > 0.01:
-		push_error("FAIL FLOOR_VISUAL_INSET changed unexpectedly: %s" % HollowLayout.FLOOR_VISUAL_INSET)
-		quit(1)
-		return
+	# Collision tops must match tile lip after inset (especially spawn band).
+	for deck_y in [HollowLayout.FARMS_Y, HollowLayout.WICK_Y, HollowLayout.LOWER_WORK_Y, HollowLayout.CISTERN_Y]:
+		if absf(HollowLayout.floor_visual_lip_y(deck_y) - deck_y) > 0.01:
+			push_error("FAIL footing lip mismatch at deck %s" % deck_y)
+			quit(1)
+			return
+		if int(round(deck_y)) % HollowLayout.TILE != 0:
+			push_error("FAIL deck %s not tile-aligned for FloorVisual" % deck_y)
+			quit(1)
+			return
 	print("PASS FloorVisual aligned to deck tops (inset %s)" % HollowLayout.FLOOR_VISUAL_INSET)
 
-	# Pit columns must not be a solid ground fill below the bridge row.
+
 	var farms_y := int(HollowLayout.FARMS_Y / 64)
 	var cistern_y := int(HollowLayout.CISTERN_Y / 64)
 	for x in range(pit_l, pit_r):
@@ -107,34 +116,42 @@ func _run() -> void:
 			push_error("FAIL pit has Farms-level floor at x=%d" % x)
 			quit(1)
 			return
-		if layer.get_cell_source_id(Vector2i(x, cistern_y)) != -1:
-			push_error("FAIL pit has Cistern-level floor at x=%d" % x)
-			quit(1)
-			return
-	print("PASS pit columns empty at Farms/Cistern bands")
+	# Lower freight span may paint cistern_y across the Mouth — that is intentional.
+	# Farms band in the void must stay empty.
+	print("PASS pit columns empty at Farms band")
 
-	# Upper-deck ladder openings empty; lower landings stay painted under the shaft.
-	var farms_open := int(HollowLayout.LADDER_FARMS_OPEN_X / 64)
+	var lift_open := int(HollowLayout.LIFT_OPEN_X / 64)
 	var cistern_open := int(HollowLayout.LADDER_CISTERN_OPEN_X / 64)
-	if layer.get_cell_source_id(Vector2i(farms_open, farms_y)) != -1:
-		push_error("FAIL Farms ladder opening still has floor tile")
+	var upper_open := int(HollowLayout.LADDER_UPPER_OPEN_X / 64)
+	var upper_res_y := int(HollowLayout.UPPER_RES_Y / 64)
+	var lower_y := int(HollowLayout.LOWER_WORK_Y / 64)
+	if layer.get_cell_source_id(Vector2i(lift_open, farms_y)) != -1:
+		push_error("FAIL lift shaft still has Farms floor tile")
 		quit(1)
 		return
-	if layer.get_cell_source_id(Vector2i(farms_open, wick_y)) == -1:
-		push_error("FAIL Wick landing under Farms ladder missing floor tile")
+	if layer.get_cell_source_id(Vector2i(lift_open, wick_y)) != -1:
+		push_error("FAIL lift shaft still has Wick floor tile")
 		quit(1)
 		return
-	if layer.get_cell_source_id(Vector2i(cistern_open, wick_y)) != -1:
-		push_error("FAIL Wick/Cistern ladder opening still has floor tile")
+	if layer.get_cell_source_id(Vector2i(cistern_open, lower_y)) != -1:
+		push_error("FAIL lower-work ladder opening still has floor tile")
 		quit(1)
 		return
+	if layer.get_cell_source_id(Vector2i(upper_open, upper_res_y)) != -1:
+		push_error("FAIL upper residence ladder opening still has floor tile")
+		quit(1)
+		return
+	if layer.get_cell_source_id(Vector2i(cistern_open, cistern_y)) != -1:
+		# Landing under ladder should be solid on Cistern — opening only on upper deck.
+		pass
 	if layer.get_cell_source_id(Vector2i(cistern_open, cistern_y)) == -1:
 		push_error("FAIL Cistern landing under ladder missing floor tile")
 		quit(1)
 		return
-	print("PASS ladder openings empty of FloorVisual tiles")
+	print("PASS lift + ladder openings empty on upper decks")
 
-	if scene.get_node_or_null("Hollow/Floor/CollisionShape2D") == null:
+	if scene.get_node_or_null("Hollow/Floor/FarmsDeckMid") == null \
+			and scene.get_node_or_null("Hollow/Floor/WickLeftEast") == null:
 		push_error("FAIL floor collision missing")
 		quit(1)
 		return

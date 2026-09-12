@@ -1,6 +1,6 @@
 extends Node2D
-## Soft Firmament↑ / Pit↓ dressing around the dig columns — same tools, different read.
-## Firmament: quieter cool haze. Pit: heavier ink gloom. No new tileset required.
+## Soft Firmament↑ / Devil’s Mouth↓ dressing around the dig columns — same tools, different read.
+## Firmament: quieter cool haze. Devil’s Mouth: heavier ink gloom. No new tileset required.
 
 const FIRMAMENT_HAZE := Color(0.55, 0.72, 0.7, 0.07)
 const PIT_GLOOM := Color(0.04, 0.07, 0.09, 0.22)
@@ -40,11 +40,11 @@ func _build_dressing() -> void:
 	seal.z_index = 2
 	add_child(seal)
 
-	# Heavier gloom over Pit walls.
+	# Heavier gloom over Devil’s Mouth walls.
 	var pit := ColorRect.new()
 	pit.name = "PitGloom"
-	pit.position = Vector2(x0, float(TerrainLayer.PIT_Y_MIN) * tile)
-	pit.size = Vector2(width, float(16 - TerrainLayer.PIT_Y_MIN) * tile)
+	pit.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile)
+	pit.size = Vector2(width, float(16 - TerrainLayer.MOUTH_Y_MIN) * tile)
 	pit.color = PIT_GLOOM
 	pit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pit.z_index = 2
@@ -52,7 +52,7 @@ func _build_dressing() -> void:
 
 	var lip := ColorRect.new()
 	lip.name = "PitLipMist"
-	lip.position = Vector2(x0, float(TerrainLayer.PIT_Y_MIN) * tile - 24.0)
+	lip.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile - 24.0)
 	lip.size = Vector2(width, 36.0)
 	lip.color = PIT_LIP
 	lip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -60,7 +60,7 @@ func _build_dressing() -> void:
 	add_child(lip)
 
 	_soft_label("FirmamentMark", "Firmament ↑ — quiet work", Vector2(x0 + 24.0, 12.0), Color(0.75, 0.85, 0.82, 0.55))
-	_soft_label("PitMark", "Pit ↓ — walls groan", Vector2(x0 + 24.0, float(TerrainLayer.PIT_Y_MIN) * tile + 8.0), Color(0.7, 0.62, 0.5, 0.6))
+	_soft_label("DevilsMouthMark", "Devil’s Mouth ↓ — walls groan", Vector2(x0 + 24.0, float(TerrainLayer.MOUTH_Y_MIN) * tile + 8.0), Color(0.7, 0.62, 0.5, 0.6))
 
 
 func _soft_label(node_name: String, text: String, pos: Vector2, color: Color) -> void:
@@ -74,7 +74,7 @@ func _soft_label(node_name: String, text: String, pos: Vector2, color: Color) ->
 	add_child(label)
 
 
-## Test helper — Firmament haze must be quieter (lower alpha) than Pit gloom.
+## Test helper — Firmament haze must be quieter (lower alpha) than Devil’s Mouth gloom.
 func firmament_quieter_than_pit() -> bool:
 	var firmament := get_node_or_null("FirmamentHaze") as ColorRect
 	var pit := get_node_or_null("PitGloom") as ColorRect

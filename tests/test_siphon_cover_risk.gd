@@ -12,8 +12,9 @@ func _run_tests() -> void:
 	var upgrades: Node = root.get_node_or_null("Upgrades")
 	var community: Node = root.get_node_or_null("Community")
 	var wallet: Node = root.get_node_or_null("Resources")
+	var districts: Node = root.get_node_or_null("Districts")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	if upgrades == null or community == null or wallet == null:
+	if upgrades == null or community == null or wallet == null or districts == null:
 		push_error("FAIL missing autoloads")
 		quit(1)
 		return
@@ -28,6 +29,9 @@ func _run_tests() -> void:
 	community.set_social_standing(50)
 	community.set_pending_lie(false)
 	wallet.set_amount(wallet.SALVAGE, 100)
+	districts.reset_production()
+	districts.set_good_amount(districts.BINDCORD, 5)
+	districts.set_good_amount(districts.SEALBRINE, 5)
 
 	# Forced notice on forbidden Dig Yield.
 	upgrades.force_siphon_notice = true
@@ -43,7 +47,6 @@ func _run_tests() -> void:
 	print("PASS forbidden siphon can drop Standing")
 
 	# Efficiency siphon never rolls notice even if force flag is set.
-	# (force only applies inside forbidden branch)
 	community.set_social_standing(50)
 	upgrades.force_siphon_notice = true
 	before = community.get_social_standing()

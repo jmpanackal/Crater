@@ -3,7 +3,7 @@ extends TileMapLayer
 ## Terrain — diggable world grid for Krater.
 ## Owns tile creation and destruction so digging stays one reusable system
 ## (player tools, later NPCs/cave-ins, etc. should call into here).
-## Dual frontiers: upward Firmament digs carry secrecy risk; downward Pit digs are
+## Dual frontiers: upward Firmament digs carry secrecy risk; downward Devil’s Mouth digs are
 ## public-ish danger (flavor + instability warning), same tools.
 
 signal dig_completed(cell: Vector2i, direction: Vector2i, found_record: StringName)
@@ -19,8 +19,8 @@ const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 
 ## Cells with y < this are Firmament rock (secret upward frontier).
 const FIRMAMENT_Y_MAX := 4
-## Cells with y >= this are Pit walls (public-ish downward frontier).
-const PIT_Y_MIN := 9
+## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
+const MOUTH_Y_MIN := 9
 
 var _atlas_coords: Array[Vector2i] = []
 var _pit_digs_since_warn := 0
@@ -113,19 +113,19 @@ func _build_fallback_tileset() -> TileSet:
 ## Dig columns start past the Hollow exit ledge (world x = cell * TILE_SIZE).
 ## Hollow is pit-centered terraces ending at ~1024; dig must not bleed into home.
 const DIG_START_X := 16 # world 1024 — after Hollow exit ledge
-const DIG_END_X := 32 # exclusive; 16 columns of Firmament/Pit
+const DIG_END_X := 32 # exclusive; 16 columns of Firmament/Devil’s Mouth
 
 
 func _fill_ground() -> void:
 	# Dig site past Hollow terraces + exit ledge (see HollowLayout.EXIT_RIGHT).
-	# Firmament rock (secret) above the walk ledge; Pit walls deeper below.
+	# Firmament rock (secret) above the walk ledge; Devil’s Mouth walls deeper below.
 	if _atlas_coords.is_empty():
 		return
 	for x in range(DIG_START_X, DIG_END_X):
 		# Firmament / ceiling rock — upward secret frontier.
 		for y in range(0, FIRMAMENT_Y_MAX + 1):
 			_place_random(Vector2i(x, y))
-		# Mid band + Pit walls — downward public-ish danger.
+		# Mid band + Devil’s Mouth walls — downward public-ish danger.
 		for y in range(5, 16):
 			_place_random(Vector2i(x, y))
 
@@ -144,27 +144,30 @@ func is_firmament_cell(cell: Vector2i) -> bool:
 	return cell.y <= FIRMAMENT_Y_MAX
 
 
-func is_pit_cell(cell: Vector2i) -> bool:
-	return cell.y >= PIT_Y_MIN
+func is_mouth_cell(cell: Vector2i) -> bool:
+	return cell.y >= MOUTH_Y_MIN
 
 
 ## Remove a tile if present. Returns true when something was destroyed.
-## Grants Salvage through Resources; yield comes from Upgrades when present.
-## Salvage is carried haul — it only becomes useful when siphoned at the Hollow.
+## Grants Materials (+ transitional Salvage) through Resources; yield from Upgrades.
+## Materials feed District production when turned in at the Hollow.
 func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if not has_tile(cell):
 		return false
 	erase_cell(cell)
 	var is_firmament := is_firmament_cell(cell)
-	var is_pit := is_pit_cell(cell)
+	var is_mouth := is_mouth_cell(cell)
 	var yield_amt := _salvage_yield_for_dig(cell)
 	var wallet := _resource_wallet()
 	if wallet:
-		wallet.add(wallet.SALVAGE, yield_amt)
+		if wallet.has_method("grant_dig_haul"):
+			wallet.grant_dig_haul(yield_amt)
+		else:
+			wallet.add(wallet.SALVAGE, yield_amt)
 	_apply_frontier_rules(cell, direction)
 	var world := to_global(map_to_local(cell))
-	FeelFx.spawn_dig_dust(self, world, direction, is_firmament, is_pit)
-	FeelFx.spawn_salvage_float(self, world, yield_amt, is_firmament, is_pit)
+	FeelFx.spawn_dig_dust(self, world, direction, is_firmament, is_mouth)
+	FeelFx.spawn_salvage_float(self, world, yield_amt, is_firmament, is_mouth)
 	var found := _try_record_drop(cell, direction)
 	if found != StringName():
 		FeelFx.spawn_record_float(self, world, "Record")
@@ -174,8 +177,8 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 
 func _salvage_yield_for_dig(cell: Vector2i) -> int:
 	var base := _base_salvage_yield()
-	# Pit digs sometimes shake loose a bit more — public danger payoff.
-	if is_pit_cell(cell) and randf() < 0.2:
+	# Devil’s Mouth digs sometimes shake loose a bit more — public danger payoff.
+	if is_mouth_cell(cell) and randf() < 0.2:
 		return base + 1
 	return base
 
@@ -193,7 +196,7 @@ func _base_salvage_yield() -> int:
 
 func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
 	var dug_up := direction.y < 0 or is_firmament_cell(cell)
-	var dug_down := direction.y > 0 or is_pit_cell(cell)
+	var dug_down := direction.y > 0 or is_mouth_cell(cell)
 
 	if dug_up and direction.y < 0:
 		var upgrades := get_tree().root.get_node_or_null("Upgrades") if is_inside_tree() else null
@@ -204,11 +207,11 @@ func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
 		if community and community.has_method("roll_upward_dig_risk"):
 			community.roll_upward_dig_risk(quiet)
 
-	if dug_down and is_pit_cell(cell):
+	if dug_down and is_mouth_cell(cell):
 		_pit_digs_since_warn += 1
 		if _pit_digs_since_warn >= 4:
 			_pit_digs_since_warn = 0
-			frontier_notice.emit("The Pit walls groan. Going further feels wrong — but not forbidden.")
+			frontier_notice.emit("The Devil’s Mouth walls groan. Going further feels wrong — but not forbidden.")
 
 
 func _try_record_drop(cell: Vector2i, direction: Vector2i) -> StringName:
@@ -239,7 +242,7 @@ func world_to_cell(world_pos: Vector2) -> Vector2i:
 
 ## Dig the tile adjacent to a world-space origin in a cardinal direction.
 ## `direction` should be one of: LEFT, RIGHT, UP, DOWN (Vector2i).
-## Same path for every direction — Firmament vs Pit fiction layers wrap outcomes.
+## Same path for every direction — Firmament vs Devil’s Mouth fiction layers wrap outcomes.
 func dig_in_direction(origin_world: Vector2, direction: Vector2i) -> bool:
 	var cardinal := _to_cardinal(direction)
 	if cardinal == Vector2i.ZERO:

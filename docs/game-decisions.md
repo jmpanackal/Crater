@@ -107,15 +107,15 @@ Need a small handful (3-6) of district/chamber names. Options for a naming *patt
 
 ---
 
-## 22. The Pit — descent scope and reveal placement
+## 22. The Devil’s Mouth — descent scope and reveal placement
 
-- **A) Atmospheric only** — the Pit is constant visual/narrative presence and folklore, but never a playable depth. Cheapest, no new area.
-- **B) Partial, gated descent** — mine partway down the Pit's rim early (Act 1) for ambiguous salvage/records, reusing our existing dig mechanic (down instead of up); the true bottom stays inaccessible until much later.
+- **A) Atmospheric only** — the Devil’s Mouth is constant visual/narrative presence and folklore, but never a playable depth. Cheapest, no new area.
+- **B) Partial, gated descent** — a late, exceptional descent along the Devil’s Mouth rim for ambiguous Materials/Records; it is never routine public work, and the true bottom stays inaccessible until much later.
 - **C) Full mirrored explorable area** — a real, richly built second space. Most payoff, but real added scope on top of the surface — a second area to build and balance.
 
 **Leaning:** B, with the true bottom (full view of the ship/wreckage) reserved for **Act 3**, gated by the same tech tree that gates everything else. Placement reasoning: too early (Act 1) breaks the "no alien-world confirmation yet" rule; too early in Act 2 makes it redundant with surface evidence we're already gathering. Landing it in Act 3, tied to something mechanically needed (an escape-ship component or a flight recorder confirming the crash cause), gives it real weight instead of being lore for its own sake.
 
-**Locked:** dig tools/tech work in both directions (up toward the ceiling, down into the Pit) — one growing capability, not two separate systems. Encounter dressing (cave-in risk vs. wreckage instability) can differ without the underlying tools differing.
+**Act 1 lock:** public Materials work is lateral civic excavation into side galleries, while secret work pushes upward toward the Firmament. The Devil’s Mouth is a powerful, mostly unworked crater vista—not a routine downward mine. True descent and wreckage instability remain later, gated content.
 
 ---
 
@@ -127,7 +127,7 @@ Need a small handful (3-6) of district/chamber names. Options for a naming *patt
 - **Evolving recruit dialogue** (Hades) — short, changing lines each time you revisit a recruit, rather than one static beat. Cheap (a handful of lines per character, gated by visit count).
 - **Narrated failure recaps** (Hades) — a brief narrated beat instead of a flat "you lost X" screen when an expedition fails or you're caught. Softens the partial-loss model (#13/#16).
 - **One signature chase/near-miss set-piece** (Ori) — a single deliberate high-tension sequence (first near-discovery, or fleeing the villain late-game). Cheap specifically because it's a one-off, not a repeatable mechanic.
-- **Propaganda murals** (Fallout) — in-world painted warnings about the ceiling/pit taboos. Simple flat illustration assets, not sprites needing animation — reinforces the folklore/comedy layer visually.
+- **Propaganda murals** (Fallout) — in-world painted warnings about the Firmament / Devil’s Mouth taboos. Simple flat illustration assets, not sprites needing animation — reinforces the folklore/comedy layer visually.
 
 - **A) Adopt all five** — maximum texture, and each is individually cheap, but the cumulative writing load (elder disagreement + evolving dialogue + narrated recaps) adds up even if no single piece is expensive alone.
 - **B) Adopt the cheapest, highest-impact subset: evolving recruit dialogue + narrated failure recaps** — both touch systems we already have (recruitment, expedition failure) and need zero new assets, just writing layered onto existing triggers.
@@ -268,9 +268,13 @@ Each build should feel different to *play*, not just have different numbers:
 
 1. **Category:** dig finds are **Materials** (player-facing category). Drop “Salvage” as the economy label (too generic). Specific material *types* are what you find and hold.
 2. **Multi-type dig haul:** expeditions return several Material types that feed districts, craft/forbidden components, and later Tallies turn-in — plus separate **Records**.
-3. **Siphon** spends **communal District production** (Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Clearwater — names proposed), not a single dig wallet.
+3. **Siphon** spends **communal District production** (Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Sealbrine — names proposed), not a single dig wallet.
 4. **Efficiency / safe magic** raises production rates so healthier available production improves Siphon **Cover** (incentive to help society).
 5. **Inventory** is required for the demo economy (thin list/grid + soft carry caps OK).
+
+**Balance lock:** production above a protected civic reserve comes only from inputs, is bounded by a small visible capacity, and is consumed by local Harvest demand. Siphon Cover is local to the target good and its sibling output, not a global total.
+
+**Public-work lock:** Tallies buy sanctioned work-suit / efficiency modules at a visible 3 / 6 / 10 ladder. The demo work-suit lane is Glowfiber liner, Tether harness + forbidden Tether Pull, and Quiet Sleeve only.
 
 **Proposed dig Materials (confirm/edit):** Sporemeal, Lampwick, Brinecrystal, Verdigris, Hullbit — full table in [`materials.md`](materials.md).
 
@@ -325,7 +329,7 @@ Each build should feel different to *play*, not just have different numbers:
 
 **Leaning:** A — matches everything else we've already locked in (art style, comps, digging mechanic).
 
-**✅ Locked (2026-09):** Stay **A**. Sea of Stars–style oblique JRPG camera evaluated and rejected for Act 1 (fights Firmament↑/Pit↓ dig; wrong cost). Steal SoS lighting/layering craft only — **no camera hybrid**. Full visual bible: [`art-direction.md`](art-direction.md).
+**✅ Locked (2026-09):** Stay **A**. Sea of Stars–style oblique JRPG camera evaluated and rejected for Act 1 (fights Firmament↑/Devil’s Mouth↓ dig; wrong cost). Steal SoS lighting/layering craft only — **no camera hybrid**. Full visual bible: [`art-direction.md`](art-direction.md).
 
 ---
 

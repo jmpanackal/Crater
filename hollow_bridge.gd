@@ -1,10 +1,9 @@
 extends TileMapLayer
-## Mid-pit rope-plank bridge visuals (PixelLab sidescroller, 64px = 32×2 NN).
-## Collision stays on Hollow Floor MidBridge; this layer is display-only.
+## Mid Heart + lower freight span bridge visuals (PixelLab sidescroller, 64px).
+## Collision stays on Hollow Floor Heart*/LowerSpan shapes; this layer is display-only.
 
 const TILE_SIZE := 64
 const SHEET_PATH := "res://sprites/hollow_bridge/hollow_bridge_tiles_64.png"
-## wang_12 = flat top ledge (air above, plank deck below).
 const ATLAS_TOP_MID := Vector2i(3, 0)
 
 
@@ -36,10 +35,15 @@ func _build_tileset() -> TileSet:
 func _paint_bridge() -> void:
 	clear()
 	var wick_y := int(HollowLayout.WICK_Y / TILE_SIZE)
+	var lower_y := int(HollowLayout.LOWER_WORK_Y / TILE_SIZE)
 	var pit_l := int(HollowLayout.PIT_LEFT / TILE_SIZE)
 	var pit_r := int(HollowLayout.PIT_RIGHT / TILE_SIZE)
-	for x in range(pit_l, pit_r):
+	# Mid Heart cluster cells only (leave deliberate gaps in the void).
+	for x in [6, 7, 8, 9, 10, 11]:
 		set_cell(Vector2i(x, wick_y), 0, ATLAS_TOP_MID)
+	# Lower Heart freight / worker transfer across the Mouth.
+	for x in range(pit_l, pit_r):
+		set_cell(Vector2i(x, lower_y), 0, ATLAS_TOP_MID)
 
 
 func painted_cell_count() -> int:

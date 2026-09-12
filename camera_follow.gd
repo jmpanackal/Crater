@@ -11,8 +11,11 @@ const SHAKE_DECAY := 10.0
 ## Dig columns begin at TerrainLayer.DIG_START_X * TILE (1024). Hide until exit approach.
 const LIMIT_RIGHT_HOLLOW := 1024
 const LIMIT_RIGHT_DIG := 2200
-## Open dig camera a little before the exit ledge so the approach reads cleanly.
-const DIG_CAMERA_UNLOCK_X := 960.0 # HollowLayout.HOLLOW_RIGHT
+## Blend dig framing open across the civic-excavation approach (not a hard unlock snap).
+## Starts on the right mid terrace so Mid Heart / left Wick stay dig-free.
+const DIG_LIMIT_BLEND_START_X := 880.0
+## Fully open once past HollowLayout.EXIT_RIGHT into dig columns.
+const DIG_LIMIT_BLEND_END_X := 1120.0
 
 var _look := Vector2.ZERO
 var _shake := 0.0
@@ -53,12 +56,19 @@ func _process(delta: float) -> void:
 	offset = _look + jitter
 
 
+## Ideal right clamp for a player x — continuous across the dig approach.
+func desired_limit_right(player_x: float) -> float:
+	var span := DIG_LIMIT_BLEND_END_X - DIG_LIMIT_BLEND_START_X
+	if span <= 0.0:
+		return float(LIMIT_RIGHT_HOLLOW if player_x < DIG_LIMIT_BLEND_END_X else LIMIT_RIGHT_DIG)
+	var t := clampf((player_x - DIG_LIMIT_BLEND_START_X) / span, 0.0, 1.0)
+	# Smoothstep so the unlock eases in/out instead of linear popping.
+	t = t * t * (3.0 - 2.0 * t)
+	return lerpf(float(LIMIT_RIGHT_HOLLOW), float(LIMIT_RIGHT_DIG), t)
+
+
 func _update_dig_limit(player_x: float) -> void:
-	# Keep dig strip off-screen while framing the Hollow terraces / pit.
-	if player_x >= DIG_CAMERA_UNLOCK_X:
-		limit_right = LIMIT_RIGHT_DIG
-	else:
-		limit_right = LIMIT_RIGHT_HOLLOW
+	limit_right = int(round(desired_limit_right(player_x)))
 
 
 func apply_shake(amplitude: float) -> void:

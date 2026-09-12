@@ -23,7 +23,12 @@ func _run_tests() -> void:
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	upgrades.set_siphon_station_open(true)
+	upgrades.force_siphon_notice = false
 	wallet.set_amount(wallet.SALVAGE, 50)
+	var districts: Node = root.get_node_or_null("Districts")
+	if districts:
+		districts.reset_production()
+		districts.set_good_amount(districts.BINDCORD, 5)
 
 	var packed: PackedScene = load("res://main.tscn")
 	var scene: Node = packed.instantiate()
@@ -126,11 +131,15 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	level_before = upgrades.get_level(upgrades.DIG_YIELD)
-	var salvage_before: int = wallet.get_amount(wallet.SALVAGE)
+	var bindcord_before: int = districts.get_good_amount(districts.BINDCORD) if districts else 0
 	root.get_viewport().push_input(buy)
 	await process_frame
-	if upgrades.get_level(upgrades.DIG_YIELD) != level_before or wallet.get_amount(wallet.SALVAGE) != salvage_before:
+	if upgrades.get_level(upgrades.DIG_YIELD) != level_before:
 		push_error("FAIL siphon at dig site via U")
+		quit(1)
+		return
+	if districts and districts.get_good_amount(districts.BINDCORD) != bindcord_before:
+		push_error("FAIL Bindcord changed at dig site via U")
 		quit(1)
 		return
 	if shop_panel.visible:

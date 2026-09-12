@@ -1,11 +1,10 @@
 extends TileMapLayer
 ## Terrace cliff ledge + timber joist underside (PixelLab sidescroller, 64px = 32×2 NN).
-## Extends hollow_floor language on left/right decks; mid-bridge is hollow_bridge.
+## Extends hollow_floor language on left/right decks; Mid Heart / spans use bridge source elsewhere.
 ## Collision stays on Hollow StaticBody2D decks; this layer is display-only.
 
 const TILE_SIZE := 64
 const SHEET_PATH := "res://sprites/hollow_ledge/hollow_ledge_tiles_64.png"
-## wang_12 = flat top ledge (air above, cliff + joist below).
 const ATLAS_TOP_MID := Vector2i(3, 0)
 
 
@@ -39,18 +38,19 @@ func _paint_ledges() -> void:
 	var farms_y := int(HollowLayout.FARMS_Y / TILE_SIZE)
 	var wick_y := int(HollowLayout.WICK_Y / TILE_SIZE)
 	var cistern_y := int(HollowLayout.CISTERN_Y / TILE_SIZE)
-	var pit_l := int(HollowLayout.PIT_LEFT / TILE_SIZE)
+	var left := int(HollowLayout.HOLLOW_LEFT / TILE_SIZE)
 	var pit_r := int(HollowLayout.PIT_RIGHT / TILE_SIZE)
 	var exit_r := int(HollowLayout.EXIT_RIGHT / TILE_SIZE)
-	var farms_open := int(HollowLayout.LADDER_FARMS_OPEN_X / TILE_SIZE)
+	var lift_open := int(HollowLayout.LIFT_OPEN_X / TILE_SIZE)
 	var cistern_open := int(HollowLayout.LADDER_CISTERN_OPEN_X / TILE_SIZE)
 
-	# Terraces only — mid-bridge owned by HollowBridge.
-	_paint_span(0, farms_open, farms_y)
-	_paint_span(0, pit_l, wick_y)
+	_paint_span(left, lift_open, farms_y)
+	_paint_span(left, lift_open, wick_y)
 	_paint_span(pit_r, cistern_open, wick_y)
 	_paint_span(cistern_open + 1, exit_r, wick_y)
-	_paint_span(pit_r + 1, exit_r - 1, cistern_y)
+	_paint_span(lift_open - 2, lift_open, cistern_y)
+	_paint_span(pit_r, cistern_open, cistern_y)
+	_paint_span(cistern_open + 1, exit_r, cistern_y)
 
 
 func _paint_span(x0: int, x1: int, y: int) -> void:

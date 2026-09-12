@@ -81,12 +81,17 @@ func _run_tests() -> void:
 			return
 	print("PASS solid district props on decks")
 
-	# Building silhouettes are kind-specific (not plain boxes).
+	# Building silhouettes / district kits are kind-specific.
 	var farms_b := scene.get_node_or_null("Hollow/PropFarms/Building")
 	var wick_b := scene.get_node_or_null("Hollow/PropWick/Building")
 	var cistern_b := scene.get_node_or_null("Hollow/PropCistern/Building")
 	if farms_b == null or farms_b.get_node_or_null("Roof") == null:
 		push_error("FAIL Farms building roof missing")
+		quit(1)
+		return
+	if farms_b.get_node_or_null("../DistrictExtras/FiberRack") == null \
+			and scene.get_node_or_null("Hollow/PropFarms/DistrictExtras/FiberRack") == null:
+		push_error("FAIL Glowbeds fiber rack missing")
 		quit(1)
 		return
 	if wick_b == null or wick_b.get_node_or_null("Chimney") == null:
@@ -97,23 +102,46 @@ func _run_tests() -> void:
 		push_error("FAIL Cistern dome silhouette missing")
 		quit(1)
 		return
+	if scene.get_node_or_null("Hollow/PropCistern/DistrictExtras/FreightPlatform") == null:
+		push_error("FAIL Cistern freight platform missing")
+		quit(1)
+		return
 	print("PASS district props building-like silhouettes")
+
+	if scene.get_node_or_null("Hollow/CarvedRooms/GlowbedsGallery") == null:
+		push_error("FAIL Glowbeds carved gallery missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/HeartStructure/UpperHeartDeck") == null:
+		push_error("FAIL Upper Heart silhouette missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/DistrictMidHeart") == null:
+		push_error("FAIL Mid Heart label missing")
+		quit(1)
+		return
+	print("PASS carved rooms + Heart structure")
 
 	var ladder_f: Area2D = scene.get_node_or_null("Hollow/LadderFarms") as Area2D
 	var ladder_c: Area2D = scene.get_node_or_null("Hollow/LadderCistern") as Area2D
-	if ladder_f == null or ladder_c == null:
-		push_error("FAIL climb ladders missing")
+	var lift: Node = scene.get_node_or_null("Hollow/CivicLift")
+	if ladder_f != null:
+		push_error("FAIL primary Farms ladder still present")
 		quit(1)
 		return
-	if ladder_f.get_script() == null or ladder_c.get_script() == null:
-		push_error("FAIL climb ladder script missing")
+	if ladder_c == null or lift == null:
+		push_error("FAIL civic lift or local Cistern ladder missing")
 		quit(1)
 		return
-	if ladder_f.get_node_or_null("WoodBack") == null or ladder_c.get_node_or_null("WoodBack") == null:
+	if ladder_c.get_script() == null or lift.get_script() == null:
+		push_error("FAIL climb/lift script missing")
+		quit(1)
+		return
+	if ladder_c.get_node_or_null("WoodBack") == null:
 		push_error("FAIL woodier ladder backboard missing")
 		quit(1)
 		return
-	print("PASS climb ladders present")
+	print("PASS civic lift + local climb ladder present")
 
 	if scene.get_node_or_null("Hollow/NPCs/Pell") == null:
 		push_error("FAIL Hollow NPCs missing")
@@ -129,7 +157,8 @@ func _run_tests() -> void:
 		push_error("FAIL HollowZone missing")
 		quit(1)
 		return
-	if scene.get_node_or_null("Hollow/Floor/CollisionShape2D") == null:
+	if scene.get_node_or_null("Hollow/Floor/WickLeftEast") == null \
+			and scene.get_node_or_null("Hollow/Floor/FarmsDeckMid") == null:
 		push_error("FAIL Hollow floor collision missing")
 		quit(1)
 		return
@@ -138,6 +167,21 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	print("PASS Hollow zone + collision + floor tiles still present")
+
+	if scene.get_node_or_null("Hollow/LeftServiceLift") == null \
+			or scene.get_node_or_null("Hollow/FreightLift") == null:
+		push_error("FAIL secondary lifts missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/VaultwardGate") == null:
+		push_error("FAIL Vaultward gate missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/SocietyLife/Window0") == null:
+		push_error("FAIL society life cues missing")
+		quit(1)
+		return
+	print("PASS lift network + Vaultward + society life")
 
 	if scene.get_node_or_null("Hollow/PitFogHigh") == null and scene.get_node_or_null("Hollow/AmbianceLights") == null:
 		push_error("FAIL hollow ambiance (fog/lights) missing")
@@ -177,6 +221,75 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	print("PASS Hollow setting craft (place read)")
+
+	if scene.get_node_or_null("Hollow/ImpactStrata/HullPlateFar") == null:
+		push_error("FAIL Devil's Mouth impact strata / hull remnants missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/TerracePunctuation/FarmsLookout") == null:
+		push_error("FAIL terrace lookout bay missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/CarvedRooms/GlowbedsGallery/Overhang") == null:
+		push_error("FAIL carved room overhang missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/AmbianceLights/LightDeepSparseA") == null:
+		push_error("FAIL sparse deep Mouth lights missing")
+		quit(1)
+		return
+	var farms_label: Label = scene.get_node("Hollow/DistrictFarms") as Label
+	if farms_label.get_theme_constant("outline_size") < 2:
+		push_error("FAIL district labels lack outline contrast")
+		quit(1)
+		return
+	# Diegetic signage — no large flat translucent placard behind the whole name.
+	if farms_label.get_node_or_null("SignPlate") != null:
+		push_error("FAIL DistrictFarms still uses flat SignPlate rectangle")
+		quit(1)
+		return
+	if farms_label.get_node_or_null("SignPost") == null and farms_label.get_node_or_null("PaintMark") == null:
+		push_error("FAIL district labels lack diegetic signpost/paint mark")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/MidHeartProps/TallyBooth") == null:
+		push_error("FAIL Mid Heart tally booth missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/MidHeartProps/TallyBoard") == null:
+		push_error("FAIL Mid Heart tally board missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/MidHeartProps/BoothCanopy") == null:
+		push_error("FAIL Mid Heart canopy missing")
+		quit(1)
+		return
+	# Carved-in facades (overhang / inset), not props only on flat decks.
+	if scene.get_node_or_null("Hollow/PropFarms/Building/RockOverhang") == null:
+		push_error("FAIL Glowbeds facade overhang missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/PropWick/Building/InsetDoor") == null:
+		push_error("FAIL Wickwork inset doorway missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/PropCistern/Building/WallPipe") == null:
+		push_error("FAIL Cistern wall pipe missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/PropCistern/DistrictExtras/SeepMark") == null:
+		push_error("FAIL Cistern wet-rock seep mark missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/PropCistern/DistrictExtras/FreightLift") == null:
+		push_error("FAIL Cistern public freight-lift prop missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/ImpactStrata/DistantHazeBand") == null:
+		push_error("FAIL Devil's Mouth distant haze band missing")
+		quit(1)
+		return
+	print("PASS habitation readability (strata / rooms / labels / facades)")
 
 	print("HOLLOW_BG_TESTS_PASSED")
 	quit(0)

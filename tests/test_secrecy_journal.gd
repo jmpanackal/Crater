@@ -141,7 +141,7 @@ func _run_tests() -> void:
 		return
 	print("PASS journal + standing persist")
 
-	# Firmament vs Pit cell helpers.
+	# Firmament vs Devil’s Mouth cell helpers.
 	var terrain := TerrainLayer.new()
 	root.add_child(terrain)
 	await process_frame
@@ -149,15 +149,15 @@ func _run_tests() -> void:
 		push_error("FAIL Firmament cell")
 		quit(1)
 		return
-	if not terrain.is_pit_cell(Vector2i(12, 12)):
-		push_error("FAIL pit cell")
+	if not terrain.is_mouth_cell(Vector2i(12, 12)):
+		push_error("FAIL Devil’s Mouth cell")
 		quit(1)
 		return
-	if terrain.is_firmament_cell(Vector2i(12, 12)) or terrain.is_pit_cell(Vector2i(12, 2)):
+	if terrain.is_firmament_cell(Vector2i(12, 12)) or terrain.is_mouth_cell(Vector2i(12, 2)):
 		push_error("FAIL frontier helpers crossed")
 		quit(1)
 		return
-	print("PASS Firmament/Pit frontier helpers")
+	print("PASS Firmament/Devil’s Mouth frontier helpers")
 
 	if save_load:
 		save_load.clear_save()

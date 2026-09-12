@@ -10,7 +10,7 @@ Related canon: [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-dec
 
 **Design intent (canon — USER locked #29):**
 
-- Public work returns assigned **Materials** → **Tallies** (personal pay for sanctioned gear) + **Contribution** (residence/access) + district inputs.
+- Public work returns assigned **Materials** → **Tallies** (personal pay for sanctioned gear) + **Trust** through reliable civic work + district inputs. Residence/access use Trust, Tallies/relocation cost, and story gates; there is no Contribution meter.
 - Districts passively turn inputs into **District production**; healthy output = **Siphon Cover**.
 - **Siphon** = diverting District production / rare Hullbit for *personal forbidden* work-rig upgrades (not normal Tallies spend).
 - Efficiency / “safe magic” is *open* help to districts; forbidden / knowledge is the secret, cover-gated path.
@@ -25,7 +25,7 @@ Related canon: [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-dec
 | Two currencies / channels (Tallies vs siphon) | One wallet: **Salvage** pays for *everything* in the “Siphon shop” |
 | Forbidden divert vs open requisition | Both Safe and Secret rows call `siphon_for_upgrade`; Safe only skips notice RNG |
 | Divert *communal District production* | Costs Salvage; District production never decreases (flavor counters only) |
-| Cover from healthy districts | Implemented as `total_rate / 4.5` → notice chance — correct *shape*, weak *fiction* (rates, not “missing goods”) |
+| Cover from healthy districts | Implemented as `total_rate / 4.5` → notice chance — correct *shape*, weak *fiction* (rates, not target-good / sibling production) |
 | Hollow-only spend | Correct (`HollowZone` → `set_siphon_station_open`) |
 | District supplies from digs | Digs only grant Salvage (+ rare Records); no district-input haul |
 | Materials inventory | No multi-type bag — single Salvage int |
@@ -36,12 +36,13 @@ Related canon: [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-dec
 
 ## Pending rename (Salvage → Materials)
 
-Do **not** treat code “Salvage” as canon. After USER confirms names in [`materials.md`](materials.md):
+Partial slice landed (named District production + Materials turn-in). Remaining:
 
-- [ ] `resources.gd` / SaveLoad: Salvage wallet → Materials inventory (multi-type)
-- [ ] Feel floats / HUD copy: `+Salvage` → per-material labels
-- [ ] District production labels: Mushrooms/Water → Glowrations + Glowfiber / Presswater + Clearwater; Wickwork → Wicklamps + Bindcord
-- [ ] Siphon UI: cost District production; stop paying forbidden upgrades from dig wallet
+- [x] District production labels: Glowrations + Glowfiber / Wicklamps + Bindcord / Presswater + Sealbrine
+- [x] Siphon UI: forbidden costs District production; Cover from target + sibling goods
+- [x] Materials inventory (multi-type) + Harvest queue
+- [ ] HUD “+Salvage” floats → per-material labels
+- [ ] Efficiency spend fully on Tallies (still transitional Salvage)
 - [ ] CONTEXT / comments that still say Salvage as the economy currency
 
 ---
@@ -51,13 +52,13 @@ Do **not** treat code “Salvage” as canon. After USER confirms names in [`mat
 Ordered for “demo tomorrow” coherence — cut deep story beats before cutting clarity.
 
 1. **Clarify siphon fiction in UI + economy (after Decision 2 + name confirm)**  
-   Split open requisition vs secret divert; stop calling efficiency a siphon; make Cover mean something visible (production drain and/or missing-goods toast). Tiny copy-only mitigations only if full split waits.
+   Split open requisition vs secret divert; stop calling efficiency a siphon; make Cover mean something visible (target-good drain, local production state, and/or missing-goods toast). Tiny copy-only mitigations only if full split waits.
 
 2. **Teach the core loop in the first 3 minutes**  
-   Short diegetic onboarding: Harvest clock → return to Hollow → districts exist → dig Mouth for Materials → turn in / spend at home. One Steward assignment stub (“help excavate / gather for districts”) even if the new district map is a single authored room.
+   Short diegetic onboarding: Harvest clock → return to Hollow → districts exist → excavate side galleries for Materials → turn in / spend at home. One Steward assignment stub (“help excavate / gather for districts”) even if the new district map is a single authored room.
 
 3. **Public dig + return loop that matters**  
-   Mouth dig remains the public reason to leave; Materials (and district inputs) only useful after return. Harvest miss + lie stays the accountability pulse. Thin inventory bag.
+   Lateral civic excavation remains the public reason to leave; Materials (and district inputs) only useful after return. Harvest miss + lie stays the accountability pulse. Thin inventory bag.
 
 4. **Make districts feel like places, not HUD stats**  
    Walkable Farms / Wickwork / Cistern props with NPC presence; world labels; District production that players notice rising when they “help.”
@@ -69,7 +70,7 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
    Keep flat list for demo if needed; ensure Firmament note → Quiet Dig gate is findable and explained once.
 
 7. **Spatial Hollow prototype polish for screenshots**  
-   Heart platforms + Mouth void read; approach thresholds; Firmament haze / Pit gloom — enough that it doesn’t look like a greybox shop.
+   Heart platforms + Mouth void read; approach thresholds; Firmament haze / Devil’s Mouth gloom — enough that it doesn’t look like a greybox shop.
 
 8. **Demo-critical feel**  
    Dig/land juice already present; one pass on HUD chrome so “Siphon shop” doesn’t dominate first impression.
@@ -78,7 +79,7 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
    Lateral dig zone + one contradiction fragment — enough to show civic digging, not full spine reveal.
 
 10. **Defer for post-demo**  
-    Full Tallies/Contribution ranks, lift rig, Vaultward ascent, authored Firmament fissure, Mystery/Codex Journal, painted tilesets, authored SFX packs, Act 2 tease (never).
+    Full Tallies/Trust progression, personal tether rig, fixed freight-lift set dressing, Ashram Heights ascent, authored Firmament fissure, Mystery/Codex Journal, painted tilesets, authored SFX packs, Act 2 tease (never).
 
 ---
 
@@ -88,10 +89,11 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
 
 - [ ] Efficiency upgrades sold through the same “Siphon shop” / `siphon_for_upgrade` path — contradicts “open safe magic.”
 - [ ] Button labels “Safe / Secret … Salvage” never say what is being diverted from communal life.
-- [ ] District production ticks forever with no spend sink; Cover ignores available production, only rates.
-- [ ] No Tallies / Contribution / public requisition channel.
+- [ ] District production ticks forever with no civic demand/cap; Cover ignores target-good and sibling production, using only rates.
+- [ ] No Tallies / Trust progression / public requisition channel.
 - [ ] No district-supply Materials from digs (story canon has them) — still Salvage-only haul.
 - [ ] No Materials inventory (multi-type).
+- [ ] Current dig prototype still frames the lower lane as Devil’s Mouth descent; target public loop is lateral civic excavation into side galleries.
 - [ ] Dig Yield is “forbidden” but also the obvious first power buy — may teach “siphon = shop” before “siphon = theft.”
 
 ### UX / teaching
@@ -105,15 +107,15 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
 
 - [ ] Harvest 60s + Standing + lie — works; consequences don’t yet change shifts/access (Standing is a number).
 - [ ] Quiet Dig gated by Firmament note — works; only three Journal stubs; no Mystery/Codex.
-- [ ] Upward dig risk — works; no Vaultward / authored fissure, so Firmament dig may feel available too early vs story.
+- [ ] Upward dig risk — works; no Ashram Heights / authored fissure, so Firmament dig may feel available too early vs story.
 - [ ] Living NPCs — wander/talk; bodies hidden ColorRects; rare Pell farm help only.
-- [ ] SaveLoad v2 — present; no Tallies/Contribution / Materials inventory fields yet.
+- [ ] SaveLoad v2 — present; no Tallies/Trust progression / Materials inventory fields yet.
 
 ### Art / presentation
 
 - [ ] Hollow blocked layout (terraces/bridge/stairs) — prototype, not final social hierarchy.
 - [ ] District props / NPC bodies / lanterns still placeholders.
-- [ ] Firmament/Pit soft overlays only — not distinct tilesets.
+- [ ] Firmament/Devil’s Mouth soft overlays only — not distinct tilesets.
 - [ ] Audio = procedural click stubs.
 
 ### Coherence risks for a demo
@@ -140,12 +142,12 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
    Draft still good: “When the districts thrive, missing materials are harder to notice.” Lock with Decision 2 / UI pass.
 
 5. **Demo economy depth:**  
-   **✅ Locked (USER):** Need **inventory** + multi-type Materials toward Tallies + production-drain Siphon — not Salvage-only forever. Implement in focused passes after names + Decision 2.
+   **✅ Locked (USER):** Need **inventory** + multi-type Materials toward Tallies + production-drain Siphon — not Salvage-only forever. Production needs a protected reserve, local demand/cap, and target-good Cover. Implement in focused passes after names + Decision 2.
 
 ### Demo scope (non-blocking but useful)
 
 6. Steward assignment for demo: **stub dialogue + marker**, or skip until new-district dig space exists? — Open
-7. Firmament upward dig in demo: **available now** (prototype), or **gated** until a fake “Vaultward access” flag so story matches feel? — Open
+7. Firmament upward dig in demo: **available now** (prototype), or **gated** until a fake “Ashram Heights access” flag so story matches feel? — Open
 8. Art bar for demo: greybox OK if loop/fiction clear, or need one PixelLab pass on districts/NPCs first? — Open
 
 ---

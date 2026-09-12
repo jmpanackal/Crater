@@ -7,6 +7,7 @@ Read this before making changes. For the full pitch and open decisions, see:
 - [`docs/story.md`](docs/story.md) — Act 1 fiction canon + story idea inbox (not design locks)
 - [`docs/game-feel-best-practices.md`](docs/game-feel-best-practices.md) — living juice / feel notes (Act 1 tone)
 - [`docs/art-direction.md`](docs/art-direction.md) — locked visual bible (camera, refs steal/don’t-steal, Hollow composition, palette)
+- [`docs/hollow-build-brief.md`](docs/hollow-build-brief.md) — Cursor-ready first Hollow environment pass (layout, assets, acceptance checks)
 - [`docs/art-pipeline.md`](docs/art-pipeline.md) — when/how to use PixelLab MCP for Act 1 pixel assets
 - [`docs/godot-best-practices.md`](docs/godot-best-practices.md) — Godot 4 / pixel structure checklist for this repo
 - [`docs/ai-workflow.md`](docs/ai-workflow.md) — solo AI / agent production habits (role split, player-camera eval, USER vs AI tags)
@@ -21,7 +22,7 @@ Read this before making changes. For the full pitch and open decisions, see:
 
 ## One-line pitch
 
-A kid in an underground society built into a massive pit is forbidden from digging up. They break the taboo, reach a surface no one knew existed, and uncover that their people are crash-landed colonists — with the answer waiting at the bottom of the pit everyone stared into for generations.
+A kid in an underground society built into the walls of the massive Devil’s Mouth is forbidden from digging up. They break the taboo, reach a surface no one knew existed, and uncover that their people are crash-landed colonists — with the answer waiting at the bottom of the Mouth everyone stared into for generations.
 
 Closest comps: **Dome Keeper** (loop/team size), **SteamWorld Dig** (dig-and-open), **Inscryption** (mystery pacing). Tone: curiosity/wonder over fear.
 
@@ -52,15 +53,15 @@ Act 1 players only feel "some magic is common, some is rare/suspicious."
 
 1. **Hollow production districts** — named areas that produce different communal resources; efficiency/"safe magic" upgrades speed those passives over time (society gets healthier, not just a timer UI).
 2. **Harvest** — communal rhythm + clock on top of that economy; miss it (away digging) and you're noticed.
-3. **Dual-direction dig** — one toolset: **up** (secret taboo, from a late authored Firmament fissure) and **down** into Devil’s Mouth walls (public-ish but dangerous if you go too far).
+3. **Two-frontier dig** — one toolset: **up** (secret taboo, from a late authored Firmament fissure) and **sideways** into braced civic galleries (public work that opens districts and yields Materials). The Devil’s Mouth is a feared, mostly unworked central void.
 4. **Fragments** stay ambiguous (myth/history, never clear "alien planet"):
    - **Materials** (category; #29) — multi-type dig haul → district inputs, Tallies turn-in, rare Hullbit for forbidden craft. Names proposed in [`docs/materials.md`](docs/materials.md); code may still say Salvage until rename.
-   - **District production** — Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Clearwater: communal output produced by districts; **Siphon diverts specific goods**
+   - **District production** — Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Sealbrine: communal output produced by districts; **Siphon diverts specific goods**
    - **Records** → lore / knowledge upgrades (always forbidden-tier; not Materials)
 5. **Social Standing** — caught digging up, lying, or using unsanctioned tech costs standing; lies can dodge but exposed lies hurt worse; gates later recruitment.
-6. **Public work + siphon framing** — assigned Materials returned to districts earn Tallies (personal work pay), durable Contribution (residence/access rank), and district inputs. Personal forbidden upgrades divert District production rather than spending Tallies normally. **Stronger communal output makes siphoning safer** — healthier production covers diversion; thin output makes people notice. Demo needs thin **inventory**.
+6. **Public work + theft framing** — assigned Materials returned to districts earn Tallies (personal work pay), Trust through reliable civic work, and district inputs. Residence/access use Trust plus Tallies/relocation cost and story gates; there is no Contribution meter. Personal forbidden upgrades steal/divert District production rather than spending Tallies normally. Production above a protected civic reserve needs inputs and is consumed at Harvest. **Cover is local** to the stolen good and its workplace sibling; thin output makes people notice. Demo needs thin **inventory**.
 7. **Living Hollow** — NPCs who work, live, play, and chat in those districts. Act 1's home base is a populated society, not an empty upgrade booth.
-8. **Vertical advancement** — public contribution earns higher residence and access through the Hollow, culminating in Vaultward access directly beneath the Firmament. Higher status also brings duties and scrutiny.
+8. **Vertical advancement** — public work builds Trust and earns Tallies for higher residence and access through the Hollow, culminating in Ashram Heights access directly beneath the Firmament. Higher status also brings duties and scrutiny; there is no separate Contribution system.
 
 ### Act 1 design goal (critical)
 
@@ -71,7 +72,7 @@ Act 1 players only feel "some magic is common, some is rare/suspicious."
 - **Hybrid campaign** (decisions #13/#16): one persistent save; expedition/miss risk costs unbanked resources/time/Standing — **not** full permadeath.
 - **Deep pillar:** tech tree / builds (#9). Mining must feel good but stay simpler. **Hollow production districts + living NPCs are Act 1 requirements** (decision #28) — keep them intentionally lighter than the tech tree, not absent. Surface settlement/ship passives are Act 2–3 only.
 - **Camera:** 2D side-view (#14) — Sea of Stars oblique evaluated and rejected; no hybrid. **Art:** detailed pixel art (#10); see [`docs/art-direction.md`](docs/art-direction.md). Underground earthy vs later Reef vivid (Act 2 — not now).
-- **Pit descent:** partial/gated (#22 leaning B) — reuse dig-down; true bottom is Act 3.
+- **Devil’s Mouth:** Act 1’s powerful, mostly unworked crater vista; public Materials work is lateral civic excavation. Any true descent stays later and gated (#22).
 
 ---
 
@@ -92,27 +93,27 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 ### Implemented (Act 1 vertical slice)
 
 - Campaign shell: **title → New Dig / Continue → play**; Esc saves and returns to title. No Act 2 tease.
-- Zones: **Hollow** as Mouth-centered vertical terraces, with the Heart of the Hollow suspended civic complex at the middle band: Upper Heart (Holding/Council), Mid Heart (market/allotments), and Lower Heart (freight/excavation dispatch). Hanging walkways and transfer spans connect its levels and both sides of the Hollow. Firmament↑ / Devil’s Mouth↓. The present scene is a spatial prototype, not yet the final social hierarchy.
-- Player: move/jump/dig (**R**), climb ladders (**W/S**), 8-dir idle sprites; coyote/buffer; accel/friction; sprite squash/stretch; dig/land dust (Firmament quieter than Pit); soft land/dig shake (Firmament quieter than Pit); micro dig hitch (Firmament shorter than Pit); subdued +Salvage / Record floats (**pending rename → Materials**); procedural dig/land click stubs; camera look-ahead + deadzone; starts in the Hollow.
-- Dig Site Firmament↑ / Pit↓ soft dressing (haze/gloom overlays) + Hollow fog drift / FarHaze / PitShaftVeil depth polish + Approach threshold (plank / chasm / “Work walls ahead”).
-- **Production districts** (`Districts`): Farms / Wickwork / Cistern passive stocks + rates; efficiency upgrades raise rates; **siphon cover** from total output. District prop stubs use building-like silhouettes (still placeholders).
+- Zones: **Hollow** as Mouth-centered vertical terraces with **lateral carved rooms** (`HOLLOW_LEFT=-512`): Glowbeds grow gallery + public terrace, Wickwork bay + street, Mid Heart bridge band, Cistern + service alcove hint. Upper/Lower Heart suggested by distant suspended decks/cables. Soft labels: **The Glowbeds**, **The Wickwork**, **Mid Heart**, **The Cistern**. Firmament↑ / Devil’s Mouth↓. Dig exit reads as braced civic excavation.
+- Player: move/jump/dig (**R**), climb ladders (**W/S**), 8-dir idle sprites; coyote/buffer; accel/friction; sprite squash/stretch; dig/land dust (Firmament quieter than Devil’s Mouth); soft land/dig shake (Firmament quieter than Devil’s Mouth); micro dig hitch (Firmament shorter than Devil’s Mouth); subdued +Salvage / Record floats (**pending rename → Materials**); procedural dig/land click stubs; camera look-ahead + deadzone; starts on Glowbeds terrace.
+- Dig Site Firmament / civic side-gallery soft dressing (haze/gloom overlays) + Hollow fog drift / FarHaze / deep-Mouth veil polish + Approach threshold (braced tunnel / “Work walls ahead”).
+- **Production districts** (`Districts`): Farms / Wickwork / Cistern passive production + rates; efficiency upgrades raise rates; **Siphon Cover** will use the target good and its sibling output. District prop kits are ColorRect craft (planters, wick bench, cistern basin/freight) — still not painted PixelLab props.
 - Hollow ladders: woodier ColorRect shafts with climb hints.
 - **Upgrade split**: Efficiency (Farm Tending, Wickcraft, Cistern Flow — open) vs Forbidden (Dig Yield open; Quiet Dig gated by Firmament note Record — cover-based notice risk). Siphon only in Hollow (**U** / buttons). Future work-rig progression must use meaningful choice junctions: digging, movement/recovery, secrecy, knowledge, and community utility.
 - **Harvest** 60s + Standing miss; optional **lie** prompt when away (Y/N + dimmer stakes copy); exposed lies worsen later notices; Harvest clock soft-pulses when ≤10s; Standing toasts tint by gain/loss.
-- **Upward dig risk** (Quiet Dig reduces); Mouth digs warn after depth streaks; same dig tools. A constrained lift rig is planned so deep Mouth exploration and upper-Firmament work have safe, interesting vertical recovery.
+- **Upward dig risk** (Quiet Dig reduces); lateral civic excavation remains public work. A constrained personal tether rig is planned for unsafe side galleries and upper-Firmament work; fixed Cistern-powered freight lifts remain public infrastructure.
 - **Records / Journal** stub (`Journal`, **J**): a few ambiguous fragments, findable while digging; count + “new” highlight on unlock.
-- **Living NPCs** (Pell, Rook, Sila, Joss): wander, idle bob, face toward player, talk (**E** / Space advance, Y/N choices), rare Yes/No (Pell farm help → +1 Standing).
+- **Living NPCs** (Pell, Rook, Sila, Joss): wander, idle bob, face toward player, talk (**E** / Space advance, Y/N choices), rare Yes/No (Pell farm help → +1 Standing). Placed across Glowbeds / Wickwork / Mid Heart / Cistern.
 - **SaveLoad** v2: Salvage, upgrades, Standing, harvest, pending_lie, District production, journal.
-- Art ref: `docs/refs/hollow_concept.png` (primary Hollow composition — pit + terraces).
+- Art ref: `docs/refs/hollow_concept.png` (primary Hollow composition — Devil’s Mouth + terraces).
 - Campaign shell title: quieter ink/lantern atmosphere (INMOST-leaning), no Act 2 tease.
 
 ### Still placeholder / thin
 
-- Hollow structure is blocked (pit/terraces/bridge/stairs); props use building-like ColorRect silhouettes — no painted bridge, waterwheel, or farm rows yet.
-- NPC bodies still ColorRect stubs (hidden); lanterns are warm rect hints, not PointLights.
+- District / Heart / void craft is **ColorRect + existing ledge/bridge tiles** — not yet painted prop kits or a full settler sprite. See [`docs/hollow-build-brief.md`](docs/hollow-build-brief.md) implemented table.
+- NPC bodies still ColorRect stubs; lanterns are warm posts + PointLight2D, not authored lamp art.
 - District production is currently flavor-only (not yet a full spend sink beyond Cover). **Pending:** Materials inventory + District-production siphon drain (#29 / [`docs/materials.md`](docs/materials.md)); code still uses single Salvage wallet.
 - Records are three stubs; Firmament note unlocks Quiet Dig (first knowledge gate). Journal is still a flat list (not Mystery/Codex views).
-- Firmament/Devil’s Mouth dressing now has soft Firmament haze / Mouth gloom overlays (still not distinct painted tilesets); the Heart, upper-Vaultward, an authored hidden Firmament fissure, contribution-ranked residences, and the Steward's new district are not implemented yet.
+- Heart Upper/Lower are silhouette hints only; Trust/Tallies-gated residences, authored Firmament fissure, and the Steward's new district are not implemented yet.
 - Audio is procedural dig/land click stubs only (no authored SFX packs yet); ceiling name is locked in fiction.
 
 ### Later acts (do not build now)
@@ -129,19 +130,19 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `main.tscn` / `main.gd` | Play scene; NPC + notice wiring |
 | `resources.gd` | Salvage wallet (**pending rename → Materials inventory**) |
 | `upgrades.gd` | Efficiency + forbidden upgrades; `siphon_for_upgrade` |
-| `districts.gd` | Passive rates, stocks, siphon cover |
+| `districts.gd` | Passive production rates, civic reserve/demand (pending), local Siphon Cover |
 | `community.gd` | Harvest, Standing, lie, upward/siphon notice |
 | `journal.gd` | Records unlock + snapshot |
 | `save_load.gd` | Persist Act 1 progress |
-| `hollow_layout.gd` | Pit/terrace world metrics |
+| `hollow_layout.gd` | Devil’s Mouth / terrace world metrics |
 | `hollow_zone.gd` | Opens siphon station in Hollow |
 | `hollow_npc.gd` | District NPC presence + talk |
 | `hollow_floor.gd` | Terrace floor TileMap visuals |
-| `terrain.gd` | Diggable TileMapLayer; Firmament/Pit frontiers |
+| `terrain.gd` | Diggable TileMapLayer; Firmament/Devil’s Mouth frontiers |
 | `feel_fx.gd` | Dig/land grit, soft shake, micro dig hitch, restrained +Salvage/Record floats (**→ Materials**) |
 | `feel_audio.gd` | Procedural dig/land click stubs with pitch randomize |
 | `camera_follow.gd` | Look-ahead, drag deadzone, shake on Camera2D |
-| `dig_site_dressing.gd` | Firmament haze / Pit gloom overlays at dig columns |
+| `dig_site_dressing.gd` | Firmament haze / Devil’s Mouth gloom overlays at dig columns |
 | `dig_approach.gd` | Hollow→Dig Site threshold plank / chasm / placard |
 | `player.gd` | Move / dig / feel (coyote, squash, dust) |
 | `upgrade_hud.gd` | Hollow status + multi-siphon UI; harvest pulse; notice tones |

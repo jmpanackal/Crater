@@ -1,5 +1,5 @@
 extends SceneTree
-## District passive rates, efficiency upgrades, and siphon cover health.
+## District efficiency still raises illustrative rates; Cover uses named goods.
 
 
 func _init() -> void:
@@ -25,8 +25,8 @@ func _run_tests() -> void:
 		save_load.clear_save()
 
 	districts.set_paused(true)
+	districts.reset_production()
 	for id in districts.get_district_ids():
-		districts.set_stock(id, 0.0)
 		match str(id):
 			"farms":
 				upgrades.set_level(upgrades.FARMS_EFF, 0)
@@ -41,6 +41,9 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
+	# Thin production → weaker Cover / higher notice.
+	for good_id in districts.get_good_ids():
+		districts.set_good_amount(good_id, districts.PROTECTED_RESERVE)
 	var cover_low: float = districts.get_cover_health()
 	var notice_high: float = districts.get_siphon_notice_chance()
 	if cover_low >= 0.95:
@@ -48,52 +51,48 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	upgrades.set_level(upgrades.FARMS_EFF, 3)
-	upgrades.set_level(upgrades.WICKWORK_EFF, 3)
-	upgrades.set_level(upgrades.CISTERN_EFF, 3)
+	for good_id in districts.get_good_ids():
+		districts.set_good_amount(good_id, districts.CAPACITY)
 	var cover_high: float = districts.get_cover_health()
 	var notice_low: float = districts.get_siphon_notice_chance()
 	if cover_high <= cover_low:
-		push_error("FAIL efficiency did not raise cover")
+		push_error("FAIL healthy production did not raise cover")
 		quit(1)
 		return
 	if notice_low >= notice_high:
 		push_error("FAIL healthier districts did not lower notice chance")
 		quit(1)
 		return
-	print("PASS efficiency raises cover and lowers siphon notice")
+	print("PASS healthy named goods raise cover and lower siphon notice")
 
-	# Passive tick accumulates stock.
-	districts.set_paused(false)
-	districts.set_stock(districts.FARMS, 0.0)
-	await create_timer(0.25).timeout
-	var stock: float = districts.get_stock(districts.FARMS)
-	if stock <= 0.05:
-		push_error("FAIL farms stock did not grow %s" % stock)
+	# Efficiency still raises get_rate for Harvest bonus wiring.
+	upgrades.set_level(upgrades.FARMS_EFF, 3)
+	upgrades.set_level(upgrades.WICKWORK_EFF, 3)
+	upgrades.set_level(upgrades.CISTERN_EFF, 3)
+	if districts.get_total_rate() <= base_total:
+		push_error("FAIL efficiency did not raise rates")
 		quit(1)
 		return
-	print("PASS farms stock ticks upward")
+	print("PASS efficiency raises district rates")
 
-	districts.set_paused(true)
-	districts.set_stock(districts.FARMS, 12.5)
-	districts.set_stock(districts.WICKWORK, 3.0)
-	districts.set_stock(districts.CISTERN, 7.0)
+	districts.reset_production()
+	districts.set_good_amount(districts.GLOWRATIONS, 5)
+	districts.set_good_amount(districts.WICKLAMPS, 3)
+	districts.set_good_amount(districts.PRESSWATER, 4)
 	if not save_load.save_game():
 		push_error("FAIL save")
 		quit(1)
 		return
-	districts.set_stock(districts.FARMS, 0.0)
-	districts.set_stock(districts.WICKWORK, 0.0)
-	districts.set_stock(districts.CISTERN, 0.0)
+	districts.reset_production()
 	if not save_load.load_game():
 		push_error("FAIL load")
 		quit(1)
 		return
-	if not is_equal_approx(districts.get_stock(districts.FARMS), 12.5):
-		push_error("FAIL farms stock after load")
+	if districts.get_good_amount(districts.GLOWRATIONS) != 5:
+		push_error("FAIL Glowrations after load")
 		quit(1)
 		return
-	print("PASS district stocks persist")
+	print("PASS district production persists")
 
 	save_load.clear_save()
 	print("DISTRICT_COVER_TESTS_PASSED")
