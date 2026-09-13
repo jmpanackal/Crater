@@ -76,8 +76,17 @@ func service_speed_mult() -> float:
 	return 1.0
 
 
+var _districts_cache: Node = null
+
+
 func _districts() -> Node:
-	return get_tree().root.get_node_or_null("Districts")
+	## Called every _physics_process tick via _refresh_service_state(); cache
+	## the autoload lookup instead of re-querying by string path every frame.
+	## Districts is a persistent root autoload, so a cached reference is safe
+	## for the life of the scene.
+	if _districts_cache == null:
+		_districts_cache = get_tree().root.get_node_or_null("Districts")
+	return _districts_cache
 
 
 func _refresh_service_state() -> void:

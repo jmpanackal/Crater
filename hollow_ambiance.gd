@@ -24,6 +24,19 @@ var _far_wall_base := Vector2.ZERO
 var _sway_nodes: Array[CanvasItem] = []
 var _pulse_nodes: Array[CanvasItem] = []
 
+## Fog node references, resolved once by _cache_fog_bases() and reused by
+## _drift_fog() every frame instead of 8 fresh get_node_or_null() string-path
+## lookups per frame — the base-position cache already existed for these same
+## nodes, this just extends it to also cache the references themselves.
+var _mist_node: ColorRect = null
+var _mid_node: ColorRect = null
+var _high_node: ColorRect = null
+var _deep_node: ColorRect = null
+var _veil_node: ColorRect = null
+var _far_node: ColorRect = null
+var _far_wall_node: ColorRect = null
+var _motes_node: ColorRect = null
+
 
 func _ready() -> void:
 	_deepen_pit_void()
@@ -1769,52 +1782,46 @@ func _spore_tex() -> Texture2D:
 
 
 func _cache_fog_bases() -> void:
-	var mist := get_node_or_null("Mist") as ColorRect
-	if mist:
-		_mist_base = mist.position
-	var mid := get_node_or_null("PitFogMid") as ColorRect
-	if mid:
-		_mid_base = mid.position
-	var high := get_node_or_null("PitFogHigh") as ColorRect
-	if high:
-		_high_base = high.position
-	var deep := get_node_or_null("PitFogDeep") as ColorRect
-	if deep:
-		_deep_base = deep.position
-	var veil := get_node_or_null("PitShaftVeil") as ColorRect
-	if veil:
-		_veil_base = veil.position
-	var far_wall := get_node_or_null("PitFarWall") as ColorRect
-	if far_wall:
-		_far_wall_base = far_wall.position
+	_mist_node = get_node_or_null("Mist") as ColorRect
+	if _mist_node:
+		_mist_base = _mist_node.position
+	_mid_node = get_node_or_null("PitFogMid") as ColorRect
+	if _mid_node:
+		_mid_base = _mid_node.position
+	_high_node = get_node_or_null("PitFogHigh") as ColorRect
+	if _high_node:
+		_high_base = _high_node.position
+	_deep_node = get_node_or_null("PitFogDeep") as ColorRect
+	if _deep_node:
+		_deep_base = _deep_node.position
+	_veil_node = get_node_or_null("PitShaftVeil") as ColorRect
+	if _veil_node:
+		_veil_base = _veil_node.position
+	_far_node = get_node_or_null("FarHaze") as ColorRect
+	_far_wall_node = get_node_or_null("PitFarWall") as ColorRect
+	if _far_wall_node:
+		_far_wall_base = _far_wall_node.position
+	_motes_node = get_node_or_null("PitMoteBand") as ColorRect
 
 
 func _drift_fog() -> void:
-	var mist := get_node_or_null("Mist") as ColorRect
-	if mist:
-		mist.position = _mist_base + Vector2(sin(_fog_t * 0.22) * 6.0, cos(_fog_t * 0.15) * 2.0)
-	var mid := get_node_or_null("PitFogMid") as ColorRect
-	if mid:
-		mid.position = _mid_base + Vector2(sin(_fog_t * 0.18 + 1.2) * 4.0, cos(_fog_t * 0.12) * 3.0)
-	var high := get_node_or_null("PitFogHigh") as ColorRect
-	if high:
-		high.position = _high_base + Vector2(sin(_fog_t * 0.14 + 0.4) * 3.0, 0.0)
-	var deep := get_node_or_null("PitFogDeep") as ColorRect
-	if deep:
-		deep.position = _deep_base + Vector2(sin(_fog_t * 0.1 + 2.0) * 2.0, cos(_fog_t * 0.08) * 4.0)
-	var veil := get_node_or_null("PitShaftVeil") as ColorRect
-	if veil:
-		veil.position = _veil_base + Vector2(sin(_fog_t * 0.09 + 2.6) * 5.0, cos(_fog_t * 0.07 + 0.8) * 3.5)
-		veil.modulate.a = 0.88 + sin(_fog_t * 0.25 + 1.1) * 0.12
-	var far := get_node_or_null("FarHaze") as ColorRect
-	if far:
-		far.modulate.a = 0.85 + sin(_fog_t * 0.3) * 0.15
-	var far_wall := get_node_or_null("PitFarWall") as ColorRect
-	if far_wall:
-		far_wall.position = _far_wall_base + Vector2(sin(_fog_t * 0.06) * 1.5, 0.0)
-	var motes := get_node_or_null("PitMoteBand") as ColorRect
-	if motes:
-		motes.modulate.a = 0.75 + sin(_fog_t * 0.4 + 0.5) * 0.25
+	if _mist_node:
+		_mist_node.position = _mist_base + Vector2(sin(_fog_t * 0.22) * 6.0, cos(_fog_t * 0.15) * 2.0)
+	if _mid_node:
+		_mid_node.position = _mid_base + Vector2(sin(_fog_t * 0.18 + 1.2) * 4.0, cos(_fog_t * 0.12) * 3.0)
+	if _high_node:
+		_high_node.position = _high_base + Vector2(sin(_fog_t * 0.14 + 0.4) * 3.0, 0.0)
+	if _deep_node:
+		_deep_node.position = _deep_base + Vector2(sin(_fog_t * 0.1 + 2.0) * 2.0, cos(_fog_t * 0.08) * 4.0)
+	if _veil_node:
+		_veil_node.position = _veil_base + Vector2(sin(_fog_t * 0.09 + 2.6) * 5.0, cos(_fog_t * 0.07 + 0.8) * 3.5)
+		_veil_node.modulate.a = 0.88 + sin(_fog_t * 0.25 + 1.1) * 0.12
+	if _far_node:
+		_far_node.modulate.a = 0.85 + sin(_fog_t * 0.3) * 0.15
+	if _far_wall_node:
+		_far_wall_node.position = _far_wall_base + Vector2(sin(_fog_t * 0.06) * 1.5, 0.0)
+	if _motes_node:
+		_motes_node.modulate.a = 0.75 + sin(_fog_t * 0.4 + 0.5) * 0.25
 
 
 ## Test helper — setting craft pieces that sell place without changing collision.
