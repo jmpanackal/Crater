@@ -1,5 +1,5 @@
 extends SceneTree
-## Named District production: Materials queue, Harvest apply, reserve, siphon, Cover.
+## Named District production: Materials queue, Harvest apply, reserve, steal, Cover.
 
 
 func _init() -> void:
@@ -130,7 +130,7 @@ func _run_tests() -> void:
 		return
 	print("PASS capacity clamps Harvest output")
 
-	# --- Siphon cannot take below reserve ---
+	# --- Steal cannot take below reserve ---
 	districts.set_good_amount(districts.PRESSWATER, 1)
 	if districts.divert_good(districts.PRESSWATER, 1):
 		push_error("FAIL divert below reserve allowed")
@@ -145,7 +145,7 @@ func _run_tests() -> void:
 		push_error("FAIL divert amount wrong")
 		quit(1)
 		return
-	print("PASS siphon respects protected reserve")
+	print("PASS steal respects protected reserve")
 
 	# --- Cover: 70% target above reserve + 30% sibling ---
 	districts.set_good_amount(districts.PRESSWATER, 6)  # 5 above
@@ -157,10 +157,10 @@ func _run_tests() -> void:
 		push_error("FAIL sibling production did not raise Cover")
 		quit(1)
 		return
-	var notice_thin: float = districts.get_siphon_notice_chance(districts.PRESSWATER)
+	var notice_thin: float = districts.get_theft_notice_chance(districts.PRESSWATER)
 	districts.set_good_amount(districts.PRESSWATER, 2)
 	districts.set_good_amount(districts.SEALBRINE, 1)
-	var notice_worse: float = districts.get_siphon_notice_chance(districts.PRESSWATER)
+	var notice_worse: float = districts.get_theft_notice_chance(districts.PRESSWATER)
 	if notice_worse <= notice_thin:
 		push_error("FAIL thin production did not raise notice chance")
 		quit(1)
@@ -213,20 +213,20 @@ func _run_tests() -> void:
 		return
 	print("PASS efficiency adds +1 per queued input to primary good")
 
-	# --- Forbidden siphon diverts named good, not Salvage ---
+	# --- Forbidden steal diverts named good, not Salvage ---
 	districts.reset_production()
 	districts.set_good_amount(districts.BINDCORD, 4)
 	wallet.set_amount(wallet.SALVAGE, 100)
-	upgrades.set_siphon_station_open(true)
-	upgrades.force_siphon_notice = false
+	upgrades.set_theft_station_open(true)
+	upgrades.force_theft_notice = false
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	var salvage_before: int = wallet.get_amount(wallet.SALVAGE)
-	if not upgrades.siphon_for_upgrade(upgrades.DIG_YIELD):
-		push_error("FAIL Dig Yield siphon with Bindcord")
+	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+		push_error("FAIL Dig Yield steal with Bindcord")
 		quit(1)
 		return
 	if wallet.get_amount(wallet.SALVAGE) != salvage_before:
-		push_error("FAIL forbidden siphon spent Salvage")
+		push_error("FAIL forbidden steal spent Salvage")
 		quit(1)
 		return
 	if districts.get_good_amount(districts.BINDCORD) != 3:
@@ -237,7 +237,7 @@ func _run_tests() -> void:
 		push_error("FAIL Dig Yield level")
 		quit(1)
 		return
-	print("PASS forbidden siphon diverts District production")
+	print("PASS forbidden steal diverts District production")
 
 	# --- Save / load named goods + queue + Materials ---
 	districts.reset_production()

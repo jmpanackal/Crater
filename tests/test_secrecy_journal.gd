@@ -27,14 +27,14 @@ func _run_tests() -> void:
 		for id in upgrades.get_upgrade_ids():
 			upgrades.set_level(id, 0)
 
-	# Lie prompt path: dodge Standing, set pending_lie.
+	# Lie prompt path: dodge Trust, set pending_lie.
 	community.skip_lie_prompt = false
-	community.set_social_standing(50)
+	community.set_trust(50)
 	community.set_pending_lie(false)
 	if upgrades:
-		upgrades.set_siphon_station_open(false)
+		upgrades.set_theft_station_open(false)
 	if community.is_player_in_hollow():
-		push_error("FAIL expected Dig Site (siphon closed) for miss prompt")
+		push_error("FAIL expected Dig Site (steal closed) for miss prompt")
 		quit(1)
 		return
 	var prompted: Array = [false]
@@ -47,34 +47,34 @@ func _run_tests() -> void:
 		push_error("FAIL harvest miss prompt not emitted (skip_lie_prompt=%s)" % community.skip_lie_prompt)
 		quit(1)
 		return
-	if community.get_social_standing() != 50:
-		push_error("FAIL lie still penalized Standing")
+	if community.get_trust() != 50:
+		push_error("FAIL lie still penalized Trust")
 		quit(1)
 		return
 	if not community.has_pending_lie():
 		push_error("FAIL lie did not set pending_lie")
 		quit(1)
 		return
-	print("PASS Harvest miss lie dodges Standing")
+	print("PASS Harvest miss lie dodges Trust")
 	community.skip_lie_prompt = true
 
 	# Truth path still penalizes.
 	community.set_pending_lie(false)
-	community.set_social_standing(50)
-	var before: int = community.get_social_standing()
+	community.set_trust(50)
+	var before: int = community.get_trust()
 	community.on_harvest_missed()
-	if community.get_social_standing() != before - community.SOCIAL_STANDING_MISS_PENALTY:
+	if community.get_trust() != before - community.TRUST_MISS_PENALTY:
 		push_error("FAIL truth miss penalty")
 		quit(1)
 		return
 	print("PASS honest miss still penalizes")
 
 	# Upward dig catch with forced RNG via many rolls is awkward — call caught directly.
-	community.set_social_standing(40)
+	community.set_trust(40)
 	community.set_pending_lie(true)
-	before = community.get_social_standing()
+	before = community.get_trust()
 	community.on_caught_upward_dig()
-	var drop: int = before - community.get_social_standing()
+	var drop: int = before - community.get_trust()
 	if drop != community.UPWARD_DIG_PENALTY + community.LIE_EXPOSED_EXTRA_PENALTY:
 		push_error("FAIL upward catch drop=%d" % drop)
 		quit(1)
@@ -112,13 +112,13 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	community.set_pending_lie(false)
-	community.set_social_standing(33)
+	community.set_trust(33)
 	if not save_load.save_game():
 		push_error("FAIL save")
 		quit(1)
 		return
 	journal.clear_all()
-	community.set_social_standing(50)
+	community.set_trust(50)
 	if not save_load.load_game():
 		push_error("FAIL load")
 		quit(1)
@@ -135,11 +135,11 @@ func _run_tests() -> void:
 		push_error("FAIL Quiet Dig locked after Firmament note load")
 		quit(1)
 		return
-	if community.get_social_standing() != 33:
-		push_error("FAIL standing after journal save load")
+	if community.get_trust() != 33:
+		push_error("FAIL trust after journal save load")
 		quit(1)
 		return
-	print("PASS journal + standing persist")
+	print("PASS journal + trust persist")
 
 	# Firmament vs Devil’s Mouth cell helpers.
 	var terrain := TerrainLayer.new()

@@ -22,8 +22,8 @@ func _run_tests() -> void:
 		save_load.clear_save()
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
-	upgrades.set_siphon_station_open(true)
-	upgrades.force_siphon_notice = false
+	upgrades.set_theft_station_open(true)
+	upgrades.force_theft_notice = false
 	wallet.set_amount(wallet.SALVAGE, 0)
 	districts.reset_production()
 	districts.set_good_amount(districts.BINDCORD, districts.PROTECTED_RESERVE)
@@ -32,18 +32,18 @@ func _run_tests() -> void:
 		push_error("FAIL Dig Yield divert cost")
 		quit(1)
 		return
-	if upgrades.siphon_for_upgrade(upgrades.DIG_YIELD):
-		push_error("FAIL siphon at reserve Bindcord")
+	if upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+		push_error("FAIL steal at reserve Bindcord")
 		quit(1)
 		return
 
 	districts.set_good_amount(districts.BINDCORD, 3)
-	if not upgrades.siphon_for_upgrade(upgrades.DIG_YIELD):
-		push_error("FAIL first siphon")
+	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+		push_error("FAIL first steal")
 		quit(1)
 		return
 	if districts.get_good_amount(districts.BINDCORD) != 2 or upgrades.get_level(upgrades.DIG_YIELD) != 1:
-		push_error("FAIL after first siphon")
+		push_error("FAIL after first steal")
 		quit(1)
 		return
 
@@ -54,12 +54,12 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	wallet.set_amount(wallet.SALVAGE, 4)
-	if not upgrades.siphon_for_upgrade(upgrades.FARMS_EFF):
-		push_error("FAIL efficiency siphon")
+	if not upgrades.steal_for_upgrade(upgrades.FARMS_EFF):
+		push_error("FAIL efficiency steal")
 		quit(1)
 		return
 	if wallet.get_amount(wallet.SALVAGE) != 0 or upgrades.get_level(upgrades.FARMS_EFF) != 1:
-		push_error("FAIL after efficiency siphon")
+		push_error("FAIL after efficiency steal")
 		quit(1)
 		return
 	if upgrades.get_next_cost(upgrades.FARMS_EFF) != 6:
@@ -67,5 +67,5 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	print("UPGRADE_SIPHON_CURVE_PASSED")
+	print("UPGRADE_STEAL_CURVE_PASSED")
 	quit(0)
