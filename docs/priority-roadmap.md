@@ -40,16 +40,16 @@ Risk rename below, lock both together.
 
 ---
 
-## Phase 1 — Harden the core loop to match what's already locked
+## Phase 1 — Harden the core loop to match what's already locked ✅ done (2026-09-13)
 
-*Cost: bounded implementation work. No design decisions needed — these are
+*Cost: bounded implementation work. No design decisions needed — these were
 gaps between locked intent and current code, not open questions.*
 
-- [ ] **Split the shop UI into Requisition (public) + Steal (forbidden)** per Phase 0 Decision #2 — currently both efficiency and Dig Yield route through the same `steal_for_upgrade()` panel. This is a prerequisite for the next bullet, not a separate later task: Tallies needs a public panel to be spent *in*.
-- [ ] **Wire Tallies as the real efficiency-spend currency** for the new Requisition panel, replacing the transitional Salvage path (`upgrades.gd:4` marks this explicitly). Scope: `upgrades.gd`'s efficiency spend path, `upgrade_hud.gd`'s cost display, one save-migration note if wallet shape changes.
-- [ ] **Rename Cover → Shortage Risk with an inverted polarity** (healthier production → *lower* Shortage Risk, per `materials.md`). Touches `districts.gd` (`cover_changed`, `get_cover_health()`, `get_cover_for_good()` and their formulas), `upgrade_hud.gd` (labels/tooltips/notice text), `main.tscn` (`ShopCover`/`CoverLabel` nodes), and their tests. Do this as its own reviewable batch — it's a values-and-meaning change, not a find/replace.
-- [ ] **One true end-to-end integration test**: dig → return to Hollow → turn in Materials → district production updates → save → reload → state persists. Current tests are strong per-system but don't prove this full loop holds together as one path.
-- [ ] Re-run the full suite (`tools/run_tests.ps1`) after each of the above — they're independent, land and verify one at a time.
+- [x] **Split the shop UI into Requisition (public) + Steal (forbidden)** per Phase 0 Decision #2. `upgrades.gd`'s shared gate/spend renamed `can_acquire`/`acquire_upgrade` (was `can_steal`/`steal_for_upgrade` — that name was itself wrong for a sanctioned purchase); `theft_result` now only fires for the forbidden path, fixing a real bug where every efficiency buy showed "Theft complete." Two real panels in `main.tscn` (`RequisitionPanel` + `TheftShopPanel`), two hotkeys (`Q` / `U`), District production browsing moved to Requisition only.
+- [x] **Wire Tallies as the real efficiency-spend currency** — `acquire_upgrade`'s efficiency branch spends `wallet.TALLIES`, not `wallet.SALVAGE`.
+- [x] **Rename Cover → Shortage Risk with an inverted polarity** — `districts.gd`'s `get_cover_health`/`get_cover_for_good` → `get_shortage_risk`/`get_shortage_risk_for_good` (1.0 - the old value), `cover_changed` → `shortage_risk_changed`, `get_theft_notice_chance` rewritten directly proportional to risk. HUD labels/tooltips and `main.tscn` node names (`CoverLabel`→`ShortageRiskLabel`, `ShopCover`→`ShopShortageRisk`) updated to match.
+- [x] **One true end-to-end integration test** — new `tests/test_economy_loop.gd`: dig → turn in → Harvest → Requisition (Tallies) → Steal (divert) → save → mutate everything → load → confirm the whole loop survives together, not per-system.
+- [x] Verified with `tools/run_tests.ps1` after each step — **26/26 passing** at the end (one pre-existing flaky test unrelated to this phase, confirmed by rerun: `test_feel_feedback.gd`'s Record-drop RNG isn't seeded/disabled, occasionally fails at whichever assertion runs first — not a regression, not touched by this phase, worth a follow-up fix later).
 
 **Exit condition:** the four gaps above are closed; `tools/run_tests.ps1` still 25/25 (or however many exist by then).
 
