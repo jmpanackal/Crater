@@ -1,7 +1,7 @@
 extends Node
 ## Global upgrade / tech seed (autoload name: Upgrades).
 ## Forbidden upgrades steal District production at the Hollow.
-## Efficiency = sanctioned/"safe magic" (boosts districts; still spends Salvage until Tallies UI lands).
+## Efficiency = sanctioned/"safe magic" Requisition purchases (boosts districts; spends Tallies).
 
 signal upgrade_changed(upgrade_id: StringName, new_level: int)
 ## Emitted when the Hollow theft station opens/closes (player enters/leaves Hollow).
@@ -20,7 +20,7 @@ const CISTERN_EFF := &"cistern_eff"
 # true only while the player is physically in the Hollow (set by HollowZone).
 var _theft_station_open := false
 
-## When true, forbidden thefts skip RNG (tests). Null = use cover chance.
+## When true, forbidden thefts skip RNG (tests). Null = use Shortage Risk chance.
 var force_theft_notice: Variant = null
 
 var _defs: Dictionary = {
@@ -133,7 +133,7 @@ func get_divert_amount(upgrade_id: StringName) -> int:
 	return maxi(1, int(get_def(upgrade_id).get("divert_amount", 1)))
 
 
-## Next cost. Efficiency uses Salvage curve; forbidden shows divert amount.
+## Next cost. Efficiency uses a Tallies curve; forbidden shows divert amount.
 func get_next_cost(upgrade_id: StringName) -> int:
 	if is_forbidden(upgrade_id):
 		return get_divert_amount(upgrade_id)
@@ -190,7 +190,9 @@ func get_required_record(upgrade_id: StringName) -> StringName:
 	return StringName(str(req))
 
 
-func can_steal(upgrade_id: StringName) -> bool:
+## Category-agnostic gate: forbidden checks district divert capacity,
+## efficiency (Requisition) checks Tallies balance.
+func can_acquire(upgrade_id: StringName) -> bool:
 	if not _theft_station_open:
 		return false
 	if not _defs.has(upgrade_id):
@@ -207,12 +209,13 @@ func can_steal(upgrade_id: StringName) -> bool:
 	var wallet := _wallet()
 	if wallet == null:
 		return false
-	return wallet.get_amount(wallet.SALVAGE) >= get_next_cost(upgrade_id)
+	return wallet.get_amount(wallet.TALLIES) >= get_next_cost(upgrade_id)
 
 
-## Efficiency spends Salvage; forbidden upgrades steal District production and roll Cover notice.
-func steal_for_upgrade(upgrade_id: StringName) -> bool:
-	if not can_steal(upgrade_id):
+## Efficiency (Requisition) spends Tallies; forbidden (Steal) upgrades divert
+## District production and roll a theft-notice chance.
+func acquire_upgrade(upgrade_id: StringName) -> bool:
+	if not can_acquire(upgrade_id):
 		return false
 
 	var divert_good := get_divert_good(upgrade_id)
@@ -224,20 +227,20 @@ func steal_for_upgrade(upgrade_id: StringName) -> bool:
 	else:
 		var cost := get_next_cost(upgrade_id)
 		var wallet := _wallet()
-		wallet.add(wallet.SALVAGE, -cost)
+		wallet.add(wallet.TALLIES, -cost)
 
 	_levels[upgrade_id] = get_level(upgrade_id) + 1
 	upgrade_changed.emit(upgrade_id, get_level(upgrade_id))
 
-	var noticed := false
+	# theft_result only makes sense for the forbidden path — an efficiency
+	# purchase isn't a theft and shouldn't trigger a "Theft complete" notice.
 	if is_forbidden(upgrade_id):
-		noticed = _roll_theft_notice(divert_good)
+		var noticed := _roll_theft_notice(divert_good)
 		if noticed:
 			var community := get_tree().root.get_node_or_null("Community")
 			if community and community.has_method("on_theft_noticed"):
 				community.on_theft_noticed()
-
-	theft_result.emit(upgrade_id, noticed)
+		theft_result.emit(upgrade_id, noticed)
 
 	var save_load := get_tree().root.get_node_or_null("SaveLoad")
 	if save_load and save_load.has_method("save_game"):

@@ -1,5 +1,5 @@
 extends SceneTree
-## Forbidden steal notice uses cover; efficiency steals skip notice.
+## Forbidden steal notice uses Shortage Risk; efficiency requisitions skip notice.
 
 
 func _init() -> void:
@@ -29,6 +29,7 @@ func _run_tests() -> void:
 	community.set_trust(50)
 	community.set_pending_lie(false)
 	wallet.set_amount(wallet.SALVAGE, 100)
+	wallet.set_amount(wallet.TALLIES, 100)
 	districts.reset_production()
 	districts.set_good_amount(districts.BINDCORD, 5)
 	districts.set_good_amount(districts.SEALBRINE, 5)
@@ -36,7 +37,7 @@ func _run_tests() -> void:
 	# Forced notice on forbidden Dig Yield.
 	upgrades.force_theft_notice = true
 	var before: int = community.get_trust()
-	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if not upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL forbidden steal")
 		quit(1)
 		return
@@ -46,19 +47,19 @@ func _run_tests() -> void:
 		return
 	print("PASS forbidden steal can drop Trust")
 
-	# Efficiency steal never rolls notice even if force flag is set.
+	# Efficiency requisition never rolls notice even if force flag is set.
 	community.set_trust(50)
 	upgrades.force_theft_notice = true
 	before = community.get_trust()
-	if not upgrades.steal_for_upgrade(upgrades.FARMS_EFF):
-		push_error("FAIL efficiency steal")
+	if not upgrades.acquire_upgrade(upgrades.FARMS_EFF):
+		push_error("FAIL efficiency requisition")
 		quit(1)
 		return
 	if community.get_trust() != before:
-		push_error("FAIL efficiency steal changed Trust")
+		push_error("FAIL efficiency requisition changed Trust")
 		quit(1)
 		return
-	print("PASS efficiency steal is open (no notice)")
+	print("PASS efficiency requisition is open (no notice)")
 
 	# Exposed lie worsens steal penalty (Quiet Dig needs Firmament note Record).
 	var journal: Node = root.get_node_or_null("Journal")
@@ -68,7 +69,7 @@ func _run_tests() -> void:
 	community.set_pending_lie(true)
 	upgrades.force_theft_notice = true
 	before = community.get_trust()
-	if not upgrades.steal_for_upgrade(upgrades.QUIET_DIG):
+	if not upgrades.acquire_upgrade(upgrades.QUIET_DIG):
 		push_error("FAIL Quiet Dig steal after Firmament note")
 		quit(1)
 		return
