@@ -105,10 +105,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		var upgrade_panel := get_node_or_null("UI/UpgradePanel")
-		if upgrade_panel and upgrade_panel.has_method("is_shop_open") and upgrade_panel.is_shop_open():
-			upgrade_panel.close_shop()
-			get_viewport().set_input_as_handled()
-			return
+		if upgrade_panel and upgrade_panel.has_method("is_theft_shop_open"):
+			if upgrade_panel.is_theft_shop_open() or upgrade_panel.is_requisition_open():
+				upgrade_panel.close_theft_shop()
+				upgrade_panel.close_requisition()
+				get_viewport().set_input_as_handled()
+				return
 		var save_load := get_tree().root.get_node_or_null("SaveLoad")
 		if save_load and save_load.has_method("save_game"):
 			save_load.save_game()

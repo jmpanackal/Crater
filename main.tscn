@@ -507,20 +507,101 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="CoverLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
+[node name="ShortageRiskLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "Cover ?"
-tooltip_text = "How hidden your theft is. Higher Cover = safer diversion of District production."
+text = "Shortage Risk ?"
+tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
+
+[node name="RequisitionExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
+layout_mode = 2
+focus_mode = 0
+custom_minimum_size = Vector2(0, 22)
+theme_override_font_sizes/font_size = 11
+text = "Requisition  [Q]"
+tooltip_text = "Open, sanctioned upgrades — spend Tallies to help the districts."
 
 [node name="TheftExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
 layout_mode = 2
 focus_mode = 0
 custom_minimum_size = Vector2(0, 22)
 theme_override_font_sizes/font_size = 11
-text = "Shop  [U]"
-tooltip_text = "Turn in Materials and steal District production. Forbidden options risk Trust if Cover is thin."
+text = "Steal  [U]"
+tooltip_text = "Forbidden upgrades — divert District production. Risks Trust if Shortage Risk is high."
+
+[node name="RequisitionDimmer" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.02, 0.04, 0.05, 0.55)
+
+[node name="RequisitionPanel" type="PanelContainer" parent="UI"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -292.0
+offset_right = 210.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="UI/RequisitionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="UI/RequisitionPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="UI/RequisitionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Requisition"
+modulate = Color(0.68, 0.82, 0.66, 0.95)
+
+[node name="TalliesLabel" type="Label" parent="UI/RequisitionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Tallies ?"
+tooltip_text = "Personal work pay from public Material turn-ins."
+modulate = Color(0.62, 0.82, 0.78, 0.92)
+
+[node name="DistrictToggle" type="Button" parent="UI/RequisitionPanel/Margin/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 11
+text = "Districts ▸"
+
+[node name="DistrictLabel" type="Label" parent="UI/RequisitionPanel/Margin/VBox"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Districts…"
+autowrap_mode = 3
+tooltip_text = "District production and output."
+modulate = Color(0.68, 0.72, 0.7, 0.82)
+
+[node name="RequisitionList" type="VBoxContainer" parent="UI/RequisitionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="CloseButton" type="Button" parent="UI/RequisitionPanel/Margin/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 11
+text = "Close  [Q / Esc]"
 
 [node name="TheftShopDimmer" type="ColorRect" parent="UI"]
 visible = false
@@ -563,27 +644,12 @@ theme_override_font_sizes/font_size = 12
 text = "Steal from production"
 modulate = Color(0.86, 0.68, 0.48, 0.95)
 
-[node name="ShopCover" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
+[node name="ShopShortageRisk" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "Cover ?"
-tooltip_text = "How hidden your theft is. Higher Cover = safer diversion of District production."
+text = "Shortage Risk ?"
+tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
-
-[node name="DistrictToggle" type="Button" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 11
-text = "Districts ▸"
-
-[node name="DistrictLabel" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
-visible = false
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Districts…"
-autowrap_mode = 3
-tooltip_text = "District production and output. Healthy districts raise Cover."
-modulate = Color(0.68, 0.72, 0.7, 0.82)
 
 [node name="TheftList" type="VBoxContainer" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2

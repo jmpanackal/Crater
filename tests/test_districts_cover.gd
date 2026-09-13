@@ -1,5 +1,5 @@
 extends SceneTree
-## District efficiency still raises illustrative rates; Cover uses named goods.
+## District efficiency still raises illustrative rates; Shortage Risk uses named goods.
 
 
 func _init() -> void:
@@ -41,29 +41,29 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	# Thin production → weaker Cover / higher notice.
+	# Thin production → higher Shortage Risk / higher notice.
 	for good_id in districts.get_good_ids():
 		districts.set_good_amount(good_id, districts.PROTECTED_RESERVE)
-	var cover_low: float = districts.get_cover_health()
+	var risk_high: float = districts.get_shortage_risk()
 	var notice_high: float = districts.get_theft_notice_chance()
-	if cover_low >= 0.95:
-		push_error("FAIL base cover too high %s" % cover_low)
+	if risk_high <= 0.05:
+		push_error("FAIL base shortage risk too low %s" % risk_high)
 		quit(1)
 		return
 
 	for good_id in districts.get_good_ids():
 		districts.set_good_amount(good_id, districts.CAPACITY)
-	var cover_high: float = districts.get_cover_health()
+	var risk_low: float = districts.get_shortage_risk()
 	var notice_low: float = districts.get_theft_notice_chance()
-	if cover_high <= cover_low:
-		push_error("FAIL healthy production did not raise cover")
+	if risk_low >= risk_high:
+		push_error("FAIL healthy production did not lower shortage risk")
 		quit(1)
 		return
 	if notice_low >= notice_high:
 		push_error("FAIL healthier districts did not lower notice chance")
 		quit(1)
 		return
-	print("PASS healthy named goods raise cover and lower steal notice")
+	print("PASS healthy named goods lower shortage risk and steal notice")
 
 	# Efficiency still raises get_rate for Harvest bonus wiring.
 	upgrades.set_level(upgrades.FARMS_EFF, 3)

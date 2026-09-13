@@ -2,10 +2,11 @@ extends Node
 ## Hollow District production (autoload: Districts).
 ## Named communal goods are filled by Materials queued for the next Harvest.
 ## Theft diverts named goods (never below the protected civic reserve).
-## Cover is local: 70% target good + 30% sibling, from production above reserve.
+## Shortage Risk is local: 70% target good + 30% sibling, from production
+## above reserve — lower risk when a good's production is healthy.
 
 signal district_changed(district_id: StringName)
-signal cover_changed(cover_health: float)
+signal shortage_risk_changed(risk: float)
 signal production_changed(good_id: StringName)
 signal material_queued(material_id: StringName)
 
@@ -24,10 +25,13 @@ const SEALBRINE := &"sealbrine"
 const PROTECTED_RESERVE := 1
 const CAPACITY := 6
 const THIN_PRODUCTION_THRESHOLD := 3
-const COVER_TARGET_WEIGHT := 0.7
-const COVER_SIBLING_WEIGHT := 0.3
+const HEALTH_TARGET_WEIGHT := 0.7
+const HEALTH_SIBLING_WEIGHT := 0.3
 const MAX_ABOVE_RESERVE := CAPACITY - PROTECTED_RESERVE
-const MIN_COVER := 0.12
+## Production health never reaches 0 (there's always some baseline safety),
+## so Shortage Risk (1.0 - health) never reaches its theoretical ceiling either.
+const MIN_PRODUCTION_HEALTH := 0.12
+const MAX_SHORTAGE_RISK := 1.0 - MIN_PRODUCTION_HEALTH
 const MAX_THEFT_NOTICE := 0.42
 const MIN_THEFT_NOTICE := 0.03
 
@@ -109,7 +113,7 @@ func reset_production() -> void:
 		_queue[good_id] = 0
 	for id in _defs.keys():
 		district_changed.emit(id)
-	cover_changed.emit(get_cover_health())
+	shortage_risk_changed.emit(get_shortage_risk())
 
 
 func get_district_ids() -> Array[StringName]:
@@ -184,7 +188,7 @@ func set_good_amount(good_id: StringName, amount: int) -> void:
 	var district_id := get_district_for_good(good_id)
 	if district_id != StringName():
 		district_changed.emit(district_id)
-	cover_changed.emit(get_cover_health())
+	shortage_risk_changed.emit(get_shortage_risk())
 
 
 func get_queued(good_id: StringName) -> int:
@@ -248,37 +252,43 @@ func get_total_rate() -> float:
 	return total
 
 
-## Global Cover chip: mean of all named-good covers.
-func get_cover_health() -> float:
-	var total := 0.0
-	var count := 0
-	for good_id in _good_defs.keys():
-		total += get_cover_for_good(good_id)
-		count += 1
-	if count <= 0:
-		return MIN_COVER
-	return clampf(total / float(count), MIN_COVER, 1.0)
-
-
-## Cover for diverting a specific named good (70% target + 30% sibling, above reserve).
-func get_cover_for_good(good_id: StringName) -> float:
+## How healthy a good's production is, above reserve (70% target + 30%
+## sibling). Private — the public surface is Shortage Risk, its inverse.
+func _production_health_for_good(good_id: StringName) -> float:
 	if not _good_defs.has(good_id):
-		return MIN_COVER
+		return MIN_PRODUCTION_HEALTH
 	var target_above := float(maxi(0, get_good_amount(good_id) - PROTECTED_RESERVE))
 	var sibling_id := get_sibling(good_id)
 	var sibling_above := float(maxi(0, get_good_amount(sibling_id) - PROTECTED_RESERVE))
-	var raw := COVER_TARGET_WEIGHT * target_above + COVER_SIBLING_WEIGHT * sibling_above
+	var raw := HEALTH_TARGET_WEIGHT * target_above + HEALTH_SIBLING_WEIGHT * sibling_above
 	var denom := float(MAX_ABOVE_RESERVE)
 	if denom <= 0.0:
-		return MIN_COVER
-	return clampf(raw / denom, MIN_COVER, 1.0)
+		return MIN_PRODUCTION_HEALTH
+	return clampf(raw / denom, MIN_PRODUCTION_HEALTH, 1.0)
+
+
+## Global Shortage Risk chip: mean of all named-good risks. Lower = safer —
+## healthy district production makes missing goods harder to notice.
+func get_shortage_risk() -> float:
+	var total := 0.0
+	var count := 0
+	for good_id in _good_defs.keys():
+		total += _production_health_for_good(good_id)
+		count += 1
+	var health := MIN_PRODUCTION_HEALTH if count <= 0 else clampf(total / float(count), MIN_PRODUCTION_HEALTH, 1.0)
+	return 1.0 - health
+
+
+## Shortage Risk for diverting a specific named good. Lower = safer.
+func get_shortage_risk_for_good(good_id: StringName) -> float:
+	return 1.0 - _production_health_for_good(good_id)
 
 
 func get_theft_notice_chance(good_id: StringName = StringName()) -> float:
-	var cover := get_cover_health()
+	var risk := get_shortage_risk()
 	if good_id != StringName() and _good_defs.has(good_id):
-		cover = get_cover_for_good(good_id)
-	return lerpf(MAX_THEFT_NOTICE, MIN_THEFT_NOTICE, cover)
+		risk = get_shortage_risk_for_good(good_id)
+	return lerpf(MIN_THEFT_NOTICE, MAX_THEFT_NOTICE, risk)
 
 
 func can_divert(good_id: StringName, amount: int = 1) -> bool:
@@ -344,7 +354,7 @@ func apply_harvest() -> void:
 		production_changed.emit(good_id)
 	for id in _defs.keys():
 		district_changed.emit(id)
-	cover_changed.emit(get_cover_health())
+	shortage_risk_changed.emit(get_shortage_risk())
 
 
 func get_production_snapshot() -> Dictionary:
