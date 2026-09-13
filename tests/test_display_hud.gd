@@ -57,8 +57,8 @@ func _run_tests() -> void:
 		push_error("FAIL HarvestLabel missing")
 		quit(1)
 		return
-	if scene.get_node_or_null("UI/StandingLabel") == null:
-		push_error("FAIL StandingLabel missing")
+	if scene.get_node_or_null("UI/TrustLabel") == null:
+		push_error("FAIL TrustLabel missing")
 		quit(1)
 		return
 	if scene.get_node_or_null("UI/UpgradePanel/HarvestLabel") != null:
@@ -66,20 +66,20 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	# Harvest / Standing / Materials must be distinct non-overlapping rows.
+	# Harvest / Trust / Materials must be distinct non-overlapping rows.
 	var mats: Control = scene.get_node("UI/SalvageLabel") as Control
 	var harvest: Control = scene.get_node("UI/HarvestLabel") as Control
-	var standing: Control = scene.get_node("UI/StandingLabel") as Control
-	if mats == null or harvest == null or standing == null:
+	var trust: Control = scene.get_node("UI/TrustLabel") as Control
+	if mats == null or harvest == null or trust == null:
 		push_error("FAIL primary HUD rows missing")
 		quit(1)
 		return
 	var mats_r := mats.get_global_rect()
 	var harv_r := harvest.get_global_rect()
-	var stand_r := standing.get_global_rect()
+	var stand_r := trust.get_global_rect()
 	if mats_r.intersects(harv_r) or harv_r.intersects(stand_r) or mats_r.intersects(stand_r):
 		push_error(
-			"FAIL HUD status rows overlap mats=%s harvest=%s standing=%s"
+			"FAIL HUD status rows overlap mats=%s harvest=%s trust=%s"
 			% [mats_r, harv_r, stand_r]
 		)
 		quit(1)
@@ -89,7 +89,7 @@ func _run_tests() -> void:
 		quit(1)
 		return
 	if stand_r.position.y < harv_r.end.y - 0.5:
-		push_error("FAIL StandingLabel not below Harvest row")
+		push_error("FAIL TrustLabel not below Harvest row")
 		quit(1)
 		return
 	print("PASS HUD status rows non-overlapping")
@@ -138,7 +138,7 @@ func _run_tests() -> void:
 
 	var upgrades: Node = root.get_node_or_null("Upgrades")
 	if upgrades:
-		upgrades.set_siphon_station_open(true)
+		upgrades.set_theft_station_open(true)
 		await process_frame
 		await process_frame
 		var panel: Control = scene.get_node("UI/UpgradePanel") as Control
@@ -151,17 +151,17 @@ func _run_tests() -> void:
 			quit(1)
 			return
 		var harvest_lbl: Label = scene.get_node("UI/HarvestLabel") as Label
-		var standing_lbl: Label = scene.get_node("UI/StandingLabel") as Label
+		var trust_lbl: Label = scene.get_node("UI/TrustLabel") as Label
 		if not str(harvest_lbl.text).begins_with("Harvest"):
 			push_error("FAIL harvest text '%s'" % harvest_lbl.text)
 			quit(1)
 			return
-		if not str(standing_lbl.text).begins_with("Standing"):
-			push_error("FAIL standing text '%s'" % standing_lbl.text)
+		if not str(trust_lbl.text).begins_with("Trust"):
+			push_error("FAIL trust text '%s'" % trust_lbl.text)
 			quit(1)
 			return
-		if harvest_lbl.tooltip_text.strip_edges() == "" or standing_lbl.tooltip_text.strip_edges() == "":
-			push_error("FAIL Harvest/Standing missing meaning tooltips")
+		if harvest_lbl.tooltip_text.strip_edges() == "" or trust_lbl.tooltip_text.strip_edges() == "":
+			push_error("FAIL Harvest/Trust missing meaning tooltips")
 			quit(1)
 			return
 		var cover: Label = scene.get_node("UI/UpgradePanel/Margin/Content/CoverLabel") as Label
@@ -174,31 +174,31 @@ func _run_tests() -> void:
 			push_error("FAIL DistrictToggle should not live on Hollow chip")
 			quit(1)
 			return
-		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/SiphonList") != null:
-			var legacy: CanvasItem = scene.get_node("UI/UpgradePanel/Margin/Content/SiphonList") as CanvasItem
+		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/TheftList") != null:
+			var legacy: CanvasItem = scene.get_node("UI/UpgradePanel/Margin/Content/TheftList") as CanvasItem
 			if legacy.visible:
-				push_error("FAIL inline SiphonList visible on chip")
+				push_error("FAIL inline TheftList visible on chip")
 				quit(1)
 				return
 	print("PASS compact Hollow HUD hierarchy")
 
-	var shop_panel: CanvasItem = scene.get_node_or_null("UI/SiphonShopPanel") as CanvasItem
-	var siphon_list: CanvasItem = scene.get_node_or_null("UI/SiphonShopPanel/Margin/VBox/SiphonList") as CanvasItem
-	if shop_panel == null or siphon_list == null:
-		push_error("FAIL SiphonShopPanel / SiphonList missing")
+	var shop_panel: CanvasItem = scene.get_node_or_null("UI/TheftShopPanel") as CanvasItem
+	var theft_list: CanvasItem = scene.get_node_or_null("UI/TheftShopPanel/Margin/VBox/TheftList") as CanvasItem
+	if shop_panel == null or theft_list == null:
+		push_error("FAIL TheftShopPanel / TheftList missing")
 		quit(1)
 		return
 	if shop_panel.visible:
-		push_error("FAIL SiphonShop should start collapsed until U")
+		push_error("FAIL TheftShop should start collapsed until U")
 		quit(1)
 		return
-	var hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/SiphonExpandHint") as Control
+	var hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/TheftExpandHint") as Control
 	if hint == null or not hint.visible:
-		push_error("FAIL SiphonExpandHint missing/hidden while collapsed")
+		push_error("FAIL TheftExpandHint missing/hidden while collapsed")
 		quit(1)
 		return
 	if not ("Shop" in str(hint.get("text"))):
-		push_error("FAIL SiphonExpandHint text '%s'" % hint.get("text"))
+		push_error("FAIL TheftExpandHint text '%s'" % hint.get("text"))
 		quit(1)
 		return
 
@@ -211,7 +211,7 @@ func _run_tests() -> void:
 			quit(1)
 			return
 		var district_toggle: BaseButton = scene.get_node_or_null(
-			"UI/SiphonShopPanel/Margin/VBox/DistrictToggle"
+			"UI/TheftShopPanel/Margin/VBox/DistrictToggle"
 		) as BaseButton
 		if district_toggle == null or not district_toggle.visible:
 			push_error("FAIL DistrictToggle missing in open shop")
@@ -223,7 +223,7 @@ func _run_tests() -> void:
 			push_error("FAIL close_shop left modal open")
 			quit(1)
 			return
-	print("PASS siphon shop modal collapsed by default")
+	print("PASS steal shop modal collapsed by default")
 
 	var cam: Camera2D = scene.get_node("Player/Camera2D") as Camera2D
 	if cam.limit_right > 1100:

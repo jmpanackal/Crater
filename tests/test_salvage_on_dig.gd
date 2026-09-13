@@ -21,7 +21,7 @@ func _run_tests(terrain: TerrainLayer) -> void:
 
 	if upgrades:
 		upgrades.set_level(upgrades.DIG_YIELD, 0)
-		upgrades.set_siphon_station_open(false)
+		upgrades.set_theft_station_open(false)
 
 	wallet.reset_all()
 	terrain.clear()

@@ -41,7 +41,7 @@ var _defs: Dictionary = {
 		"base_effect": 0,
 		"effect_per_level": 1,
 		"blurb": "Softer Firmament strikes. Harder to notice upward digs.",
-		## Knowledge gate — Firmament note must be found before this can be siphoned.
+		## Knowledge gate — Firmament note must be found before this can be stolen.
 		"requires_record": &"firmament_note",
 	},
 	FARMS_EFF: {
@@ -279,9 +279,19 @@ func set_level(upgrade_id: StringName, level: int) -> void:
 	upgrade_changed.emit(upgrade_id, get_level(upgrade_id))
 
 
+var _wallet_cache: Node = null
+var _districts_cache: Node = null
+
+
 func _wallet() -> Node:
-	return get_tree().root.get_node_or_null("Resources")
+	## Cache the autoload lookup — Resources is a persistent root autoload,
+	## so re-querying by string path on every call is wasted work.
+	if _wallet_cache == null:
+		_wallet_cache = get_tree().root.get_node_or_null("Resources")
+	return _wallet_cache
 
 
 func _districts() -> Node:
-	return get_tree().root.get_node_or_null("Districts")
+	if _districts_cache == null:
+		_districts_cache = get_tree().root.get_node_or_null("Districts")
+	return _districts_cache

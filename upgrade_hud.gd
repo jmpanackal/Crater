@@ -10,7 +10,7 @@ const UiStyleRef := preload("res://ui_style.gd")
 @onready var _cover_label: Label = $Margin/Content/CoverLabel
 
 var _harvest_label: Label
-var _standing_label: Label
+var _trust_label: Label
 var _notice_label: Label
 var _lie_box: VBoxContainer
 var _lie_panel: PanelContainer
@@ -23,10 +23,10 @@ var _upgrades: Node
 var _wallet: Node
 var _community: Node
 var _districts: Node
-var _siphon_buttons: Dictionary = {}
+var _theft_buttons: Dictionary = {}
 var _notice_ttl := 0.0
-## Shop modal starts closed — never dump upgrade rows over the pit.
-var _siphon_expanded := false
+## Shop modal starts closed — never dump upgrade rows over Devil's Mouth.
+var _theft_expanded := false
 var _district_expanded := false
 var _shop_open_btn: Button
 var _district_toggle: Button
@@ -35,12 +35,13 @@ var _shop_panel: PanelContainer
 var _shop_title: Label
 var _shop_cover: Label
 var _district_label: Label
-var _siphon_list: VBoxContainer
+var _theft_list: VBoxContainer
 var _shop_close: Button
 var _pulse_t := 0.0
-var _last_standing := -1
-var _standing_flash_ttl := 0.0
-var _standing_delta := 0
+var _status_dirty := true ## starts true so _process() paints the initial labels
+var _last_trust := -1
+var _trust_flash_ttl := 0.0
+var _trust_delta := 0
 var _last_notice_tone: StringName = &"neutral"
 
 
@@ -48,7 +49,7 @@ func _ready() -> void:
 	var ui := get_parent()
 	if ui:
 		_harvest_label = ui.get_node_or_null("HarvestLabel") as Label
-		_standing_label = ui.get_node_or_null("StandingLabel") as Label
+		_trust_label = ui.get_node_or_null("TrustLabel") as Label
 		_notice_label = ui.get_node_or_null("NoticeLabel") as Label
 		_lie_box = ui.get_node_or_null("LiePrompt") as VBoxContainer
 		_lie_panel = ui.get_node_or_null("LiePromptPanel") as PanelContainer
@@ -103,9 +104,9 @@ func _ready() -> void:
 		_lie_dimmer.visible = false
 
 	_ensure_shop_open_btn()
-	_build_siphon_buttons()
+	_build_theft_buttons()
 	if _community:
-		_last_standing = _community.get_trust()
+		_last_trust = _community.get_trust()
 	_refresh_status()
 	_refresh()
 
@@ -115,17 +116,17 @@ func _ensure_shop_modal() -> void:
 	if ui == null:
 		return
 
-	_shop_dimmer = ui.get_node_or_null("SiphonShopDimmer") as ColorRect
-	_shop_panel = ui.get_node_or_null("SiphonShopPanel") as PanelContainer
+	_shop_dimmer = ui.get_node_or_null("TheftShopDimmer") as ColorRect
+	_shop_panel = ui.get_node_or_null("TheftShopPanel") as PanelContainer
 	if _shop_panel == null:
-		push_error("UpgradeHud: SiphonShopPanel missing from UI")
+		push_error("UpgradeHud: TheftShopPanel missing from UI")
 		return
 
 	_shop_title = _shop_panel.get_node_or_null("Margin/VBox/Title") as Label
 	_shop_cover = _shop_panel.get_node_or_null("Margin/VBox/ShopCover") as Label
 	_district_toggle = _shop_panel.get_node_or_null("Margin/VBox/DistrictToggle") as Button
 	_district_label = _shop_panel.get_node_or_null("Margin/VBox/DistrictLabel") as Label
-	_siphon_list = _shop_panel.get_node_or_null("Margin/VBox/SiphonList") as VBoxContainer
+	_theft_list = _shop_panel.get_node_or_null("Margin/VBox/TheftList") as VBoxContainer
 	_shop_close = _shop_panel.get_node_or_null("Margin/VBox/CloseButton") as Button
 
 	if _shop_dimmer and not _shop_dimmer.gui_input.is_connected(_on_shop_dimmer_input):
@@ -166,9 +167,9 @@ func _apply_chrome() -> void:
 			_harvest_label,
 			"Return for the communal gathering before the clock runs out."
 		)
-	if _standing_label:
-		UiStyleRef.apply_label(_standing_label, &"stat")
-		UiStyleRef.tip(_standing_label, "How trusted you are in the Hollow.")
+	if _trust_label:
+		UiStyleRef.apply_label(_trust_label, &"stat")
+		UiStyleRef.tip(_trust_label, "How trusted you are in the Hollow.")
 	if _notice_label:
 		UiStyleRef.apply_label(_notice_label, &"body")
 	if _lie_label:
@@ -202,10 +203,10 @@ func _apply_chrome() -> void:
 func _ensure_shop_open_btn() -> void:
 	if _content == null:
 		return
-	_shop_open_btn = _content.get_node_or_null("SiphonExpandHint") as Button
+	_shop_open_btn = _content.get_node_or_null("TheftExpandHint") as Button
 	if _shop_open_btn == null:
 		_shop_open_btn = Button.new()
-		_shop_open_btn.name = "SiphonExpandHint"
+		_shop_open_btn.name = "TheftExpandHint"
 		_content.add_child(_shop_open_btn)
 	_shop_open_btn.focus_mode = Control.FOCUS_NONE
 	_shop_open_btn.text = "Shop  [U]"
@@ -220,18 +221,18 @@ func _ensure_shop_open_btn() -> void:
 
 
 func is_shop_open() -> bool:
-	return _siphon_expanded and _shop_panel != null and _shop_panel.visible
+	return _theft_expanded and _shop_panel != null and _shop_panel.visible
 
 
 func open_shop() -> void:
 	if _upgrades == null or not _upgrades.is_theft_station_open():
 		return
-	_siphon_expanded = true
+	_theft_expanded = true
 	_refresh()
 
 
 func close_shop() -> void:
-	_siphon_expanded = false
+	_theft_expanded = false
 	_district_expanded = false
 	_refresh()
 
@@ -248,13 +249,21 @@ func _on_shop_dimmer_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_pulse_t += delta
-	if _standing_flash_ttl > 0.0:
-		_standing_flash_ttl = maxf(0.0, _standing_flash_ttl - delta)
+	if _trust_flash_ttl > 0.0:
+		_trust_flash_ttl = maxf(0.0, _trust_flash_ttl - delta)
+		_status_dirty = true # flash color fades every frame while active
 	if _notice_ttl > 0.0:
 		_notice_ttl -= delta
 		if _notice_ttl <= 0.0 and _notice_label:
 			_notice_label.visible = false
-	_refresh_status()
+	# _on_harvest_timer_changed/_on_trust_changed already mark this dirty
+	# whenever Community actually has something new to show — this avoids
+	# rebuilding the Harvest/Trust strings and re-deriving Color objects on
+	# frames where nothing changed (e.g. while Community is paused, as tests
+	# do via set_paused(true)).
+	if _status_dirty:
+		_status_dirty = false
+		_refresh_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -291,12 +300,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func _build_siphon_buttons() -> void:
-	if _siphon_list == null or _upgrades == null:
+func _build_theft_buttons() -> void:
+	if _theft_list == null or _upgrades == null:
 		return
-	for child in _siphon_list.get_children():
+	for child in _theft_list.get_children():
 		child.queue_free()
-	_siphon_buttons.clear()
+	_theft_buttons.clear()
 
 	for id in _upgrades.get_upgrade_ids():
 		var upgrade_id: StringName = id
@@ -306,15 +315,15 @@ func _build_siphon_buttons() -> void:
 		btn.custom_minimum_size = Vector2(0, 24)
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		UiStyleRef.apply_button(btn, true)
-		btn.pressed.connect(_try_siphon.bind(upgrade_id))
-		_siphon_list.add_child(btn)
-		_siphon_buttons[upgrade_id] = btn
+		btn.pressed.connect(_try_steal.bind(upgrade_id))
+		_theft_list.add_child(btn)
+		_theft_buttons[upgrade_id] = btn
 
 
-func _try_siphon(upgrade_id: StringName) -> void:
+func _try_steal(upgrade_id: StringName) -> void:
 	if _upgrades == null:
 		return
-	if not _siphon_expanded:
+	if not _theft_expanded:
 		open_shop()
 	_upgrades.steal_for_upgrade(upgrade_id)
 	_refresh()
@@ -330,21 +339,21 @@ func _on_resource_changed(_resource_id: StringName, _new_amount: int) -> void:
 
 func _on_theft_station_changed(_is_open: bool) -> void:
 	if _upgrades and not _upgrades.is_theft_station_open():
-		_siphon_expanded = false
+		_theft_expanded = false
 		_district_expanded = false
 	_refresh()
 
 
 func _on_harvest_timer_changed(_seconds: float) -> void:
-	_refresh_status()
+	_status_dirty = true
 
 
 func _on_trust_changed(value: int) -> void:
-	if _last_standing >= 0 and value != _last_standing:
-		_standing_delta = value - _last_standing
-		_standing_flash_ttl = 0.95
-	_last_standing = value
-	_refresh_status()
+	if _last_trust >= 0 and value != _last_trust:
+		_trust_delta = value - _last_trust
+		_trust_flash_ttl = 0.95
+	_last_trust = value
+	_status_dirty = true
 
 
 func _on_harvest_completed(_missed: bool) -> void:
@@ -449,17 +458,17 @@ func _refresh() -> void:
 	var in_hollow: bool = _upgrades.is_theft_station_open()
 	visible = in_hollow
 	if not in_hollow:
-		_siphon_expanded = false
+		_theft_expanded = false
 		_district_expanded = false
 		_set_shop_visible(false)
 		return
 
 	_refresh_districts()
-	_refresh_siphon_buttons()
-	_set_shop_visible(_siphon_expanded)
+	_refresh_theft_buttons()
+	_set_shop_visible(_theft_expanded)
 	if _shop_open_btn:
 		_shop_open_btn.visible = true
-		_shop_open_btn.text = "Close shop  [U]" if _siphon_expanded else "Shop  [U]"
+		_shop_open_btn.text = "Close shop  [U]" if _theft_expanded else "Shop  [U]"
 	call_deferred("_fit_to_content")
 
 
@@ -482,24 +491,24 @@ func _fit_to_content() -> void:
 
 
 func _refresh_status() -> void:
-	if _harvest_label == null and _standing_label == null:
+	if _harvest_label == null and _trust_label == null:
 		return
 	if _community == null:
 		if _harvest_label:
 			_harvest_label.text = "Harvest ?"
 			_harvest_label.modulate = UiStyleRef.TEXT_MUTED
-		if _standing_label:
-			_standing_label.text = "Trust ?"
-			_standing_label.modulate = UiStyleRef.TEXT_MUTED
+		if _trust_label:
+			_trust_label.text = "Trust ?"
+			_trust_label.modulate = UiStyleRef.TEXT_MUTED
 		return
 
 	var remaining: float = _community.get_harvest_seconds_remaining()
 	var lie_tag := ""
 	if _community.has_pending_lie():
 		lie_tag = "  · lie pending"
-	var standing_tag := ""
-	if _standing_flash_ttl > 0.0 and _standing_delta != 0:
-		standing_tag = " (%+d)" % _standing_delta
+	var trust_tag := ""
+	if _trust_flash_ttl > 0.0 and _trust_delta != 0:
+		trust_tag = " (%+d)" % _trust_delta
 
 	if _harvest_label:
 		_harvest_label.text = "Harvest %ds%s" % [int(ceil(remaining)), lie_tag]
@@ -514,18 +523,18 @@ func _refresh_status() -> void:
 		else:
 			_harvest_label.modulate = UiStyleRef.TEXT_PRIMARY
 
-	if _standing_label:
-		_standing_label.text = "Trust %d/%d%s" % [
+	if _trust_label:
+		_trust_label.text = "Trust %d/%d%s" % [
 			_community.get_trust(),
 			_community.TRUST_MAX,
-			standing_tag,
+			trust_tag,
 		]
-		if _standing_flash_ttl > 0.0 and _standing_delta < 0:
-			_standing_label.modulate = Color(1.0, 0.78, 0.62, 1.0)
-		elif _standing_flash_ttl > 0.0 and _standing_delta > 0:
-			_standing_label.modulate = Color(0.78, 0.92, 0.8, 1.0)
+		if _trust_flash_ttl > 0.0 and _trust_delta < 0:
+			_trust_label.modulate = Color(1.0, 0.78, 0.62, 1.0)
+		elif _trust_flash_ttl > 0.0 and _trust_delta > 0:
+			_trust_label.modulate = Color(0.78, 0.92, 0.8, 1.0)
 		else:
-			_standing_label.modulate = UiStyleRef.TEXT_PRIMARY
+			_trust_label.modulate = UiStyleRef.TEXT_PRIMARY
 
 
 ## Test helper — true when harvest urgency pulse band is active.
@@ -556,10 +565,10 @@ func _refresh_districts() -> void:
 
 	if _district_toggle:
 		_district_toggle.text = "District production ▾" if _district_expanded else "District production ▸"
-		_district_toggle.visible = _siphon_expanded
+		_district_toggle.visible = _theft_expanded
 
 	if _district_label:
-		_district_label.visible = _siphon_expanded and _district_expanded
+		_district_label.visible = _theft_expanded and _district_expanded
 		if _district_expanded and _districts != null:
 			var lines: PackedStringArray = PackedStringArray()
 			for id in _districts.get_district_ids():
@@ -652,11 +661,11 @@ func _try_turn_in_materials(prefer_tallies: bool = false) -> void:
 	_show_notice("No Materials to turn in.")
 
 
-func _refresh_siphon_buttons() -> void:
+func _refresh_theft_buttons() -> void:
 	if _upgrades == null:
 		return
-	for id in _siphon_buttons.keys():
-		var btn: Button = _siphon_buttons[id]
+	for id in _theft_buttons.keys():
+		var btn: Button = _theft_buttons[id]
 		var kind := "Safe" if _upgrades.is_efficiency(id) else "Secret"
 		var def: Dictionary = _upgrades.get_def(id) if _upgrades.has_method("get_def") else {}
 		var blurb := str(def.get("blurb", ""))

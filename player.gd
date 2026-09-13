@@ -47,7 +47,7 @@ var _climb_axis_release_required := false
 
 var _coyote_timer := 0.0
 var _jump_buffer_timer := 0.0
-## Last grounded stand — used when falling into the pit void.
+## Last grounded stand — used when falling into Devil's Mouth.
 var _last_safe_pos := Vector2.ZERO
 var _has_safe_pos := false
 ## Sprite-only squash/stretch (never scales collision).

@@ -468,7 +468,7 @@ text = "Harvest ?"
 tooltip_text = "Return for the communal gathering before the clock runs out."
 modulate = Color(0.88, 0.88, 0.84, 0.9)
 
-[node name="StandingLabel" type="Label" parent="UI"]
+[node name="TrustLabel" type="Label" parent="UI"]
 offset_left = 18.0
 offset_top = 48.0
 offset_right = 228.0
@@ -514,7 +514,7 @@ text = "Cover ?"
 tooltip_text = "How hidden your theft is. Higher Cover = safer diversion of District production."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
-[node name="SiphonExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
+[node name="TheftExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
 layout_mode = 2
 focus_mode = 0
 custom_minimum_size = Vector2(0, 22)
@@ -522,7 +522,7 @@ theme_override_font_sizes/font_size = 11
 text = "Shop  [U]"
 tooltip_text = "Turn in Materials and steal District production. Forbidden options risk Trust if Cover is thin."
 
-[node name="SiphonShopDimmer" type="ColorRect" parent="UI"]
+[node name="TheftShopDimmer" type="ColorRect" parent="UI"]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -532,7 +532,7 @@ grow_vertical = 2
 mouse_filter = 0
 color = Color(0.02, 0.04, 0.05, 0.55)
 
-[node name="SiphonShopPanel" type="PanelContainer" parent="UI"]
+[node name="TheftShopPanel" type="PanelContainer" parent="UI"]
 visible = false
 anchors_preset = 7
 anchor_left = 0.5
@@ -546,50 +546,50 @@ offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Margin" type="MarginContainer" parent="UI/SiphonShopPanel"]
+[node name="Margin" type="MarginContainer" parent="UI/TheftShopPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="UI/SiphonShopPanel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="UI/TheftShopPanel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="Title" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Steal from production"
 modulate = Color(0.86, 0.68, 0.48, 0.95)
 
-[node name="ShopCover" type="Label" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="ShopCover" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Cover ?"
 tooltip_text = "How hidden your theft is. Higher Cover = safer diversion of District production."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
-[node name="DistrictToggle" type="Button" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="DistrictToggle" type="Button" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
 text = "Districts ▸"
 
-[node name="DistrictLabel" type="Label" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="DistrictLabel" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Districts…"
 autowrap_mode = 3
-tooltip_text = "District stock and output. Healthy districts raise Cover."
+tooltip_text = "District production and output. Healthy districts raise Cover."
 modulate = Color(0.68, 0.72, 0.7, 0.82)
 
-[node name="SiphonList" type="VBoxContainer" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="TheftList" type="VBoxContainer" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="CloseButton" type="Button" parent="UI/SiphonShopPanel/Margin/VBox"]
+[node name="CloseButton" type="Button" parent="UI/TheftShopPanel/Margin/VBox"]
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
@@ -660,7 +660,7 @@ text = "Harvest finished while you were away from the districts.
 People will ask where you were.
 
 Lie (Y) — dodge notice for now, risk worse later if exposed.
-Tell the truth (N) — −5 Standing now."
+Tell the truth (N) — −5 Trust now."
 autowrap_mode = 3
 
 [node name="YesButton" type="Button" parent="UI/LiePrompt"]

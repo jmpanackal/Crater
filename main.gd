@@ -63,10 +63,10 @@ func _apply_hud_chrome() -> void:
 	if harvest:
 		UiStyleRef.apply_label(harvest, &"stat")
 		harvest.modulate = Color(0.9, 0.9, 0.86, 0.92)
-	var standing := get_node_or_null("UI/StandingLabel") as Label
-	if standing:
-		UiStyleRef.apply_label(standing, &"stat")
-		standing.modulate = Color(0.9, 0.9, 0.86, 0.92)
+	var trust := get_node_or_null("UI/TrustLabel") as Label
+	if trust:
+		UiStyleRef.apply_label(trust, &"stat")
+		trust.modulate = Color(0.9, 0.9, 0.86, 0.92)
 	var meaning := get_node_or_null("UI/MeaningHint") as Label
 	if meaning:
 		meaning.modulate.a = 0.42

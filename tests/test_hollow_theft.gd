@@ -1,5 +1,5 @@
 extends SceneTree
-## Siphon only works in Hollow; dig-site siphon fails; Hollow siphon diverts production.
+## Steal only works in Hollow; dig-site steal fails; Hollow steal diverts production.
 
 
 func _init() -> void:
@@ -24,51 +24,51 @@ func _run_tests(terrain: TerrainLayer) -> void:
 		save_load.clear_save()
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
-	upgrades.set_siphon_station_open(false)
-	upgrades.force_siphon_notice = false
+	upgrades.set_theft_station_open(false)
+	upgrades.force_theft_notice = false
 	wallet.set_amount(wallet.SALVAGE, 20)
 	districts.reset_production()
 	districts.set_good_amount(districts.BINDCORD, 4)
 
-	# Dig site: cannot siphon even with Bindcord available.
-	if upgrades.can_siphon(upgrades.DIG_YIELD):
-		push_error("FAIL can_siphon true at dig site")
+	# Dig site: cannot steal even with Bindcord available.
+	if upgrades.can_steal(upgrades.DIG_YIELD):
+		push_error("FAIL can_steal true at dig site")
 		quit(1)
 		return
-	if upgrades.siphon_for_upgrade(upgrades.DIG_YIELD):
-		push_error("FAIL siphon succeeded away from Hollow")
+	if upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+		push_error("FAIL steal succeeded away from Hollow")
 		quit(1)
 		return
 	if upgrades.get_level(upgrades.DIG_YIELD) != 0 or districts.get_good_amount(districts.BINDCORD) != 4:
-		push_error("FAIL dig-site siphon mutated state")
+		push_error("FAIL dig-site steal mutated state")
 		quit(1)
 		return
-	print("PASS siphon blocked at dig site")
+	print("PASS steal blocked at dig site")
 
-	# Return to Hollow: open station and siphon Bindcord.
-	upgrades.set_siphon_station_open(true)
-	if not upgrades.can_siphon(upgrades.DIG_YIELD):
-		push_error("FAIL can_siphon false in Hollow with Bindcord")
+	# Return to Hollow: open station and steal Bindcord.
+	upgrades.set_theft_station_open(true)
+	if not upgrades.can_steal(upgrades.DIG_YIELD):
+		push_error("FAIL can_steal false in Hollow with Bindcord")
 		quit(1)
 		return
-	if not upgrades.siphon_for_upgrade(upgrades.DIG_YIELD):
-		push_error("FAIL Hollow siphon failed")
+	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+		push_error("FAIL Hollow steal failed")
 		quit(1)
 		return
 	if upgrades.get_level(upgrades.DIG_YIELD) != 1 or districts.get_good_amount(districts.BINDCORD) != 3:
 		push_error(
-			"FAIL after siphon level=%d bindcord=%d"
+			"FAIL after steal level=%d bindcord=%d"
 			% [upgrades.get_level(upgrades.DIG_YIELD), districts.get_good_amount(districts.BINDCORD)]
 		)
 		quit(1)
 		return
 	if wallet.get_amount(wallet.SALVAGE) != 20:
-		push_error("FAIL forbidden siphon spent Salvage")
+		push_error("FAIL forbidden steal spent Salvage")
 		quit(1)
 		return
-	print("PASS Hollow siphon diverts Bindcord and levels upgrade")
+	print("PASS Hollow steal diverts Bindcord and levels upgrade")
 
-	# Dig yield improved after siphon (level 1 => 2 materials/dig).
+	# Dig yield improved after steal (level 1 => 2 materials/dig).
 	if upgrades.get_dig_salvage_yield() != 2:
 		push_error("FAIL yield=%d expected 2" % upgrades.get_dig_salvage_yield())
 		quit(1)
@@ -81,7 +81,7 @@ func _run_tests(terrain: TerrainLayer) -> void:
 	wallet.reset_all()
 	var origin := terrain.to_global(terrain.map_to_local(center))
 	# Dig still works away from Hollow; station can be closed.
-	upgrades.set_siphon_station_open(false)
+	upgrades.set_theft_station_open(false)
 	if not terrain.dig_in_direction(origin, Vector2i.DOWN):
 		push_error("FAIL dig after leaving Hollow")
 		quit(1)
@@ -101,5 +101,5 @@ func _run_tests(terrain: TerrainLayer) -> void:
 		return
 	print("PASS dig still works at dig site with improved yield")
 
-	print("HOLLOW_SIPHON_TESTS_PASSED")
+	print("HOLLOW_THEFT_TESTS_PASSED")
 	quit(0)

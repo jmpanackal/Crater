@@ -23,7 +23,7 @@ func _run_tests() -> void:
 	community.set_paused(true)
 	wallet.set_amount(wallet.SALVAGE, 40)
 	upgrades.set_level(upgrades.DIG_YIELD, 2)
-	community.set_social_standing(22)
+	community.set_trust(22)
 	community.set_pending_lie(true)
 	journal.unlock_record(journal.RECORD_NURSERY)
 	districts.set_stock(districts.FARMS, 9.0)
@@ -50,8 +50,8 @@ func _run_tests() -> void:
 		push_error("FAIL upgrades not reset")
 		quit(1)
 		return
-	if community.get_social_standing() != community.SOCIAL_STANDING_DEFAULT:
-		push_error("FAIL standing not reset")
+	if community.get_trust() != community.TRUST_DEFAULT:
+		push_error("FAIL trust not reset")
 		quit(1)
 		return
 	if community.has_pending_lie():

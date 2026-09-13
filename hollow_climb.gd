@@ -11,7 +11,7 @@ extends Area2D
 @export var grab_margin_top: float = 40.0
 ## Inset climb hitbox from visual rails so the core zone matches the copper ladder.
 @export var grab_inset: float = 4.0
-## Extra grab reach onto upper-deck lips beside the rails (not into the pit).
+## Extra grab reach onto upper-deck lips beside the rails (not into Devil's Mouth).
 @export var grab_reach: float = 20.0
 ## Upper-deck floor gap this shaft climbs through (world X). Lower landing stays solid.
 @export var deck_open_x: float = 0.0

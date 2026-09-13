@@ -45,7 +45,7 @@ func _run_tests() -> void:
 	for good_id in districts.get_good_ids():
 		districts.set_good_amount(good_id, districts.PROTECTED_RESERVE)
 	var cover_low: float = districts.get_cover_health()
-	var notice_high: float = districts.get_siphon_notice_chance()
+	var notice_high: float = districts.get_theft_notice_chance()
 	if cover_low >= 0.95:
 		push_error("FAIL base cover too high %s" % cover_low)
 		quit(1)
@@ -54,7 +54,7 @@ func _run_tests() -> void:
 	for good_id in districts.get_good_ids():
 		districts.set_good_amount(good_id, districts.CAPACITY)
 	var cover_high: float = districts.get_cover_health()
-	var notice_low: float = districts.get_siphon_notice_chance()
+	var notice_low: float = districts.get_theft_notice_chance()
 	if cover_high <= cover_low:
 		push_error("FAIL healthy production did not raise cover")
 		quit(1)
@@ -63,7 +63,7 @@ func _run_tests() -> void:
 		push_error("FAIL healthier districts did not lower notice chance")
 		quit(1)
 		return
-	print("PASS healthy named goods raise cover and lower siphon notice")
+	print("PASS healthy named goods raise cover and lower steal notice")
 
 	# Efficiency still raises get_rate for Harvest bonus wiring.
 	upgrades.set_level(upgrades.FARMS_EFF, 3)

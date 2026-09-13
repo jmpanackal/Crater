@@ -3,8 +3,8 @@ extends Node2D
 ## Firmament: quieter cool haze. Devil’s Mouth: heavier ink gloom. No new tileset required.
 
 const FIRMAMENT_HAZE := Color(0.55, 0.72, 0.7, 0.07)
-const PIT_GLOOM := Color(0.04, 0.07, 0.09, 0.22)
-const PIT_LIP := Color(0.12, 0.2, 0.22, 0.18)
+const MOUTH_GLOOM := Color(0.04, 0.07, 0.09, 0.22)
+const MOUTH_LIP := Color(0.12, 0.2, 0.22, 0.18)
 
 
 func _ready() -> void:
@@ -41,20 +41,20 @@ func _build_dressing() -> void:
 	add_child(seal)
 
 	# Heavier gloom over Devil’s Mouth walls.
-	var pit := ColorRect.new()
-	pit.name = "PitGloom"
-	pit.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile)
-	pit.size = Vector2(width, float(16 - TerrainLayer.MOUTH_Y_MIN) * tile)
-	pit.color = PIT_GLOOM
-	pit.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	pit.z_index = 2
-	add_child(pit)
+	var mouth := ColorRect.new()
+	mouth.name = "MouthGloom"
+	mouth.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile)
+	mouth.size = Vector2(width, float(16 - TerrainLayer.MOUTH_Y_MIN) * tile)
+	mouth.color = MOUTH_GLOOM
+	mouth.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouth.z_index = 2
+	add_child(mouth)
 
 	var lip := ColorRect.new()
-	lip.name = "PitLipMist"
+	lip.name = "MouthLipMist"
 	lip.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile - 24.0)
 	lip.size = Vector2(width, 36.0)
-	lip.color = PIT_LIP
+	lip.color = MOUTH_LIP
 	lip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lip.z_index = 2
 	add_child(lip)
@@ -75,9 +75,9 @@ func _soft_label(node_name: String, text: String, pos: Vector2, color: Color) ->
 
 
 ## Test helper — Firmament haze must be quieter (lower alpha) than Devil’s Mouth gloom.
-func firmament_quieter_than_pit() -> bool:
+func firmament_quieter_than_mouth() -> bool:
 	var firmament := get_node_or_null("FirmamentHaze") as ColorRect
-	var pit := get_node_or_null("PitGloom") as ColorRect
-	if firmament == null or pit == null:
+	var mouth := get_node_or_null("MouthGloom") as ColorRect
+	if firmament == null or mouth == null:
 		return false
-	return firmament.color.a < pit.color.a
+	return firmament.color.a < mouth.color.a
