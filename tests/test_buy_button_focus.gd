@@ -1,5 +1,5 @@
 extends SceneTree
-## Siphon buttons have no keyboard focus; shop opens with U; click buys only in Hollow.
+## Steal buttons have no keyboard focus; shop opens with U; click buys only in Hollow.
 
 
 func _init() -> void:
@@ -22,8 +22,8 @@ func _run_tests() -> void:
 		save_load.clear_save()
 
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
-	upgrades.set_siphon_station_open(true)
-	upgrades.force_siphon_notice = false
+	upgrades.set_theft_station_open(true)
+	upgrades.force_theft_notice = false
 	wallet.set_amount(wallet.SALVAGE, 50)
 	var districts: Node = root.get_node_or_null("Districts")
 	if districts:
@@ -37,16 +37,16 @@ func _run_tests() -> void:
 	await process_frame
 
 	var panel: CanvasItem = scene.get_node("UI/UpgradePanel")
-	var shop_panel: CanvasItem = scene.get_node("UI/SiphonShopPanel") as CanvasItem
-	var siphon_list: Node = scene.get_node("UI/SiphonShopPanel/Margin/VBox/SiphonList")
-	var button: Button = siphon_list.get_node_or_null("dig_yield") as Button
+	var shop_panel: CanvasItem = scene.get_node("UI/TheftShopPanel") as CanvasItem
+	var theft_list: Node = scene.get_node("UI/TheftShopPanel/Margin/VBox/TheftList")
+	var button: Button = theft_list.get_node_or_null("dig_yield") as Button
 	if button == null:
-		for child in siphon_list.get_children():
+		for child in theft_list.get_children():
 			if child is Button and str(child.name) == "dig_yield":
 				button = child
 				break
 	if button == null:
-		push_error("FAIL dig_yield siphon button missing")
+		push_error("FAIL dig_yield steal button missing")
 		quit(1)
 		return
 
@@ -63,7 +63,7 @@ func _run_tests() -> void:
 
 	# Hollow chip visible; shop modal starts closed.
 	if not panel.visible:
-		push_error("FAIL siphon UI hidden while station open")
+		push_error("FAIL steal UI hidden while station open")
 		quit(1)
 		return
 	if shop_panel.visible:
@@ -83,11 +83,11 @@ func _run_tests() -> void:
 		push_error("FAIL ui_accept purchased")
 		quit(1)
 		return
-	print("PASS jump does not siphon")
+	print("PASS jump does not steal")
 
 	# U opens the shop modal without purchasing.
 	var buy := InputEventAction.new()
-	buy.action = &"siphon_upgrade"
+	buy.action = &"steal_upgrade"
 	buy.pressed = true
 	root.get_viewport().push_input(buy)
 	await process_frame
@@ -99,15 +99,15 @@ func _run_tests() -> void:
 		push_error("FAIL U purchased instead of opening shop")
 		quit(1)
 		return
-	print("PASS U opens siphon shop")
+	print("PASS U opens steal shop")
 
 	button.pressed.emit()
 	await process_frame
 	if upgrades.get_level(upgrades.DIG_YIELD) != level_before + 1:
-		push_error("FAIL click siphon")
+		push_error("FAIL click steal")
 		quit(1)
 		return
-	print("PASS click siphons in Hollow")
+	print("PASS click steals in Hollow")
 
 	# Second U closes shop without another purchase.
 	level_before = upgrades.get_level(upgrades.DIG_YIELD)
@@ -123,8 +123,8 @@ func _run_tests() -> void:
 		return
 	print("PASS U toggles shop closed")
 
-	# Leave Hollow: UI hides and U cannot open shop / siphon.
-	upgrades.set_siphon_station_open(false)
+	# Leave Hollow: UI hides and U cannot open shop / steal.
+	upgrades.set_theft_station_open(false)
 	await process_frame
 	if panel.visible or shop_panel.visible:
 		push_error("FAIL UI still visible at dig site")
@@ -135,7 +135,7 @@ func _run_tests() -> void:
 	root.get_viewport().push_input(buy)
 	await process_frame
 	if upgrades.get_level(upgrades.DIG_YIELD) != level_before:
-		push_error("FAIL siphon at dig site via U")
+		push_error("FAIL steal at dig site via U")
 		quit(1)
 		return
 	if districts and districts.get_good_amount(districts.BINDCORD) != bindcord_before:
@@ -146,7 +146,7 @@ func _run_tests() -> void:
 		push_error("FAIL shop opened at dig site")
 		quit(1)
 		return
-	print("PASS dig site blocks siphon UI and U")
+	print("PASS dig site blocks steal UI and U")
 
-	print("SIPHON_UI_FOCUS_TESTS_PASSED")
+	print("STEAL_UI_FOCUS_TESTS_PASSED")
 	quit(0)
