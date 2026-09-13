@@ -1,7 +1,7 @@
 class_name FeelAudio
 extends RefCounted
 ## Procedural dig/land click stubs — no asset files.
-## Slight pitch randomize; Firmament quieter / muffled, Pit fuller.
+## Slight pitch randomize; Firmament quieter / muffled, Mouth fuller.
 
 static var last_pitch: float = 1.0
 static var last_volume_db: float = -80.0
@@ -20,26 +20,26 @@ static func reset_debug() -> void:
 	land_play_count = 0
 
 
-## Firmament quieter than mid; Pit louder. Pitch base differs by frontier.
-static func dig_volume_db(is_firmament: bool, is_pit: bool) -> float:
+## Firmament quieter than mid; Mouth louder. Pitch base differs by frontier.
+static func dig_volume_db(is_firmament: bool, is_mouth: bool) -> float:
 	if is_firmament:
 		return -22.0
-	if is_pit:
+	if is_mouth:
 		return -13.5
 	return -17.5
 
 
-static func dig_pitch_base(is_firmament: bool, is_pit: bool) -> float:
+static func dig_pitch_base(is_firmament: bool, is_mouth: bool) -> float:
 	if is_firmament:
 		return 1.08 # thinner / quieter read
-	if is_pit:
+	if is_mouth:
 		return 0.86 # heavier
 	return 0.96
 
 
-static func play_dig(host: Node, is_firmament: bool, is_pit: bool) -> void:
-	last_pitch = dig_pitch_base(is_firmament, is_pit) * randf_range(0.94, 1.06)
-	last_volume_db = dig_volume_db(is_firmament, is_pit) + randf_range(-0.6, 0.6)
+static func play_dig(host: Node, is_firmament: bool, is_mouth: bool) -> void:
+	last_pitch = dig_pitch_base(is_firmament, is_mouth) * randf_range(0.94, 1.06)
+	last_volume_db = dig_volume_db(is_firmament, is_mouth) + randf_range(-0.6, 0.6)
 	last_kind = &"dig"
 	dig_play_count += 1
 	_play(host, last_pitch, last_volume_db)

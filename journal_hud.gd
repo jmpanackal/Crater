@@ -115,7 +115,7 @@ func _refresh() -> void:
 		_title.text = "Journal — %d Record%s" % [ids.size(), "" if ids.size() == 1 else "s"]
 	if _empty:
 		_empty.visible = ids.is_empty()
-		_empty.text = "No Records yet. Firmament scraps surface more often than Pit walls."
+		_empty.text = "No Records yet. Firmament scraps surface more often than Devil's Mouth walls."
 
 	for id in ids:
 		var def: Dictionary = _journal.get_def(id)

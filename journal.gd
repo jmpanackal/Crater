@@ -21,7 +21,7 @@ var _defs: Dictionary = {
 	},
 	RECORD_FIRMAMENT_NOTE: {
 		"title": "Folded note",
-		"text": "If the Roof is only rock, why does the Wickwork hoard the bright tools?",
+		"text": "If the Firmament is only rock, why does the Wickwork hoard the bright tools?",
 		"unlocks_upgrade": &"quiet_dig",
 		"unlock_hint": "Quiet Dig — softer Firmament strikes, harder to notice.",
 	},

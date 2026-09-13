@@ -1,7 +1,7 @@
 class_name FeelFx
 extends RefCounted
 ## Quiet Act 1 juice — grit bursts, soft shake, micro dig hitch, restrained floats.
-## Firmament digs stay softer/shorter than Pit digs (secrecy vs public danger).
+## Firmament digs stay softer/shorter than Mouth digs (secrecy vs public danger).
 
 const _FeelAudio := preload("res://feel_audio.gd")
 
@@ -38,20 +38,20 @@ static func reset_debug() -> void:
 		_hitstop_active = false
 
 
-## Firmament quieter, Pit heavier; mid-band digs sit in between.
-static func dig_intensity(is_firmament: bool, is_pit: bool) -> float:
+## Firmament quieter, Mouth heavier; mid-band digs sit in between.
+static func dig_intensity(is_firmament: bool, is_mouth: bool) -> float:
 	if is_firmament:
 		return 0.42
-	if is_pit:
+	if is_mouth:
 		return 1.15
 	return 0.75
 
 
-## Soft shake amps — Firmament barely notches; Pit slightly more; land scales with impact.
-static func dig_shake_amp(is_firmament: bool, is_pit: bool) -> float:
+## Soft shake amps — Firmament barely notches; Mouth slightly more; land scales with impact.
+static func dig_shake_amp(is_firmament: bool, is_mouth: bool) -> float:
 	if is_firmament:
 		return 0.12
-	if is_pit:
+	if is_mouth:
 		return 0.55
 	return 0.28
 
@@ -60,11 +60,11 @@ static func land_shake_amp(impact: float) -> float:
 	return clampf(0.25 + impact * 0.45, 0.2, 0.95)
 
 
-## Micro hitch only — Firmament ~1 frame, Pit ~2–3 frames. Never stack.
-static func dig_hitstop_ms(is_firmament: bool, is_pit: bool) -> float:
+## Micro hitch only — Firmament ~1 frame, Mouth ~2–3 frames. Never stack.
+static func dig_hitstop_ms(is_firmament: bool, is_mouth: bool) -> float:
 	if is_firmament:
 		return 16.0
-	if is_pit:
+	if is_mouth:
 		return 40.0
 	return 26.0
 
@@ -112,18 +112,18 @@ static func spawn_dig_dust(
 	world_pos: Vector2,
 	direction: Vector2i,
 	is_firmament: bool,
-	is_pit: bool
+	is_mouth: bool
 ) -> void:
-	var intensity := dig_intensity(is_firmament, is_pit)
+	var intensity := dig_intensity(is_firmament, is_mouth)
 	var color := Color(0.55, 0.48, 0.38, 0.55)
 	if is_firmament:
 		color = Color(0.62, 0.66, 0.64, 0.28) # quieter, cooler
-	elif is_pit:
+	elif is_mouth:
 		color = Color(0.42, 0.36, 0.3, 0.7)
 	_spawn_burst(parent, world_pos, Vector2(direction), intensity, color, &"dig")
-	request_shake(parent, dig_shake_amp(is_firmament, is_pit))
-	request_hitstop(parent, dig_hitstop_ms(is_firmament, is_pit))
-	_FeelAudio.play_dig(parent, is_firmament, is_pit)
+	request_shake(parent, dig_shake_amp(is_firmament, is_mouth))
+	request_hitstop(parent, dig_hitstop_ms(is_firmament, is_mouth))
+	_FeelAudio.play_dig(parent, is_firmament, is_mouth)
 
 
 static func spawn_land_dust(parent: Node, world_pos: Vector2, impact: float = 1.0) -> void:
@@ -140,17 +140,17 @@ static func spawn_land_dust(parent: Node, world_pos: Vector2, impact: float = 1.
 	_FeelAudio.play_land(parent, impact)
 
 
-## Subdued haul confirm — copper tick, Firmament quieter than Pit.
+## Subdued haul confirm — copper tick, Firmament quieter than Mouth.
 static func spawn_salvage_float(
 	parent: Node,
 	world_pos: Vector2,
 	amount: int,
 	is_firmament: bool,
-	is_pit: bool
+	is_mouth: bool
 ) -> void:
 	var alpha := 0.52
 	var pop := 1.06
-	if is_pit:
+	if is_mouth:
 		alpha = 0.78
 		pop = 1.14
 	elif not is_firmament:

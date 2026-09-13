@@ -1,6 +1,6 @@
 extends Camera2D
 ## Soft Hollow follow — look-ahead, drag deadzone, light shake.
-## Keeps Firmament/Pit vertical climbs readable without snappy lock-on.
+## Keeps Firmament/Mouth vertical climbs readable without snappy lock-on.
 ## Hollow clamps limit_right so dig-tile columns never peek into Wick framing.
 
 const LOOK_AHEAD_X := 44.0

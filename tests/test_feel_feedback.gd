@@ -1,6 +1,6 @@
 extends SceneTree
-## Dig hit-stop Firmament shorter than Pit; salvage/record floats; NPC face/bob;
-## harvest pulse; standing toast tone; dig approach threshold; title quiet.
+## Dig hit-stop Firmament shorter than Devil's Mouth; salvage/record floats; NPC face/bob;
+## harvest pulse; trust toast tone; dig approach threshold; title quiet.
 
 const FeelAudio := preload("res://feel_audio.gd")
 const UpgradeHudScript := preload("res://upgrade_hud.gd")
@@ -20,27 +20,27 @@ func _run() -> void:
 	if save_load:
 		save_load.clear_save()
 
-	# --- Hit-stop Firmament shorter than Pit ---
+	# --- Hit-stop Firmament shorter than Devil's Mouth ---
 	FeelFx.reset_debug()
-	var cap_h := FeelFx.dig_hitstop_ms(true, false)
+	var firmament_h := FeelFx.dig_hitstop_ms(true, false)
 	var mid_h := FeelFx.dig_hitstop_ms(false, false)
-	var pit_h := FeelFx.dig_hitstop_ms(false, true)
-	if not (cap_h < mid_h and mid_h < pit_h):
-		push_error("FAIL hitstop order firmament=%s mid=%s pit=%s" % [cap_h, mid_h, pit_h])
+	var mouth_h := FeelFx.dig_hitstop_ms(false, true)
+	if not (firmament_h < mid_h and mid_h < mouth_h):
+		push_error("FAIL hitstop order firmament=%s mid=%s mouth=%s" % [firmament_h, mid_h, mouth_h])
 		quit(1)
 		return
-	if pit_h > 50.0:
-		push_error("FAIL Pit hitstop too long (%s ms)" % pit_h)
+	if mouth_h > 50.0:
+		push_error("FAIL Devil's Mouth hitstop too long (%s ms)" % mouth_h)
 		quit(1)
 		return
-	print("PASS dig hitstop Firmament shorter than Pit")
+	print("PASS dig hitstop Firmament shorter than Devil's Mouth")
 
 	# --- Notice toast tones ---
 	if UpgradeHudScript.notice_tone_for("Missed Harvest. People noticed you were gone.") != &"loss":
 		push_error("FAIL miss notice tone")
 		quit(1)
 		return
-	if UpgradeHudScript.notice_tone_for("You help in the Farms. (+1 Standing)") != &"gain":
+	if UpgradeHudScript.notice_tone_for("You help in the Farms. (+1 Trust)") != &"gain":
 		push_error("FAIL gain notice tone")
 		quit(1)
 		return
@@ -48,28 +48,28 @@ func _run() -> void:
 		push_error("FAIL caution notice tone")
 		quit(1)
 		return
-	if UpgradeHudScript.notice_tone_for("Siphon complete. Cover held.") != &"neutral":
+	if UpgradeHudScript.notice_tone_for("Theft complete. Cover held.") != &"neutral":
 		push_error("FAIL neutral notice tone")
 		quit(1)
 		return
-	print("PASS standing toast tone clarity")
+	print("PASS trust toast tone clarity")
 
 	# --- Terrain dig: float + hitstop request ---
 	var terrain := TerrainLayer.new()
 	root.add_child(terrain)
 	await process_frame
 	terrain.clear()
-	var cap_cell := Vector2i(18, 2)
-	var pit_cell := Vector2i(18, 12)
-	terrain.set_cell(cap_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
-	terrain.set_cell(pit_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
+	var firmament_cell := Vector2i(18, 2)
+	var mouth_cell := Vector2i(18, 12)
+	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
+	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 
 	FeelFx.reset_debug()
-	if not terrain.destroy_cell(cap_cell, Vector2i.UP):
+	if not terrain.destroy_cell(firmament_cell, Vector2i.UP):
 		push_error("FAIL Firmament dig")
 		quit(1)
 		return
-	var cap_stop := FeelFx.last_hitstop_ms
+	var firmament_stop := FeelFx.last_hitstop_ms
 	if FeelFx.float_spawn_count < 1 or FeelFx.last_float_kind != &"salvage":
 		push_error("FAIL Firmament salvage float missing")
 		quit(1)
@@ -80,19 +80,19 @@ func _run() -> void:
 		return
 
 	FeelFx.reset_debug()
-	if not terrain.destroy_cell(pit_cell, Vector2i.DOWN):
-		push_error("FAIL Pit dig")
+	if not terrain.destroy_cell(mouth_cell, Vector2i.DOWN):
+		push_error("FAIL Devil's Mouth dig")
 		quit(1)
 		return
-	if FeelFx.last_hitstop_ms <= cap_stop:
-		push_error("FAIL Pit hitstop not longer than Firmament (%s vs %s)" % [FeelFx.last_hitstop_ms, cap_stop])
+	if FeelFx.last_hitstop_ms <= firmament_stop:
+		push_error("FAIL Devil's Mouth hitstop not longer than Firmament (%s vs %s)" % [FeelFx.last_hitstop_ms, firmament_stop])
 		quit(1)
 		return
 	if not str(FeelFx.last_float_text).begins_with("+"):
 		push_error("FAIL salvage float text '%s'" % FeelFx.last_float_text)
 		quit(1)
 		return
-	print("PASS dig salvage float + Firmament/Pit hitstop")
+	print("PASS dig salvage float + Firmament/Devil's Mouth hitstop")
 
 	# Restore timescale after live hitstop request.
 	FeelFx.reset_debug()
@@ -165,7 +165,7 @@ func _run() -> void:
 	print("PASS harvest clock urgent pulse band")
 
 	if panel.has_method("_show_notice"):
-		panel._show_notice("Caught digging the Firmament — and your lie cracked. (−12 Standing)")
+		panel._show_notice("Caught digging the Firmament — and your lie cracked. (−12 Trust)")
 		if panel.debug_notice_tone() != &"loss":
 			push_error("FAIL notice tone after show")
 			quit(1)
