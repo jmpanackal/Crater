@@ -1,5 +1,5 @@
 extends SceneTree
-## Named District production: Materials queue, Harvest apply, reserve, steal, Cover.
+## Named District production: Materials queue, Harvest apply, reserve, steal, Shortage Risk.
 
 
 func _init() -> void:
@@ -147,14 +147,14 @@ func _run_tests() -> void:
 		return
 	print("PASS steal respects protected reserve")
 
-	# --- Cover: 70% target above reserve + 30% sibling ---
+	# --- Shortage Risk: 70% target above reserve + 30% sibling ---
 	districts.set_good_amount(districts.PRESSWATER, 6)  # 5 above
 	districts.set_good_amount(districts.SEALBRINE, 1)  # 0 above
-	var cover_skewed: float = districts.get_cover_for_good(districts.PRESSWATER)
+	var risk_skewed: float = districts.get_shortage_risk_for_good(districts.PRESSWATER)
 	districts.set_good_amount(districts.SEALBRINE, 6)  # 5 above
-	var cover_balanced: float = districts.get_cover_for_good(districts.PRESSWATER)
-	if cover_balanced <= cover_skewed:
-		push_error("FAIL sibling production did not raise Cover")
+	var risk_balanced: float = districts.get_shortage_risk_for_good(districts.PRESSWATER)
+	if risk_balanced >= risk_skewed:
+		push_error("FAIL sibling production did not lower Shortage Risk")
 		quit(1)
 		return
 	var notice_thin: float = districts.get_theft_notice_chance(districts.PRESSWATER)
@@ -165,7 +165,7 @@ func _run_tests() -> void:
 		push_error("FAIL thin production did not raise notice chance")
 		quit(1)
 		return
-	print("PASS Cover uses target + sibling production above reserve")
+	print("PASS Shortage Risk uses target + sibling production above reserve")
 
 	# --- Verdigris: Wickwork production OR Mid Heart Tallies ---
 	districts.reset_production()
@@ -221,7 +221,7 @@ func _run_tests() -> void:
 	upgrades.force_theft_notice = false
 	upgrades.set_level(upgrades.DIG_YIELD, 0)
 	var salvage_before: int = wallet.get_amount(wallet.SALVAGE)
-	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if not upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL Dig Yield steal with Bindcord")
 		quit(1)
 		return

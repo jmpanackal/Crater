@@ -1,5 +1,5 @@
 extends SceneTree
-## Forbidden Dig Yield costs Bindcord; efficiency keeps Salvage curve.
+## Forbidden Dig Yield costs Bindcord; efficiency (Requisition) spends Tallies.
 
 
 func _init() -> void:
@@ -32,13 +32,13 @@ func _run_tests() -> void:
 		push_error("FAIL Dig Yield divert cost")
 		quit(1)
 		return
-	if upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL steal at reserve Bindcord")
 		quit(1)
 		return
 
 	districts.set_good_amount(districts.BINDCORD, 3)
-	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if not upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL first steal")
 		quit(1)
 		return
@@ -47,19 +47,19 @@ func _run_tests() -> void:
 		quit(1)
 		return
 
-	# Efficiency still uses Salvage cost curve.
+	# Efficiency (Requisition) uses the Tallies cost curve.
 	upgrades.set_level(upgrades.FARMS_EFF, 0)
 	if upgrades.get_next_cost(upgrades.FARMS_EFF) != 4:
 		push_error("FAIL efficiency base cost")
 		quit(1)
 		return
-	wallet.set_amount(wallet.SALVAGE, 4)
-	if not upgrades.steal_for_upgrade(upgrades.FARMS_EFF):
-		push_error("FAIL efficiency steal")
+	wallet.set_amount(wallet.TALLIES, 4)
+	if not upgrades.acquire_upgrade(upgrades.FARMS_EFF):
+		push_error("FAIL efficiency requisition")
 		quit(1)
 		return
-	if wallet.get_amount(wallet.SALVAGE) != 0 or upgrades.get_level(upgrades.FARMS_EFF) != 1:
-		push_error("FAIL after efficiency steal")
+	if wallet.get_amount(wallet.TALLIES) != 0 or upgrades.get_level(upgrades.FARMS_EFF) != 1:
+		push_error("FAIL after efficiency requisition")
 		quit(1)
 		return
 	if upgrades.get_next_cost(upgrades.FARMS_EFF) != 6:

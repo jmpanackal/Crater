@@ -164,9 +164,9 @@ func _run_tests() -> void:
 			push_error("FAIL Harvest/Trust missing meaning tooltips")
 			quit(1)
 			return
-		var cover: Label = scene.get_node("UI/UpgradePanel/Margin/Content/CoverLabel") as Label
-		if cover == null or cover.tooltip_text.strip_edges() == "":
-			push_error("FAIL CoverLabel missing meaning tooltip")
+		var risk: Label = scene.get_node("UI/UpgradePanel/Margin/Content/ShortageRiskLabel") as Label
+		if risk == null or risk.tooltip_text.strip_edges() == "":
+			push_error("FAIL ShortageRiskLabel missing meaning tooltip")
 			quit(1)
 			return
 		# Districts + upgrade rows live in the shop modal — not the slim chip.
@@ -197,33 +197,68 @@ func _run_tests() -> void:
 		push_error("FAIL TheftExpandHint missing/hidden while collapsed")
 		quit(1)
 		return
-	if not ("Shop" in str(hint.get("text"))):
+	if not ("Steal" in str(hint.get("text"))):
 		push_error("FAIL TheftExpandHint text '%s'" % hint.get("text"))
 		quit(1)
 		return
 
+	var req_panel: CanvasItem = scene.get_node_or_null("UI/RequisitionPanel") as CanvasItem
+	var req_list: CanvasItem = scene.get_node_or_null("UI/RequisitionPanel/Margin/VBox/RequisitionList") as CanvasItem
+	if req_panel == null or req_list == null:
+		push_error("FAIL RequisitionPanel / RequisitionList missing")
+		quit(1)
+		return
+	if req_panel.visible:
+		push_error("FAIL RequisitionPanel should start collapsed until Q")
+		quit(1)
+		return
+	var req_hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/RequisitionExpandHint") as Control
+	if req_hint == null or not req_hint.visible:
+		push_error("FAIL RequisitionExpandHint missing/hidden while collapsed")
+		quit(1)
+		return
+	if not ("Requisition" in str(req_hint.get("text"))):
+		push_error("FAIL RequisitionExpandHint text '%s'" % req_hint.get("text"))
+		quit(1)
+		return
+
 	var hud: Node = scene.get_node("UI/UpgradePanel")
-	if hud.has_method("open_shop"):
-		hud.open_shop()
+	if hud.has_method("open_theft_shop"):
+		hud.open_theft_shop()
 		await process_frame
 		if not shop_panel.visible:
-			push_error("FAIL open_shop did not show modal")
+			push_error("FAIL open_theft_shop did not show modal")
 			quit(1)
 			return
-		var district_toggle: BaseButton = scene.get_node_or_null(
-			"UI/TheftShopPanel/Margin/VBox/DistrictToggle"
-		) as BaseButton
-		if district_toggle == null or not district_toggle.visible:
-			push_error("FAIL DistrictToggle missing in open shop")
-			quit(1)
-			return
-		hud.close_shop()
+		hud.close_theft_shop()
 		await process_frame
 		if shop_panel.visible:
-			push_error("FAIL close_shop left modal open")
+			push_error("FAIL close_theft_shop left modal open")
 			quit(1)
 			return
 	print("PASS steal shop modal collapsed by default")
+
+	if hud.has_method("open_requisition"):
+		hud.open_requisition()
+		await process_frame
+		if not req_panel.visible:
+			push_error("FAIL open_requisition did not show modal")
+			quit(1)
+			return
+		var district_toggle: BaseButton = scene.get_node_or_null(
+			"UI/RequisitionPanel/Margin/VBox/DistrictToggle"
+		) as BaseButton
+		if district_toggle == null or not district_toggle.visible:
+			push_error("FAIL DistrictToggle missing in open Requisition panel")
+			quit(1)
+			return
+		hud.close_requisition()
+		await process_frame
+		if req_panel.visible:
+			push_error("FAIL close_requisition left modal open")
+			quit(1)
+			return
+	print("PASS requisition panel collapsed by default")
 
 	var cam: Camera2D = scene.get_node("Player/Camera2D") as Camera2D
 	if cam.limit_right > 1100:

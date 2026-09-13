@@ -48,7 +48,7 @@ func _run() -> void:
 		push_error("FAIL caution notice tone")
 		quit(1)
 		return
-	if UpgradeHudScript.notice_tone_for("Theft complete. Cover held.") != &"neutral":
+	if UpgradeHudScript.notice_tone_for("Theft complete. Shortage Risk held.") != &"neutral":
 		push_error("FAIL neutral notice tone")
 		quit(1)
 		return

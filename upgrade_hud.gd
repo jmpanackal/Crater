@@ -1,13 +1,15 @@
 extends PanelContainer
-## Slim Hollow chip (Cover + shop affordance). Theft upgrades live in a bottom-sheet modal.
-## Primary Materials / Harvest / Trust live as separate always-visible rows above.
+## Slim Hollow chip (Shortage Risk + shop affordances). Upgrades live in two
+## bottom-sheet modals: Requisition (public, Tallies) and Steal (forbidden,
+## diverts District production). Primary Materials / Harvest / Trust live as
+## separate always-visible rows above.
 
 signal lie_choice(lied: bool)
 
 const UiStyleRef := preload("res://ui_style.gd")
 
 @onready var _content: VBoxContainer = $Margin/Content
-@onready var _cover_label: Label = $Margin/Content/CoverLabel
+@onready var _risk_label: Label = $Margin/Content/ShortageRiskLabel
 
 var _harvest_label: Label
 var _trust_label: Label
@@ -23,20 +25,34 @@ var _upgrades: Node
 var _wallet: Node
 var _community: Node
 var _districts: Node
+
+## Shop modals start closed — never dump upgrade rows over Devil's Mouth.
 var _theft_buttons: Dictionary = {}
-var _notice_ttl := 0.0
-## Shop modal starts closed — never dump upgrade rows over Devil's Mouth.
 var _theft_expanded := false
-var _district_expanded := false
-var _shop_open_btn: Button
-var _district_toggle: Button
-var _shop_dimmer: ColorRect
-var _shop_panel: PanelContainer
-var _shop_title: Label
-var _shop_cover: Label
-var _district_label: Label
+var _theft_dimmer: ColorRect
+var _theft_panel: PanelContainer
+var _theft_title: Label
+var _shop_risk: Label
 var _theft_list: VBoxContainer
-var _shop_close: Button
+var _theft_close: Button
+var _theft_open_btn: Button
+
+var _req_buttons: Dictionary = {}
+var _req_expanded := false
+var _req_dimmer: ColorRect
+var _req_panel: PanelContainer
+var _tallies_label: Label
+var _req_list: VBoxContainer
+var _req_close: Button
+var _req_open_btn: Button
+
+## District production browsing lives on the Requisition panel only — it's
+## public info and doesn't fit the Steal panel's secretive framing.
+var _district_expanded := false
+var _district_toggle: Button
+var _district_label: Label
+
+var _notice_ttl := 0.0
 var _pulse_t := 0.0
 var _status_dirty := true ## starts true so _process() paints the initial labels
 var _last_trust := -1
@@ -64,7 +80,8 @@ func _ready() -> void:
 	_community = get_tree().root.get_node_or_null("Community")
 	_districts = get_tree().root.get_node_or_null("Districts")
 
-	_ensure_shop_modal()
+	_ensure_theft_modal()
+	_ensure_requisition_modal()
 	_apply_chrome()
 
 	if _community:
@@ -87,7 +104,7 @@ func _ready() -> void:
 		_wallet.resource_changed.connect(_on_resource_changed)
 	if _districts:
 		_districts.district_changed.connect(_on_district_changed)
-		_districts.cover_changed.connect(_on_cover_changed)
+		_districts.shortage_risk_changed.connect(_on_shortage_risk_changed)
 
 	if _lie_yes:
 		_lie_yes.focus_mode = Control.FOCUS_NONE
@@ -103,46 +120,72 @@ func _ready() -> void:
 	if _lie_dimmer:
 		_lie_dimmer.visible = false
 
-	_ensure_shop_open_btn()
+	_ensure_theft_open_btn()
+	_ensure_requisition_open_btn()
 	_build_theft_buttons()
+	_build_requisition_buttons()
 	if _community:
 		_last_trust = _community.get_trust()
 	_refresh_status()
 	_refresh()
 
 
-func _ensure_shop_modal() -> void:
+func _ensure_theft_modal() -> void:
 	var ui := get_parent()
 	if ui == null:
 		return
 
-	_shop_dimmer = ui.get_node_or_null("TheftShopDimmer") as ColorRect
-	_shop_panel = ui.get_node_or_null("TheftShopPanel") as PanelContainer
-	if _shop_panel == null:
+	_theft_dimmer = ui.get_node_or_null("TheftShopDimmer") as ColorRect
+	_theft_panel = ui.get_node_or_null("TheftShopPanel") as PanelContainer
+	if _theft_panel == null:
 		push_error("UpgradeHud: TheftShopPanel missing from UI")
 		return
 
-	_shop_title = _shop_panel.get_node_or_null("Margin/VBox/Title") as Label
-	_shop_cover = _shop_panel.get_node_or_null("Margin/VBox/ShopCover") as Label
-	_district_toggle = _shop_panel.get_node_or_null("Margin/VBox/DistrictToggle") as Button
-	_district_label = _shop_panel.get_node_or_null("Margin/VBox/DistrictLabel") as Label
-	_theft_list = _shop_panel.get_node_or_null("Margin/VBox/TheftList") as VBoxContainer
-	_shop_close = _shop_panel.get_node_or_null("Margin/VBox/CloseButton") as Button
+	_theft_title = _theft_panel.get_node_or_null("Margin/VBox/Title") as Label
+	_shop_risk = _theft_panel.get_node_or_null("Margin/VBox/ShopShortageRisk") as Label
+	_theft_list = _theft_panel.get_node_or_null("Margin/VBox/TheftList") as VBoxContainer
+	_theft_close = _theft_panel.get_node_or_null("Margin/VBox/CloseButton") as Button
 
-	if _shop_dimmer and not _shop_dimmer.gui_input.is_connected(_on_shop_dimmer_input):
-		_shop_dimmer.gui_input.connect(_on_shop_dimmer_input)
+	if _theft_dimmer and not _theft_dimmer.gui_input.is_connected(_on_theft_dimmer_input):
+		_theft_dimmer.gui_input.connect(_on_theft_dimmer_input)
+	if _theft_close and not _theft_close.pressed.is_connected(close_theft_shop):
+		_theft_close.focus_mode = Control.FOCUS_NONE
+		_theft_close.pressed.connect(close_theft_shop)
+
+	_set_theft_visible(false)
+
+
+func _ensure_requisition_modal() -> void:
+	var ui := get_parent()
+	if ui == null:
+		return
+
+	_req_dimmer = ui.get_node_or_null("RequisitionDimmer") as ColorRect
+	_req_panel = ui.get_node_or_null("RequisitionPanel") as PanelContainer
+	if _req_panel == null:
+		push_error("UpgradeHud: RequisitionPanel missing from UI")
+		return
+
+	_tallies_label = _req_panel.get_node_or_null("Margin/VBox/TalliesLabel") as Label
+	_district_toggle = _req_panel.get_node_or_null("Margin/VBox/DistrictToggle") as Button
+	_district_label = _req_panel.get_node_or_null("Margin/VBox/DistrictLabel") as Label
+	_req_list = _req_panel.get_node_or_null("Margin/VBox/RequisitionList") as VBoxContainer
+	_req_close = _req_panel.get_node_or_null("Margin/VBox/CloseButton") as Button
+
+	if _req_dimmer and not _req_dimmer.gui_input.is_connected(_on_requisition_dimmer_input):
+		_req_dimmer.gui_input.connect(_on_requisition_dimmer_input)
 	if _district_toggle and not _district_toggle.pressed.is_connected(_toggle_districts):
 		_district_toggle.focus_mode = Control.FOCUS_NONE
 		_district_toggle.pressed.connect(_toggle_districts)
-	if _shop_close and not _shop_close.pressed.is_connected(close_shop):
-		_shop_close.focus_mode = Control.FOCUS_NONE
-		_shop_close.pressed.connect(close_shop)
+	if _req_close and not _req_close.pressed.is_connected(close_requisition):
+		_req_close.focus_mode = Control.FOCUS_NONE
+		_req_close.pressed.connect(close_requisition)
 
-	_set_shop_visible(false)
+	_set_requisition_visible(false)
 
 
 func _apply_chrome() -> void:
-	# Slim Hollow chip — quieter than shop modal, secondary to the cavern.
+	# Slim Hollow chip — quieter than either shop modal, secondary to the cavern.
 	UiStyleRef.apply_panel(self, &"teal", false, true)
 	custom_minimum_size = Vector2(UiStyleRef.HUD_CHIP_WIDTH, 0)
 	modulate = Color(1.0, 1.0, 1.0, 0.7)
@@ -154,12 +197,12 @@ func _apply_chrome() -> void:
 		margin.add_theme_constant_override("margin_top", 4)
 		margin.add_theme_constant_override("margin_right", 6)
 		margin.add_theme_constant_override("margin_bottom", 4)
-	UiStyleRef.apply_label(_cover_label, &"teal")
-	if _cover_label:
-		_cover_label.modulate.a = 0.9
+	UiStyleRef.apply_label(_risk_label, &"teal")
+	if _risk_label:
+		_risk_label.modulate.a = 0.9
 	UiStyleRef.tip(
-		_cover_label,
-		"How hidden your theft is. Higher Cover = safer diversion of District production."
+		_risk_label,
+		"When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
 	)
 	if _harvest_label:
 		UiStyleRef.apply_label(_harvest_label, &"stat")
@@ -176,17 +219,26 @@ func _apply_chrome() -> void:
 		UiStyleRef.apply_label(_lie_label, &"body")
 	UiStyleRef.apply_button(_lie_yes)
 	UiStyleRef.apply_button(_lie_no)
-	if _shop_panel:
-		UiStyleRef.apply_panel(_shop_panel, &"copper", true)
-	if _shop_title:
-		UiStyleRef.apply_label(_shop_title, &"accent")
-		_shop_title.text = "Steal from production"
-	if _shop_cover:
-		UiStyleRef.apply_label(_shop_cover, &"teal")
+
+	if _theft_panel:
+		UiStyleRef.apply_panel(_theft_panel, &"copper", true)
+	if _theft_title:
+		UiStyleRef.apply_label(_theft_title, &"accent")
+		_theft_title.text = "Steal from production"
+	if _shop_risk:
+		UiStyleRef.apply_label(_shop_risk, &"teal")
 		UiStyleRef.tip(
-			_shop_cover,
-			"How hidden your theft is. Higher Cover = safer diversion of District production."
+			_shop_risk,
+			"When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
 		)
+	if _theft_close:
+		UiStyleRef.apply_button(_theft_close, true)
+
+	if _req_panel:
+		UiStyleRef.apply_panel(_req_panel, &"teal", true)
+	if _tallies_label:
+		UiStyleRef.apply_label(_tallies_label, &"teal")
+		UiStyleRef.tip(_tallies_label, "Personal work pay from public Material turn-ins.")
 	if _district_label:
 		UiStyleRef.apply_label(_district_label, &"muted")
 		UiStyleRef.tip(
@@ -196,55 +248,98 @@ func _apply_chrome() -> void:
 	if _district_toggle:
 		UiStyleRef.apply_button(_district_toggle, true)
 		UiStyleRef.tip(_district_toggle, "District production — amount, reserve, capacity, Next Harvest.")
-	if _shop_close:
-		UiStyleRef.apply_button(_shop_close, true)
+	if _req_close:
+		UiStyleRef.apply_button(_req_close, true)
 
 
-func _ensure_shop_open_btn() -> void:
+func _ensure_theft_open_btn() -> void:
 	if _content == null:
 		return
-	_shop_open_btn = _content.get_node_or_null("TheftExpandHint") as Button
-	if _shop_open_btn == null:
-		_shop_open_btn = Button.new()
-		_shop_open_btn.name = "TheftExpandHint"
-		_content.add_child(_shop_open_btn)
-	_shop_open_btn.focus_mode = Control.FOCUS_NONE
-	_shop_open_btn.text = "Shop  [U]"
-	_shop_open_btn.custom_minimum_size = Vector2(0, 22)
-	UiStyleRef.apply_button(_shop_open_btn, true)
+	_theft_open_btn = _content.get_node_or_null("TheftExpandHint") as Button
+	if _theft_open_btn == null:
+		_theft_open_btn = Button.new()
+		_theft_open_btn.name = "TheftExpandHint"
+		_content.add_child(_theft_open_btn)
+	_theft_open_btn.focus_mode = Control.FOCUS_NONE
+	_theft_open_btn.text = "Steal  [U]"
+	_theft_open_btn.custom_minimum_size = Vector2(0, 22)
+	UiStyleRef.apply_button(_theft_open_btn, true)
 	UiStyleRef.tip(
-		_shop_open_btn,
-		"Turn in Materials and steal District production. Forbidden options risk Trust if Cover is thin."
+		_theft_open_btn,
+		"Forbidden upgrades — divert District production. Risks Trust if Shortage Risk is high."
 	)
-	if not _shop_open_btn.pressed.is_connected(open_shop):
-		_shop_open_btn.pressed.connect(open_shop)
+	if not _theft_open_btn.pressed.is_connected(open_theft_shop):
+		_theft_open_btn.pressed.connect(open_theft_shop)
 
 
-func is_shop_open() -> bool:
-	return _theft_expanded and _shop_panel != null and _shop_panel.visible
+func _ensure_requisition_open_btn() -> void:
+	if _content == null:
+		return
+	_req_open_btn = _content.get_node_or_null("RequisitionExpandHint") as Button
+	if _req_open_btn == null:
+		_req_open_btn = Button.new()
+		_req_open_btn.name = "RequisitionExpandHint"
+		_content.add_child(_req_open_btn)
+	_req_open_btn.focus_mode = Control.FOCUS_NONE
+	_req_open_btn.text = "Requisition  [Q]"
+	_req_open_btn.custom_minimum_size = Vector2(0, 22)
+	UiStyleRef.apply_button(_req_open_btn, true)
+	UiStyleRef.tip(
+		_req_open_btn,
+		"Open, sanctioned upgrades — spend Tallies to help the districts."
+	)
+	if not _req_open_btn.pressed.is_connected(open_requisition):
+		_req_open_btn.pressed.connect(open_requisition)
 
 
-func open_shop() -> void:
+func is_theft_shop_open() -> bool:
+	return _theft_expanded and _theft_panel != null and _theft_panel.visible
+
+
+func is_requisition_open() -> bool:
+	return _req_expanded and _req_panel != null and _req_panel.visible
+
+
+func open_theft_shop() -> void:
 	if _upgrades == null or not _upgrades.is_theft_station_open():
 		return
+	_req_expanded = false
 	_theft_expanded = true
 	_refresh()
 
 
-func close_shop() -> void:
+func close_theft_shop() -> void:
 	_theft_expanded = false
+	_refresh()
+
+
+func open_requisition() -> void:
+	if _upgrades == null or not _upgrades.is_theft_station_open():
+		return
+	_theft_expanded = false
+	_req_expanded = true
+	_refresh()
+
+
+func close_requisition() -> void:
+	_req_expanded = false
 	_district_expanded = false
 	_refresh()
 
 
 func _toggle_districts() -> void:
 	_district_expanded = not _district_expanded
-	_refresh_districts()
+	_refresh_requisition_status()
 
 
-func _on_shop_dimmer_input(event: InputEvent) -> void:
+func _on_theft_dimmer_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		close_shop()
+		close_theft_shop()
+
+
+func _on_requisition_dimmer_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		close_requisition()
 
 
 func _process(delta: float) -> void:
@@ -277,18 +372,29 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 
-	if is_shop_open() and event.is_action_pressed("ui_cancel"):
-		close_shop()
+	if event.is_action_pressed("ui_cancel") and (is_theft_shop_open() or is_requisition_open()):
+		close_theft_shop()
+		close_requisition()
 		get_viewport().set_input_as_handled()
 		return
 
 	if event.is_action_pressed("steal_upgrade"):
 		if _upgrades == null or not _upgrades.is_theft_station_open():
 			return
-		if is_shop_open():
-			close_shop()
+		if is_theft_shop_open():
+			close_theft_shop()
 		else:
-			open_shop()
+			open_theft_shop()
+		get_viewport().set_input_as_handled()
+		return
+
+	if event.is_action_pressed("requisition_upgrade"):
+		if _upgrades == null or not _upgrades.is_theft_station_open():
+			return
+		if is_requisition_open():
+			close_requisition()
+		else:
+			open_requisition()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -309,6 +415,8 @@ func _build_theft_buttons() -> void:
 
 	for id in _upgrades.get_upgrade_ids():
 		var upgrade_id: StringName = id
+		if not _upgrades.is_forbidden(upgrade_id):
+			continue
 		var btn := Button.new()
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.name = String(upgrade_id)
@@ -320,12 +428,47 @@ func _build_theft_buttons() -> void:
 		_theft_buttons[upgrade_id] = btn
 
 
+func _build_requisition_buttons() -> void:
+	if _req_list == null or _upgrades == null:
+		return
+	for child in _req_list.get_children():
+		child.queue_free()
+	_req_buttons.clear()
+
+	for id in _upgrades.get_upgrade_ids():
+		var upgrade_id: StringName = id
+		if not _upgrades.is_efficiency(upgrade_id):
+			continue
+		var btn := Button.new()
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.name = String(upgrade_id)
+		btn.custom_minimum_size = Vector2(0, 24)
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		UiStyleRef.apply_button(btn, true)
+		btn.pressed.connect(_try_requisition.bind(upgrade_id))
+		_req_list.add_child(btn)
+		_req_buttons[upgrade_id] = btn
+
+
 func _try_steal(upgrade_id: StringName) -> void:
 	if _upgrades == null:
 		return
 	if not _theft_expanded:
-		open_shop()
-	_upgrades.steal_for_upgrade(upgrade_id)
+		open_theft_shop()
+	_upgrades.acquire_upgrade(upgrade_id)
+	_refresh()
+
+
+func _try_requisition(upgrade_id: StringName) -> void:
+	if _upgrades == null:
+		return
+	if not _req_expanded:
+		open_requisition()
+	# acquire_upgrade() no longer emits theft_result for efficiency ids (see
+	# upgrades.gd) — an efficiency purchase isn't a theft, so its success
+	# notice is shown directly here instead of via that signal.
+	if _upgrades.acquire_upgrade(upgrade_id):
+		_show_notice("Requisition complete.")
 	_refresh()
 
 
@@ -340,6 +483,7 @@ func _on_resource_changed(_resource_id: StringName, _new_amount: int) -> void:
 func _on_theft_station_changed(_is_open: bool) -> void:
 	if _upgrades and not _upgrades.is_theft_station_open():
 		_theft_expanded = false
+		_req_expanded = false
 		_district_expanded = false
 	_refresh()
 
@@ -362,17 +506,17 @@ func _on_harvest_completed(_missed: bool) -> void:
 
 
 func _on_district_changed(_id: StringName) -> void:
-	_refresh_districts()
+	_refresh_requisition_status()
 
 
-func _on_cover_changed(_cover: float) -> void:
-	_refresh_districts()
+func _on_shortage_risk_changed(_risk: float) -> void:
+	_refresh_risk()
 
 
 func _on_theft_result(_id: StringName, noticed: bool) -> void:
 	if noticed:
 		return
-	_show_notice("Theft complete. Cover held.")
+	_show_notice("Theft complete. Shortage Risk held.")
 
 
 func _on_records_changed() -> void:
@@ -380,7 +524,8 @@ func _on_records_changed() -> void:
 
 
 func _on_harvest_miss_prompt() -> void:
-	close_shop()
+	close_theft_shop()
+	close_requisition()
 	if _lie_dimmer:
 		_lie_dimmer.visible = true
 	if _lie_panel:
@@ -452,31 +597,47 @@ static func notice_color_for(tone: StringName) -> Color:
 func _refresh() -> void:
 	if _upgrades == null:
 		visible = false
-		_set_shop_visible(false)
+		_set_theft_visible(false)
+		_set_requisition_visible(false)
 		return
 
 	var in_hollow: bool = _upgrades.is_theft_station_open()
 	visible = in_hollow
 	if not in_hollow:
 		_theft_expanded = false
+		_req_expanded = false
 		_district_expanded = false
-		_set_shop_visible(false)
+		_set_theft_visible(false)
+		_set_requisition_visible(false)
 		return
 
-	_refresh_districts()
+	_refresh_risk()
+	_refresh_requisition_status()
 	_refresh_theft_buttons()
-	_set_shop_visible(_theft_expanded)
-	if _shop_open_btn:
-		_shop_open_btn.visible = true
-		_shop_open_btn.text = "Close shop  [U]" if _theft_expanded else "Shop  [U]"
+	_refresh_requisition_buttons()
+	_set_theft_visible(_theft_expanded)
+	_set_requisition_visible(_req_expanded)
+	if _theft_open_btn:
+		_theft_open_btn.visible = true
+		_theft_open_btn.text = "Close steal  [U]" if _theft_expanded else "Steal  [U]"
+	if _req_open_btn:
+		_req_open_btn.visible = true
+		_req_open_btn.text = "Close requisition  [Q]" if _req_expanded else "Requisition  [Q]"
 	call_deferred("_fit_to_content")
 
 
-func _set_shop_visible(open_: bool) -> void:
-	if _shop_dimmer:
-		_shop_dimmer.visible = open_
-	if _shop_panel:
-		_shop_panel.visible = open_
+func _set_theft_visible(open_: bool) -> void:
+	if _theft_dimmer:
+		_theft_dimmer.visible = open_
+	if _theft_panel:
+		_theft_panel.visible = open_
+
+
+func _set_requisition_visible(open_: bool) -> void:
+	if _req_dimmer:
+		_req_dimmer.visible = open_
+	if _req_panel:
+		_req_panel.visible = open_
 
 
 func _fit_to_content() -> void:
@@ -548,27 +709,37 @@ func debug_notice_tone() -> StringName:
 	return _last_notice_tone
 
 
-func _refresh_districts() -> void:
-	var cover_text := "Cover ?"
+## Shortage Risk chip (always visible) + the Steal panel's own risk label.
+func _refresh_risk() -> void:
+	var risk_text := "Shortage Risk ?"
 	if _districts != null:
-		var cover: float = _districts.get_cover_health()
+		var risk: float = _districts.get_shortage_risk()
 		var notice: float = _districts.get_theft_notice_chance()
-		cover_text = "Cover %d%%  ·  notice ~%d%%" % [
-			int(round(cover * 100.0)),
+		risk_text = "Shortage Risk %d%%  ·  notice ~%d%%" % [
+			int(round(risk * 100.0)),
 			int(round(notice * 100.0)),
 		]
 
-	if _cover_label:
-		_cover_label.text = cover_text
-	if _shop_cover:
-		_shop_cover.text = cover_text
+	if _risk_label:
+		_risk_label.text = risk_text
+	if _shop_risk:
+		_shop_risk.text = risk_text
+
+
+## Requisition panel: Tallies balance + the district production breakdown.
+func _refresh_requisition_status() -> void:
+	if _tallies_label:
+		var tallies := 0
+		if _wallet != null:
+			tallies = _wallet.get_amount(_wallet.TALLIES)
+		_tallies_label.text = "Tallies %d" % tallies
 
 	if _district_toggle:
 		_district_toggle.text = "District production ▾" if _district_expanded else "District production ▸"
-		_district_toggle.visible = _theft_expanded
+		_district_toggle.visible = _req_expanded
 
 	if _district_label:
-		_district_label.visible = _theft_expanded and _district_expanded
+		_district_label.visible = _req_expanded and _district_expanded
 		if _district_expanded and _districts != null:
 			var lines: PackedStringArray = PackedStringArray()
 			for id in _districts.get_district_ids():
@@ -666,35 +837,55 @@ func _refresh_theft_buttons() -> void:
 		return
 	for id in _theft_buttons.keys():
 		var btn: Button = _theft_buttons[id]
-		var kind := "Safe" if _upgrades.is_efficiency(id) else "Secret"
 		var def: Dictionary = _upgrades.get_def(id) if _upgrades.has_method("get_def") else {}
 		var blurb := str(def.get("blurb", ""))
 		if blurb != "":
 			btn.tooltip_text = blurb
 		if _upgrades.has_method("is_unlocked") and not _upgrades.is_unlocked(id):
-			btn.text = "%s  %s — locked" % [kind, _upgrades.get_display_name(id)]
+			btn.text = "%s — locked" % _upgrades.get_display_name(id)
 			btn.disabled = true
 			continue
 		var level: int = _upgrades.get_level(id)
 		var cost: int = _upgrades.get_next_cost(id)
 		var cost_label := "%d" % cost
-		if _upgrades.is_forbidden(id) and _districts != null:
+		if _districts != null:
 			var good_id: StringName = _upgrades.get_divert_good(id)
 			cost_label = "%d %s" % [cost, _districts.get_good_display_name(good_id)]
 			if _districts.is_production_thin(good_id):
 				btn.tooltip_text = (
 					"%s\nProduction is thin — diversion will be noticed." % blurb
 				)
-		elif _upgrades.is_efficiency(id):
-			cost_label = "%d Salvage" % cost
 		var suffix := ""
 		if id == _upgrades.DIG_YIELD:
 			suffix = "  ·  %d/dig" % _upgrades.get_dig_salvage_yield()
-		btn.text = "%s  %s  Lv%d — %s%s" % [
-			kind,
+		btn.text = "%s  Lv%d — %s%s" % [
 			_upgrades.get_display_name(id),
 			level,
 			cost_label,
 			suffix,
 		]
-		btn.disabled = not _upgrades.can_steal(id)
+		btn.disabled = not _upgrades.can_acquire(id)
+
+
+func _refresh_requisition_buttons() -> void:
+	if _upgrades == null:
+		return
+	for id in _req_buttons.keys():
+		var btn: Button = _req_buttons[id]
+		var def: Dictionary = _upgrades.get_def(id) if _upgrades.has_method("get_def") else {}
+		var blurb := str(def.get("blurb", ""))
+		if blurb != "":
+			btn.tooltip_text = blurb
+		if _upgrades.has_method("is_unlocked") and not _upgrades.is_unlocked(id):
+			btn.text = "%s — locked" % _upgrades.get_display_name(id)
+			btn.disabled = true
+			continue
+		var level: int = _upgrades.get_level(id)
+		var cost: int = _upgrades.get_next_cost(id)
+		var cost_label := "%d Tallies" % cost
+		btn.text = "%s  Lv%d — %s" % [
+			_upgrades.get_display_name(id),
+			level,
+			cost_label,
+		]
+		btn.disabled = not _upgrades.can_acquire(id)

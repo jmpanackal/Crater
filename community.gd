@@ -3,7 +3,7 @@ extends Node
 ## harvest_timer counts down each Harvest cycle. Missing a Harvest (being at the
 ## Dig Site when it completes) calls on_harvest_missed() and lowers Trust.
 ## Optional lie prompt can dodge the miss; exposed lies hurt worse later.
-## Upward digs and thin-cover thefts also risk Trust.
+## Upward digs and high-Shortage-Risk thefts also risk Trust.
 
 signal harvest_timer_changed(seconds_remaining: float)
 signal harvest_completed(player_missed: bool)

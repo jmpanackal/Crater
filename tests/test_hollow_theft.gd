@@ -31,11 +31,11 @@ func _run_tests(terrain: TerrainLayer) -> void:
 	districts.set_good_amount(districts.BINDCORD, 4)
 
 	# Dig site: cannot steal even with Bindcord available.
-	if upgrades.can_steal(upgrades.DIG_YIELD):
-		push_error("FAIL can_steal true at dig site")
+	if upgrades.can_acquire(upgrades.DIG_YIELD):
+		push_error("FAIL can_acquire true at dig site")
 		quit(1)
 		return
-	if upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL steal succeeded away from Hollow")
 		quit(1)
 		return
@@ -47,11 +47,11 @@ func _run_tests(terrain: TerrainLayer) -> void:
 
 	# Return to Hollow: open station and steal Bindcord.
 	upgrades.set_theft_station_open(true)
-	if not upgrades.can_steal(upgrades.DIG_YIELD):
-		push_error("FAIL can_steal false in Hollow with Bindcord")
+	if not upgrades.can_acquire(upgrades.DIG_YIELD):
+		push_error("FAIL can_acquire false in Hollow with Bindcord")
 		quit(1)
 		return
-	if not upgrades.steal_for_upgrade(upgrades.DIG_YIELD):
+	if not upgrades.acquire_upgrade(upgrades.DIG_YIELD):
 		push_error("FAIL Hollow steal failed")
 		quit(1)
 		return

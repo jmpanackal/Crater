@@ -133,22 +133,27 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
    **✅ Locked (USER):** Story-aligned — Siphon diverts **communal District production**; dig haul is **multi-type Materials** that feed districts + Records + other; efficiency raises production for Cover. See #29 / [`materials.md`](materials.md). (Not Salvage-only shop; not copy-only patch as the end state.)
 
 2. **Should efficiency / safe magic share the siphon UI at all?**  
-   **⏳ Next Decision** — ask after Material names confirmed.
+   **✅ Locked (USER, 2026-09-13):** No — split into two visible panels. A public **Requisition** panel for efficiency/safe upgrades, and the existing **Steal** panel for forbidden-only. Both currently route through the same `steal_for_upgrade()` — this is the fix. Realizes #28's locked intent that helping the society and stealing from it should read as different things to the player, not identical UI.
 
 3. **Is Dig Yield forbidden-tier or public worker gear?**  
-   Open (A/B/C still valid).
+   **✅ Resolved (USER, 2026-09-13):** Not a locked question — Dig Yield isn't a necessary/sacred mechanic, it was demo-only content. **General rule going forward: nothing in the current code/prototype is canon by default; the docs are the source of truth.** When the Requisition/Steal split (Decision 2) lands, place Dig Yield wherever fits naturally (it reads as ordinary gear, so Requisition is the likely default) without treating the choice as a hard lock.
 
 4. **What should Cover communicate in one player-facing sentence?**  
-   Draft still good: “When the districts thrive, missing materials are harder to notice.” Lock with Decision 2 / UI pass.
+   Draft still good: “When the districts thrive, missing materials are harder to notice.” Still open — note this is the same mechanic as the “Cover → Shortage Risk” rename tracked in [`terminology-transition.md`](terminology-transition.md)’s Known follow-ups; lock the sentence and the rename together.
 
 5. **Demo economy depth:**  
    **✅ Locked (USER):** Need **inventory** + multi-type Materials toward Tallies + production-drain Siphon — not Salvage-only forever. Production needs a protected reserve, local demand/cap, and target-good Cover. Implement in focused passes after names + Decision 2.
 
 ### Demo scope (non-blocking but useful)
 
-6. Steward assignment for demo: **stub dialogue + marker**, or skip until new-district dig space exists? — Open
-7. Firmament upward dig in demo: **available now** (prototype), or **gated** until a fake “Ashram Heights access” flag so story matches feel? — Open
-8. Art bar for demo: greybox OK if loop/fiction clear, or need one PixelLab pass on districts/NPCs first? — Open
+6. Steward assignment for demo: **stub dialogue + marker**, or skip until new-district dig space exists?  
+   **✅ Locked (USER, 2026-09-13):** Stub it now. `hollow-chunk-map.md`'s opening route already designs H-2-11 West Dispatch Yard around the First Steward's assignment — it's the route's core teaching beat (sanctioned civic work); skipping it leaves that design's centerpiece unbuilt.
+
+7. Firmament upward dig in demo: **available now** (prototype), or **gated** until a fake “Ashram Heights access” flag so story matches feel?  
+   **✅ Locked (USER, 2026-09-13, soft lean):** Gate it behind a stand-in flag. Closest call of the five — revisit if it costs more than a trivial flag check to implement.
+
+8. Art bar for demo: greybox OK if loop/fiction clear, or need one PixelLab pass on districts/NPCs first?  
+   **✅ Locked (USER, 2026-09-13):** Greybox is fine. A demo proves the loop, not the visuals — matches `priority-roadmap.md`'s own sequencing (layout locked, then real art). Spend art budget after the loop is proven, not before.
 
 ---
 
