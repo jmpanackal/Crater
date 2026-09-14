@@ -42,8 +42,8 @@ flowchart TB
 
   subgraph L2["L2 · Player Core"]
     MOVE[Player Controller]
-    STAM[Stamina + Reservations]
-    FATIGUE[Fatigue / Push / Recovery]
+    STAM[Stamina + Blocks]
+    FATIGUE[Fatigue / Overexertion / Recovery]
     INTERACT[Interaction]
   end
 
@@ -117,9 +117,9 @@ Presentation (HUD, Trust view, district view, workbench UI, journal/map, world-s
 
 ```mermaid
 flowchart LR
-  MOVE[Player Controller] --> STAM[Stamina + Reservations]
+  MOVE[Player Controller] --> STAM[Stamina + Blocks]
   STAM --> TUNE[Tuning Registry]
-  FATIGUE[Fatigue / Push] --> STAM
+  FATIGUE[Fatigue / Overexertion] --> STAM
   FATIGUE --> CLOCK[World Clock]
   HAUL[Hauling] --> STAM
   HAUL --> ITEMS[Materials]
@@ -135,7 +135,7 @@ flowchart LR
   FAIL --> CLOCK
 ```
 
-**Contract focus:** Stamina owns *all* reservations, keyed by `source_id` (hauling, rig_strain, fatigue). Hauling and Gear request reservations; they never touch the bar. Blocked by **G1, G2, G21, G13**.
+**Contract focus:** Stamina owns *all* reservations, keyed by `source_id` (hauling, rig_strain, fatigue). Hauling and Gear request reservations; they never touch the bar. All resolved — §68.
 
 ### 2b. Time chain — clock to social rhythm
 
@@ -152,7 +152,7 @@ flowchart LR
   JOBS --> FACTS
 ```
 
-**Contract focus:** only the Clock advances time. Sleep, rescue, and failure **request** time advances; the Clock emits phase-transition events exactly once per transition. Blocked by **G3, G11, G10**.
+**Contract focus:** only the Clock advances time. Sleep, rescue, and failure **request** time advances; the Clock emits phase-transition events exactly once per transition. All resolved — §68.
 
 ### 2c. Transgression chain — action to consequence
 
@@ -175,7 +175,7 @@ flowchart LR
   DIALOGUE --> FACTS
 ```
 
-**Contract focus:** perception and witness systems **only write facts**. Suspicion and investigation are **derived** from facts and never saved as truth. Trust is authoritative but changes only through named, reasoned events read from facts. Blocked by **G14, G16, G9, G4**.
+**Contract focus:** perception and witness systems **only write facts**. Suspicion and investigation are **derived** from facts and never saved as truth. Trust is authoritative but changes only through named, reasoned events read from facts. All resolved — §68.
 
 ### 2d. Economy chain — production to progression
 
@@ -201,7 +201,7 @@ flowchart LR
   DELIVER --> TALLY
 ```
 
-**Contract focus:** the District owns District Reserves. Orders and Diversion both **request withdrawals** through the same contract, which is what makes legitimate and illicit draws compete. Blocked by **G4, G5, G6, G7, G8**.
+**Contract focus:** the District owns District Reserves. Orders and Diversion both **request withdrawals** through the same contract, which is what makes legitimate and illicit draws compete. All resolved — §68 (G6) and §67 (G7, G8).
 
 ### 2e. Home and Firmament chain
 
@@ -231,7 +231,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | Current time, phase | World Clock | Authoritative | Request advance |
 | Stamina max, reservations by source, current usable | Stamina | Authoritative | Request/release reservation, spend |
-| Fatigue amount, exhausted flag | Fatigue | Authoritative | Request add (Push), request recovery |
+| Fatigue amount, exhausted flag | Fatigue | Authoritative | Request add (Overexert), request recovery |
 | Terrain deltas per chunk, deposit state | Terrain | Authoritative | Request dig/extract |
 | Hauled loads, tether attachments | Hauling | Authoritative | Attach / detach / cache |
 | Personal storage, concealed storage, caches | Storage | Authoritative | Deposit / withdraw with ownership tag |
@@ -252,7 +252,7 @@ flowchart LR
 
 Phases follow the layers. **Slice** is a proposed vertical-slice treatment (AI proposal, pending USER): **full**, **thin** (real contract, minimal content), **stub** (contract + fake implementation), **defer**.
 
-| # | System | Depends on | Blocking gaps | Slice (proposed) |
+| # | System | Depends on | Resolved by | Slice (proposed) |
 | --- | --- | --- | --- | --- |
 | 1 | Event Bus, Authoritative State, Fact Log, Tuning Registry, Content Definitions | — | — | full |
 | 2 | Save / Load + versioning | 1 | G10 | full |
@@ -261,8 +261,8 @@ Phases follow the layers. **Slice** is a proposed vertical-slice treatment (AI p
 | 5 | Authored Topology / Zones | 1 | camera/scale lock | thin (opening route) |
 | 6 | Destructible Terrain + Persistence | 2, 5 | spike | thin (Bottom-West envelope) |
 | 7 | Player Controller (reuse prototype) | 6 | — | full |
-| 8 | Stamina + Reservations | 1, 7 | G2, G21 | full |
-| 9 | Fatigue / Push / Recovery | 4, 8 | G2, G21 | thin |
+| 8 | Stamina + Blocks | 1, 7 | G2, G21 | full |
+| 9 | Fatigue / Overexertion / Recovery | 4, 8 | G2, G21 | thin |
 | 10 | Interaction | 7 | — | full |
 | 11 | Materials / Components / Records + Storage | 1, 2, 10 | G8 | thin (2 Materials, 1 Component, 1 Record) |
 | 12 | Deposits + Extraction | 6, 11 | — | thin |

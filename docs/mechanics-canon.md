@@ -3725,5 +3725,73 @@ The Forbidden items already listed in Section 65 (Resonance Driver, Ghost Mapper
 - exact concealment tier names and search rules for on-body grafts (may reuse §62's names outright or diverge slightly once tested);
 - whether full removal requires a distinct Record from the one that taught the graft;
 - an in-world name for the pioneer/expedition corps;
+
+---
+
+# 68. Vertical-Slice Structural Locks
+
+## LOCKED — Provenance
+
+This section is **USER-locked** (2026-09-15), resolving every Tier 1/Tier 2 structural gap identified for the vertical slice. Full rationale and rejected alternatives live in `docs/build-bible/01-gap-decisions.md` (G1–G22); this section is the terse canonical form. These are structural decisions, not tuning — exact numbers (durations, thresholds, quantities) remain OPEN/tunable unless stated otherwise.
+
+## LOCKED — Stamina block overflow
+
+Stamina blocks apply in a fixed order: fatigue first, then Rig Strain, then hauling. An action that would push total blocks past the stamina bar is allowed only as Overexertion, with a warning; the overflow converts into fatigue. If fatigue alone fills the bar, the player is Exhausted. Invariant: blocked stamina never exceeds the maximum.
+
+## LOCKED — Overexertion trigger
+
+Holding a strenuous action at zero usable stamina triggers Overexertion automatically, with a strong audio/visual warning. The first Overexertion in a play session shows an explicit prompt before it happens.
+
+## LOCKED — Sleep and cycle skipping
+
+Sleep is available only from Gathering onward (or after Ritual), and always advances to the next Rousing, triggering exactly one district cycle resolution. Earlier in the cycle, only field/home rest is available: partial fatigue recovery at a time cost, never crossing a cycle boundary. This makes farming repeated district resolutions by sleep-spam structurally impossible.
+
+## LOCKED — Civic cycle length and time flow
+
+A civic cycle runs roughly 30–40 real minutes, with Working occupying about half. Time pauses during menus, the workbench, and dialogue. Travel-time budgets are a design target, not a hard rule (e.g. home to the Bottom-West front under 3 minutes). Exact minutes stay tunable; the structure (paused during UI, Working as the long phase) does not.
+
+## LOCKED — Save and reload policy
+
+One rolling save slot autosaves at beds, civic phase transitions, and on quit; quitting resumes exactly where the player left off. No manual save list, and no save-scumming path around theft or lie consequences. A separate optional backup slot for accessibility may be offered later without breaking this.
+
+## LOCKED — NPC simulation scope
+
+NPCs follow an abstract schedule table (location per civic phase) whether or not their chunk is loaded. Off-screen NPCs "are" at their scheduled location without physics simulation, and instantiate when their chunk loads. Perception (witnessing, noise) runs only for loaded NPCs, but off-screen scheduled presence can still be queried for world-fact purposes (e.g. "was anyone scheduled in Wickwork storage at that time").
+
+## LOCKED — Trust granularity
+
+Trust is one global value for Act 1, with local suspicion tracked separately per NPC, district, Wardens, location, or incident, per §17/§19. The Trust system exposes a context-aware query from the start, so group-specific modifiers (e.g. Wardens reading Trust differently than ordinary residents) can be added later without breaking the contract.
+
+## LOCKED — Combat in Act 1
+
+Act 1 has no combat. Danger comes from hazards (collapse, flooding, falls, pressure), stamina, civic time, and social consequence. Non-combat creatures that react to the noise system (avoiding, distracting, hiding — never fighting) remain a possible later DIRECTION, not required for Act 1.
+
+## LOCKED — Hauling cost on flat routes
+
+Hauling makes climbing, ladders, steep ramps, and jumps strenuous — they spend stamina and can't draw on the blocked portion — and sprinting is unavailable while hauling. Loaded movement is also slower, scaled by load, so distance costs civic time even on flat ground.
+
+## LOCKED — Load bundling
+
+The player tows one bundle holding up to a capacity of a single Material type at a time. Additional simultaneous bundle capacity comes from Hauling-dimension Gear, not from carrying multiple bundles by default.
+
+## LOCKED — Theft interaction
+
+Diversion is a hold-to-take interaction at a physical storage object (rack, culture shelf, supply crate): cancellable, takes real time, emits noise, one unit per take. Small amounts stay concealed on the player; amounts above a threshold become a physical haul load. Witness danger is shown diegetically (NPC facing, footsteps, light) — never a meter or percentage.
+
+## LOCKED — Core Improvement sources
+
+Core Improvements come from a small, mixed set of sources: some ordered from Wickwork at Trust/story-gated milestones (Approved), some restored from recovered ship Components or discovered at repair bays, and some Forbidden. Kept deliberately small so Core Improvements never become an RPG stat track.
+
+## LOCKED — Theft cost when District Reserves refill
+
+Every diversion writes an unexplained-loss fact regardless of current District Reserves; local investigation pressure derives from those facts and decays slowly across cycles. Additionally, at cycle resolution each district compares expected vs. actual District Reserves — when the unexplained loss since the last check crosses a threshold (lower while the district is strained), a discrepancy fact is logged and storage checks increase. Both effects are deterministic, not hidden random rolls.
+
+## LOCKED — Player lever during a shortage
+
+When a district is short this cycle, the player has two immediate levers even though District Capacity itself only grows via lasting projects: a shortage can spawn Emergency/World Need jobs (repair a line, haul supplies, clear a blockage) granting temporary District Capacity for a few cycles; and the player can return diverted District Output or donate personal stores directly to District Reserves, openly or anonymously as its own risky act.
+
+## LOCKED — Accidental falls and void drops
+
+Authored barriers keep normal routes from dropping into the Devil's Mouth or off lethal falls. If a severe fall happens anyway, the player wakes at the nearest safe point with added fatigue, lost time, and any haul left behind but recoverable. Rescue as a forced event is reserved for authored stranded situations (§54), not ordinary accidental falls.
 - which specific Materials pair with which playstyle dimensions beyond the examples given above.
 
