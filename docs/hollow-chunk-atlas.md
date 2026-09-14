@@ -33,11 +33,21 @@ During this pass, prioritize in this order:
 
 Only cells physically adjacent to the Devil’s Mouth may read out into its open depth. Every other wall district—including worker homes, Wickwork, Glowbeds, Mid-East dig access, lower-east housing, and Cistern service—must terminate into thick crater rock, a carved court, a local shaft, a retaining wall, or an inward-facing service bay. A walkable terrace in an interior district needs a visible rock-backed or enclosed far edge; it is never an unexplained balcony above blue abyss. Narrow sightlines through a guarded fracture are permitted, but they cannot replace a physically grounded route.
 
+The west worker connector at `H-4-7`–`H-5-8` is the reference repair for this rule: one shared 2 × 2 master gives it an enclosed diagonal switchback, local hand freight, and a controlled entry toward Mid Heart. It has no operating lower-west lift and no open pit balcony.
+
+The lower continuation at `H-4`–`H-5`, rows `9`–`10`, follows the same rule: it is a shared, rock-backed worker/home approach with a short stair and a sealed eastern service side. `H-4-11` remains the immutable Home Court anchor; `H-5-11` is a contained service turnback, never a lift landing or a second exit.
+
 ### Landmark-first spatial rule
 
 Do not generate the Hollow as stacked horizontal room bands. Before making a new anchor, assign it one **multi-cell landmark** that crosses at least one cell boundary: a switchback, steep/short stair run, tall carved bay, local hydraulic service lift, hanging freight gantry, recessed court, or open public terrace. The anchor’s rooms and props must conform to that landmark rather than creating clean parallel floors.
 
 At least one of each region’s major spaces must be an **open terrace** large enough for its civic function, with visible railings/cables/supports and a view into Devil’s Mouth only where that geography is truly adjacent, otherwise a large interior shaft or enclosed court. Pair it with tighter caves, deeper carved rooms, and overhangs so the settlement reads as an uneven inhabited cliffscape. At outer-wall limits, transition into thick rock, collapse, braced gates, sealed galleries, and maintained turnbacks—never another generic room. Seam masters must continue the landmark’s route and silhouette, not merely erase a black gap.
+
+### 2D gameplay readability rule
+
+Every atlas cell must read as a side-scroller play space before it reads as concept art: one dominant collision floor, at most one clearly railed secondary ledge, and explicit stair/ramp landings. In a shared 2 × 2 master, use no more than three traversable elevations. Pipes, distant buildings, rigging, tank faces, and deep-Mouth silhouettes are background or blockers rather than ambiguous walkways. The rebuilt `H-8`–`H-9`, rows `6`–`7` Holding plate is the current Mid Heart reference: one public upper route, one short local descent, and a deliberate lower void cut.
+
+Every shared image must be normalized to its intended tile canvas before cropping: a 2 × 2 parent is exactly 2048 × 1152 before its four 1024 × 576 children are exported. This is map integrity, not just export hygiene: it makes routes, rock volumes, and void cuts literal across the internal seams. The rebuilt `H-6`–`H-7`, rows `6`–`7` West Exchange approach is the complementary reference: it is rock-backed except for one narrow, railed gangway into the Mouth-facing Holding edge.
 
 ### Locked transport topology
 

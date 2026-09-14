@@ -286,7 +286,7 @@ Uses can include:
 - electrical systems,
 - infrastructure,
 - Rig technology,
-- Magician-related technology,
+- Pulse Binder technology,
 - advanced/Forbidden technology.
 
 Verdigris also acts as a clue that buried ship infrastructure may be nearby.
@@ -446,7 +446,7 @@ Allowed techniques include:
 
 The goal is physical feel, not simulation purity.
 
-Normal hauling primarily reserves stamina rather than creating a large set of special traversal prohibitions.
+Normal hauling primarily blocks stamina rather than creating a large set of special traversal prohibitions.
 
 Ordinary traversal should remain broadly functional while hauling.
 
@@ -561,7 +561,7 @@ Do **not** display something like:
 
 when the character is burdened.
 
-Instead, display the full baseline capacity with blocked/reserved portions.
+Instead, display the full baseline capacity with blocked portions.
 
 Ordinary walking should be free or essentially free.
 
@@ -584,37 +584,37 @@ Walking should not normally prevent regeneration.
 
 ---
 
-# 10. Reserved Stamina, Fatigue, and Overexertion
+# 10. Blocked Stamina, Fatigue, and Overexertion
 
-## LOCKED — Reservation
+## LOCKED — Stamina blocks
 
-Certain conditions reserve part of the fixed stamina bar.
+Certain conditions block part of the fixed stamina bar: that portion is visible on the bar, but the player can't spend it until the block is released.
 
-### Hauling reservation
+### Hauling block
 
-Hauling Materials reserves stamina.
+Hauling Materials blocks part of your stamina.
 
-Removing/depositing/caching the load releases that reservation.
+Removing/depositing/caching the load releases that block.
 
-### Rig Strain reservation
+### Rig Strain block
 
-Equipping Gear beyond safe Rig Capacity creates Rig Strain and reserves stamina.
+Equipping Gear beyond safe Rig Capacity creates Rig Strain, which blocks stamina.
 
-Hauling reservation and Rig Strain are separate causes that can stack on the same fixed stamina bar.
+The hauling block and the Rig Strain block are separate causes that can stack on the same fixed stamina bar.
 
-### Fatigue reservation
+### Fatigue block
 
 Fatigue is longer-lasting expedition strain.
 
-Fatigue reserves stamina capacity but does **not** simply disappear through ordinary moment-to-moment stamina regeneration.
+Fatigue blocks stamina capacity but does **not** simply disappear through ordinary moment-to-moment stamina regeneration.
 
-## LOCKED — Push / overexertion
+## LOCKED — Overexertion
 
 At zero usable stamina, the player does not simply collapse.
 
-When appropriate, the player may **Push** through an action.
+When appropriate, the player may **Overexert**: push through an action anyway.
 
-Pushing converts additional future capacity into fatigue.
+Overexerting converts additional future capacity into fatigue.
 
 Repeated abuse can lead to an exhausted state where strenuous activity is no longer possible until proper recovery.
 
@@ -656,7 +656,7 @@ Exact:
 - stamina capacity,
 - rates,
 - fatigue conversion,
-- Push rules,
+- Overexertion rules,
 - rest duration,
 - exhaustion thresholds,
 - UI treatment.
@@ -1779,15 +1779,19 @@ Avoid random routine home searches as a punishment loop.
 
 ---
 
-# 32. Magicians
+# 32. Pulse Binders
+
+## LOCKED — Provenance
+
+This section is **USER-locked** (2026-09-14). "Divine Binding" is the practice; "Pulse Binders" are its practitioners, replacing the earlier placeholder term "Magicians"/"magic" everywhere. Divine Binding is not a separate thing from the Hollow's religion — it *is* devotional practice: sacred, ritualized work with inherited colony technology, performed in the belief (sincere for some, performative for others) that it unites the practitioner with the Pulse and the technology's original purpose. There is no separate "folk magic" vocabulary running alongside doctrine; this is the vocabulary.
 
 ## LOCKED
 
-Magicians remain a major part of Krater.
+Pulse Binders remain a major part of Krater.
 
 They are **not** a fourth production district.
 
-They are custodians/practitioners of inherited colony technology.
+They are custodians/practitioners of inherited colony technology, named for their most sacred devotion — tending the Pulse — though Divine Binding as a practice extends to old salvaged technology broadly (lifts, lamps, pressure systems, Wickwork's machinery), not only the Pulse itself.
 
 Their knowledge consists of real technical procedures preserved through:
 - ritual,
@@ -1797,11 +1801,11 @@ Their knowledge consists of real technical procedures preserved through:
 - institutional practice,
 - possibly deliberate secrecy.
 
-To ordinary Hollow residents, some of what they do can genuinely appear magical.
+To ordinary Hollow residents, what they do genuinely reads as sacred, not as a trick — Divine Binding is understood as devotion, not performance, even by residents who privately doubt it.
 
 ## LOCKED — Role in technology
 
-Magicians may:
+Pulse Binders may:
 - maintain ancient systems,
 - interpret Components,
 - teach procedures,
@@ -1818,19 +1822,21 @@ Forbidden technology often comes from:
 
 > understanding, modifying, repurposing, or recombining technology beyond accepted doctrine.
 
-A Magician may know **how** a procedure works operationally without understanding **why**.
+A Pulse Binder may know **how** a procedure works operationally without understanding **why**.
 
 A Record may reveal why it works and expose new possibilities.
 
-This directly connects Magicians to the distinction between Approved and Forbidden technology.
+This directly connects Pulse Binders to the distinction between Approved and Forbidden technology.
+
+The unsanctioned counterpart — practicing the same Divine Binding without Council sanction, including bio-fusion (§67) — is not a separate practice but a corruption of this one: the same devotional work, stolen rather than granted. It is named **Hellbinding** or **Voidbinding** (interchangeable), and its practitioners **Hell Binders** or **Void Binders** (interchangeable). See §67.
 
 ## LOCKED — Story potential
 
-The eventual surface/ship revelations should not reduce the Magicians to:
+The eventual surface/ship revelations should not reduce the Pulse Binders to:
 
-> “haha, your magic was just technology.”
+> “haha, your Binding was just technology.”
 
-Different Magicians can react differently.
+Different Pulse Binders can react differently.
 
 Some may:
 - resist,
@@ -1920,11 +1926,11 @@ The player may intentionally equip Gear beyond capacity.
 
 Going over capacity creates Rig Strain.
 
-Rig Strain reserves part of the player's fixed stamina bar.
+Rig Strain blocks part of the player's fixed stamina bar.
 
 Greater overcapacity creates greater strain.
 
-Hauling Strain and Rig Strain are separate stamina-reservation sources.
+The hauling block and Rig Strain are separate stamina-blocking sources.
 
 Improving the underlying Rig can increase Rig Capacity, allowing previously strenuous builds to operate comfortably.
 
@@ -1976,7 +1982,7 @@ with further growth later.
 
 Exact values remain tuning targets.
 
-Going over Capacity remains legal and creates Rig Strain through stamina reservation.
+Going over Capacity remains legal and creates Rig Strain, which blocks stamina.
 
 ## DIRECTION — Functional categories
 
@@ -2020,7 +2026,7 @@ Strong Gear effects should be qualitative.
 
 Good examples:
 - reveal cavities,
-- reduce hauling reservation,
+- reduce the hauling stamina block,
 - change light shape,
 - suppress excavation noise,
 - penetrate a new class of terrain.
@@ -2078,7 +2084,7 @@ Fantasy:
 > I can stay out longer and bring more back.
 
 Potential capabilities:
-- reduced hauling reservation,
+- reduced hauling stamina block,
 - better tether handling,
 - better fatigue management,
 - better use of rest/logistics,
@@ -2207,7 +2213,7 @@ Partial unknown leads appear only after meaningful evidence.
 Examples:
 - strange Component,
 - Record fragment,
-- Magician mention,
+- Pulse Binder mention,
 - observed old system,
 - restricted mechanism.
 
@@ -2221,7 +2227,7 @@ Discovery can surprise the player, but build progression must remain **steerable
 
 If the player wants more Survey progression, the world should provide meaningful leads:
 - district projects,
-- Magician knowledge,
+- Pulse Binder knowledge,
 - locations,
 - Materials,
 - Components,
@@ -2362,6 +2368,14 @@ It represents:
 
 Its technological tradition grows naturally from generations maintaining ship-derived fluid/pressure systems.
 
+## LOCKED — Water source (USER, 2026-09-14)
+
+Cistern's water is drawn from below, not above: the Great Collapse's flood drained downward over generations through fractures and cavities, pooling at the bottom of the Devil's Mouth and submerging part of the wreck there. Cistern's supply is siphoned up from that pool, not a slow surface seep — giving the district's water a direct, discoverable origin in the Hollow's founding disaster rather than an unexplained utility.
+
+## DIRECTION — Endgame Cistern arc
+
+A sufficiently developed Cistern is the plausible mechanism for eventually draining the Devil's Mouth and exposing the wreck at its bottom (§51, game-pitch.md Act 3's "bottom of the Devil's Mouth"). This is not mechanically specified — exact capacity, infrastructure, and timing remain open, Act 3 content — but the throughline is locked: Cistern's Act 1–2 development is not incidental infrastructure, it is the thing that eventually makes the true bottom reachable.
+
 Cistern improvements can produce large physical world changes such as:
 - repaired lifts,
 - powered hauling,
@@ -2474,11 +2488,11 @@ See Section 62 for the detailed residential, concealment, and Ashram/Firmament r
 
 ---
 
-# 48. Magicians and the Capability Web
+# 48. Pulse Binders and the Capability Web
 
 ## LOCKED
 
-Magicians are major sources/interpreters of **Known** and **Approved** technology.
+Pulse Binders are major sources/interpreters of **Known** and **Approved** technology.
 
 They may know:
 - operating procedures,
@@ -2490,7 +2504,7 @@ Records can reinterpret their knowledge.
 
 Example conceptual pattern:
 
-> Magician: “This regulator is only for the Pulse.”  
+> Pulse Binder: “This regulator is only for the Pulse.”  
 > Record: reveals it is actually a general pressure-control component.  
 > Player: realizes it can support another forbidden application.
 
@@ -2522,7 +2536,7 @@ The surface should feel like an expansion of systems the player already understa
 - jobs → settlement work, expeditions, major projects
 - Rig builds → advanced exploration/salvage builds
 - Hollow infrastructure → surface infrastructure
-- Magicians → technicians/engineers and/or ideological conflict
+- Pulse Binders → technicians/engineers and/or ideological conflict
 
 ## LOCKED — District tradition continuity
 
@@ -2783,11 +2797,11 @@ This should be contextual and occasional rather than constant wear-and-tear book
 The game should clearly communicate when the player is approaching a severe overextension/stranding risk.
 
 Potential signals include:
-- heavily reserved stamina,
+- heavily blocked stamina,
 - exhausted animation,
 - breathing/exertion audio,
 - poor recovery,
-- warnings when attempting another Push.
+- warnings when attempting to Overexert again.
 
 Major consequences should generally feel earned rather than surprising.
 
@@ -2795,7 +2809,7 @@ Major consequences should generally feel earned rather than surprising.
 
 - permadeath as the default failure loop,
 - automatic full-expedition resets,
-- consequence-free repeated Push abuse,
+- consequence-free repeated Overexertion,
 - instant arbitrary rescue teleports with no contextual meaning,
 - random injury tables,
 - routine deletion of important Records/Components.
@@ -2931,7 +2945,7 @@ Older implementation names may remain temporarily in code only when clearly trea
 - Permanent mutually exclusive district branches as the normal model.
 - Random injury complexity.
 - Generic morality meter.
-- Magicians being discarded once technology is revealed.
+- Pulse Binders being discarded once technology is revealed.
 
 ---
 
@@ -3023,13 +3037,13 @@ Krater is a systemically connected game in which:
 - the Hollow is a real society rather than a hub menu;
 - jobs teach the game through believable civic participation;
 - the civic cycle and Ritual create social rhythm without turning play into constant schedule anxiety;
-- the society's cult-like/religious undertone shapes Ritual, doctrine, legitimacy, access, Magicians, taboo, and social expectations without becoming a separate Faith meter;
+- the society's cult-like/religious undertone shapes Ritual, doctrine, legitimacy, access, Pulse Binders, taboo, and social expectations without becoming a separate Faith meter;
 - digging creates persistent player-made routes and reveals meaningful pockets rather than showering generic loot;
 - the world uses authored settlement/story geography with Terraria-like local digging freedom inside controlled excavation zones;
 - extraction/hauling borrows some of Dome Keeper's physical satisfaction while remaining part of a persistent world rather than a run-reset mine;
 - Sutral, Ravelstone, Brinecrystal, Verdigris, and Hullbit form the locked Act 1 bulk Material roster;
 - Materials, Components, and Records have distinct roles;
-- hauling, Rig Strain, stamina, fatigue, Push, rescue, and civic time create real expedition consequences;
+- hauling, Rig Strain, stamina, fatigue, Overexertion, rescue, and civic time create real expedition consequences;
 - failure usually continues the world rather than resetting it, but severe overextension can force rescue and social/time consequences;
 - districts produce useful civic output once per civic cycle through Capacity, Demand, finite Reserves, and contextual shortages;
 - district development is influenced rather than directly commanded;
@@ -3043,7 +3057,7 @@ Krater is a systemically connected game in which:
 - Gear changes capabilities, information, routes, logistics, or risk rather than mainly adding percentages;
 - the five overlapping build dimensions are Excavation, Survey, Hauling/Endurance, Mobility, and Secrecy;
 - technology is discovered through a Known → Understood → Available capability web rather than fully exposed from the start;
-- Magicians preserve inherited real technology through ritualized/incomplete understanding;
+- Pulse Binders preserve inherited real technology through ritualized/incomplete understanding, practicing what the Hollow calls Divine Binding;
 - the Pulse anchors time, culture, and infrastructure;
 - the hidden Forbidden workspace develops through residential progression;
 - Mid Hollow housing is a meaningful intermediate status/mechanical milestone;
@@ -3232,7 +3246,7 @@ Possible consequences may include:
 - Trust loss,
 - local restrictions,
 - confiscation of some illicit goods,
-- Magician/Warden confrontation,
+- Pulse Binder/Warden confrontation,
 - forced explanation/lie/deflection,
 - loss of access,
 - a story branch,
@@ -3335,7 +3349,7 @@ The Hollow's religious/cult-like culture is expressed primarily through **existi
 
 Religion/cultural doctrine can shape:
 - Ritual,
-- Magicians,
+- Pulse Binders,
 - Approved vs Forbidden technology,
 - civic duty,
 - Trust,
@@ -3474,7 +3488,7 @@ Role:
 Improves how hauled Material is supported.
 
 Role:
-- reduces the severity of hauling-related stamina reservation,
+- reduces the severity of the hauling stamina block,
 - improves practical expedition range,
 - does not simply raise maximum stamina.
 
@@ -3589,7 +3603,7 @@ The Build Bible should convert this canon into implementation-level definitions 
 - services/autoloads,
 - signals and dependencies,
 - player-controller contract,
-- stamina/fatigue/reservation,
+- stamina/fatigue/stamina blocks,
 - Materials/Components/Records,
 - hauling/caching,
 - district production/demand/reserves,
@@ -3610,4 +3624,105 @@ The Build Bible must preserve every **LOCKED**, **DIRECTION**, **OPEN**, and **C
 Do not reopen a locked mechanic merely because an implementation agent prefers a different architecture.
 
 Small numeric/tuning changes explicitly marked as tunable do not constitute redesign.
+
+---
+
+# 67. Forbidden Gear as Bio-Fusion
+
+## LOCKED — Provenance
+
+This section is **USER-locked** (2026-09-14), reached through explicit design discussion and checked against every other section of this document for contradictions before being added. It refines Sections 29, 33–36, 47, 54, and 62 without contradicting anything else marked LOCKED elsewhere in this document. Where this section and an earlier one could be read two ways for Forbidden Gear specifically, this section's wording governs.
+
+## LOCKED — Naming (USER, 2026-09-14)
+
+Bodily fusion is named **Hellbinding** or **Voidbinding** (interchangeable — both derive from existing folk names for the Devil's Mouth, "Hell" and "the Void"), and its practitioners **Hell Binders** or **Void Binders** (interchangeable). This is deliberately the same root as Divine Binding / Pulse Binders, not an unrelated word: Binding always means joining technology to something through sacred procedure. Pulse Binders join tech to tech. Hell/Void Binders join tech to a body. The transgression is exactly and only that the target shifted from an object to a self — doctrine permits binding tools together, not binding a tool to yourself.
+
+**DIRECTION, not mechanically specified:** folk warning holds that Hellbinding/Voidbinding "traps your soul in the void" — mostly superstition, but consistent with this game's pattern (the Great Collapse) of doctrine's exaggerated warnings sitting on top of a real, smaller kernel of truth. Whether that kernel is literal (some genuine connection to whatever's actually at the bottom of the Mouth) remains open, Act 3 territory.
+
+## LOCKED — What Forbidden Gear physically is
+
+**Forbidden Gear is bodily fusion, not a worn device.**
+
+Approved Gear remains ordinary sanctioned worn equipment — harnesses, tools, lamps — built and issued by the sanctioned districts, mounted in Gear slots as already defined (§35–§36).
+
+Forbidden Gear is different in kind, not just in legality: it is grafted into the player's body. There is no separate mechanical Forbidden Gear category running alongside it — every Forbidden item is a graft.
+
+This does not change how Forbidden Gear is acquired. The existing cost rule (§29) still applies in full: **diverted/stolen district output remains the base cost for every Forbidden item**, with a Material, Component, and/or Record as the required additional layer, detailed below.
+
+## LOCKED — Recipe
+
+A graft requires all three of:
+
+- a **Component** recovered from ship wreckage, specifically tied to old bio-interface/medical-grade equipment (not general ship hardware — see Origin below);
+- a **Material** whose properties match the graft's function, acting as the living, tissue-compatible substrate the Component needs to bond safely. Different grafts call for different Materials — Sutral for recovery/endurance-flavored grafts, Ravelstone for hardening/structural grafts, Brinecrystal for pressure/sensory grafts, Verdigris for signal/conductive grafts, Hullbit for the rarest, most intact grafts. No single Material is required by every graft;
+- a **Record** teaching the procedure. Without it, the Component and Material exist but the knowledge to use them safely does not.
+
+This is the same Material/Component/Record framework already locked in Sections 3–8, applied to one specific use. It does not create a sixth Material or a new discovery type.
+
+## LOCKED — Origin
+
+The recovered Components are not general-purpose ship debris. They belonged to equipment built for a small **pioneer/expedition corps** — colonists meant to do the hazardous frontier work an unfamiliar world required (deep excavation, survey, first contact, whatever lay beyond what ordinary domestic technology could handle) — not life support or environmental adaptation for the general colonist population. Ordinary colonists relied on conventional equipment, consistent with Approved technology already being described as mundane and domestic (fire-starting, filtration, structural).
+
+This equipment was restricted and specialist even before the crash. After it, knowledge of what it actually is falls under the same "could reveal the truth" category already locked for navigation, communications, and legible ship data (§32, §48) — hoarded and suppressed, not openly destroyed.
+
+This means most colonists never had access to it, and their descendants have no baseline need for it. Bio-fusion is not universal among the Hollow's population, and finding a working fragment of it is rare by design, not by accident.
+
+The First Steward's own long life, drawn from "medical stock" recovered from deep within the Devil's Mouth (story canon), comes from the same restricted category of technology — a more complete source than anything reachable in Act 1. **The player's Act 1 finds are lesser, partial caches from the wider crash debris field, not the same source the Steward reached.** This distinction must be preserved wherever the Steward's backstory and the player's Forbidden progression are both discussed, so the two are never implied to be the same find.
+
+## LOCKED — Slots and Capacity
+
+Grafts do not use Gear slots. Slot count (§36) governs only configurable, worn Approved Gear.
+
+Grafts draw only from **Rig Capacity**, the same soft-limit pool Approved Gear already draws from (§35). Exceeding it still creates Rig Strain, following the existing rule exactly — nothing new is added to how Capacity or Strain work.
+
+This gives the two acquisition paths a genuinely different shape rather than a reskinned one: an Approved-heavy build is limited by slot count first; a Forbidden-heavy build is not slot-limited at all, but pays for it in cumulative Capacity/Strain cost.
+
+"The Rig" remains the umbrella term for the player's whole loadout, worn and grafted alike — the term does not narrow to mean only mechanical equipment.
+
+## LOCKED — Where grafting happens
+
+Grafting occurs only at the player's private Forbidden workspace (§47), following its existing rules for fabrication time and residence-tier improvement.
+
+Grafting specifically requires the **Mid Hollow residence tier or better** — the Lower home's crude workspace is not sufficient for it. Earlier Forbidden progression, before Mid Hollow, can still exist through smaller diverted-output spends the crude workspace already supports; sustained bio-fusion is a Mid Hollow-and-later capability.
+
+## LOCKED — Removal and refitting
+
+Grafts follow the existing semi-permanent refit rule (§34, §36): swapping which graft is active is possible only at the workspace, for a real cost — consumed Materials/Components and a short recovery window during which strenuous action is harder — rather than an instant menu swap.
+
+Full removal back to an unmodified body is rarer and harder than a routine swap, and may require its own Record. It is not designed as a common action, and does not need further definition before the vertical slice.
+
+## LOCKED — Concealment
+
+A graft's concealment uses the same qualitative tiers already locked for the hidden workspace (§62: Basic / Improved / Advanced), but tracks **independently** — a player's body and a player's workspace each have their own concealment state; improving one does not improve the other.
+
+Consistent with §62, concealment is state-based, not a percentage: a Basic-concealed graft is safe from a casual glance but not a deliberate search or medical exam; better concealment raises what it takes to expose it. What is actually found still determines the severity of the consequence, per §47's discovery philosophy.
+
+## LOCKED — Damage and complications
+
+Severe, specific, contextual events may disable or complicate a graft, following the exact rule already locked for ordinary Gear damage (§54): occasional and story/event-driven, never routine wear-and-tear bookkeeping, and never a random injury system. This section does not introduce a new injury mechanic — it applies the existing one.
+
+## DIRECTION — Size and visibility
+
+Most grafts should be small and easy to miss at a glance — a vein pattern, a faint luminous patch, a color change in one eye — consistent with the existing line that "smaller modifications may be concealable" (§36). A handful of the most powerful late grafts may be visibly larger, consistent with the same section's "large obvious forbidden attachments may create social/logistical issues." Exact sizes and which specific items are large remain tuning, not locked here.
+
+## DIRECTION — Existing prototype roster
+
+The Forbidden items already listed in Section 65 (Resonance Driver, Ghost Mapper, Deadweight Bypass, Snapline, Quieting Coupler, the possible Pulse Lamp evolution) keep their existing mechanical roles unchanged. Their fiction needs to be rewritten as grafts rather than devices — this is follow-up work for the Build Bible / roster pass, not a re-design, and Section 65's own permission already covers it: "Names and tuning may be refined, but the mechanical roles define the intended capability web."
+
+## CUT
+
+- A separate mechanical Forbidden Gear category running alongside bio-fusion.
+- A dedicated Gear slot type for grafts.
+- A random injury/complication system distinct from the existing occasional Gear-damage rule.
+- A sixth Material or a fourth discovery type created specifically for grafting.
+- Any implication that the player's Act 1 finds are the same source as the First Steward's medical stock.
+
+## OPEN
+
+- exact Capacity cost per graft, and whether a graft has a minimum Capacity floor regardless of size;
+- exact procedure time/fatigue cost at the moment of grafting, separate from the ongoing Capacity cost;
+- exact concealment tier names and search rules for on-body grafts (may reuse §62's names outright or diverge slightly once tested);
+- whether full removal requires a distinct Record from the one that taught the graft;
+- an in-world name for the pioneer/expedition corps;
+- which specific Materials pair with which playstyle dimensions beyond the examples given above.
 

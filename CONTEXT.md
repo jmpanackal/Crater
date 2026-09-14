@@ -40,16 +40,16 @@ Closest comps: **Dome Keeper** (loop/team size), **SteamWorld Dig** (dig-and-ope
 - Firmament is formal speech; people also say Vault or roof. A small collective Council of Stewards makes major decisions; its members are not departmental bosses. **Albus Socul**, the First Steward, is its longest-serving chair and controls relic protocol, Firmament doctrine, and what evidence reaches the Council. He must not read as an obvious villain in Act 1.
 - Folk comedy lightly: belly-of-a-beast theories, nursery rhymes, one guy who says "it's just rock."
 
-### Magicians (load-bearing lore → systems)
+### Divine Binding (load-bearing lore → systems)
 
-Rote use of inherited colony technology is called **magic**. Villain encourages that framing. Magicians are custodians of real technical procedures, not a fourth district.
+Rote, devotional operation of inherited colony technology is the Hollow's own religion, called **Divine Binding**; its practitioners are **Pulse Binders** — custodians of real technical procedures, not a fourth district. The villain encourages the reverent framing.
 
 | Diegetic | Maps to |
 | --- | --- |
-| Sanctioned procedure society accepts | **Approved Gear** — ordered openly with Tallies + authorized district output |
-| Understanding/modifying/repurposing tech beyond doctrine | **Forbidden Gear** — privately built from diverted output + Material/Component/Record |
+| Sanctioned, Council-approved Divine Binding | **Approved Gear** — ordered openly with Tallies + authorized district output |
+| The same Divine Binding, practiced without sanction | **Forbidden Gear** — privately built from diverted output + Material/Component/Record |
 
-Every playstyle dimension contains both. Act 1 players only feel "some magic is common, some is rare/suspicious."
+Every playstyle dimension contains both. Act 1 players only feel "some Binding is common and sanctioned, some is rare and suspicious."
 
 ### Act 1 gameplay pillars
 

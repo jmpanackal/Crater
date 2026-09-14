@@ -23,7 +23,7 @@ Not every technology requires all three.
 | **Sutral** | Naturally occurring and cultivable underground biological/fungal Material with useful fibrous structure | Glowbeds, Wickwork, frontier cultivation, fibers/bindings, recovery/light, biological technology | Implies damp conditions or a nearby growth pocket |
 | **Ravelstone** | Dense, strong impact-altered structural stone | Supports, platforms, reinforcement, construction, civic expansion, heavy structural projects | Hints at impact geometry |
 | **Brinecrystal** | Water/mineral-associated geological Material (not generic glowing crystal) | Water treatment, Cistern processes, sealing, pressure systems | Suggests moisture, water, or pressure conditions |
-| **Verdigris** | Recoverable corroded copper-bearing/conductive ship material in impact geology | Wickwork, Cistern machinery, electrical systems, infrastructure, Rig tech, Magician tech, Forbidden tech | Buried ship infrastructure may be nearby |
+| **Verdigris** | Recoverable corroded copper-bearing/conductive ship material in impact geology | Wickwork, Cistern machinery, electrical systems, infrastructure, Rig tech, Pulse Binder tech, Forbidden tech | Buried ship infrastructure may be nearby |
 | **Hullbit** | Useful intact colony-ship structural composite | Civic reinforcement, infrastructure, Approved and Forbidden Gear, major projects, later shipbuilding | Proximity to larger buried structures |
 
 Materials should support more than one use; no Material exists only to feed one district. Names like Sporemeal, Threadroot, Lampwick (as a mined Material), Charstone, Deeprock, Lunore, Karn, and Tetzal are cut.

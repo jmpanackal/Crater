@@ -15,7 +15,9 @@
 
 **✅ Locked (USER):** **the Firmament** is the formal, sacred name. In ordinary speech, residents say **the Vault** or simply **the roof**.
 
-The Firmament is natural crash-sealed rock, overburden, mineral growth, and alien surface geology. Doctrine says it remains intact through shared work, obedience, and grace; an older “correction” supposedly buried a selfish, questioning generation beneath a collapse. This gives the taboo both religious force and a material-sounding threat, while later allowing the player to discover that the doctrine is manufactured control. The Firmament is thick and exceptionally hard; Act 1 culminates in breaking through those natural strata to the surface after sustained secret excavation from Ashram Heights—not a discovery that the whole ceiling was artificially built, and not a naturally thin shortcut.
+The Firmament is natural crash-sealed rock, overburden, mineral growth, and alien surface geology. Doctrine says it remains intact through shared work, obedience, and grace.
+
+**Revised 2026-09-14 (USER) — the founding disaster is real, not invented:** the doctrine points to **the Great Collapse** — an early expedition dug upward generations ago and broke into a waterlogged layer above the Firmament, causing a genuine collapse and flood that killed people. Doctrine reframes this afterward as judgment (a selfish, questioning generation, spared faithful), but the disaster itself really happened. This gives the taboo real, earned weight — what's manufactured is the moral framing layered on top over generations, and its use by Albus Socul specifically (see decision #25 / story.md's First Steward section), not the disaster itself. Act 1 still culminates in breaking through those natural strata to the surface after sustained secret excavation from Ashram Heights — not a discovery that nothing bad ever happened, and not a naturally thin shortcut.
 
 ---
 
@@ -89,6 +91,8 @@ Need a small handful (3-6) of district/chamber names. Options for a naming *patt
 
 ## 12. Runaway settlers — where/how found
 *(the second group who split off generations ago and stayed on the surface)*
+
+**✅ Revised (USER, 2026-09-14):** not a later dispute — the ship broke apart during the crash itself. The main mass tore open the crater and became the Hollow; a smaller section landed safer on the surface with fewer survivors. Each side has assumed the other died for generations, so finding them lands as "the dead aren't dead" for both populations at once, not "we found the ones who left." Simpler than the original framing and reuses no new lore.
 
 - **A) A physical settlement you discover** — has its own small area, maybe its own tech branch or NPCs
 - **B) A ruin/journal trail only** — cheaper: you find evidence they existed, but don't meet living descendants
@@ -229,7 +233,7 @@ Each build should feel different to *play*, not just have different numbers:
 
 **Piece 1 — Repair:** broken salvage/ship parts can be repaired into functional tools. Not really new design — this is our existing salvage → mechanic pipeline, just narrated as restoration instead of an abstract unlock.
 
-**Piece 2 — Fusion/combine:** two different tools/parts can be combined into something stronger (e.g. a multitool), with a real risk that both items break in the attempt. Ties directly into decision #5's "optional higher tier, real cost" model — this is that tradeoff made concrete. One-time transformation per pair, not repeatable.
+**Piece 2 — Fusion/combine** *(naming collision — do not confuse with the unrelated, now-locked "bio-fusion" Forbidden Gear mechanic in [`mechanics-canon.md`](mechanics-canon.md) §67; this piece needs a different name if ever revisited, e.g. "Splice/combine")*: two different tools/parts can be combined into something stronger (e.g. a multitool), with a real risk that both items break in the attempt. Ties directly into decision #5's "optional higher tier, real cost" model — this is that tradeoff made concrete. One-time transformation per pair, not repeatable.
 
 **Piece 3 — Escalating repeated risk ("push your luck"):** grounded directly in how Inscryption's campfire actually works — first use is safe, then each additional use on the same thing carries escalating failure risk (their real numbers: ~22.5% / 45% / 67.5% chance of loss on the 2nd/3rd/4th attempt), capped at a max of 5 attempts total. Answers a different design question than fusion: fusion is "what do I combine," this is "how far do I push one thing." Keep it **rare** (specific locations/opportunities, not a repeatable menu action) — this is what keeps it a deliberate tense event instead of a compulsive slot-machine loop.
 
@@ -240,20 +244,21 @@ Each build should feel different to *play*, not just have different numbers:
 
 ---
 
-## 25. "Magicians" — sanctioned vs. forbidden tech
-*(locked in as core lore/systems logic — a few sub-questions remain open)*
+## 25. Divine Binding / Pulse Binders — sanctioned vs. forbidden tech
+*(locked in as core lore/systems logic — naming resolved 2026-09-14, USER; a few sub-questions remain open)*
 
-**The concept:** some Hollow residents operate old salvaged machinery by rote, inherited practice, without understanding it — everyone calls this magic, because that's what it genuinely looks like. This isn't just flavor: it's *why* the villain's power works. A settlement that thinks its tools are magic has no framework for questioning who controls them, so he encourages the framing rather than merely tolerating it, and likely positions himself as the most gifted magician of all — reads as harmless in Act 1, recontextualizes hard once his identity is revealed in Act 3.
+**✅ Named (USER, 2026-09-14):** the practice is **Divine Binding**; its practitioners are **Pulse Binders** (formerly the placeholder "Magicians"/"magic"). The unsanctioned counterpart (bio-fusion, §67) is **Hellbinding**/**Voidbinding**, practitioners **Hell Binders**/**Void Binders** — same root verb, joining tech to a body instead of another tool. This is not folk magic running beside the Hollow's religion — it *is* the religion, practiced as devotional labor: ritually operating inherited technology, believed to unite the practitioner with the Pulse and the technology's original purpose. One continuous vocabulary, used with varying sincerity by devout, going-through-the-motions, and skeptical residents alike — not three separate words for three audiences.
 
-**The tech split, mapped onto existing systems (not a new one) — updated per canon §29, §32, §39, §48:**
-- **Approved technology** = established, sanctioned procedure society accepts → **Approved Gear**, ordered openly with Tallies + authorized district output. Magicians certify it and teach its procedures.
-- **Forbidden technology** = understanding, modifying, repurposing, or recombining technology beyond accepted doctrine (including anything that could reveal the truth — navigation, comms, legible data) → **Forbidden Gear**, privately built from diverted output + a Material, Component, or Record, tied to the evidence/Trust system.
-- Every playstyle dimension contains both; Forbidden Gear often modifies Approved Gear. Records can reinterpret Magician knowledge ("this regulator is only for the Pulse" → actually a general pressure-control component).
+**The concept:** some Hollow residents operate old salvaged machinery by rote, inherited practice, without understanding it — and everyone treats this as sacred, because that's genuinely what it looks like. This isn't just flavor: it's *why* the villain's power works. A settlement that believes its tools are god-work has no framework for questioning who controls them, so he encourages the framing rather than merely tolerating it, and likely positions himself as the most gifted Pulse Binder alive — reads as harmless in Act 1, recontextualizes hard once his identity is revealed in Act 3.
 
-**Why it's worth it:** costs nothing new to build — it's a diegetic skin on the Approved/Forbidden split and the capability web. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic.
+**The tech split, mapped onto existing systems (not a new one) — updated per canon §29, §32, §39, §48, §67:**
+- **Approved technology** = established, sanctioned Divine Binding society accepts → **Approved Gear**, ordered openly with Tallies + authorized district output. Pulse Binders certify it and teach its procedures.
+- **Forbidden technology** = the same Divine Binding, practiced without sanction — understanding, modifying, repurposing, or recombining technology beyond accepted doctrine (including anything that could reveal the truth — navigation, comms, legible data, and now bio-fusion, §67) → **Forbidden Gear**, privately built from diverted output + a Material, Component, or Record, tied to the evidence/Trust system.
+- Every playstyle dimension contains both; Forbidden Gear often modifies Approved Gear. Records can reinterpret a Pulse Binder's knowledge ("this regulator is only for the Pulse" → actually a general pressure-control component).
+
+**Why it's worth it:** costs nothing new to build — it's the Approved/Forbidden split and the capability web, correctly understood as the Hollow's actual religion rather than a separate magic system beside it. Gives the villain a personal stake and presence in Act 1, long before his Act 3 reveal, without spending any extra dev time on a new mechanic.
 
 **Open sub-questions:**
-- Exact term for this in-world ("magicians" works fine as a placeholder — worth revisiting once we're naming other Hollow-specific vocabulary)
 - How strictly the sanctioned/forbidden line is enforced in-fiction — is it an unspoken norm everyone just follows, or does the villain (or his allies) actively police it? Affects how much of a threat "getting caught with forbidden tech" should feel like in Act 1 versus just a stronger Trust risk (#21's social consequence category already covers the mechanical side either way).
 
 ---

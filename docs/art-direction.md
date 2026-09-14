@@ -34,6 +34,15 @@ Side-view weakness (Devil’s Mouth-as-space) is solved with **composition + par
 
 ---
 
+## Bio-fusion Gear — tone guardrail (locked)
+
+Forbidden Gear is bodily fusion ([`mechanics-canon.md`](mechanics-canon.md) §67). This sits directly next to the Blasphemous body-horror line already rejected above — the guardrail applies with extra weight here:
+
+- Most grafts render as small, quiet, almost-missable changes: a fine vein pattern, a faint luminous patch, a color shift in one eye. Not new limbs, not visible growths, not wounds.
+- A rare few late/powerful grafts may be larger and genuinely visible, but still read as **uncanny and controlled**, never grotesque or wound-like. No exposed tissue, no gore palette.
+- Use the existing modular-overlay sprite principle (small patches/tints on the current sprite), not a new base body per graft.
+- The feeling to aim for is closer to INMOST's quiet unease than Blasphemous's penance/gore — something private and a little wrong, not a horror reveal.
+
 ## Hollow composition (Devil’s Mouth-centered vertical)
 
 Primary ref: [`refs/hollow_concept.png`](refs/hollow_concept.png) (cliffside city around a deep central chasm). **Play layout matches that read** (placeholders OK):
