@@ -158,7 +158,7 @@ Also decide: **time pauses in menus, the workbench, and dialogue** (AI rec: yes)
 
 ### ~~G8~~ · Stolen output before the workspace — RESOLVED
 
-**Resolved by §67 (2026-09-14), no decision needed:** every home has a basic concealed workspace from the start (Lower home = crude tier); it exists specifically to hold diverted output and illicit Components/Records before sustained Forbidden progress is possible. Grafting itself — the thing that actually *consumes* Materials/Components/Records into a Forbidden item — additionally requires the Mid Hollow residence tier or better. So: diversion can start from day one into the crude workspace; turning that into an actual graft can't happen until Mid Hollow. This is Option B from the original draft, just already locked rather than picked.
+**Resolved by §67 (2026-09-14), no decision needed:** every home has a basic concealed workspace from the start (Lower home = crude tier); it exists specifically to hold diverted output and illicit Components/Records before sustained Forbidden progress is possible. Grafting itself — the thing that actually *consumes* Materials/Components/Records into a Forbidden item — additionally requires the Mid Reach residence tier or better. So: diversion can start from day one into the crude workspace; turning that into an actual graft can't happen until Mid Reach. This is Option B from the original draft, just already locked rather than picked.
 
 ### ~~G7~~ · Forbidden modifications on the Rig — RESOLVED
 

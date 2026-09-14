@@ -2438,11 +2438,11 @@ The player does **not** begin the game with a fully developed forbidden workshop
 
 The forbidden workspace evolves alongside residential progression:
 
-**Lower Hollow home → Mid Hollow residence → Ashram Heights residence**
+**Lower Hollow home → Mid Reach residence → Ashram Heights residence**
 
 The starting/lower home supports a crude concealed workspace once forbidden progression begins.
 
-The Mid Hollow residence provides a meaningful improvement in privacy, storage, legitimate Rig preparation, and secret-workspace capability.
+The Mid Reach residence provides a meaningful improvement in privacy, storage, legitimate Rig preparation, and secret-workspace capability.
 
 The Ashram Heights residence becomes the strongest late-Act-1 private base and provides sustained access immediately beneath the Firmament.
 
@@ -3061,7 +3061,7 @@ Krater is a systemically connected game in which:
 - Pulse Binders preserve inherited real technology through ritualized/incomplete understanding, practicing what the Hollow calls Divine Binding;
 - the Pulse anchors time, culture, and infrastructure;
 - the hidden Forbidden workspace develops through residential progression;
-- Mid Hollow housing is a meaningful intermediate status/mechanical milestone;
+- Mid Reach housing is a meaningful intermediate status/mechanical milestone;
 - Ashram Heights is a major late-Act-1 aspiration because it combines legitimate status with private sustained access beneath the Firmament;
 - the Firmament is thick, difficult, and requires sustained secret excavation rather than a single breakable barrier;
 - legitimate social advancement enabling deeper forbidden activity is an intentional thematic contradiction;
@@ -3075,9 +3075,9 @@ Future AI work must treat this document as canon and must not silently restore o
 
 ## LOCKED — Residential progression
 
-The player's residential progression includes a meaningful **Mid Hollow home before Ashram Heights**.
+The player's residential progression includes a meaningful **Mid Reach home before Ashram Heights**.
 
-The Mid Hollow residence is an intermediate social and mechanical milestone. It should expand:
+The Mid Reach residence is an intermediate social and mechanical milestone. It should expand:
 - privacy,
 - personal storage,
 - legitimate Rig preparation capability,
@@ -3684,7 +3684,7 @@ This gives the two acquisition paths a genuinely different shape rather than a r
 
 Grafting occurs only at the player's private Forbidden workspace (§47), following its existing rules for fabrication time and residence-tier improvement.
 
-Grafting specifically requires the **Mid Hollow residence tier or better** — the Lower home's crude workspace is not sufficient for it. Earlier Forbidden progression, before Mid Hollow, can still exist through smaller diverted-output spends the crude workspace already supports; sustained bio-fusion is a Mid Hollow-and-later capability.
+Grafting specifically requires the **Mid Reach residence tier or better** — the Lower home's crude workspace is not sufficient for it. Earlier Forbidden progression, before Mid Reach, can still exist through smaller diverted-output spends the crude workspace already supports; sustained bio-fusion is a Mid Reach-and-later capability.
 
 ## LOCKED — Removal and refitting
 

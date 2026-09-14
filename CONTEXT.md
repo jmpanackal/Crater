@@ -67,7 +67,7 @@ Full detail and status labels: [`docs/mechanics-canon.md`](docs/mechanics-canon.
 7. **Diversion (theft) and detection** — steal real District Output from physical storage into concealed storage toward **Forbidden Gear**. Two independent consequences: civic harm and detection (sight, sound, persistent evidence). Suspicion is local; no global Suspicion meter; no lie button or success percentages.
 8. **Rig** — one evolving Rig: Core Improvements + swappable Gear slots (~3 → 4 → 5) + soft **Rig Capacity** (exceeding it = **Rig Strain**). Builds span Excavation / Survey / Hauling-Endurance / Mobility / Secrecy. Technology is a discovered capability web (Known → Understood → Available).
 9. **Living Hollow** — NPCs who work, rest, talk, use infrastructure, gather, and react to district state. Relationships stay lightweight.
-10. **Vertical advancement** — Lower home → Mid Hollow residence → Ashram Heights residence via Trust, Tallies, status, and story. Each home hosts an improving concealed Forbidden workspace, safe by default and exposed only through believable evidence with warning.
+10. **Vertical advancement** — Lower home → Mid Reach residence → Ashram Heights residence via Trust, Tallies, status, and story. Each home hosts an improving concealed Forbidden workspace, safe by default and exposed only through believable evidence with warning.
 
 ### Act 1 design goal (critical)
 
