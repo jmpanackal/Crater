@@ -2,24 +2,24 @@
 
 > **One line:** You're a kid in an underground society built into the walls of the massive Devil’s Mouth — forbidden from digging up, and quietly the only person who's ever wanted to. You break the taboo, reach a surface no one knew existed, and slowly uncover the truth: your people are crash-landed colonists on an alien moon, and the answer to everything was always waiting at the bottom of the Mouth everyone else spent generations staring into.
 
-*(This doc stays high-level. Every open decision — naming, mechanics, structure, art, production — lives in the companion **Decisions doc**, organized by category there. Living narrative detail and story idea inbox: [`story.md`](story.md).)*
+*(This doc stays high-level. **Mechanics source of truth: [`mechanics-canon.md`](mechanics-canon.md)** — where this pitch and the canon disagree, the canon wins. Open decisions live in the companion **Decisions doc**. Living narrative detail and story idea inbox: [`story.md`](story.md).)*
 
 ---
 
 ## 🕹️ WHAT KIND OF GAME IS IT
 
-An **expedition-based mining roguelite with a tech tree, a settlement layer, passive/idle-style resource generation, and a story campaign.** Think:
+A **persistent-world game of civic life, underground exploration, physical excavation and hauling, build progression, mystery, and quiet transgression** — with a living district economy and a story campaign. Think:
 
-- **Dome Keeper** (2-person team, made ~$1M) — dig for resources, upgrade, defend against threats. This is our closest comp and proof our team size can pull off this *kind* of game.
+- **Dome Keeper** (2-person team, made ~$1M) — the physical satisfaction of extraction and hauling, inside a persistent world rather than a run-reset mine. Proof our team size can pull off this *kind* of game.
+- **Terraria** — local digging freedom inside controlled excavation zones, layered under an authored settlement and story geography.
 - **SteamWorld Dig** — dig-and-upgrade with a world that opens up as you progress.
 - **Inscryption** — for the mystery pacing, the slow reveal, and "the game is bigger than you first think."
-- **AdVenture Capitalist / idle-clicker games, and Palworld's Pals-working-while-you-explore loop** — for the passive generation layer, detailed below. This is how we keep the incremental/idle DNA that started this whole conversation, without making the *whole* game idle.
 
 **Why this fits us:** it's systems-heavy and light on hand-drawn art/animation (plays to a coder-driven team + AI-assisted coding). Simple pixel art. Godot engine (free, exactly what Dome Keeper used). Premium game on Steam, ~$10–20, no live-service/monetization treadmill needed. Digging itself is one mechanic pointed in two directions (up and down — more on that below), so we're getting two forbidden frontiers out of one system to build, not two.
 
-**The key insight:** Dome Keeper's most common criticisms are (1) builds collapse into one obvious path, (2) no story, (3) gets repetitive. Our whole concept — real build variety, a mystery campaign, a tech tree that doubles as lore — is basically a checklist of the things people *wished Dome Keeper had.*
+**The key insight:** Dome Keeper's most common criticisms are (1) builds collapse into one obvious path, (2) no story, (3) gets repetitive. Our whole concept — real build variety, a mystery campaign, a capability web that doubles as lore — is basically a checklist of the things people *wished Dome Keeper had.*
 
-**Genre honesty check:** this is *incremental* (numbers escalate, upgrades increase generation rates) but not a pure *idle* game (you can't just close the app and win — it needs active exploration too). If what drew us to the clicker idea was mainly "low art burden, systems-driven, buildable by a small team," this keeps all of that. If it was specifically the close-the-app-and-come-back mechanic, see the passive layer below — that's where it lives.
+**Genre honesty check:** this is **not** an idle or roguelite game. Districts produce once per civic cycle, not per second; there is no AFK farming, no permadeath, and no expedition reset. Failure continues the world in a changed state. Progression changes what the player can *do, perceive, and risk* rather than mainly escalating numbers.
 
 ---
 
@@ -27,21 +27,19 @@ An **expedition-based mining roguelite with a tech tree, a settlement layer, pas
 
 One loop, reused across the whole game so we're not building four separate games:
 
-**Venture out → gather resources + discover fragments → return before you're missed → upgrade your tech tree → go further next time.**
+**Live in the Hollow → take civic work or explore → travel, dig, extract, and haul → decide how far to push → keep, cache, deliver, order, or secretly divert → return to a Hollow that responds → improve your Rig, districts, knowledge, and access → reach new places.** (Full loop: [`mechanics-canon.md`](mechanics-canon.md) §1.)
 
-- Early game that loop is **digging in secret** — and it runs across two frontiers from day one: *up*, toward the Firmament everyone's mythologized, and *sideways*, into braced civic galleries that expand the Hollow and yield Materials. Same tools and upgrades support both; the Devil’s Mouth remains a feared central crater, not the ordinary mining route.
+- Early game the loop runs across two frontiers: *sideways*, into braced civic galleries that expand the Hollow and yield Materials, and — secretly — *up*, toward the Firmament everyone's mythologized. Same traversal, digging, hauling, and progression systems support both; there is no separate "work mode" and "adventure mode." The Devil’s Mouth remains a feared central crater, not the ordinary mining route.
 - Mid/late game it's **running expeditions onto the surface** and hauling stuff back, while Devil’s Mouth descent deepens in parallel as a slower secondary thread.
-- The *pressure* that makes it tense = a time/risk system (detailed below), NOT a monster-mash. Skill = deciding what to grab, how far to push, when to turn back — not twitch reflexes.
+- The *pressure* comes from stamina, fatigue, hauling, civic time, commitments, evidence, and social consequence — NOT a monster-mash. Skill = deciding what to grab, how far to push, when to turn back.
 
-**⭐ Running underneath all of that: passive/idle generation, the same system reskinned three times, same as the core loop:**
+**⭐ Running underneath all of that: a living civic production economy, transformed rather than discarded across the game:**
 
-- **The Hollow:** the society is constantly working across **different production districts** (farms, craft, water, etc.) — generating different resources whether you're actively digging or not. Efficiency/"safe magic" upgrades raise those rates over time. This funds and speeds your secret digging, and **healthier communal output makes siphoning safer** (people notice diversion less when the districts are thriving). This is Act 1's home economy — not scaffolding for later acts.
-- **The surface settlement:** recruited people auto-work here too, at a **higher rate** than the Hollow (because of the tech you've brought up) — direct, visible payoff for progress and recruitment. (Act 2 — same formula family, different skin.)
-- **The ship:** same system, final skin — passive construction ticking upward while you're out on expeditions, until it's ready. (Act 3.)
+- **The Hollow:** Glowbeds, Wickwork, and Cistern each produce civic output **once per civic cycle** from Production Capacity against Civic Demand, with a finite Reserve. Districts stay stable without babysitting; shortages create contextual problems (delayed lift repair, thin recovery support) rather than meter chores. Players raise Capacity through discoveries, Materials, Components, Records, and projects — and the same Reserve that legitimate Approved Gear orders draw on is what secret diversion steals from.
+- **The surface settlement:** district traditions evolve into settlement production (agriculture, manufacturing, water/power) (Act 2).
+- **The ship:** the same Materials + Components + knowledge + production + infrastructure architecture at the largest scale (Act 3).
 
-This is deliberately one of the *cheapest* systems to build (a rate-per-tick number, modified by upgrades and headcount, no animation/combat-feel needed) — it's the same math idle-clicker games run on, and it's a well-worn enough pattern that AI-assisted coding handles it easily. It keeps the actual incremental/idle satisfaction (numbers climbing, checking in on growth) without making the *whole* game passive. Comparable to how Palworld's Pals work on tasks while you go explore.
-
-**Guardrail:** keep all three tiers sharing the same underlying formula/scaling logic with different flavor numbers. If any tier starts needing its own prestige system or its own independent balancing pass, that's scope creep — flag it.
+**Guardrail:** no idle-style per-second production, AFK farming, or sleep-spam as optimal play, and no separate prestige economy per act. If a tier needs its own disconnected economy, that's scope creep — flag it.
 
 ---
 
@@ -66,16 +64,17 @@ You're a kid who never really bought the Firmament story. You don't hate your ho
 Not all tech gets the same treatment, though. Anything mundane and utilitarian — fire-starting tools, water filtration, structural reinforcement — is sanctioned, openly used, "safe magic." Anything that could actually reveal the truth — navigation instruments, communication devices, ship logs, legible data of any kind — is hoarded, restricted, or quietly destroyed, because that's the tech that could unravel his story. Players won't know this distinction exists yet in Act 1 — it's just "some magic is common, some is rare and suspicious" — but it maps directly onto real mechanics below.
 
 **GAMEPLAY IN ACT 1:**
-- **Production districts in the Hollow** — distinct areas that produce different communal resources. You upgrade those over time (mostly via sanctioned/"safe magic" efficiency tech) so the society generates faster. This is the Act 1 face of the passive/idle layer, not a placeholder for the surface settlement.
-- The **daily Harvest** — communal crop/resource gathering that keeps the society fed. It's the rhythm of life AND your clock: you dig during stolen time, but you have to show up or you're noticed. Harvest sits on top of the district economy (a pulse + accountability check), not instead of it.
-- **A living Hollow** — people who work those districts, live in the chambers, play, and talk. Act 1's home base must feel inhabited; an empty siphon booth fails the "might be the whole game" design goal.
-- **Two-frontier digging** — the same tools push both upward (the secret, forbidden project) and sideways into civic side galleries (public, permitted work that opens districts and finds Materials). Cheap for us to build: one system, two frontiers.
-- **Fragments** are seeded in both directions but stay ambiguous everywhere this early (could be read as myth, religion, or history — never clearly "we're on an alien planet"). Three distinct tracks keep their fiction legible:
-  - **Materials** = Sporemeal, Lampwick, Brinecrystal, Verdigris, and rare Hullbit. They feed districts, earn Tallies through public work, or form forbidden components.
-  - **District production** = the communal goods created from Materials. Siphon diverts a named good, not the player’s haul. Production above a protected civic reserve needs inputs and is consumed by local Harvest demand.
-  - **Records** = data-slates, audio logs, survivor journals → lore. Always forbidden-tier — this is the tech that could unravel the myth, so finding and using it becomes a **knowledge upgrade**, tied directly to the risk below rather than open daily life.
-- **Siphoning** — personal forbidden modifications divert District production when you are back home, not at the dig site. Cover is local: the siphoned good and its sibling output determine how noticeable the theft is. This is the mechanical link between "help the society" and "steal from it."
-- **Social Standing system (important, runs the whole game):** getting caught digging upward, caught in a lie about where you've been, caught siphoning when cover is thin, or caught tinkering with tech beyond what's sanctioned, costs you standing. A lie mechanic lets you dodge suspicion — but if a lie is *later* exposed, the penalty is worse than getting caught honestly. Standing gates how many people you can recruit later. **Act 1's small personal risks become Act 3's payoff.**
+- **Production districts in the Hollow** — Glowbeds, Wickwork, and Cistern produce civic output each cycle. The player influences their development through discoveries, Materials, Components, Records, and work — never a city-builder menu.
+- **The Pulse and Ritual** — the Pulse, a degraded ship relic at Mid Heart, sets the civic cycle (Rousing → Working → Gathering → Ritual). **Ritual** is the communal return anchor: gathering, accountability, and story. Time creates rhythm and social expectation, not constant rushing; missing Ritual is contextual.
+- **Jobs as invisible tutorials** — early civic work (Dispatch → worksite → excavation → haul/deliver → Tallies → Ritual) teaches the game through believable participation. Later, the player may ignore work to explore; not helping is not the same as promising and failing.
+- **A living Hollow** — people who work those districts, live in the chambers, play, and talk. Act 1's home base must feel inhabited; an empty upgrade booth fails the "might be the whole game" design goal.
+- **Two-frontier digging** — the same tools push sideways into civic side galleries (public work that expands the Hollow) and, secretly, upward. The **Firmament is thick**: breaching it is a sustained multi-session project from a hard-won Ashram Heights residence.
+- **Discoveries** stay ambiguous everywhere this early (could be read as myth, religion, or history — never clearly "we're on an alien planet"):
+  - **Materials** = Sutral, Ravelstone, Brinecrystal, Verdigris, and Hullbit — finite, physically hauled, multi-use.
+  - **Components** = smaller ship-derived parts.
+  - **Records** = knowledge that can unlock Approved capabilities, district projects, routes, or Forbidden Designs — and whose sharing is the player's choice.
+- **Approved vs Forbidden Gear** — public progression: work → Tallies → Order Approved Gear. Secret progression: explore → understand → recover Material/Component → divert district output → privately build Forbidden Gear. One shared economy, no dark currency.
+- **Trust (important, runs the whole game):** qualitative, explainable social standing. Being caught stealing, exposed lies, broken commitments, and forbidden evidence damage it; reliability and meaningful help build it. Detection is sight, sound, and persistent evidence; suspicion is local. There is no lie button — questioning leads to truth, lie, deflection, or partial truth, and exposed lies hurt more than honesty. Trust gates access now and recruitment later. **Act 1's small personal risks become Act 3's payoff.**
 
 **🎯 DESIGN GOAL: Act 1 should feel like it might be the whole game.** No visible "surface" tab, no locked branches hinting at more. The player should brace for punishment when they dig up, NOT anticipate a reveal — the world only turning out to be bigger than shown should land as a genuine surprise, not something the player was quietly expecting. The Devil’s Mouth stays a constant, lived-with mystery throughout — never confirmed, never explained, just always there in the background the way it is for everyone else in the Hollow.
 
@@ -97,10 +96,10 @@ You break through. **The world doesn't end.** Instead: a vast, alien, wondrous l
 
 **GAMEPLAY IN ACT 2 — this is where the game opens up:**
 - **Surface expeditions:** the core loop, reskinned. Venture out, gather alien resources + salvage the *real* ship wreckage (bigger finds than the scraps below), race back.
-- **The return timer / Social Standing:** you still have to go back down for food and to keep relationships alive. Stay out too long = standing drops. Same system as Act 1 — one mechanic, whole game.
+- **Return pressure / Trust:** you still have to go back down to keep relationships and commitments alive. Absence is contextual, as in Act 1 — one social system, whole game.
 - **The Devil’s Mouth keeps deepening alongside everything else** — better drills and survival gear pulled from surface Materials let you push further down than Act 1 ever allowed, in parallel with your surface progress. Still no confirmation of what's at the bottom — just further, and stranger.
 - **⭐ BUILD A SURFACE SETTLEMENT:** you establish a camp up top. As you recruit people — from below, and eventually from every relationship thread the story opens up — they populate it and **auto-work** (gathering, crafting) — this is our incremental/auto-farming engine. Crucially, **because you've got salvaged tech, the surface settlement is MORE efficient than the underground society** — that contrast is the point: the life everyone was taught to fear is better than the one they were told to accept.
-- **Recruitment has three sources by the end of the game, all sharing the same underlying system** (same generic worker slot, gated the same way — just a different recruitment beat and flavor per source, not a separate mechanic each): Hollow recruits, gated by your Social Standing (from the caught/lie system); the runaway settlers, once you find them (below); and, if you make peace, the native species themselves. More people from any source = bigger, faster settlement = closer to building the ship.
+- **Recruitment has three sources by the end of the game, all sharing the same underlying system** (same generic worker slot, gated the same way — just a different recruitment beat and flavor per source, not a separate mechanic each): Hollow recruits, gated by your Trust (from the caught/lie system); the runaway settlers, once you find them (below); and, if you make peace, the native species themselves. More people from any source = bigger, faster settlement = closer to building the ship.
 - **Hints of the other survivors:** you find signs that a *second* group survived the crash and stayed on the surface generations ago, splitting from your ancestors over a dispute nobody remembers — and unlike the Hollow, whose people you're persuading to leave everything they know, these are people who already chose the surface once. Finding them and winning them over is a second, distinct route into your settlement's growth, not just a lore beat.
 
 ---
@@ -118,9 +117,9 @@ Using **records from below + salvage from above**, you finally have enough to re
 **The bottom of the Devil’s Mouth.** This is where it all lands. Access has been opening gradually all game, tech-gated the same way everything else is — but the true bottom, a full view of the ship or a real chunk of it, is reserved for right here, tied to something you actually need: a component for the escape ship, or a flight recorder that nails the crash cause in the founders' own words. Not lore for its own sake — mechanical weight too. And the payoff line writes itself: **everyone in the Hollow spent generations staring at the answer to everything, and never once thought to look up instead.** Your whole arc, in reverse, is the mirror of theirs — you're the one person who looked in the direction nobody else did, and it turns out the two mysteries — what's above, what's below — were always the same one.
 
 **GAMEPLAY IN ACT 3:**
-- The **ship = the final tier of the tech tree**, not a new genre. Everything you've built — upward and downward — funnels into it.
+- The **ship = the largest-scale project of the same capability web and production architecture**, not a new genre. Everything you've built — upward and downward — funnels into it.
 - **The alien-contact choice:** you can find the native species' settlement and choose to **fight or make peace** — and it's a genuinely hard call, because *by now you know they're why your people crashed.* Choosing peace can unlock a third tech branch (trade/shared knowledge) and opens the native species as your settlement's third recruitment source — the biggest possible reward for the hardest choice in the game, since you'd be building a shared future with the people who ended your old one. Fighting closes both off, but opens others.
-- **The ending is driven by your Social Standing + recruitment across all three sources:**
+- **The ending is driven by your Trust + recruitment across all three sources:**
   - Expose the villain and leave him behind
   - Defeat him in a final confrontation
   - He stays and convinces others NOT to go with you — and **the number of people who leave vs. stay depends on how many you convinced over the whole game, from the Hollow, the runaway settlers, and — if you chose peace — the aliens themselves.** Your choices across all three threads literally shape your ending headcount.
@@ -129,24 +128,24 @@ Using **records from below + salvage from above**, you finally have enough to re
 
 ## 🧩 THE SYSTEMS THAT MAKE IT UNIQUE (vs. Dome Keeper)
 
-1. **Dual-purpose tech tree** — every unlock is a mechanic AND a lore fragment. Salvaged ship tech literally upgrades you and explains your origin. Solves Dome Keeper's "no story" + "thin content" at once.
-2. **Trade-off upgrades** — higher tiers cost something. Kills the "one obvious build order" problem. (How punishing: see Decisions doc #5.)
-3. **Social Standing** — one persistent stat driven by getting caught/lying/time-away, that gates recruitment and shapes the ending. Gives the game *memory* and makes choices matter.
-4. **Passive/idle generation, reskinned across three tiers (Hollow districts → settlement → ship)** — Act 1's underground society has upgradable production areas; healthier output also covers siphoning. Later tiers reuse the same formula family. Incremental DNA + thematic statement (surface life > the life you were told to fear, made visible in the numbers once Act 2 exists).
+1. **Discovered capability web** — technology moves from Known → Understood → Available through Records, Components, Magician knowledge, and exploration. Recovered ship knowledge literally upgrades you and explains your origin. Solves Dome Keeper's "no story" + "thin content" at once.
+2. **Qualitative builds** — Gear changes what you can do, perceive, reach, and risk, across five overlapping dimensions (Excavation, Survey, Hauling/Endurance, Mobility, Secrecy) under soft Rig Capacity. Kills the "one obvious build order" problem.
+3. **Trust** — qualitative, explainable social standing driven by what society actually knows: commitments, exposed lies, caught theft, meaningful help. Gates access and recruitment and shapes the ending. Gives the game *memory* and makes choices matter.
+4. **A civic production economy that transforms across the game (Hollow districts → settlement → ship)** — Act 1 districts produce each civic cycle; legitimate orders and secret diversion draw on the same Reserve. Later acts expand the same architecture (surface life > the life you were told to fear, made visible once Act 2 exists).
 5. **One dig mechanic, two story frontiers** — the same growing toolset serves both Firmament breach work and public lateral civic excavation, while the Devil’s Mouth remains the slow-burn mystery converging in Act 3. Two mysteries for the cost of one system.
 6. **One recruitment system, three narrative sources (Hollow, runaway settlers, aliens)** — same generic worker slot and standing-gated logic every time, but each source is a different relationship thread paying off into the same settlement number. Every major story choice ends up visible in your headcount.
-7. **"Magicians" — sanctioned vs. forbidden tech, as a diegetic skin on the tech tree.** Public "safe magic" tech maps to efficiency upgrades (openly boosts passive generation); hoarded "dangerous magic" — anything that could reveal the truth — maps to knowledge upgrades, tied to the risk/Social Standing system. Gives the villain a personal stake in Act 1 long before his reveal (he's the "greatest magician"), and turns an existing mechanical split into a piece of characterization for free.
+7. **"Magicians" — Approved vs. Forbidden tech, as a diegetic skin on the capability web.** Magicians preserve real technical procedures they can operate without fully understanding; sanctioned use becomes **Approved Gear**, while understanding or repurposing technology beyond doctrine — including anything that could reveal the truth — becomes **Forbidden Gear**, tied to the evidence/Trust system. Gives the villain a personal stake in Act 1 long before his reveal (he's the "greatest magician"), and turns an existing mechanical split into a piece of characterization for free.
 
 ---
 
 ## 🛠️ CAN WE ACTUALLY BUILD THIS? (scope reality check)
 
-**Yes, IF we're disciplined.** The trick: it's **one core loop reskinned three times, pointed in two directions**, not several separate games. Same underlying "venture / gather / return / upgrade" code runs underground, into the Devil’s Mouth, on the surface, and into the endgame — what changes is the skin, the threats, and what the tech tree unlocks.
+**Yes, IF we're disciplined.** The trick: it's **one core loop reskinned three times, pointed in two directions**, not several separate games. Same underlying "venture / gather / return / upgrade" code runs underground, into the Devil’s Mouth, on the surface, and into the endgame — what changes is the skin, the threats, and what the capability web unlocks.
 
 Keep these LIGHT so we don't drown:
-- Hollow Act 1 = production districts + rate upgrades + living NPCs with light talk, NOT Rimworld / full dialogue sim
+- Hollow Act 1 = production districts (Capacity/Demand/Reserve per cycle) + living NPCs with light talk, NOT Rimworld / city-builder / full dialogue sim
 - Settlement (Act 2+) = headcount + passive bonuses, NOT Rimworld
-- Recruitment/persuasion = triggered story beats + a standing check, NOT a full dialogue sim
+- Recruitment/persuasion = triggered story beats + a Trust check, NOT a full dialogue sim
 - Three recruitment sources = same generic worker + different flavor text/recruitment beat each, NOT three distinct worker types or mechanics
 - Alien contact = a meaningful choice with a few consequences, NOT a branching faction system
 - Story = fragments + key scripted beats, NOT hours of cutscenes
@@ -154,7 +153,7 @@ Keep these LIGHT so we don't drown:
 
 **Tech:** Godot + GDScript (free, proven at our team size). Pixel art (Aseprite). Contract out music. Target: premium on Steam.
 
-**Timeline:** 1–2 years is plausible at Dome-Keeper scope. It is NOT plausible if we try to make mining, combat, settlement, AND diplomacy all deep. **Pick ONE system as our "deep" pillar** (I vote the tech tree / build system — it's our strength and interest) and keep the rest intentionally simple.
+**Timeline:** 1–2 years is plausible at Dome-Keeper scope. It is NOT plausible if we try to make mining, combat, settlement, AND diplomacy all deep. **Pick ONE system as our "deep" pillar** (the build system / capability web) and keep the rest intentionally simple. The mechanics canon defines many connected systems; the Build Bible must still choose a thin vertical-slice form for each.
 
 ---
 

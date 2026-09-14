@@ -1,25 +1,47 @@
 # Terminology transition
 
+**Source of truth:** [`mechanics-canon.md`](mechanics-canon.md). This table tracks retired words so docs, copy, and code converge on the canon vocabulary.
+
 Current canonical terms:
 
 | Use now | Retired term | Meaning |
 | --- | --- | --- |
-| **Trust** | Social Standing / Standing | The Hollow's measure of how much people trust the player. It is affected by attendance, lies, forbidden work, and public help. Gates favors, alibis, watched/delayed upper access, and later recruitment. |
-| **Steal** / **theft** | Siphon / siphoning | The forbidden diversion of named District production for a personal work-rig upgrade. **Shortage Risk** is the measure of how likely missing production is to be noticed later — code still calls this **Cover** throughout (`districts.gd`'s `cover_changed`/`get_cover_health()`/`get_cover_for_good()`, `upgrade_hud.gd`'s Cover label/tooltips); see "Known follow-ups" below, this was not renamed in the 2026-09-13 pass. |
-| **Tallies** | (keep) | Personal work pay from public Material turn-ins; used for openly requisitioned, sanctioned gear. |
-| **Materials** | Salvage (as category) | Dig finds you carry and turn in. Transitional dig-haul id `salvage` may remain in code until Tallies UI fully lands. |
-| **District production** | stocks / stock (player-facing) | Named communal goods (Glowrations, Presswater, etc.). |
-| **Firmament** | Vault / roof (formal); also **Cap** in `cap_*` test-variable naming | Sacred ceiling; natural crash-sealed strata. Correction (2026-09-13): this row previously listed "Cap" under Devil's Mouth below, but the actual `cap_*` identifiers in `test_feel_feedback.gd`/`test_feel_polish.gd` consistently meant the Firmament case (paired against `pit_*` for Devil's Mouth) — renamed to `firmament_*` accordingly. |
-| **Devil’s Mouth** | Pit (as a place name) | Central impact crater void. Code may still use `PIT_*` layout constants (`hollow_layout.gd`) and `hollow_ambiance.gd`'s decorative `Pit*` node names — both explicitly allowed to remain. |
+| **Trust** | Social Standing / Standing | Society's accumulated, qualitative perception of the player's reliability. Shown as 4–5 standing states with human-readable reasons, not a raw number. Not spendable. |
+| **Ritual** | Holding; Harvest | The communal return anchor at the end of the Pulse-driven civic cycle. Missing it is contextual, not an automatic stat penalty. The Holding Raft is now the **Ritual Raft**. |
+| **Civic cycle** (Rousing → Working → Gathering → Ritual) | Harvest clock / 60-second Harvest timer | The Pulse-driven daily rhythm. Phase names and timings are still OPEN. |
+| **the Pulse** | — | Degraded surviving ship component at Mid Heart; civic timekeeper and relic. Original ship function OPEN. |
+| **Diversion / theft** (verb: divert, steal) | Siphon / siphoning | Secretly removing district output from a district's Reserve into concealed personal storage toward Forbidden Gear. |
+| **District condition** (e.g. Comfortable / Stable / Strained / Shortage / Critical — names tunable) | Cover; Shortage Risk | How vulnerable a district's Capacity/Demand/Reserve balance currently is. There is no theft-success percentage. |
+| **Local suspicion / evidence** (sight, sound, persistent evidence) | Witness Risk (five-state meter); siphon notice chance | Detection records believable facts; suspicion belongs to an NPC, district, Wardens, location, or incident. No universal Suspicion meter. |
+| **Approved Gear** (category) / **Order** (action) | Requisition; efficiency / “safe magic” upgrades | Society-sanctioned equipment ordered with Tallies + authorized district output (plus Trust/access where relevant). |
+| **Forbidden Gear** / **Forbidden Designs** | forbidden work-rig modules; knowledge upgrades | Privately built from stolen/diverted output + at least one non-Tally requirement (Material, Component, Record). |
+| **Rig** | work rig; Mouthworker rig / suit | The player's single evolving work/exploration platform. |
+| **Gear slots** + **Rig Capacity** / **Rig Strain** | three fixed mounts (Toolhead / Harness / Utility pack); Rig Load | Separate progression systems. Capacity is a soft limit; exceeding it creates Rig Strain, which reserves stamina. |
+| **Core Improvements** | — | Permanent baseline Rig improvements that do not use a Gear slot. |
+| **Materials** | Salvage (as category) | Bulk physical resources: Sutral, Ravelstone, Brinecrystal, Verdigris, Hullbit. |
+| **Sutral** | Sporemeal, Threadroot | Biological/fungal fibrous Material. |
+| **Ravelstone** | Charstone, Deeprock, Lunore, Karn, Tetzal | Dense structural stone Material. |
+| *(cut)* | Lampwick (as a mined Material) | Not a raw Material. |
+| **Components** / **Records** | “fragments” as a single track | Components = manufactured/ship parts; Records = knowledge (can unlock Approved *or* Forbidden capability). |
+| **District output** / **Production Capacity**, **Civic Demand**, **Reserve**, **Reserve Cap** | named District-production pairs (Glowrations + Glowfiber, Wicklamps + Bindcord, Presswater + Sealbrine); protected reserve of 1; cap of 6; 70/30 sibling weighting | District production resolves once per civic cycle. Output is abstracted into units; named goods are flavor, not canon currencies. |
+| **Capability web** (Known → Understood → Available) | tech tree; junction choices | Technology is discovered, not shown as a full tree. |
+| **Firmament** | Vault / roof (everyday speech — still valid in dialogue); **Cap** in old `cap_*` test names | Sacred ceiling; thick, exceptionally hard natural crash-sealed strata. |
+| **Devil’s Mouth** | Pit (as a place name) | Central impact crater void. Code may still use `PIT_*` layout constants and decorative `Pit*` node names. |
 
-**Do not reintroduce** a separate **Contribution** meter or currency. Residence and band advancement are driven by **Trust** plus Tallies / relocation cost / story gates — not a second progress bar.
+**Still valid as in-world descriptive words** (not currencies or district-output goods): **Presswater** for the Cistern's pressurized service water that drives lifts, brakes, and docks; **Wicklamp** for the Hollow's lamp family; **Firstfall** for old ship relics.
+
+**Do not reintroduce** a separate **Contribution** meter or currency.
 
 The retired terms are retained only in this reference and legacy save migration notes. New player-facing copy, specs, APIs, tests, and implementation work must use the **Use now** column.
 
-## Known follow-ups (not done in the 2026-09-13 pass)
+## Code still using retired terms (migration backlog)
 
-Recorded here so they aren't silently lost — each needs its own scoped pass, not a blind find/replace:
+Code is not canon by default. As of 2026-09-14 the prototype still encodes the retired model and needs a scoped migration pass driven by the Build Bible, not a blind find/replace:
 
-- **Cover → Shortage Risk.** Deep and genuinely ambiguous, not just stale naming: `districts.gd`'s `cover_changed` signal, `get_cover_health()`, `get_cover_for_good()`; `upgrade_hud.gd`'s `CoverLabel`/`ShopCover` nodes and live tooltip/notice text ("How hidden your theft is. Higher Cover = safer diversion..."); `upgrades.gd`'s comments. The open question before renaming: "Cover" reads as *good* (higher = safer), while "Shortage Risk" as described above reads as a *risk* (higher = more likely noticed) — these may be the same value under different polarity, or two different framings of the mechanic. Needs a design decision, not a mechanical rename.
-- **`hollow_ambiance.gd` split** (~1859 lines). Bolts together ~12 responsibilities: cliff/backdrop painting, carved rooms, deck architecture, the Vaultward gate, NPC life dressing, bridge visuals, three separate per-district prop kits (Farms/Wick/Cistern), mid-Heart clutter, the lighting system, district ambience animation, camera vignette, and the fog/atmosphere system. The district kits, lighting, and fog read as the cleanest extraction candidates.
-- **`upgrade_hud.gd` split** (~700 lines). Mixes shop-modal UI, HUD stat-label refresh, a notice/toast queue, the lie-prompt flow, district production display, and the Materials turn-in transaction path — six largely-independent concerns in one controller.
+- **Harvest** 60s timer and Standing miss (`community.gd`, HUD) → civic cycle + Ritual + contextual Trust.
+- **Requisition** panel / `RequisitionPanel` (`upgrade_hud.gd`, `main.tscn`) → Approved Gear Orders.
+- **Shortage Risk** (`districts.gd` `get_shortage_risk*`, `shortage_risk_changed`, HUD labels) and the theft notice chance → district condition states + local suspicion/evidence.
+- **Named District-production goods, protected reserve 1, capacity 6, 70/30 weighting** (`districts.gd`, `Districts.divert_good`, tests `test_district_production.gd`, `test_districts_cover.gd`, `test_siphon_cover_risk.gd`, `test_economy_loop.gd`) → Capacity / Demand / Reserve / Reserve Cap resolved once per civic cycle.
+- **Salvage** wallet and `+Salvage` floats (`resources.gd`, `feel_fx.gd`) → Materials (physical haul) / Components / Records.
+- **Dig Yield / Quiet Dig** upgrades (`upgrades.gd`) → Gear under Rig Capacity; Quiet Dig's role maps to Secrecy Gear (e.g. Dampening Wrap / Quieting Coupler).
+- **`hollow_ambiance.gd` split** (~1859 lines) and **`upgrade_hud.gd` split** (~700 lines) remain structural follow-ups; do them alongside the migration so new canon systems don't land in the god-objects.

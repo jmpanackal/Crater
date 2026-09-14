@@ -28,7 +28,7 @@ Durable lessons for Act 1 production with Cursor agents, Godot MCP, and PixelLab
 
 Three concerns — can be three chats or one chat with hard boundaries:
 
-1. **Look (art director)** — Refs, palette, silhouette. Output: approved stills / briefs only. Never invents dig systems or Standing rules.
+1. **Look (art director)** — Refs, palette, silhouette. Output: approved stills / briefs only. Never invents dig systems or Trust rules.
 2. **Assets (PixelLab / sprites)** — Implements the approved brief. No scene wiring, no “while I’m here” feature creep.
 3. **Integrate (Godot)** — Placement, collision, TileMap, import settings, tests. May *propose* design changes tagged **AI**; must not silently promote them to requirements.
 

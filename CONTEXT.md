@@ -2,6 +2,7 @@
 
 Read this before making changes. For the full pitch and open decisions, see:
 
+- [`docs/mechanics-canon.md`](docs/mechanics-canon.md) — **mechanics source of truth.** Supersedes conflicting mechanics anywhere else (including this file). Preserve its LOCKED / DIRECTION / OPEN / CUT distinctions; never invent values for OPEN items.
 - [`docs/game-pitch.md`](docs/game-pitch.md) — full game vision (Acts 1–3)
 - [`docs/game-decisions.md`](docs/game-decisions.md) — open/locked design choices
 - [`docs/story.md`](docs/story.md) — Act 1 fiction canon + story idea inbox (not design locks)
@@ -11,10 +12,11 @@ Read this before making changes. For the full pitch and open decisions, see:
 - [`docs/art-pipeline.md`](docs/art-pipeline.md) — when/how to use PixelLab MCP for Act 1 pixel assets
 - [`docs/godot-best-practices.md`](docs/godot-best-practices.md) — Godot 4 / pixel structure checklist for this repo
 - [`docs/ai-workflow.md`](docs/ai-workflow.md) — solo AI / agent production habits (role split, player-camera eval, USER vs AI tags)
-- [`docs/act1-demo-plan.md`](docs/act1-demo-plan.md) — Act 1 demo priority/fix lists + siphon questions (planning)
-- [`docs/materials.md`](docs/materials.md) — Act 1 Materials types, District production, inventory sketch (#29)
+- [`docs/act1-demo-plan.md`](docs/act1-demo-plan.md) — Act 1 demo priority/fix lists (planning; partly historical)
+- [`docs/materials.md`](docs/materials.md) — summary of the canon Materials / Components / Records model
+- [`docs/terminology-transition.md`](docs/terminology-transition.md) — retired terms and the code migration backlog
 
-**We are only building Act 1 right now.** Acts 2–3 exist so systems we seed (Standing, siphon, dual dig, sanctioned/forbidden tech) stay compatible — do not implement surface/Reef/settlement/ship features unless asked.
+**We are only building Act 1 right now.** Acts 2–3 exist so systems we seed (Trust, diversion, lateral + upward dig, Approved/Forbidden tech) stay compatible — do not implement surface/Reef/settlement/ship features unless asked.
 
 **Solo project.** Repo: [jmpanackal/Crater](https://github.com/jmpanackal/Crater) · path `E:\Coding\Projects\Crater` · title **Krater** · Godot **4.7.2** GDScript · 2D side-view · eventual premium Steam.
 
@@ -40,28 +42,32 @@ Closest comps: **Dome Keeper** (loop/team size), **SteamWorld Dig** (dig-and-ope
 
 ### Magicians (load-bearing lore → systems)
 
-Rote use of salvaged machinery is called **magic**. Villain encourages that framing.
+Rote use of inherited colony technology is called **magic**. Villain encourages that framing. Magicians are custodians of real technical procedures, not a fourth district.
 
 | Diegetic | Maps to |
 | --- | --- |
-| Sanctioned / "safe magic" (mundane tools) | **Efficiency** upgrades — boost Hollow district passives openly |
-| Forbidden / "dangerous magic" (nav, logs, legible data) | **Knowledge** upgrades — tied to risk / Social Standing |
+| Sanctioned procedure society accepts | **Approved Gear** — ordered openly with Tallies + authorized district output |
+| Understanding/modifying/repurposing tech beyond doctrine | **Forbidden Gear** — privately built from diverted output + Material/Component/Record |
 
-Act 1 players only feel "some magic is common, some is rare/suspicious."
+Every playstyle dimension contains both. Act 1 players only feel "some magic is common, some is rare/suspicious."
 
 ### Act 1 gameplay pillars
 
-1. **Hollow production districts** — named areas that produce different communal resources; efficiency/"safe magic" upgrades speed those passives over time (society gets healthier, not just a timer UI).
-2. **Harvest** — communal rhythm + clock on top of that economy; miss it (away digging) and you're noticed.
-3. **Two-frontier dig** — one toolset: **up** (secret taboo, from a late authored Firmament fissure) and **sideways** into braced civic galleries (public work that opens districts and yields Materials). The Devil’s Mouth is a feared, mostly unworked central void.
-4. **Fragments** stay ambiguous (myth/history, never clear "alien planet"):
-   - **Materials** (category; #29) — multi-type dig haul → district inputs, Tallies turn-in, rare Hullbit for forbidden craft. Names proposed in [`docs/materials.md`](docs/materials.md); code may still say Salvage until rename.
-   - **District production** — Glowrations / Glowfiber, Wicklamps / Bindcord, and Presswater / Sealbrine: communal output produced by districts; **Siphon diverts specific goods**
-   - **Records** → lore / knowledge upgrades (always forbidden-tier; not Materials)
-5. **Social Standing** — caught digging up, lying, or using unsanctioned tech costs standing; lies can dodge but exposed lies hurt worse; gates later recruitment.
-6. **Public work + theft framing** — assigned Materials returned to districts earn Tallies (personal work pay), Trust through reliable civic work, and district inputs. Residence/access use Trust plus Tallies/relocation cost and story gates; there is no Contribution meter. Personal forbidden upgrades steal/divert District production rather than spending Tallies normally. Production above a protected civic reserve needs inputs and is consumed at Harvest. **Cover is local** to the stolen good and its workplace sibling; thin output makes people notice. Demo needs thin **inventory**.
-7. **Living Hollow** — NPCs who work, live, play, and chat in those districts. Act 1's home base is a populated society, not an empty upgrade booth.
-8. **Vertical advancement** — public work builds Trust and earns Tallies for higher residence and access through the Hollow, culminating in Ashram Heights access directly beneath the Firmament. Higher status also brings duties and scrutiny; there is no separate Contribution system.
+Full detail and status labels: [`docs/mechanics-canon.md`](docs/mechanics-canon.md). Summary:
+
+1. **Hollow production districts** — Glowbeds / Wickwork / Cistern each track Capacity, Civic Demand, Reserve, Reserve Cap, and Unmet Demand, resolved **once per civic cycle**. Stable without babysitting; shortages create contextual world problems. Development is influenced (Materials, Components, Records, work), not commanded.
+2. **The Pulse, civic cycle, and Ritual** — the Pulse at Mid Heart drives Rousing → Working → Gathering → **Ritual** (names/timings OPEN). Time creates rhythm and social expectation, not constant rushing. Missing Ritual is contextual.
+3. **Lateral public dig + upward secret dig** — one toolset in a hybrid authored + destructible, persistent world. Public work is **sideways** civic excavation; secret investigation trends **up**. The **Firmament is thick** — a sustained, multi-session project from the Ashram Heights residence, not a thin fissure. The Devil’s Mouth is a feared, mostly unworked central void.
+4. **Discoveries** stay ambiguous (myth/history, never clear "alien planet"):
+   - **Materials** — Sutral, Ravelstone, Brinecrystal, Verdigris, Hullbit. Finite deposits in resource pockets; most rock yields nothing; bulk Materials are hauled/tethered physically and can be cached.
+   - **Components** — smaller ship-derived parts in light personal storage.
+   - **Records** — knowledge that unlocks routes, district projects, Approved capabilities, or Forbidden Designs (not always forbidden).
+5. **Stamina, fatigue, Push** — a fixed stamina bar with reserved portions (hauling, Rig Strain, fatigue). Push converts future capacity into fatigue; proper rest recovers it. No hunger/thirst/injury systems.
+6. **Jobs, Tallies, Trust** — jobs are physical civic situations and the invisible tutorial; not helping ≠ promising and failing. Work earns **Tallies** → Order **Approved Gear**. **Trust** is qualitative, explainable standing that is not spendable. No Contribution meter.
+7. **Diversion (theft) and detection** — steal real district output from physical storage into concealed storage toward **Forbidden Gear**. Two independent consequences: civic harm and detection (sight, sound, persistent evidence). Suspicion is local; no global Suspicion meter; no lie button or success percentages.
+8. **Rig** — one evolving Rig: Core Improvements + swappable Gear slots (~3 → 4 → 5) + soft **Rig Capacity** (exceeding it = **Rig Strain**). Builds span Excavation / Survey / Hauling-Endurance / Mobility / Secrecy. Technology is a discovered capability web (Known → Understood → Available).
+9. **Living Hollow** — NPCs who work, rest, talk, use infrastructure, gather, and react to district state. Relationships stay lightweight.
+10. **Vertical advancement** — Lower home → Mid Hollow residence → Ashram Heights residence via Trust, Tallies, status, and story. Each home hosts an improving concealed Forbidden workspace, safe by default and exposed only through believable evidence with warning.
 
 ### Act 1 design goal (critical)
 
@@ -69,8 +75,8 @@ Act 1 players only feel "some magic is common, some is rare/suspicious."
 
 ### Structure honesty (locked leanings)
 
-- **Hybrid campaign** (decisions #13/#16): one persistent save; expedition/miss risk costs unbanked resources/time/Standing — **not** full permadeath.
-- **Deep pillar:** tech tree / builds (#9). Mining must feel good but stay simpler. **Hollow production districts + living NPCs are Act 1 requirements** (decision #28) — keep them intentionally lighter than the tech tree, not absent. Surface settlement/ship passives are Act 2–3 only.
+- **Persistent campaign, graduated failure** (canon §54): one persistent world; failure continues the world in a changed state (lost time, abandoned haul, rescue exposure, contextual Trust) — **no** permadeath or expedition resets.
+- **Deep pillar:** builds / capability web (#9). **Hollow production districts + living NPCs are Act 1 requirements** — keep them lighter than the build system, not absent. Surface settlement/ship production are Act 2–3 only.
 - **Camera:** 2D side-view (#14) — Sea of Stars oblique evaluated and rejected; no hybrid. **Art:** detailed pixel art (#10); see [`docs/art-direction.md`](docs/art-direction.md). Underground earthy vs later Reef vivid (Act 2 — not now).
 - **Devil’s Mouth:** Act 1’s powerful, mostly unworked crater vista; public Materials work is lateral civic excavation. Any true descent stays later and gated (#22).
 
@@ -78,9 +84,9 @@ Act 1 players only feel "some magic is common, some is rare/suspicious."
 
 ## Core loop — do not simplify away
 
-**Venture out → gather → return before missed → improve the Hollow or your work rig → go further.**
+**Live in the Hollow → take civic work or explore → travel, dig, extract, haul → decide how far to push → keep / cache / deliver / order / divert → return to a Hollow that responds → improve Rig, districts, knowledge, access → reach new places.** (canon §1)
 
-This is **not** a neutral dig-shop. Scaffolding in code may look like dig→resource→upgrade; the **meaning** is secrecy, siphoning from a living communal economy, Standing risk, and covering that diversion by keeping district output healthy. The Act 1 inciting public work is the First Steward’s assignment to excavate a new district: a real pressure-storage/expansion annex, worked from both sides of the Hollow, whose location conceals a ship service spine tied to the Steward’s longevity. The exact hidden room/discovery beat remains unresolved.
+This is **not** a neutral dig-shop. Scaffolding in code may look like dig→resource→upgrade; the **meaning** is civic participation, quiet transgression against a living communal economy, contextual Trust, and evidence-driven consequences. The Act 1 inciting public work is the First Steward’s assignment to excavate a new district: a real pressure-storage/expansion annex, worked from both sides of the Hollow, whose location conceals a ship service spine tied to the Steward’s longevity. The exact hidden room/discovery beat remains unresolved.
 
 ### When in doubt
 
@@ -90,7 +96,9 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 
 ## Current build state (keep honest)
 
-### Implemented (Act 1 vertical slice)
+> **Prototype ≠ canon.** The implemented slice below predates [`docs/mechanics-canon.md`](docs/mechanics-canon.md) and still uses retired mechanics (Harvest timer, Standing, Salvage wallet, Requisition panel, Shortage Risk/Cover, named district goods with reserve 1 / cap 6, siphon notice RNG, Dig Yield / Quiet Dig). Treat it as transitional; migration backlog lives in [`docs/terminology-transition.md`](docs/terminology-transition.md).
+
+### Implemented (Act 1 vertical slice — transitional)
 
 - Campaign shell: **title → New Dig / Continue → play**; Esc saves and returns to title. No Act 2 tease.
 - Zones: **Hollow** as Mouth-centered vertical terraces with **lateral carved rooms** (`HOLLOW_LEFT=-512`): Glowbeds grow gallery + public terrace, Wickwork bay + street, Mid Heart bridge band, Cistern + service alcove hint. Upper/Lower Heart suggested by distant suspended decks/cables. Soft labels: **The Glowbeds**, **The Wickwork**, **Mid Heart**, **The Cistern**. Firmament↑ / Devil’s Mouth↓. Dig exit reads as braced civic excavation.
@@ -98,7 +106,7 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 - Dig Site Firmament / civic side-gallery soft dressing (haze/gloom overlays) + Hollow fog drift / FarHaze / deep-Mouth veil polish + Approach threshold (braced tunnel / “Work walls ahead”).
 - **Production districts** (`Districts`): Farms / Wickwork / Cistern passive production + rates; efficiency upgrades raise rates; **Siphon Cover** will use the target good and its sibling output. District prop kits are ColorRect craft (planters, wick bench, cistern basin/freight) — still not painted PixelLab props.
 - Hollow ladders: woodier ColorRect shafts with climb hints.
-- **Upgrade split**: Efficiency (Farm Tending, Wickcraft, Cistern Flow — open) vs Forbidden (Dig Yield open; Quiet Dig gated by Firmament note Record — cover-based notice risk). Siphon only in Hollow (**U** / buttons). Future work-rig progression must use meaningful choice junctions: digging, movement/recovery, secrecy, knowledge, and community utility.
+- **Upgrade split**: Efficiency (Farm Tending, Wickcraft, Cistern Flow — open) vs Forbidden (Dig Yield open; Quiet Dig gated by Firmament note Record — cover-based notice risk). Siphon only in Hollow (**U** / buttons). Future Rig progression follows docs/mechanics-canon.md (Gear slots, Rig Capacity / Strain, capability web).
 - **Harvest** 60s + Standing miss; optional **lie** prompt when away (Y/N + dimmer stakes copy); exposed lies worsen later notices; Harvest clock soft-pulses when ≤10s; Standing toasts tint by gain/loss.
 - **Upward dig risk** (Quiet Dig reduces); lateral civic excavation remains public work. A constrained personal tether rig is planned for unsafe side galleries and upper-Firmament work; fixed Cistern-powered freight lifts remain public infrastructure.
 - **Records / Journal** stub (`Journal`, **J**): a few ambiguous fragments, findable while digging; count + “new” highlight on unlock.
@@ -111,9 +119,9 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 
 - District / Heart / void craft is **ColorRect + existing ledge/bridge tiles** — not yet painted prop kits or a full settler sprite. See [`docs/hollow-build-brief.md`](docs/hollow-build-brief.md) implemented table.
 - NPC bodies still ColorRect stubs; lanterns are warm posts + PointLight2D, not authored lamp art.
-- District production is currently flavor-only (not yet a full spend sink beyond Cover). **Pending:** Materials inventory + District-production siphon drain (#29 / [`docs/materials.md`](docs/materials.md)); code still uses single Salvage wallet.
+- District economy still uses the retired per-good reserve/cap model, not canon Capacity/Demand/Reserve per civic cycle. No physical hauling, caching, stamina reservation, fatigue, Components, Rig Capacity, or capability web yet.
 - Records are three stubs; Firmament note unlocks Quiet Dig (first knowledge gate). Journal is still a flat list (not Mystery/Codex views).
-- Heart Upper/Lower are silhouette hints only; Trust/Tallies-gated residences, authored Firmament fissure, and the Steward's new district are not implemented yet.
+- Heart Upper/Lower are silhouette hints only; Trust/Tallies-gated residences, hidden workspace, thick-Firmament excavation, and the Steward's new district are not implemented yet.
 - Audio is procedural dig/land click stubs only (no authored SFX packs yet); ceiling name is locked in fiction.
 
 ### Later acts (do not build now)
@@ -175,8 +183,9 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 
 ## Scope guardrails (from pitch)
 
-- Hollow districts/NPCs stay simple (rates + presence + light talk), **not** RimWorld / full dialogue sim.
-- Surface settlement later = headcount + passives, **not** RimWorld (same formula family as Hollow passives).
-- Passive tiers share one formula — flag if a tier needs its own prestige system.
+- Hollow districts/NPCs stay simple (Capacity/Demand/Reserve per cycle + presence + light talk), **not** RimWorld, city-builder control, per-NPC consumption, or a full dialogue sim.
+- No idle/per-second production, AFK farming, or sleep-spam production loops (canon §25, §58).
+- Surface settlement later **transforms** Act 1 systems (canon §49) — no separate prestige economy.
 - One dig system, two directions — not two tool trees.
-- Pick **tech tree** as the deep pillar; keep other Act 1 systems intentionally simple — but do not cut production districts, siphon cover, or living NPCs from Act 1.
+- Builds / capability web are the deep pillar; do not cut production districts, diversion, or living NPCs from Act 1.
+- Use the canon's §60 design test before adding any mechanic; mark undecided details OPEN.

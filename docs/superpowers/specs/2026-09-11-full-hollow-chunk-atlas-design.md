@@ -23,6 +23,53 @@ This specification preserves the existing fiction: Devil's Mouth is a vast impac
 - **Districts visibly grow.** Production upgrades must claim prepared physical space, add or repurpose buildings, and change daily activity. They are not invisible number increases behind an unchanged backdrop.
 - **No false global shot.** The atlas is an editorial/map view only. Normal gameplay never displays the entire settlement at once.
 
+## Locked atlas grid
+
+The canonical full-Hollow atlas is an **18-column × 16-row logical grid**: **288 stable composition cells**. This is the definitive spatial canvas for all current and future chunk work.
+
+- Columns **0–2** are the far-west outward frontier and Bottom-West/High-West dig space.
+- Columns **3–5** are the inhabited west wall.
+- Columns **6–11** are Devil's Mouth and the Mid Heart band. The void occupies these cells except where a Mid Heart raft/deck intentionally claims a cell; all remaining cells have explicit fog/depth/wreck visual ownership.
+- Columns **12–14** are the inhabited east wall.
+- Columns **15–17** are the far-east approach and Mid-East dig frontier.
+- Rows progress from Firmament-adjacent upper settlement through Ashram, upper work/cultivation, mid bands and Mid Heart, lower worker/service districts, deep Cistern, and the visual black descent.
+
+A cell is a stable **composition slot**, not a promise of one camera screen or a final Godot pixel rectangle. A normal camera can span multiple cells; every cell still receives a fixed ID, type, neighbor seams, visual contract, and eventually an approved reference image. A full composition must account for every one of the 288 cells; the only difference is whether a cell is fixed play, interior, transit, destructible dig, future-locked, or visual depth.
+
+### Hierarchical visual-production lock
+
+The full grid is not generated as 288 independent images, and a single macro illustration cannot substitute for final player-scale images. Use this production pyramid instead:
+
+| Level | Unit | Count | Purpose |
+| --- | --- | ---: | --- |
+| 0 | 18 × 16 logical board | 1 | Canonical non-AI topology: every route, district, lift, dig front, depth cell, and growth socket. |
+| 1 | 6 × 4 regional master | 12 | Composition reference for one quarter-band of the Hollow; follows the exact Level 0 cells below it. |
+| 2A | 2 × 2 anchor master | 72 | One shared, high-resolution 16:9 composition whose four quadrants map directly to four Level 0 cells. |
+| 2B | 2 × 2 bridge master | Per cross-anchor seam | Overlapping composition that repairs one important seam crossing an anchor boundary; contributes only a shared narrow border band. |
+| 3 | 16:9 child frame | 288 | Crop from its parent anchor master; carries parent provenance and exact internal neighbor boundaries. |
+
+Level 1 is partitioned 3 columns × 4 rows. Each Level 1 region partitions into 3 × 2 Level 2A anchor masters, each covering exactly 2 × 2 final cells. This fits the 18 × 16 board without padding, invented cells, or asymmetric edge exceptions. Because no non-overlapping 2 × 2 partition can contain every neighboring pair, a Level 2B bridge master is required for each important walkable seam crossing an anchor boundary. It provides a narrow shared seam band for both child frames rather than a competing full-cell image.
+
+Generated macro imagery may help judge mood and large silhouette only. It is never allowed to move the player home from the lower-left, move Ashram Heights out of the wall strata, turn excavation downward into Devil's Mouth, or override the fixed row/column placement below.
+
+### Locked capacity and row hierarchy
+
+The west wall and east wall each contain 96 cells. Each reserves **58 active-core cells**, **22 occupied growth/discovery cells**, and **16 transit/visual-support cells**. The center contains 18 Mid Heart cells, 8 future deep/secret cells, and 70 Devil's Mouth visual-depth cells.
+
+Reserved cells are never empty map blanks. Before conversion, they have an explicit believable use: fallow cultivation, storage, a shuttered but occupied work bay, an old tank, a quiet residence, an unused service passage, a delivery yard, a façade with inhabitants, or a sealed/hidden room. Their atlas state describes both the current use and the later conversion. The compositor must expose that current use directly in every cell; a label such as “reserve” by itself is invalid.
+
+| Rows | Locked content |
+| --- | --- |
+| 0 | Firmament/roof visual cells |
+| 1–2 | Ashram Heights on both walls |
+| 3–4 | High-West on the left; Glowbeds on the right |
+| 5–6 | Wickwork on the left; Mid-East approach begins on the right |
+| 6–8 | Mid Heart's separated raft/deck cells through the central Mouth band |
+| 7–8 | Mid-East dig front at true middle-east height |
+| 9–11 | Lower worker neighborhoods; Home Court at row 11 in lower-left band |
+| 12–13 | Bottom-West approach/dig; lower-east service and Cistern upper levels |
+| 14–15 | Deep Bottom-West boundary; Cistern basin/Seep; deep void/wreck depth |
+
 ## Atlas piece classes
 
 | Class | Player interaction | Atlas treatment | Godot translation |
@@ -46,8 +93,8 @@ The atlas uses irregular rectangular or stepped chunk footprints. Shapes may ove
 | High-West | guarded approach, dispatch/checkpoint, dig staging, 5–7 destructible dig-envelope pieces, locked deep boundary | Official late lateral work directly under Ashram. It never becomes the hidden upward route. |
 | Wickwork | public terrace, repair bays, lamp/bindcord production rooms, workbench room, mid lift landing | Mid-left production complex with substantial sideways play. |
 | Mid allotments | shared street, mid-home exterior, apartment interior, wash/cook yard, connector passages | Later home band and lived-in mid-level density. |
-| Lower west | Home Court (O1), Lower Switchback (O2), family interiors, maker alcoves, worker courts, West Dispatch (O3), lower lift landing (O8) | Starting civic neighborhood that gives the player a home and long lateral route. |
-| Bottom-West | outward approach (O4), threshold (O5), 5–7 destructible expansion pieces including O6, optional O7 chamber, locked deep boundary | Early sanctioned outward work; the Mouth disappears as the route travels west. |
+| Lower west | Home Court (`H-4-11`), Lower Switchback (`H-3-11`), family interiors, maker alcoves, worker courts, West Dispatch Yard (`H-2-11`), lower lift landing (`H-5-11`) | Starting civic neighborhood that gives the player a home and long lateral route. |
+| Bottom-West | outward approach, threshold, 5–7 destructible expansion pieces, optional collapsed chamber, locked deep boundary | Early sanctioned outward work; the Mouth disappears as the route travels west. |
 
 ### Mid Heart
 
@@ -55,9 +102,9 @@ Mid Heart is one large region of many chunks, not a single plaza. It must reserv
 
 | Major raft | Required subchunks |
 | --- | --- |
-| West Exchange | west dock, Joss Materials counter, requisition/repair intake, attached freight ledge |
-| Holding | upper holding hall, lower Holding floor, queue/bench terrace, council/announcement edge |
-| East Service | Glowration queue, medic/care room, notices/small shops, right dock |
+| West Exchange | west dock, Joss Materials counter, Approved Gear order/repair intake, attached freight ledge |
+| Ritual Raft *(formerly Holding)* | upper Ritual hall, lower Ritual floor, the Pulse, queue/bench terrace, council/announcement edge |
+| East Service | Glowbeds ration queue, medic/care room, notices/small shops, right dock |
 | Lower Freight | cargo deck, transfer machinery, west and east maintenance loops, emergency catch rail |
 
 The cluster connects to Wickwork/left lift on the west and the lower-east/right-lift approach on the east. It has no direct public excavation face.
@@ -70,7 +117,7 @@ The cluster connects to Wickwork/left lift on the west and the lower-east/right-
 | Glowbeds | upper terrace, planters/fiber racks, cultivation rooms, drying/packing bay, lift landing | Directly below east Ashram; tidy and protected. |
 | Mid-East | wall approach street, freight/service passage, checkpoint, staging, 6–8 destructible dig-envelope pieces, locked deep boundary | True middle height, below Glowbeds and well above Cistern. Wet/pressurized shock-fault work. |
 | Lower-east service | residential/service street, clinic, freight dock, repair corridor, lift landing, interior service rooms | A substantial dense band—not a dead-end beside Cistern. |
-| Cistern and seep | upper pipe/service level, freight level, pressure basin level, Sealbrine room, deep walkways, seep gallery | Far below Mid Heart, linked by right freight lift and emergency local route. |
+| Cistern and seep | upper pipe/service level, freight level, pressure basin level, sealant room, deep walkways, seep gallery | Far below Mid Heart, linked by right freight lift and emergency local route. |
 
 ### Devil's Mouth visual mosaic
 
@@ -90,7 +137,7 @@ Each dig front has a **fixed outer envelope** of destructible chunks. A player m
 
 | Front | Act / geography | Envelope | Boundaries | Expected player choice |
 | --- | --- | --- | --- | --- |
-| Bottom-West | Early; far low west | 5–7 connected chunks, broad and comparatively low | impact-compacted bedrock, brace line, collapse face, locked deep seam | two or three viable horizontal/diagonal routes; O7 optional collapsed side chamber |
+| Bottom-West | Early; far low west | 5–7 connected chunks, broad and comparatively low | impact-compacted bedrock, brace line, collapse face, locked deep seam | two or three viable horizontal/diagonal routes; optional collapsed side chamber |
 | Mid-East | Mid Act 1; far middle east | 6–8 connected chunks, taller/branchier than Bottom-West | pressurized seams, flooding pockets, old sealed service wall, civic brace limit | routes balance pressure routing, safer material veins, and ambiguous service traces |
 | High-West | Late Act 1; directly below Ashram west | 5–7 constrained chunks with controlled staging | guarded permit boundary, near-rim collapse rock, sealed component strata, locked roof-side limit | deliberate routes through rarer material; never a shortcut into the forbidden upward dig |
 
@@ -112,7 +159,7 @@ The player may create messy personal tunnels, but those tunnels are confined to 
 
 Production districts need enough area to read as living workplaces before an upgrade and to become visibly larger, busier, and more capable afterward. The atlas therefore reserves **growth sockets** beside every production anchor: at least two adjacent interior/exterior subchunks plus one flexible service/yard seam. These are not blank space. Before use, they have a named low-intensity role—storage, a quiet yard, old equipment, a closed work bay, a fallow bed, or a service passage. After an upgrade, they become active construction, work, cultivation, storage, or distribution space.
 
-The upgrade unlock source is intentionally recorded as **`discovery unlock (name pending)`** in the atlas. It may later resolve to recovered Records, a repaired component, a named Knowledge Fragment, or a combination, but the spatial plan must not silently invent a new economy item. The production/system design will decide the final name and exact cost. Atlas slots record the source, the required story state, and the visible construction consequence separately from Materials costs.
+The upgrade unlock source is recorded as **`discovery unlock`** in the atlas. Per [`mechanics-canon.md`](../../mechanics-canon.md) §23 and §26, district projects combine **knowledge (Records) + physical resources (Materials/Components) + production capacity**; the spatial plan must not invent a new economy item. Exact project costs remain OPEN. Atlas slots record the source, the required story state, and the visible construction consequence separately from Materials costs.
 
 ### Required district growth reserves
 
@@ -120,8 +167,8 @@ The upgrade unlock source is intentionally recorded as **`discovery unlock (name
 | --- | --- | --- | --- | --- |
 | **Glowbeds** | tidy upper-right cultivation terrace, planters, fiber racks, packing/drying rooms | fallow cultivation hang, closed humid room, storage/packing yard | additional stepped beds, a tended humid gallery, more drying lines/fiber racks, new grow-light niches, more workers | inoculated/fallow → sprouting → mature harvest → picked/drying → recovering; guarded/tidy throughout |
 | **Wickwork** | mid-left repair terrace, binding racks, lamp bench and work bays | shuttered repair bay, spool loft, covered loading sideyard | new binding bench/loom, repair line, lamp service nook, freight intake and visible repair queues | quiet intake → active repair shift → backlog/overflow → upgraded multi-bench operation; shortages visibly thin spools and lamp stock |
-| **Cistern** | deep lower-right pipes, basin, pressure gear, freight and Sealbrine rooms | sealed side tank, unused pump alcove, lower pressure chamber/service walk | extra pressure train, new settling tank, larger freight staging, additional controlled water route and service crew | reserve/thin/healthy Presswater; maintenance shutdown; leak repair; upgraded steady operation. States must preserve the left-lift no-softlock rule. |
-| **Mid Heart civic support** | existing separate rafts and civic counters | docked utility annex, closed counter, catch-rail service deck | a repaired civic counter, expanded ration/service point, working dock machinery, safer/more active freight flow | daily Holding crowd, quiet interval, delivery arrival, thin-Presswater dimming, harmless catch-rail settle; never a falling/failure catastrophe |
+| **Cistern** | deep lower-right pipes, basin, pressure gear, freight and sealant rooms | sealed side tank, unused pump alcove, lower pressure chamber/service walk | extra pressure train, new settling tank, larger freight staging, additional controlled water route and service crew | Cistern condition (comfortable/stable/strained/shortage — names tunable); maintenance shutdown; leak repair; upgraded steady operation. States must preserve the left-lift no-softlock rule. |
+| **Mid Heart civic support** | existing separate rafts and civic counters | docked utility annex, closed counter, catch-rail service deck | a repaired civic counter, expanded ration/service point, working dock machinery, safer/more active freight flow | civic-cycle phases (Rousing / Working / Gathering / Ritual crowd), delivery arrival, Cistern-strain dimming, harmless catch-rail settle; never a falling/failure catastrophe |
 
 ### Dynamic-area rules
 
@@ -150,14 +197,14 @@ This means the atlas will show both the **current Act 1 footprint** and the late
 Every slot in the atlas data must carry the following fields:
 
 ```text
-id                 stable ID, e.g. O1, BW-D3, MH-H2, VM-C4
+id                 stable coordinate ID, e.g. H-4-11 or VM-8-4
 display_name       user-facing working name
 class              fixed-play / interior / transit / destructible-dig / visual-depth / future-locked
 status             planned / draft / approved / revision-needed / implemented
 atlas_bounds       x, y, width, height in atlas design units
 band               upper / mid / lower / deep / void and wall/Heart side
 parent             optional complex or neighborhood owner
-seams              destination ID, edge, traversal type, state gate, camera handoff
+seams              destination ID, reciprocal edge, traversal type, boundary height/grade, state gate, camera handoff
 camera_contract    local framing, prohibited global reveal, parallax/void ownership
 visual_contract    required materials, lighting, silhouette and prohibited reads
 systems            district production, home, lift, Warden, Trust/theft, Work Order, rig, etc.
@@ -174,9 +221,9 @@ The durable local atlas will show the whole mosaic with zoom and pan. It must al
 
 - see all chunk footprints at once;
 - filter by class, status, progression, wall, and system owner;
-- click a chunk to see its full contract, adjacent seams, approved-image history, and Godot handoff fields;
+- click a chunk to see its full contract, adjacent seams, composition-master history, and Godot handoff fields; a draft master remains visibly placed across its shared bounds and is clearly marked non-canonical;
 - toggle visual-depth pieces on/off only for diagram clarity, never delete them;
-- display only approved reference images inside slots, with controlled crop and image version/date;
+- render composition masters once at their actual shared atlas bounds, with transparent selectable coordinate slots above them; normal-camera crops are implementation references and must not appear as disconnected thumbnail cards in the atlas;
 - flag an approved image as `revision-needed` without removing it, so placement history remains clear.
 
 The atlas is a planning tool, not shipped UI and not a source of runtime coordinates. It uses a plain, editable data source so a Godot exporter or a developer can consume the same IDs/seams later.
@@ -184,7 +231,7 @@ The atlas is a planning tool, not shipped UI and not a source of runtime coordin
 ## Workflow
 
 1. Build the complete fixed mosaic and assign every ID/contract before generating more player-scale art.
-2. Generate a chunk image from its contract and neighboring seams.
+2. Generate a neighboring pair (or wider local strip) from their shared seam contract. Approve the strip before cropping it into coordinate-keyed reference images.
 3. Review it at player scale and in atlas context.
 4. On approval, copy the image to `docs/refs/`, add filename/date to the atlas slot, and set status `approved`.
 5. Translate approved slots into Godot in logical neighborhood batches. Fill `godot_handoff` as each scene/region is made.
@@ -194,12 +241,13 @@ The atlas is a planning tool, not shipped UI and not a source of runtime coordin
 
 - [ ] Every part of the full cross-section is represented by a slot, including all Devil's Mouth visual-depth bands.
 - [ ] No non-void gaps remain between settlement chunks without an explicit `visual-depth` or `future-locked` reason.
-- [ ] O1 has its approved reference image; O2 remains image-withheld until approved.
+- [x] `H-4-11` retains its approved original visual reference; `H-2-10`, `H-3-10`, `H-2-11`, and `H-3-11` are derived from the approved `h2-h3-r10-r11` anchor; the approved `h3-h4-r10-r11` bridge supplies the shared `H-3-11` ↔ `H-4-11` band without overwriting either original interior.
 - [ ] All three dig fronts are bounded destructible envelopes, with no open-ended digging.
 - [ ] Every production district and Mid Heart civic-support area has named growth sockets and dynamic-state contracts; no upgrade is a purely invisible numerical change.
 - [ ] Bottom-West is visibly lateral/outward and early; Mid-East remains middle-east; High-West remains immediately below Ashram west.
 - [ ] Cistern is materially lower than Mid Heart; right wall has density comparable to west.
 - [ ] Mid Heart has separate raft/deck chunks and visible void gaps, not one bridge.
 - [ ] Every walkable seam has a reciprocal destination and traversal mode.
+- [ ] Every image-bearing walkable seam has matching boundary height/grade, rail/structure continuation, camera overlap, and a shared-master provenance record.
 - [ ] Camera contracts prevent ordinary frames from seeing the entire Hollow or Firmament from Mid Heart.
 - [ ] The data includes Godot handoff fields without conflating atlas units with final world pixels.

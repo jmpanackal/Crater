@@ -10,9 +10,11 @@ USER answer log — this doc summarizes and sequences it, doesn't replace it),
 [`game-decisions.md`](game-decisions.md) (#28/#29 locks), [`materials.md`](materials.md),
 [`terminology-transition.md`](terminology-transition.md).
 
-**Status snapshot (2026-09-13):** 25/25 headless tests passing. Terminology
-migration complete except the two items in Phase 1 below. See "Known
-follow-ups" in `terminology-transition.md` for the full detail on each.
+**Status snapshot (2026-09-14):** [`mechanics-canon.md`](mechanics-canon.md)
+adopted as the mechanics source of truth. Phase 0–1 below were completed
+against the **pre-canon** model; their Requisition, Shortage Risk, Harvest,
+and named-goods implementations are now transitional (see the code
+migration backlog in `terminology-transition.md`). Phase 1.5 is new.
 
 ---
 
@@ -55,6 +57,18 @@ gaps between locked intent and current code, not open questions.*
 
 ---
 
+## Phase 1.5 — Build Bible + canon migration
+
+*Cost: design contract first, then scoped implementation. Opened 2026-09-14 when
+the mechanics canon superseded the Phase 0–1 economy model.*
+
+- [ ] Write the **Build Bible** (canon §66): implementation-level contracts for services/autoloads, stamina/fatigue/reservation, Materials/Components/Records, hauling/caching, district Capacity/Demand/Reserve, jobs/commitments, Trust/suspicion/evidence, Rig/Gear/Capacity/Strain, capability web, workspace/residences, destructible terrain persistence, save/load, and opening-route acceptance tests. Include an explicit **vertical-slice scope cut** (which systems ship thin, which defer).
+- [ ] Migrate code off retired mechanics per `terminology-transition.md` (Harvest → civic cycle/Ritual, Requisition → Approved Gear Orders, Shortage Risk → district condition + local suspicion, named goods/reserve 1/cap 6 → Capacity/Demand/Reserve, Salvage → Materials).
+
+**Sequencing note:** Phase 2's opening-route layout (canon §52) is unchanged by the canon, so layout work may continue in parallel; only rename labels (Holding → Ritual) as chunks are touched.
+
+---
+
 ## Phase 2 — Lock the opening-route spatial layout
 
 *Cost: design + a modest amount of generation. This is the map/chunk work
@@ -93,7 +107,7 @@ blocked by layout or art, only by Phase 0/1's economy rules being settled
 actually does).*
 
 - [ ] First Steward assignment dialogue (depends on Phase 0's #6 answer).
-- [ ] Tighten Cover/Shortage Risk-adjacent notice copy once Phase 1's rename lands.
+- [ ] Write theft/evidence and Trust-reason copy against the canon (human-readable reasons, no `+X Trust` popups, no percentages) once Phase 1.5 lands.
 - [ ] Expand the three Journal record stubs if the demo needs more than the Firmament-note gate.
 
 ---

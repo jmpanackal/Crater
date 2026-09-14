@@ -28,8 +28,8 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 1. **Fairness first:** coyote + jump buffer before freeze frames / heavy shake.
 2. **Weight without mush:** accel/friction, but dig-aim (WASD + **R**) stays snappy on the 64 px grid.
 3. **Firmament quieter than Devil’s Mouth** for dust, shake, and SFX.
-4. **Social systems stay social:** Harvest / Standing / siphon notice → copy + UI, not arcade juice.
-5. **Dome Keeper–ish loop pattern (borrow the structure, not the combat):** hub return → spend → venture out under a clock. Krater’s “wave” is Harvest + Standing, not dome defense.
+4. **Social systems stay social:** Ritual / Trust / theft evidence → copy + UI, not arcade juice.
+5. **Dome Keeper–ish extraction feel (borrow the physicality, not the run reset or combat):** venture out → extract and haul → return to a persistent Hollow. Krater’s pressure is stamina, fatigue, civic time, and social consequence, not dome defense.
 
 ---
 
@@ -41,7 +41,7 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 | Feature clusters as the tree grows (`hollow/`, `dig/`, `ui/`, `autoload/`) | Forever-flat `res://` root once NPC/prop scenes multiply |
 | Scenes own composition; scripts own one responsibility | Stuffing all Hollow art + UI + wiring into one mega-`main.tscn` |
 | `TileMapLayer` + one dig API (`TerrainLayer`) | Parallel dig systems for Firmament work vs lateral civic side galleries |
-| Tests as SceneTree scripts under `tests/` for each pillar | Untested Standing / siphon / save regressions |
+| Tests as SceneTree scripts under `tests/` for each pillar | Untested Trust / diversion / district-cycle / save regressions |
 
 **Current shape:** flat root scripts + `main.tscn` play scene + `title_screen.tscn` shell is fine for a vertical slice. Split Hollow / Dig Site / UI into packed scenes when `main.tscn` or art iteration starts fighting itself.
 
@@ -51,7 +51,8 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 
 - [ ] New sprites: side-view, 32 or 64, earthy palette, transparent where needed → `sprites/…` → nearest / no mipmaps
 - [ ] Dig changes go through `terrain.gd` (one toolset, two frontiers)
-- [ ] Siphon / upgrades only meaningful in Hollow; dig site stays the venture
+- [ ] Major Rig refits, Approved Gear Orders, and Forbidden builds happen only at believable stations (home, workbench, Wickwork); no pause-menu rebuilds mid-cave
+- [ ] Mechanics match [`mechanics-canon.md`](mechanics-canon.md); OPEN values are not silently invented
 - [ ] Juice: read game-feel doc; don’t celebrate getting caught
 - [ ] Don’t tease Act 2 (surface / Reef) in UI or folders players can see
 - [ ] Prefer editing placement nodes over leaving `visible = false` ColorRect graveyards
