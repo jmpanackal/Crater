@@ -45,11 +45,11 @@ Materials should support more than one use; no Material exists only to feed one 
 
 ## District output (LOCKED — see canon §24–§25)
 
-Each district (Glowbeds, Wickwork, Cistern) tracks **Production Capacity, Civic Demand, Reserve, Reserve Cap, and Unmet Demand**, resolved once per civic cycle (around Ritual → Rousing). Output is abstracted into units that fictionally represent real goods — prepared biological products, fabricated goods, pressure/mechanical supplies. There are no canon named goods.
+Each district (Glowbeds, Wickwork, Cistern) tracks **District Capacity, Civic Demand, Reserve, District Reserve Cap, and Unmet Demand**, resolved once per civic cycle (around Ritual → Rousing). Output is abstracted into units that fictionally represent real goods — prepared biological products, fabricated goods, pressure/mechanical supplies. There are no canon named goods.
 
-- **Approved Gear Orders** consume Tallies + authorized district output.
-- **Diversion** moves output from Reserve into concealed personal storage toward Forbidden Gear. It does not lower Capacity; its harm is the lost buffer.
+- **Approved Gear Orders** consume Tallies + authorized District Output.
+- **Diversion** moves goods from District Reserves into concealed personal storage toward Forbidden Gear. It does not lower District Capacity; its harm is the lost buffer.
 
 ## OPEN
 
-Exact yields, extraction costs, deposit frequency, pocket-generation parameters, Reserve Caps, order/project costs, and storage capacities.
+Exact yields, extraction costs, deposit frequency, pocket-generation parameters, District Reserve Caps, order/project costs, and storage capacities.

@@ -76,7 +76,7 @@ flowchart TB
   end
 
   subgraph L7["L7 · Economy"]
-    DISTRICT[Districts: Capacity / Demand / Reserve]
+    DISTRICT[Districts: Capacity / Demand / District Reserves]
     TALLY[Tallies]
     ORDERS[Approved Gear Orders]
     DIVERT[Diversion / Theft]
@@ -183,7 +183,7 @@ flowchart LR
 flowchart LR
   CYCLE[Civic Cycle] --> DISTRICT[District Resolution]
   PROJECTS[Projects] --> DISTRICT
-  DISTRICT --> RESERVE[(Reserve)]
+  DISTRICT --> RESERVE[(District Reserves)]
   ORDERS[Approved Gear Orders] -->|withdraw| RESERVE
   DIVERT[Diversion] -->|withdraw| RESERVE
   DIVERT --> WITNESS[Witness Evaluation]
@@ -201,7 +201,7 @@ flowchart LR
   DELIVER --> TALLY
 ```
 
-**Contract focus:** the District owns Reserve. Orders and Diversion both **request withdrawals** through the same contract, which is what makes legitimate and illicit draws compete. Blocked by **G4, G5, G6, G7, G8**.
+**Contract focus:** the District owns District Reserves. Orders and Diversion both **request withdrawals** through the same contract, which is what makes legitimate and illicit draws compete. Blocked by **G4, G5, G6, G7, G8**.
 
 ### 2e. Home and Firmament chain
 
@@ -236,7 +236,7 @@ flowchart LR
 | Hauled loads, tether attachments | Hauling | Authoritative | Attach / detach / cache |
 | Personal storage, concealed storage, caches | Storage | Authoritative | Deposit / withdraw with ownership tag |
 | Equipped Gear, Core Improvements, Rig Capacity | Rig | Authoritative | Refit at stations only |
-| District Capacity, Demand contributors, Reserve | District | Authoritative | Request withdrawal, add project/contributor |
+| District Capacity, Demand contributors, District Reserves (stock) | District | Authoritative | Request withdrawal, add project/contributor |
 | Tallies | Wallet | Authoritative | Earn / spend |
 | Trust value + reason list | Trust | Authoritative | Submit reasoned change events |
 | Things that happened (seen, heard, missed, missing) | Fact Log | Historical | Append only |
@@ -275,7 +275,7 @@ Phases follow the layers. **Slice** is a proposed vertical-slice treatment (AI p
 | 19 | Trust (+ reasons view) | 1 | G16 | thin |
 | 20 | Suspicion + Investigation (derived) | 17, 18, 19 | G4 | stub (one authored investigation) |
 | 21 | Dialogue + Questioning | 19, 1 | — | thin |
-| 22 | Districts: Capacity / Demand / Reserve | 15, 1 | G4, G5 | thin (Wickwork full, others stub) |
+| 22 | Districts: Capacity / Demand / District Reserves | 15, 1 | G4, G5 | thin (Wickwork full, others stub) |
 | 23 | Tallies + Approved Gear Orders | 22, 14, 19 | — | thin |
 | 24 | Jobs + Commitments | 15, 11, 13, 22, 19 | — | thin (opening job) |
 | 25 | Capability Web | 11, 1 | — | thin |
@@ -296,7 +296,7 @@ These are places where two systems naturally want to call each other. Each is re
 | Apparent cycle | Resolution |
 | --- | --- |
 | Trust gates Jobs ↔ Job failure changes Trust | Jobs **emit** settlement facts; Trust **reads** facts. Jobs only **query** Trust. |
-| Orders ↔ Diversion both drain Reserve | District owns Reserve and serves withdrawal requests; neither system knows about the other. |
+| Orders ↔ Diversion both drain District Reserves | District owns District Reserves and serves withdrawal requests; neither system knows about the other. |
 | Stamina ↔ Hauling ↔ Gear | Stamina owns reservations by `source_id`; Hauling and Gear submit requests and never read each other. |
 | Investigation ↔ Home search ↔ Workspace | Investigation emits a search-requested event; Homes resolves the search against the concealment tier and emits found-evidence facts. |
 | Failure/rescue ↔ Clock ↔ Ritual | Failure requests a time advance; the Clock emits phase events; Ritual attendance reads them. Failure never marks Ritual missed directly. |

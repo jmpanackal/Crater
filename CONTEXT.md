@@ -46,7 +46,7 @@ Rote, devotional operation of inherited colony technology is the Hollow's own re
 
 | Diegetic | Maps to |
 | --- | --- |
-| Sanctioned, Council-approved Divine Binding | **Approved Gear** — ordered openly with Tallies + authorized district output |
+| Sanctioned, Council-approved Divine Binding | **Approved Gear** — ordered openly with Tallies + authorized District Output |
 | The same Divine Binding, practiced without sanction | **Forbidden Gear** — privately built from diverted output + Material/Component/Record |
 
 Every playstyle dimension contains both. Act 1 players only feel "some Binding is common and sanctioned, some is rare and suspicious."
@@ -55,7 +55,7 @@ Every playstyle dimension contains both. Act 1 players only feel "some Binding i
 
 Full detail and status labels: [`docs/mechanics-canon.md`](docs/mechanics-canon.md). Summary:
 
-1. **Hollow production districts** — Glowbeds / Wickwork / Cistern each track Capacity, Civic Demand, Reserve, Reserve Cap, and Unmet Demand, resolved **once per civic cycle**. Stable without babysitting; shortages create contextual world problems. Development is influenced (Materials, Components, Records, work), not commanded.
+1. **Hollow production districts** — Glowbeds / Wickwork / Cistern each track Capacity, Civic Demand, District Reserves, District Reserve Cap, and Unmet Demand, resolved **once per civic cycle**. Stable without babysitting; shortages create contextual world problems. Development is influenced (Materials, Components, Records, work), not commanded.
 2. **The Pulse, civic cycle, and Ritual** — the Pulse at Mid Heart drives Rousing → Working → Gathering → **Ritual** (names/timings OPEN). Time creates rhythm and social expectation, not constant rushing. Missing Ritual is contextual.
 3. **Lateral public dig + upward secret dig** — one toolset in a hybrid authored + destructible, persistent world. Public work is **sideways** civic excavation; secret investigation trends **up**. The **Firmament is thick** — a sustained, multi-session project from the Ashram Heights residence, not a thin fissure. The Devil’s Mouth is a feared, mostly unworked central void.
 4. **Discoveries** stay ambiguous (myth/history, never clear "alien planet"):
@@ -64,7 +64,7 @@ Full detail and status labels: [`docs/mechanics-canon.md`](docs/mechanics-canon.
    - **Records** — knowledge that unlocks routes, district projects, Approved capabilities, or Forbidden Designs (not always forbidden).
 5. **Stamina, fatigue, Push** — a fixed stamina bar with reserved portions (hauling, Rig Strain, fatigue). Push converts future capacity into fatigue; proper rest recovers it. No hunger/thirst/injury systems.
 6. **Jobs, Tallies, Trust** — jobs are physical civic situations and the invisible tutorial; not helping ≠ promising and failing. Work earns **Tallies** → Order **Approved Gear**. **Trust** is qualitative, explainable standing that is not spendable. No Contribution meter.
-7. **Diversion (theft) and detection** — steal real district output from physical storage into concealed storage toward **Forbidden Gear**. Two independent consequences: civic harm and detection (sight, sound, persistent evidence). Suspicion is local; no global Suspicion meter; no lie button or success percentages.
+7. **Diversion (theft) and detection** — steal real District Output from physical storage into concealed storage toward **Forbidden Gear**. Two independent consequences: civic harm and detection (sight, sound, persistent evidence). Suspicion is local; no global Suspicion meter; no lie button or success percentages.
 8. **Rig** — one evolving Rig: Core Improvements + swappable Gear slots (~3 → 4 → 5) + soft **Rig Capacity** (exceeding it = **Rig Strain**). Builds span Excavation / Survey / Hauling-Endurance / Mobility / Secrecy. Technology is a discovered capability web (Known → Understood → Available).
 9. **Living Hollow** — NPCs who work, rest, talk, use infrastructure, gather, and react to district state. Relationships stay lightweight.
 10. **Vertical advancement** — Lower home → Mid Hollow residence → Ashram Heights residence via Trust, Tallies, status, and story. Each home hosts an improving concealed Forbidden workspace, safe by default and exposed only through believable evidence with warning.
@@ -119,7 +119,7 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 
 - District / Heart / void craft is **ColorRect + existing ledge/bridge tiles** — not yet painted prop kits or a full settler sprite. See [`docs/hollow-build-brief.md`](docs/hollow-build-brief.md) implemented table.
 - NPC bodies still ColorRect stubs; lanterns are warm posts + PointLight2D, not authored lamp art.
-- District economy still uses the retired per-good reserve/cap model, not canon Capacity/Demand/Reserve per civic cycle. No physical hauling, caching, stamina reservation, fatigue, Components, Rig Capacity, or capability web yet.
+- District economy still uses the retired per-good reserve/cap model, not canon Capacity/Demand/District Reserves per civic cycle. No physical hauling, caching, stamina reservation, fatigue, Components, Rig Capacity, or capability web yet.
 - Records are three stubs; Firmament note unlocks Quiet Dig (first knowledge gate). Journal is still a flat list (not Mystery/Codex views).
 - Heart Upper/Lower are silhouette hints only; Trust/Tallies-gated residences, hidden workspace, thick-Firmament excavation, and the Steward's new district are not implemented yet.
 - Audio is procedural dig/land click stubs only (no authored SFX packs yet); ceiling name is locked in fiction.
@@ -183,7 +183,7 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 
 ## Scope guardrails (from pitch)
 
-- Hollow districts/NPCs stay simple (Capacity/Demand/Reserve per cycle + presence + light talk), **not** RimWorld, city-builder control, per-NPC consumption, or a full dialogue sim.
+- Hollow districts/NPCs stay simple (Capacity/Demand/District Reserves per cycle + presence + light talk), **not** RimWorld, city-builder control, per-NPC consumption, or a full dialogue sim.
 - No idle/per-second production, AFK farming, or sleep-spam production loops (canon §25, §58).
 - Surface settlement later **transforms** Act 1 systems (canon §49) — no separate prestige economy.
 - One dig system, two directions — not two tool trees.

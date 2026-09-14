@@ -252,7 +252,7 @@ Each build should feel different to *play*, not just have different numbers:
 **The concept:** some Hollow residents operate old salvaged machinery by rote, inherited practice, without understanding it — and everyone treats this as sacred, because that's genuinely what it looks like. This isn't just flavor: it's *why* the villain's power works. A settlement that believes its tools are god-work has no framework for questioning who controls them, so he encourages the framing rather than merely tolerating it, and likely positions himself as the most gifted Pulse Binder alive — reads as harmless in Act 1, recontextualizes hard once his identity is revealed in Act 3.
 
 **The tech split, mapped onto existing systems (not a new one) — updated per canon §29, §32, §39, §48, §67:**
-- **Approved technology** = established, sanctioned Divine Binding society accepts → **Approved Gear**, ordered openly with Tallies + authorized district output. Pulse Binders certify it and teach its procedures.
+- **Approved technology** = established, sanctioned Divine Binding society accepts → **Approved Gear**, ordered openly with Tallies + authorized District Output. Pulse Binders certify it and teach its procedures.
 - **Forbidden technology** = the same Divine Binding, practiced without sanction — understanding, modifying, repurposing, or recombining technology beyond accepted doctrine (including anything that could reveal the truth — navigation, comms, legible data, and now bio-fusion, §67) → **Forbidden Gear**, privately built from diverted output + a Material, Component, or Record, tied to the evidence/Trust system.
 - Every playstyle dimension contains both; Forbidden Gear often modifies Approved Gear. Records can reinterpret a Pulse Binder's knowledge ("this regulator is only for the Pulse" → actually a general pressure-control component).
 
@@ -268,8 +268,8 @@ Each build should feel different to *play*, not just have different numbers:
 
 **The concept:** Act 1's Hollow is a working underground society, not an empty home hub.
 
-1. **Production districts** — Glowbeds, Wickwork, Cistern each track Production Capacity, Civic Demand, Reserve, Reserve Cap, and Unmet Demand, resolved **once per civic cycle**. The Pulse-driven civic cycle and **Ritual** are the communal rhythm; districts are the economy underneath.
-2. **Diversion** — stealing real district output from its Reserve toward Forbidden Gear. Two independent consequences: **civic harm** (surplus means lower immediate harm, not consequence-free theft) and **detection** (sight, sound, evidence; suspicion is local). Legitimate Approved Gear orders draw on the same Reserve — helping the society and stealing from it are the same economy viewed two ways.
+1. **Production districts** — Glowbeds, Wickwork, Cistern each track District Capacity, Civic Demand, Reserve, District Reserve Cap, and Unmet Demand, resolved **once per civic cycle**. The Pulse-driven civic cycle and **Ritual** are the communal rhythm; districts are the economy underneath.
+2. **Diversion** — stealing real District Output from District Reserves toward Forbidden Gear. Two independent consequences: **civic harm** (surplus means lower immediate harm, not consequence-free theft) and **detection** (sight, sound, evidence; suspicion is local). Legitimate Approved Gear orders draw on the same District Reserves — helping the society and stealing from it are the same economy viewed two ways.
 3. **Living NPCs** — characters who work, rest, talk, use infrastructure, gather, and react to district state. Required for Act 1's "might be the whole game" feel. Dialogue stays lightweight per #20.
 
 **Scope guardrails:**
@@ -287,9 +287,9 @@ Each build should feel different to *play*, not just have different numbers:
 1. **Category:** bulk dig finds are **Materials** (not “Salvage”). Locked Act 1 roster: **Sutral, Ravelstone, Brinecrystal, Verdigris, Hullbit**. Most rock yields nothing; deposits are finite pockets.
 2. **Three discovery types:** Materials (the stuff), **Components** (the part), **Records** (the know-how).
 3. **Physical haul:** bulk Materials are tethered behind the player, reserve stamina, and can be cached locally. No generic haul bag with stack caps.
-4. **District output:** abstract units per district, resolved once per civic cycle via Capacity / Demand / Reserve / Reserve Cap. No canon named goods, no fixed protected reserve.
-5. **Public spend:** Tallies + authorized district output → **Order Approved Gear** (not “Requisition”). Exact prices OPEN.
-6. **Secret spend:** diverted district output + at least one non-Tally requirement (Material, Component, Record) → privately built **Forbidden Gear**.
+4. **District output:** abstract units per district, resolved once per civic cycle via Capacity / Demand / Reserve / District Reserve Cap. No canon named goods, no fixed protected reserve.
+5. **Public spend:** Tallies + authorized District Output → **Order Approved Gear** (not “Requisition”). Exact prices OPEN.
+6. **Secret spend:** diverted District Output + at least one non-Tally requirement (Material, Component, Record) → privately built **Forbidden Gear**.
 
 **Code backlog:** see [`terminology-transition.md`](terminology-transition.md) — Salvage wallet, Requisition panel, Shortage Risk, named goods with reserve 1 / cap 6, and Harvest timer are all transitional.
 

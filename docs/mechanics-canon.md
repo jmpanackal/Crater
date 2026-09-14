@@ -956,7 +956,7 @@ Tallies represent earned claim/access to legitimate civic production and Approve
 
 Public progression roughly follows:
 
-**work/contribution → Tallies → Order Approved Gear using Tallies + authorized district output**
+**work/contribution → Tallies → Order Approved Gear using Tallies + authorized District Output**
 
 Tallies should remain understandable and relatively simple.
 
@@ -1326,10 +1326,11 @@ Production determines whether society can practically execute it.
 
 Each production district tracks:
 
-- **Production Capacity**
+- **District Capacity** — the production rate; how much the district can make per civic cycle. Grows only through lasting investment (equipment, workspace, techniques, Records, infrastructure, Materials/Components, projects, workforce).
 - **Civic Demand**
-- **Stored Output / Reserve**
-- **Reserve Cap**
+- **District Output** — what's actually produced this cycle. Equal to District Capacity each cycle (see resolution order below); not its own independent lever.
+- **District Reserves** — the banked buffer of surplus District Output, carried between cycles.
+- **District Reserve Cap**
 - **Unmet Demand / resulting district condition**
 
 This is intentionally simple enough to implement and tune without simulating every individual good or resident.
@@ -1342,11 +1343,11 @@ The preferred resolution point is around the transition from **Ritual into the n
 
 Cycle resolution follows this order:
 
-1. Produce output equal to current Capacity.
-2. Current production serves Civic Demand first.
-3. Surplus fills Reserve up to the Reserve Cap.
-4. If production is below Demand, Reserve covers the deficit.
-5. If production plus Reserve cannot meet Demand, the remainder becomes Unmet Demand and creates contextual shortage consequences.
+1. Produce District Output equal to current District Capacity.
+2. District Output serves Civic Demand first.
+3. Surplus District Output fills District Reserves up to the District Reserve Cap.
+4. If District Output is below Demand, District Reserves cover the deficit.
+5. If District Output plus District Reserves cannot meet Demand, the remainder becomes Unmet Demand and creates contextual shortage consequences.
 
 The exact numeric scale is intentionally open.
 
@@ -1390,15 +1391,15 @@ Completed infrastructure may create a smaller ongoing maintenance Demand where a
 
 ---
 
-# 25. District Storage, Reserves, Orders, and Diversion
+# 25. District Storage, District Reserves, Orders, and Diversion
 
-## LOCKED — Reserves
+## LOCKED — District Reserves
 
-Stored Output / Reserve is a finite civic buffer.
+District Reserves are a finite civic buffer.
 
-Surplus production adds to Reserve until the Reserve Cap is reached.
+Surplus District Output adds to District Reserves until the District Reserve Cap is reached.
 
-When current production is insufficient, Reserve is consumed before a true shortage occurs.
+When District Output is insufficient, District Reserves are consumed before a true shortage occurs.
 
 There is no universal fixed “protected reserve” number that must always remain untouched.
 
@@ -1412,9 +1413,9 @@ Therefore:
 
 ## LOCKED — Full reserves
 
-A full Reserve does **not** mean additional district production is worthless.
+Full District Reserves do **not** mean additional District Output is worthless.
 
-Production beyond the abstract storage cap can represent:
+District Output beyond the abstract storage cap can represent:
 - ordinary distribution,
 - routine maintenance,
 - replacement work,
@@ -1427,12 +1428,12 @@ This prevents the logic that anything above the visible cap is socially free to 
 
 Approved Gear Orders may require:
 - Tallies,
-- authorized stored district output,
+- authorized stored District Output,
 - Trust/access,
 - district capability,
 - other specific requirements where appropriate.
 
-Ordering Approved Gear consumes the legitimate district output required by the item.
+Ordering Approved Gear consumes the legitimate District Output required by the item.
 
 Districts may refuse an otherwise affordable order when available output is needed for essential civic demand or important committed work.
 
@@ -1440,11 +1441,11 @@ This should be presented as a believable civic constraint rather than an arbitra
 
 ## LOCKED — Diversion
 
-Common diversion/theft removes output directly from a district's Reserve and transfers it into concealed personal stolen-output storage.
+Common diversion/theft removes goods directly from a district's District Reserves and transfers them into concealed personal stolen-goods storage.
 
-Stolen/diverted output can accumulate across cycles toward a Forbidden Gear build.
+Stolen/diverted District Output can accumulate across cycles toward a Forbidden Gear build.
 
-Diversion does **not** directly lower the district's underlying production Capacity.
+Diversion does **not** directly lower the district's underlying District Capacity.
 
 Its civic harm comes from reducing the buffer society has available for later demand, projects, disruptions, or shortages.
 
@@ -1473,7 +1474,7 @@ A district may remain healthy for many cycles.
 
 ## LOCKED — Shortage philosophy
 
-If production plus Reserve cannot satisfy Civic Demand, the remaining amount becomes Unmet Demand.
+If District Output plus District Reserves cannot satisfy Civic Demand, the remaining amount becomes Unmet Demand.
 
 Shortages should create:
 - contextual problems,
@@ -1663,7 +1664,7 @@ Forbidden Gear is privately built rather than ordered openly through a normal di
 
 Secret progression roughly follows:
 
-**explore → discover/understand → recover Material/Component → steal/divert district output → privately build Forbidden Gear**
+**explore → discover/understand → recover Material/Component → steal/divert District Output → privately build Forbidden Gear**
 
 ---
 
@@ -1671,7 +1672,7 @@ Secret progression roughly follows:
 
 ## LOCKED
 
-The common forbidden-economy mechanic is **systemic diversion** of real district output.
+The common forbidden-economy mechanic is **systemic diversion** of real District Output.
 
 The player is not waiting for random rare upgrade items to spawn.
 
@@ -1679,7 +1680,7 @@ Districts continuously create useful civic output.
 
 The player can secretly divert part of that output toward Forbidden Gear.
 
-Mechanically, the game may abstract district output into manageable units.
+Mechanically, the game may abstract District Output into manageable units.
 
 Fictionally, it represents:
 - real goods,
@@ -1763,7 +1764,7 @@ Do **not** make every theft a hauling mission.
 The player's home/private area may hold:
 - personal Materials,
 - withheld Materials,
-- diverted district output,
+- diverted District Output,
 - forbidden Components,
 - Records not shared with society.
 
@@ -2426,7 +2427,7 @@ The workspace is a physical representation of secret progression.
 
 It can:
 - support private fabrication,
-- store diverted district output,
+- store diverted District Output,
 - store illicit Components/Records,
 - conceal suspicious Gear,
 - improve alongside the player's housing.
@@ -2457,7 +2458,7 @@ Exact build-time rules remain tuning.
 
 ## LOCKED — Concealed storage
 
-Diverted district output can accumulate in concealed storage across cycles until enough exists for a Forbidden build.
+Diverted District Output can accumulate in concealed storage across cycles until enough exists for a Forbidden build.
 
 Larger or more incriminating stockpiles create stronger evidence if discovered.
 
@@ -2971,7 +2972,7 @@ Remaining OPEN items are primarily tuning, implementation, presentation detail, 
 ## District economy tuning
 - exact numeric scale,
 - qualitative condition-state thresholds/names,
-- Reserve Caps,
+- District Reserves Caps,
 - exact project/order costs,
 - exact maintenance values.
 
@@ -3045,13 +3046,13 @@ Krater is a systemically connected game in which:
 - Materials, Components, and Records have distinct roles;
 - hauling, Rig Strain, stamina, fatigue, Overexertion, rescue, and civic time create real expedition consequences;
 - failure usually continues the world rather than resetting it, but severe overextension can force rescue and social/time consequences;
-- districts produce useful civic output once per civic cycle through Capacity, Demand, finite Reserves, and contextual shortages;
+- districts produce useful civic output once per civic cycle through Capacity, Demand, finite District Reserves, and contextual shortages;
 - district development is influenced rather than directly commanded;
 - Tallies support legitimate progression;
 - Trust is qualitative social standing with explainable causes rather than a visible numeric morality bar;
 - suspicion/investigation remains local and evidence-driven;
 - theft/diversion has both economic and social consequences;
-- Approved Gear is ordered openly using Tallies and legitimate district output;
+- Approved Gear is ordered openly using Tallies and legitimate District Output;
 - Forbidden Gear is privately built from stolen output plus discoveries/resources;
 - the Rig uses separate Gear-slot and Rig-Capacity progression, with roughly 3→4→5 slots and stronger Capacity growth through Act 1 as tunable targets;
 - Gear changes capabilities, information, routes, logistics, or risk rather than mainly adding percentages;
@@ -3262,7 +3263,7 @@ Finding the workspace does not automatically prove every crime the player has ev
 
 ## LOCKED / DIRECTION — Accumulating stolen output
 
-Stolen/diverted district output can be accumulated over time in preparation for a future Forbidden Gear build.
+Stolen/diverted District Output can be accumulated over time in preparation for a future Forbidden Gear build.
 
 This is desirable because it creates anticipation and makes repeated theft part of a larger secret project.
 
@@ -3647,7 +3648,7 @@ Approved Gear remains ordinary sanctioned worn equipment — harnesses, tools, l
 
 Forbidden Gear is different in kind, not just in legality: it is grafted into the player's body. There is no separate mechanical Forbidden Gear category running alongside it — every Forbidden item is a graft.
 
-This does not change how Forbidden Gear is acquired. The existing cost rule (§29) still applies in full: **diverted/stolen district output remains the base cost for every Forbidden item**, with a Material, Component, and/or Record as the required additional layer, detailed below.
+This does not change how Forbidden Gear is acquired. The existing cost rule (§29) still applies in full: **diverted/stolen District Output remains the base cost for every Forbidden item**, with a Material, Component, and/or Record as the required additional layer, detailed below.
 
 ## LOCKED — Recipe
 
