@@ -2371,7 +2371,7 @@ Its technological tradition grows naturally from generations maintaining ship-de
 
 ## LOCKED — Water source (USER, 2026-09-14)
 
-Cistern's water is drawn from below, not above: the Great Collapse's flood drained downward over generations through fractures and cavities, pooling at the bottom of the Devil's Mouth and submerging part of the wreck there. Cistern's supply is siphoned up from that pool, not a slow surface seep — giving the district's water a direct, discoverable origin in the Hollow's founding disaster rather than an unexplained utility.
+Cistern's water is drawn from below, not above: Heavenfall's flood drained downward over generations through fractures and cavities, pooling at the bottom of the Devil's Mouth and submerging part of the wreck there. Cistern's supply is siphoned up from that pool, not a slow surface seep — giving the district's water a direct, discoverable origin in the Hollow's founding disaster rather than an unexplained utility.
 
 ## DIRECTION — Endgame Cistern arc
 
@@ -3638,7 +3638,7 @@ This section is **USER-locked** (2026-09-14), reached through explicit design di
 
 Bodily fusion is named **Hellbinding** or **Voidbinding** (interchangeable — both derive from existing folk names for the Devil's Mouth, "Hell" and "the Void"), and its practitioners **Hell Binders** or **Void Binders** (interchangeable). This is deliberately the same root as Divine Binding / Pulse Binders, not an unrelated word: Binding always means joining technology to something through sacred procedure. Pulse Binders join tech to tech. Hell/Void Binders join tech to a body. The transgression is exactly and only that the target shifted from an object to a self — doctrine permits binding tools together, not binding a tool to yourself.
 
-**DIRECTION, not mechanically specified:** folk warning holds that Hellbinding/Voidbinding "traps your soul in the void" — mostly superstition, but consistent with this game's pattern (the Great Collapse) of doctrine's exaggerated warnings sitting on top of a real, smaller kernel of truth. Whether that kernel is literal (some genuine connection to whatever's actually at the bottom of the Mouth) remains open, Act 3 territory.
+**DIRECTION, not mechanically specified:** folk warning holds that Hellbinding/Voidbinding "traps your soul in the void" — mostly superstition, but consistent with this game's pattern (Heavenfall) of doctrine's exaggerated warnings sitting on top of a real, smaller kernel of truth. Whether that kernel is literal (some genuine connection to whatever's actually at the bottom of the Mouth) remains open, Act 3 territory.
 
 ## LOCKED — What Forbidden Gear physically is
 

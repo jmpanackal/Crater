@@ -17,7 +17,7 @@
 
 The Firmament is natural crash-sealed rock, overburden, mineral growth, and alien surface geology. Doctrine says it remains intact through shared work, obedience, and grace.
 
-**Revised 2026-09-14 (USER) — the founding disaster is real, not invented:** the doctrine points to **the Great Collapse** — an early expedition dug upward generations ago and broke into a waterlogged layer above the Firmament, causing a genuine collapse and flood that killed people. Doctrine reframes this afterward as judgment (a selfish, questioning generation, spared faithful), but the disaster itself really happened. This gives the taboo real, earned weight — what's manufactured is the moral framing layered on top over generations, and its use by Albus Socul specifically (see decision #25 / story.md's First Steward section), not the disaster itself. Act 1 still culminates in breaking through those natural strata to the surface after sustained secret excavation from Ashram Heights — not a discovery that nothing bad ever happened, and not a naturally thin shortcut.
+**Revised 2026-09-14 (USER) — the founding disaster is real, not invented:** the doctrine points to **Heavenfall**, plainly called "the day the sky fell" — an early expedition dug upward generations ago and broke into a waterlogged layer above the Firmament, causing a genuine collapse and flood that killed people. Doctrine reframes this afterward as judgment (a selfish, questioning generation, spared faithful), but the disaster itself really happened. This gives the taboo real, earned weight — what's manufactured is the moral framing layered on top over generations, and its use by Albus Socul specifically (see decision #25 / story.md's First Steward section), not the disaster itself. Act 1 still culminates in breaking through those natural strata to the surface after sustained secret excavation from Ashram Heights — not a discovery that nothing bad ever happened, and not a naturally thin shortcut.
 
 ---
 
@@ -86,6 +86,8 @@ Need a small handful (3-6) of district/chamber names. Options for a naming *patt
 - **D) Some mix depending on player choices earlier** (Trust, how much evidence you gathered, etc.)
 
 **Leaning:** open — this is easiest to decide once we know our ending/final-level gameplay structure, not before.
+
+**✅ Direction locked (USER, 2026-09-15), villain resolution itself still open:** the ending overall runs on two axes, not Trust alone. Trust + recruitment across the three sources determines who leaves and how many. **Build progression determines what's reachable and what happens to the player specifically** — whether a sufficiently developed Cistern can drain the Devil's Mouth to reach the true wreck, which playstyle dimensions carried the player through the final act, and how far into Hellbinding/Voidbinding they went (the "traps your soul in the void" folklore may have a literal kernel for a heavily Bound character — ties to the open question in canon §67). Exact thresholds/mechanics are Act 3 content, not specified now.
 
 ---
 
