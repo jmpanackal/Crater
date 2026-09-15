@@ -3662,7 +3662,7 @@ This is the same Material/Component/Record framework already locked in Sections 
 
 ## LOCKED — Origin
 
-The recovered Components are not general-purpose ship debris. They belonged to equipment built for a small **pioneer/expedition corps** — colonists meant to do the hazardous frontier work an unfamiliar world required (deep excavation, survey, first contact, whatever lay beyond what ordinary domestic technology could handle) — not life support or environmental adaptation for the general colonist population. Ordinary colonists relied on conventional equipment, consistent with Approved technology already being described as mundane and domestic (fire-starting, filtration, structural).
+The recovered Components are not general-purpose ship debris. They belonged to equipment built for the **Firstwalkers** (USER-named, 2026-09-15) — a small pre-crash pioneer/expedition corps: colonists meant to do the hazardous frontier work an unfamiliar world required (deep excavation, survey, first contact, whatever lay beyond what ordinary domestic technology could handle) — not life support or environmental adaptation for the general colonist population. The name echoes "Firstfall," the existing term for crash-era ship relics — the Firstwalkers were meant to be the first to walk this world; the crash meant they never got the chance. Ordinary colonists relied on conventional equipment, consistent with Approved technology already being described as mundane and domestic (fire-starting, filtration, structural).
 
 This equipment was restricted and specialist even before the crash. After it, knowledge of what it actually is falls under the same "could reveal the truth" category already locked for navigation, communications, and legible ship data (§32, §48) — hoarded and suppressed, not openly destroyed.
 
@@ -3724,7 +3724,6 @@ The Forbidden items already listed in Section 65 (Resonance Driver, Ghost Mapper
 - exact procedure time/fatigue cost at the moment of grafting, separate from the ongoing Capacity cost;
 - exact concealment tier names and search rules for on-body grafts (may reuse §62's names outright or diverge slightly once tested);
 - whether full removal requires a distinct Record from the one that taught the graft;
-- an in-world name for the pioneer/expedition corps;
 
 ---
 
