@@ -10,12 +10,19 @@
 
 The sole owner of "what time it is." Advances the civic cycle (Rousing → Working → Gathering → Ritual, per mechanics-canon.md). Nothing else is permitted to move time forward directly — other systems (sleep, forced rescue, failure) *request* an advance; only the Clock actually mutates the phase, per the dependency map's own contract for this exact system ("only the Clock advances time... emits phase-transition events exactly once per transition").
 
-## Decisions (operationalizing G3, G11, §68 — not new design)
+## Already locked (G3, G11 — your decisions, not new)
 
-- **Cycle length ~30–40 real minutes**, Working occupying about half. A Tuning Registry value, never hardcoded.
-- **Time pauses during menus, the workbench, and dialogue.** The Clock exposes `pause(reason)` / `resume(reason)`; it doesn't know *why* it's paused, only that it is. Pause is reference-counted by reason, not a single boolean — a menu open *and* a dialogue open at once must both need to close before time resumes.
-- **Sleep is phase-gated.** `request_advance_to_next_rousing()` only succeeds when the current phase is Gathering or after Ritual (G3, locked). Calling it earlier should be prevented by the UI layer, but the Clock itself refuses/asserts as a safety net rather than trusting callers.
-- **Travel-time budgets are a design target, not an enforced rule** (G11) — the Clock doesn't need to know about them at all; they're a level-design/playtesting concern.
+- **Cycle length ~30–40 real minutes**, Working occupying about half.
+- **Time pauses during menus, the workbench, and dialogue.**
+- **Sleep is phase-gated** — only available from Gathering onward or after Ritual.
+- **Travel-time budgets are a design target, not an enforced rule.**
+
+## AI-proposed implementation of the above — not yet reviewed
+
+- Cycle length is a Tuning Registry value, never hardcoded.
+- The Clock exposes `pause(reason)` / `resume(reason)`; it doesn't know *why* it's paused, only that it is. Pause is reference-counted by reason, not a single boolean — a menu open *and* a dialogue open at once must both need to close before time resumes.
+- `request_advance_to_next_rousing()` only succeeds when the current phase is Gathering or after Ritual. Calling it earlier should be prevented by the UI layer, but the Clock itself refuses/asserts as a safety net rather than trusting callers.
+- Travel-time budgets stay outside the Clock entirely — it doesn't track them; that's a level-design/playtesting concern.
 
 ## State it owns
 

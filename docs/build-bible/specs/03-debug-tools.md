@@ -10,7 +10,9 @@
 
 One framework every later system hangs its own debug hooks off, instead of each system inventing its own ad-hoc debug UI. This is the single biggest lever for fast AI-assisted development flagged during planning: nobody, human or agent, should have to play 20 minutes to reach a scenario worth checking.
 
-## Decisions
+## AI-proposed — entirely new, no prior discussion of the design
+
+The *value* of good debug tooling was discussed and agreed earlier this session (a general "prepare for fast development" conversation). Everything below — the console/registry design, the specific command list — was invented just now while writing this spec, not something you reviewed.
 
 - **One console/overlay**, toggled by a key, debug-builds only.
 - **Registry pattern.** Systems register their own commands and inspector panels into the framework; the framework doesn't need to know about every system upfront. This is why it ships early (build-order #3) and grows incrementally as every later spec adds to it, rather than being written once at the end.

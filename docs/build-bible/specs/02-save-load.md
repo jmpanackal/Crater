@@ -10,13 +10,16 @@
 
 Persist and restore Authoritative State and the Fact Log across sessions, implementing the already-locked G10 policy: one rolling save slot, autosaving at beds, civic phase transitions, and on quit — no manual save list, no save-scumming path around consequences.
 
-## Decisions
+## Already locked (G10 — your decision, not new)
 
 - **Single rolling slot.** One save file per campaign. No save-slot picker UI.
 - **Autosave triggers:** sleeping (G3's phase-gated sleep), every civic phase transition (Rousing/Working/Gathering/Ritual), and on quit. Quit-save resumes exactly where the player left off, including mid-cycle.
-- **Ownership stays distributed.** Save/Load doesn't serialize domain state itself — it orchestrates *when* saving happens and calls a `save_state() -> Dictionary` / `load_state(Dictionary)` contract each domain autoload (Stamina, Trust, Districts, the Clock, …) implements for its own slice, matching Spec 01's one-writer-per-value rule. Save/Load never reaches into another domain's internals directly.
+
+## AI-proposed implementation — not yet reviewed
+
+- **Ownership stays distributed.** Save/Load doesn't serialize domain state itself — it orchestrates *when* saving happens and calls a `save_state() -> Dictionary` / `load_state(Dictionary)` contract each domain autoload (Stamina, Trust, Districts, the Clock, …) implements for its own slice, matching Spec 01's (also unreviewed) one-writer-per-value rule. Save/Load never reaches into another domain's internals directly.
 - **Fact Log persists in full** for Act 1 vertical-slice scope. Pruning/archival for very long saves is explicitly deferred (flagged, not a non-issue forever — see Spec 01).
-- **Schema version stored in every save file.** A loader that finds an older version migrates or fails loudly — it never silently loads mismatched data. The exact migration mechanism is a spike-owned question (00-dependency-map.md's "Save format and migration strategy"), not decided here; this spec only requires that a version number exists and gets checked.
+- **Schema version stored in every save file.** A loader that finds an older version migrates or fails loudly — it never silently loads mismatched data. The exact migration mechanism is a spike-owned question (00-dependency-map.md's "Save format and migration strategy"), not decided here; this spec only proposes that a version number exists and gets checked.
 
 ## Invariants
 
