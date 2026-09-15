@@ -1,6 +1,6 @@
 # Build Bible Spec 13 — Hauling + Tether + Caches
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #13 in [`../00-dependency-map.md`](../00-dependency-map.md). **Tether physics itself is spike-owned** — 00-dependency-map.md already flags "tether physics approach and snag handling" as a technical spike's job; this spec defines the contract around it, not the physics.
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #13 in [`../00-dependency-map.md`](../00-dependency-map.md). **Tether physics itself is spike-owned** — 00-dependency-map.md already flags "tether physics approach and snag handling" as a technical spike's job; this spec defines the contract around it, not the physics.
 
 **Depends on:** Spec 08 (Stamina), Spec 11 (Materials).
 
@@ -17,9 +17,14 @@ Bulk Materials as something physically carried, per canon §7, plus the already-
 - Hauling blocks stamina (Spec 08); depositing, delivering, or caching the load releases that block — already explicit in canon §10.
 - Caches are optional, local, player-created stashes — never mandatory, never a global inventory.
 
-## Design choice
+## Design choice (✅ Confirmed, USER, 2026-09-15, refined)
 
-- **Caches are created by the player at any valid location**, not restricted to a small set of pre-authored cache points. Canon's own description ("leave excess at a known location for later retrieval") implies player choice and memory, not a fixed list — a cache is created via an interaction ("drop bundle here"), and represented by a world marker (per canon's own DIRECTION: "a small pile, crate, marked stash"). "Valid location" means non-blocking and within an authorized/reachable area, not a special pre-placed slot.
+- **Caches are created by the player anywhere within a dig front's frontier zone** (its destructible envelope plus the approach corridor leading to it) — not restricted to a small set of pre-authored cache points, but also **never within the Hollow's own authored civic geography** (homes, Mid Heart, districts, terraces). A cache is created via an interaction ("drop bundle here") and represented by a world marker (per canon's own DIRECTION: "a small pile, crate, marked stash"). Keeps player-placed clutter confined to the frontier, where it belongs, out of authored/populated space.
+
+## Boundary check
+
+- **Valid location** = non-blocking, and within an authorized dig front's destructible envelope or its approach corridor (Spec 05's zone data already distinguishes frontier zones from Hollow-interior zones — this reuses that distinction rather than inventing a new one).
+- **Invalid location** = anywhere inside the Hollow's inhabited/civic zones, regardless of whether it's otherwise non-blocking.
 
 ## Explicitly deferred to the technical spike
 

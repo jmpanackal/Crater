@@ -1,6 +1,6 @@
 # Build Bible Spec 11 — Materials / Components / Records + Storage
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #11 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #11 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 01, Spec 02, Spec 10.
 
@@ -17,12 +17,12 @@ The three discovery types (canon §3–§8) as actual data: bulk Materials, ligh
 - Locked Act 1 roster: Sutral, Ravelstone, Brinecrystal, Verdigris, Hullbit.
 - Ownership is contextual (personal find vs. expected civic delivery vs. district property vs. reportable rarities) — a narrative/social framing, not previously specified as a data structure.
 
-## Design choices
+## Design choices (✅ Confirmed, USER, 2026-09-15)
 
-- **Stored Materials are a simple integer count per type**, not per-batch records with quality/origin metadata — directly matches "abstract stored quantities."
-- **One unified personal storage pool**, reachable from any owned residence, not separate pools per home. The thing that *does* vary by residence tier is the concealed Forbidden workspace (a different system — Spec 27), not ordinary Material storage.
-- **Components use the same unified-pool model** as Materials — "lightweight personal storage" implies the same simplicity, not a separate scoping rule.
-- **No per-unit ownership tag.** Legitimacy (was this Material "supposed" to go to a district?) is resolved by whatever job/commitment expects it, checking current totals against its own requirement — not a flag carried by individual Material units. Keeps the abstraction real instead of secretly re-introducing per-item tracking.
+- **Stored Materials are a simple integer count per type** (option A), not per-batch records with quality/origin metadata — directly matches "abstract stored quantities."
+- **One unified personal storage pool**, reachable from any owned residence, not separate pools per home (option A). Considered and rejected splitting storage per-residence to make transportation upgrades matter more (that idea's real value goes to the hauling/delivery trips that already exist constantly, per Spec 13, rather than to storage itself — splitting storage would reopen exactly the "dozens of things to track across multiple homes" problem canon's abstraction was meant to avoid). The thing that *does* vary by residence tier is the concealed Forbidden workspace (a different system — Spec 27), not ordinary Material storage.
+- **Components use the same unified-pool model** as Materials (option A, confirmed after discussion) — "lightweight personal storage" implies the same simplicity, not a separate scoping rule.
+- **No per-unit ownership tag** (option A). Legitimacy (was this Material "supposed" to go to a district?) is resolved by whatever job/commitment expects it, checking current totals against its own requirement — not a flag carried by individual Material units. Keeps the abstraction real instead of secretly re-introducing per-item tracking.
 
 ## State it owns
 

@@ -1,6 +1,6 @@
 # Build Bible Spec 12 — Deposits + Extraction
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #12 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #12 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 06 (Terrain), Spec 11 (Materials).
 
@@ -18,10 +18,10 @@ Turning a dug-open pocket into a recoverable Material, per canon §3/§6's disco
 - Depletion uses base terrain + intact overlay → depleted overlay; most deposits need only those two states.
 - Better equipment makes previously-impractical extraction possible, rather than mainly granting yield bonuses.
 
-## Design choices
+## Design choices (✅ Confirmed, USER, 2026-09-15)
 
-- **Exposing and extracting are two distinct steps**, matching canon's explicit four-step flow rather than collapsing extraction into the act of digging itself. Digging (Spec 06) exposes a deposit — it becomes visible and interactable, but not yet in the player's possession. A separate extraction interaction (Spec 10) pulls the Material out.
-- **Extraction is a cancellable hold-to-interact**, the same interaction shape already confirmed for theft (choice 9 in the earlier gap-decisions batch: "a hold-to-take interaction... cancellable"). Reusing this pattern keeps the game's interaction language consistent instead of inventing a second timing mechanic.
+- **Exposing and extracting are two distinct steps** (option A), matching canon's explicit four-step flow rather than collapsing extraction into the act of digging itself. Digging (Spec 06) exposes a deposit — it becomes visible and interactable, but not yet in the player's possession. A separate extraction interaction (Spec 10) pulls the Material out.
+- **Extraction is a cancellable hold-to-interact** (option A), the same interaction shape already confirmed for theft (choice 9 in the earlier gap-decisions batch: "a hold-to-take interaction... cancellable"). Reusing this pattern keeps the game's interaction language consistent instead of inventing a second timing mechanic.
 
 ## What stays open (canon's own call, not deferred by this spec)
 
