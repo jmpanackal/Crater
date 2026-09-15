@@ -1,6 +1,6 @@
 # Build Bible Spec 14 — Rig + Gear + Capacity / Strain
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #14 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #14 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 01, Spec 08.
 
@@ -24,9 +24,9 @@ The player's evolving Rig — Core Improvements, swappable Gear slots, Rig Capac
 - **Hard category restrictions** (which Gear category fits which slot) — §36 states this is "not yet locked." This spec treats slots as generic for the vertical slice; category-based restriction is a future refinement, not invented here.
 - **Exact Rig Strain formula** (linear vs. stepped scaling with overcapacity) — §35's own OPEN list. This spec only defines the contract: overcapacity requests a `rig_strain` block from Spec 08, magnitude left to the tuning registry.
 
-## Design choice
+## Design choice (✅ Confirmed, USER, 2026-09-15, option A)
 
-- **Station restriction is hard-enforced by the system, not just a UI convention.** The Rig autoload itself refuses equip/unequip/graft calls unless the player is currently within range of a valid station — it doesn't just trust that the UI never offers the option elsewhere. Given how explicit canon is about this ("do not allow complete build reconstruction from the pause menu in the middle of a cave"), enforcing it at the system level means it can't be bypassed by a UI bug or a debug shortcut landing in the wrong state.
+- **Station restriction is hard-enforced by the system, not just a UI convention.** The UI should still hide/grey the option normally for a clean player experience — the point is that `equip()`/`graft()` *also* refuse if called any other way (debug console, a future quick-refit feature, anything not yet built), so the rule can't be silently bypassed by a path that forgot to re-check it. The Rig autoload itself refuses equip/unequip/graft calls unless the player is currently within range of a valid station — it doesn't just trust that the UI never offers the option elsewhere. Given how explicit canon is about this ("do not allow complete build reconstruction from the pause menu in the middle of a cave"), enforcing it at the system level means it can't be bypassed by a UI bug or a debug shortcut landing in the wrong state.
 
 ## State it owns
 

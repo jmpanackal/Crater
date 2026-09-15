@@ -1,6 +1,6 @@
 # Build Bible Spec 15 — Civic Cycle / Pulse / Ritual
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #15 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #15 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 04 (Clock).
 
@@ -15,7 +15,7 @@ The Pulse-driven civic rhythm (Rousing → Working → Gathering → Ritual) as 
 - Phase names/order (provisional per canon, not finalized, but already what Spec 04 uses).
 - District resolution fires "around the transition from Ritual into the next Rousing" (§24) — implemented as: resolution runs as part of the Clock's `phase_changed` event, specifically on the Ritual→Rousing transition. Not a separate timer.
 
-## Design choice
+## Design choice (✅ Confirmed, USER, 2026-09-15, option A)
 
 - **Ritual attendance is detected automatically, not scripted per-quest.** At the Ritual phase transition, the system checks the player's current location/state and, if absent, logs a `ritual_missed` fact through Spec 01's Fact Log — a general-purpose check, not something each story beat has to remember to implement. Matches how canon already treats "missed Ritual" as a recurring, general detection example (§19), not a one-off scripted event.
 
