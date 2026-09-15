@@ -1,6 +1,6 @@
 # Build Bible Spec 04 — World Clock
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #4 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #4 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 01 (Authoritative State ownership, EventBus), Spec 02 (current phase/cycle count must persist).
 
@@ -17,11 +17,11 @@ The sole owner of "what time it is." Advances the civic cycle (Rousing → Worki
 - **Sleep is phase-gated** — only available from Gathering onward or after Ritual.
 - **Travel-time budgets are a design target, not an enforced rule.**
 
-## AI-proposed implementation of the above — not yet reviewed
+## ✅ Confirmed (USER, 2026-09-15)
 
 - Cycle length is a Tuning Registry value, never hardcoded.
-- The Clock exposes `pause(reason)` / `resume(reason)`; it doesn't know *why* it's paused, only that it is. Pause is reference-counted by reason, not a single boolean — a menu open *and* a dialogue open at once must both need to close before time resumes.
-- `request_advance_to_next_rousing()` only succeeds when the current phase is Gathering or after Ritual. Calling it earlier should be prevented by the UI layer, but the Clock itself refuses/asserts as a safety net rather than trusting callers.
+- **Reference-counted pause reason stack** (option B), not a single boolean — a menu open *and* a dialogue open at once must both clear before time resumes. API: `pause(reason)` / `resume(reason)`; the Clock doesn't know *why* it's paused, only that it is.
+- **The Clock itself refuses/asserts on an out-of-phase sleep request** (option B), not just relying on the UI to prevent it. `request_advance_to_next_rousing()` only succeeds when the current phase is Gathering or after Ritual.
 - Travel-time budgets stay outside the Clock entirely — it doesn't track them; that's a level-design/playtesting concern.
 
 ## State it owns

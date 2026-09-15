@@ -1,6 +1,6 @@
 # Build Bible Spec 02 — Save / Load + Versioning
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #2 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #2 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 01 (Core Infrastructure — Authoritative State ownership convention, Fact Log).
 
@@ -15,15 +15,16 @@ Persist and restore Authoritative State and the Fact Log across sessions, implem
 - **Single rolling slot.** One save file per campaign. No save-slot picker UI.
 - **Autosave triggers:** sleeping (G3's phase-gated sleep), every civic phase transition (Rousing/Working/Gathering/Ritual), and on quit. Quit-save resumes exactly where the player left off, including mid-cycle.
 
-## AI-proposed implementation — not yet reviewed
+## ✅ Confirmed (USER, 2026-09-15)
 
-- **Ownership stays distributed.** Save/Load doesn't serialize domain state itself — it orchestrates *when* saving happens and calls a `save_state() -> Dictionary` / `load_state(Dictionary)` contract each domain autoload (Stamina, Trust, Districts, the Clock, …) implements for its own slice, matching Spec 01's (also unreviewed) one-writer-per-value rule. Save/Load never reaches into another domain's internals directly.
+- **Ownership stays distributed** (option B). Save/Load doesn't serialize domain state itself — it orchestrates *when* saving happens and calls a `save_state() -> Dictionary` / `load_state(Dictionary)` contract each domain autoload (Stamina, Trust, Districts, the Clock, …) implements for its own slice, matching Spec 01's (also unreviewed) one-writer-per-value rule. Save/Load never reaches into another domain's internals directly.
 - **Fact Log persists in full** for Act 1 vertical-slice scope. Pruning/archival for very long saves is explicitly deferred (flagged, not a non-issue forever — see Spec 01).
-- **Schema version stored in every save file.** A loader that finds an older version migrates or fails loudly — it never silently loads mismatched data. The exact migration mechanism is a spike-owned question (00-dependency-map.md's "Save format and migration strategy"), not decided here; this spec only proposes that a version number exists and gets checked.
+- **Atomic write** (option B): write to a temp file, then atomic rename.
+- **Schema version stored in every save file** (option B). A loader that finds an older version migrates or fails loudly — it never silently loads mismatched data. The exact migration mechanism is a spike-owned question (00-dependency-map.md's "Save format and migration strategy"), not decided here; this spec only confirms that a version number exists and gets checked.
 
 ## Invariants
 
-- **Never a partial write.** Write to a temp file, then atomic rename — a crash mid-save must never corrupt the existing save.
+- **Never a partial write** — a crash mid-save must never corrupt the existing save.
 - **Loading is inert.** Restoring state never re-fires one-time events, quests, or "welcome back" side effects. If something needs to react to a fresh load, it reacts to the *state*, not to a "just loaded" signal treated as a trigger.
 - **No manual save list**, per G10 — exactly one slot, always.
 
