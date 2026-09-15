@@ -1,6 +1,6 @@
 # Build Bible Spec 10 — Interaction
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #10 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #10 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 07 (Player Controller).
 
@@ -10,11 +10,11 @@
 
 How the player interacts with world objects — NPCs, rest points, storage, deposits, doors — as one generic system rather than each object type inventing its own input handling.
 
-## Design choices
+## Design choices (✅ Confirmed, USER, 2026-09-15)
 
-- **Area2D-based targeting**, not raycast/aim or a bare proximity check. Matches the existing prototype's NPC-talk pattern (already proximity-triggered) and fits a 2D side-view game with no mouse-aim input.
-- **One unified Interact input** (already **E** in the existing control scheme) for every interactable type — talk, rest, turn-in, open. The specific behavior is decided by what's being interacted with, not by which key was pressed.
-- **Closest interactable wins** when more than one is in range simultaneously. No selection UI for the vertical slice; revisit only if overlapping interactables turn out to be a real problem in playtesting.
+- **Area2D-based targeting** (option A), not raycast/aim or a bare proximity check. Matches the existing prototype's NPC-talk pattern (already proximity-triggered) and fits a 2D side-view game with no mouse-aim input.
+- **One unified Interact input** (option A; already **E** in the existing control scheme) for every interactable type — talk, rest, turn-in, open. The specific behavior is decided by what's being interacted with, not by which key was pressed.
+- **Closest interactable wins** (option A) when more than one is in range simultaneously. No selection UI for the vertical slice; revisit only if overlapping interactables turn out to be a real problem in playtesting.
 
 ## State it owns
 

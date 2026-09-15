@@ -1,6 +1,6 @@
 # Build Bible Spec 08 — Stamina + Blocks
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #8 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #8 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 01 (ownership/event conventions), Spec 07 (Player Controller reads this).
 
@@ -17,10 +17,10 @@ The stamina bar itself: a fixed, stable budget that strenuous actions draw down,
 - Blocks apply in fixed order fatigue → Rig Strain → hauling; overflow becomes Overexertion with a warning, converting into fatigue.
 - Overexertion auto-triggers at zero usable stamina while holding a strenuous action, with a strong warning; the first Overexertion each session shows an explicit prompt.
 
-## Design choices
+## Design choices (✅ Confirmed, USER, 2026-09-15)
 
-- **Blocks are tracked by named source, not one aggregate number.** Each of hauling / Rig Strain / fatigue holds its own independent block amount, summed for the total blocked portion. This is what lets, e.g., depositing a haul load release exactly the hauling block without touching the others.
-- **Overexertion is available uniformly for any strenuous action at zero stamina**, not restricted to a specific allow-list of action types. Simpler, and nothing in canon suggests some strenuous actions should be exempt.
+- **Blocks are tracked by named source, not one aggregate number** (option A). Each of hauling / Rig Strain / fatigue holds its own independent block amount, summed for the total blocked portion. This is what lets, e.g., depositing a haul load release exactly the hauling block without touching the others.
+- **Overexertion is available uniformly for any strenuous action at zero stamina** (option A), not restricted to a specific allow-list of action types. Simpler, and nothing in canon suggests some strenuous actions should be exempt.
 
 ## State it owns
 

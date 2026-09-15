@@ -1,6 +1,6 @@
 # Build Bible Spec 09 — Fatigue / Overexertion / Recovery
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #9 in [`../00-dependency-map.md`](../00-dependency-map.md).
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #9 in [`../00-dependency-map.md`](../00-dependency-map.md).
 
 **Depends on:** Spec 04 (Clock — sleep triggers full recovery), Spec 08 (Stamina — fatigue blocks part of it).
 
@@ -16,10 +16,10 @@ Longer-lasting expedition strain that doesn't clear through ordinary stamina reg
 - Sleep provides full or near-full recovery. Field rest provides partial recovery at a time cost. Proper rest points are rare, tied to established Hollow/worksite infrastructure.
 - No hunger/thirst meters, no random injury systems, no fatigue-via-ordinary-regen loophole.
 
-## Design choices
+## Design choices (✅ Confirmed, USER, 2026-09-15)
 
-- **Overexertion adds a fixed fatigue cost per instance**, not scaled to how far past zero the triggering action would have gone. Simpler and more predictable for the player to learn and telegraph against, matching canon §54's emphasis on consequences feeling earned rather than surprising. Scaling can be revisited later if flat costs feel unsatisfying in play.
-- **Resting is an explicit interaction, not passive proximity.** Approaching a rest point and interacting (via Spec 10) triggers the recovery, rather than fatigue just draining automatically while standing nearby — keeps rest a deliberate choice/time cost rather than something to idle next to.
+- **Overexertion adds a fixed fatigue cost per instance** (option A), not scaled to how far past zero the triggering action would have gone. Simpler and more predictable for the player to learn and telegraph against, matching canon §54's emphasis on consequences feeling earned rather than surprising. Scaling can be revisited later if flat costs feel unsatisfying in play.
+- **Resting is an explicit interaction, not passive proximity** (option A). Approaching a rest point and interacting (via Spec 10) triggers the recovery, rather than fatigue just draining automatically while standing nearby — keeps rest a deliberate choice/time cost rather than something to idle next to.
 
 ## State it owns
 
