@@ -3724,6 +3724,7 @@ The Forbidden items already listed in Section 65 (Resonance Driver, Ghost Mapper
 - exact procedure time/fatigue cost at the moment of grafting, separate from the ongoing Capacity cost;
 - exact concealment tier names and search rules for on-body grafts (may reuse §62's names outright or diverge slightly once tested);
 - whether full removal requires a distinct Record from the one that taught the graft;
+- **flagged idea (USER, 2026-09-16), not decided — secretly recharging Forbidden Gear at the Pulse itself.** Once the player has pieced together what the Pulse actually is (not a relic but a real, still-active piece of ship technology), could some grafts require periodic recharging only the Pulse can provide — meaning the player secretly draws power from the exact object Pulse Binders devotionally serve, in the one location that's rarely unstaffed? Thematically sharp (a direct, personal mirror of the Approved/Forbidden split: legitimate practitioners serve the Pulse, the player secretly exploits it), but real unbuilt scope — it needs its own concealment/witness rules for a location that's almost never empty, distinct from the general hidden-workspace model. Not required for the vertical slice; revisit if/when Forbidden Builds (Build Bible Spec 28) or the Pulse itself gets fleshed out further.
 
 ---
 
