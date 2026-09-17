@@ -38,6 +38,7 @@ const SCHEMA_VERSION := 1
 const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"FactLog",
 	"Clock",
+	"Zones",
 	"Resources",
 	"Upgrades",
 	"Community",
