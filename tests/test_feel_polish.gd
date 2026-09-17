@@ -176,22 +176,23 @@ func _run() -> void:
 		return
 	print("PASS jump stretch (sprite only)")
 
-	# Orphan single-tile dig sheets retired — atlas remains.
+	# Orphan single-tile dig sheets retired. The real dig_site_tiles.png
+	# atlas is retired too (2026-09-17 scale correction) — sized for the
+	# old 64px grid and generated in a style that predates the
+	# placeholder-art-first plan; Terrain now uses a flat-color
+	# placeholder instead (see terrain.gd's _build_tileset()).
 	for orphan in [
 		"res://sprites/dig_site_cracked.png",
 		"res://sprites/dig_site_debris.png",
 		"res://sprites/dig_site_rubble.png",
 		"res://sprites/dig_site_solid.png",
+		"res://sprites/dig_site_tiles.png",
 	]:
 		if ResourceLoader.exists(orphan):
 			push_error("FAIL orphan still present: %s" % orphan)
 			quit(1)
 			return
-	if not ResourceLoader.exists("res://sprites/dig_site_tiles.png"):
-		push_error("FAIL dig_site_tiles.png missing")
-		quit(1)
-		return
-	print("PASS orphan dig_site_*.png retired; atlas kept")
+	print("PASS orphan/retired dig_site_*.png sheets gone; placeholder tileset in use")
 
 	# Lie UX dimmer present; journal subtitle/count helpers.
 	if scene.get_node_or_null("UI/LieDimmer") == null:

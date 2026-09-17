@@ -1,15 +1,22 @@
 extends TileMapLayer
-## Hollow walkable floor visuals — PixelLab sidescroller tiles (64px = 32×2 NN).
+## Hollow walkable floor visuals — flat-color placeholder tiles.
 ## Collision stays on Hollow StaticBody2D decks; this layer is display-only.
-## Source 0 = hollow_ledge (terraces), source 1 = hollow_bridge (Heart / lower span).
+## Source 0 = ledge placeholder (terraces), source 1 = bridge placeholder (Heart / lower span).
 ## Lift shafts and local ladder openings stay empty on their bands.
-
-const TILE_SIZE := 64
-const LEDGE_SHEET := "res://sprites/hollow_ledge/hollow_ledge_tiles_64.png"
-const BRIDGE_SHEET := "res://sprites/hollow_bridge/hollow_bridge_tiles_64.png"
+##
+## Scale correction (2026-09-17): unified to the same 16px grid as Terrain
+## (was 64px). The real PixelLab sheets this used to load
+## (sprites/hollow_ledge/, sprites/hollow_bridge/) were generated in an
+## "Eastward/Owlboy-detail" style that predates this project's
+## placeholder-art-first plan and its beginner-achievable pixel-art scale
+## — removed, not resized, since they were never the target style. Uses
+## flat-color placeholder tiles instead, one per source.
+const TILE_SIZE := 16
 const SOURCE_LEDGE := 0
 const SOURCE_BRIDGE := 1
-const ATLAS_TOP_MID := Vector2i(3, 0)
+const ATLAS_TOP_MID := Vector2i(0, 0)
+const LEDGE_COLOR := Color(0.5, 0.4, 0.3, 0.95)
+const BRIDGE_COLOR := Color(0.42, 0.32, 0.24, 0.95)
 
 
 func _ready() -> void:
@@ -22,22 +29,19 @@ func _ready() -> void:
 func _build_tileset() -> TileSet:
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	_add_sheet(tileset, LEDGE_SHEET)
-	_add_sheet(tileset, BRIDGE_SHEET)
+	_add_placeholder_source(tileset, LEDGE_COLOR)
+	_add_placeholder_source(tileset, BRIDGE_COLOR)
 	return tileset
 
 
-func _add_sheet(tileset: TileSet, path: String) -> void:
-	var texture: Texture2D = load(path)
-	if texture == null:
-		push_error("HollowFloor: missing %s" % path)
-		return
+func _add_placeholder_source(tileset: TileSet, color: Color) -> void:
+	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
+	image.fill(color)
+	var texture := ImageTexture.create_from_image(image)
 	var atlas := TileSetAtlasSource.new()
 	atlas.texture = texture
 	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	for y in range(4):
-		for x in range(4):
-			atlas.create_tile(Vector2i(x, y))
+	atlas.create_tile(ATLAS_TOP_MID)
 	tileset.add_source(atlas)
 
 

@@ -534,27 +534,48 @@ func _hauling_speed_multiplier() -> float:
 	return float(hauling.get_movement_speed_multiplier())
 
 
+## Placeholder-art-first (2026-09-17): the real PixelLab idle sheets this
+## used to load (sprites/player/idle/*.png) were generated in an
+## "Eastward/Owlboy-detail" style that predates this project's
+## placeholder-art-first plan and its beginner-achievable pixel-art scale
+## — removed, not resized, since they were never the target style.
+## facing_to_idle_anim()'s 8-direction mapping is real, tested logic and
+## is unchanged; only the pixels backing each animation name changed, to
+## a procedurally drawn flat-color silhouette (hollow_npc.gd's convention).
+const ANIM_FACING := {
+	&"idle_south": Vector2i(0, 1),
+	&"idle_south_east": Vector2i(1, 1),
+	&"idle_east": Vector2i(1, 0),
+	&"idle_north_east": Vector2i(1, -1),
+	&"idle_north": Vector2i(0, -1),
+	&"idle_north_west": Vector2i(-1, -1),
+	&"idle_west": Vector2i(-1, 0),
+	&"idle_south_west": Vector2i(-1, 1),
+}
+
+
 func _build_idle_frames() -> SpriteFrames:
 	var frames := SpriteFrames.new()
-	var paths := {
-		&"idle_south": "res://sprites/player/idle/south.png",
-		&"idle_south_east": "res://sprites/player/idle/south-east.png",
-		&"idle_east": "res://sprites/player/idle/east.png",
-		&"idle_north_east": "res://sprites/player/idle/north-east.png",
-		&"idle_north": "res://sprites/player/idle/north.png",
-		&"idle_north_west": "res://sprites/player/idle/north-west.png",
-		&"idle_west": "res://sprites/player/idle/west.png",
-		&"idle_south_west": "res://sprites/player/idle/south-west.png",
-	}
 	# Remove the default empty animation Godot adds.
 	if frames.has_animation(&"default"):
 		frames.remove_animation(&"default")
 
-	for anim_name in paths.keys():
+	for anim_name: StringName in ANIM_FACING.keys():
 		frames.add_animation(anim_name)
 		frames.set_animation_loop(anim_name, true)
 		frames.set_animation_speed(anim_name, 1.0)
-		var tex: Texture2D = load(paths[anim_name])
-		if tex:
-			frames.add_frame(anim_name, tex)
+		frames.add_frame(anim_name, _placeholder_frame(ANIM_FACING[anim_name]))
 	return frames
+
+
+## Flat-color placeholder silhouette on a 64x64 canvas (matches the old
+## sheet's baseline so SPRITE_SCALE/BODY_HEIGHT math is unchanged). A
+## small offset "face" mark shows facing direction during playtesting.
+func _placeholder_frame(facing: Vector2i) -> Texture2D:
+	var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0.0, 0.0, 0.0, 0.0))
+	image.fill_rect(Rect2i(20, 20, 24, 36), Color(0.65, 0.5, 0.35, 0.9)) # body
+	image.fill_rect(Rect2i(24, 8, 16, 16), Color(0.75, 0.62, 0.48, 0.95)) # head
+	var face_center := Vector2i(32, 16) + facing * 6
+	image.fill_rect(Rect2i(face_center.x - 2, face_center.y - 2, 4, 4), Color(0.15, 0.12, 0.1, 1.0))
+	return ImageTexture.create_from_image(image)

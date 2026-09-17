@@ -2,6 +2,12 @@
 
 Upscales each tile 2x with nearest-neighbor so Terrain can keep 64px cells.
 Prefer tools/import_spritefusion_dig_tiles.py when re-importing from Cursor assets.
+
+NOTE (2026-09-17): sprites/dig_tiles/ and sprites/dig_site_tiles.png were
+removed from the repo along with the rest of the PixelLab/SpriteFusion-
+generated placeholder-breaking art (see CONTEXT.md). Terrain.TILE_SIZE is
+now 16px, not 64 — re-run this against 16px sources, not a 2x upscale,
+before pointing Terrain back at generated art.
 """
 from __future__ import annotations
 
