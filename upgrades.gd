@@ -282,6 +282,24 @@ func set_level(upgrade_id: StringName, level: int) -> void:
 	upgrade_changed.emit(upgrade_id, get_level(upgrade_id))
 
 
+## Build Bible Spec 02 uniform SaveLoad contract — delegates to the existing
+## snapshot methods above, which stay the real implementation. Note:
+## theft_station_open is deliberately excluded — it's live physical-position
+## state (set by HollowZone from where the player actually is), not saved
+## progress, and self-corrects the moment the scene loads.
+func save_state() -> Dictionary:
+	return get_levels_snapshot()
+
+
+func load_state(data: Dictionary) -> void:
+	apply_levels_snapshot(data)
+
+
+func reset_all() -> void:
+	for id in get_upgrade_ids():
+		set_level(id, 0)
+
+
 var _wallet_cache: Node = null
 var _districts_cache: Node = null
 

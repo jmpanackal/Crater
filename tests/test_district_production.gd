@@ -278,8 +278,14 @@ func _run_tests() -> void:
 		return
 	print("PASS save migrates named goods, queue, Materials")
 
-	# --- Legacy district_stocks float map ---
+	# --- Build Bible Spec 02: a save with a missing/mismatched schema
+	# version is rejected outright, never silently migrated or misread.
+	# (The pre-Spec-02 prototype used to migrate this exact old
+	# district_stocks float-map shape on load; Spec 02 explicitly defers
+	# real migration as its own spike question, so the correct behavior now
+	# is rejection, not a best-effort guess.) ---
 	districts.reset_production()
+	var pre_reject_snapshot: int = districts.get_good_amount(districts.GLOWRATIONS)
 	var legacy := {
 		"version": 2,
 		"salvage": 7,
@@ -293,27 +299,15 @@ func _run_tests() -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(legacy))
 	file.close()
-	if not save_load.load_game():
-		push_error("FAIL legacy load")
+	if save_load.load_game():
+		push_error("FAIL a schema-version-less legacy save should be rejected, not loaded")
 		quit(1)
 		return
-	if districts.get_good_amount(districts.GLOWRATIONS) != 4:
-		push_error("FAIL legacy farms→Glowrations")
+	if districts.get_good_amount(districts.GLOWRATIONS) != pre_reject_snapshot:
+		push_error("FAIL rejected load must not have mutated Districts state")
 		quit(1)
 		return
-	if districts.get_good_amount(districts.WICKLAMPS) != 2:
-		push_error("FAIL legacy wickwork→Wicklamps")
-		quit(1)
-		return
-	if districts.get_good_amount(districts.PRESSWATER) != 5:
-		push_error("FAIL legacy cistern→Presswater")
-		quit(1)
-		return
-	if districts.get_good_amount(districts.GLOWFIBER) != districts.PROTECTED_RESERVE:
-		push_error("FAIL legacy sibling should stay at reserve")
-		quit(1)
-		return
-	print("PASS legacy district_stocks migrate to primary goods")
+	print("PASS legacy (pre-Spec-02) save format is rejected, not silently migrated")
 
 	save_load.clear_save()
 	print("DISTRICT_PRODUCTION_TESTS_PASSED")

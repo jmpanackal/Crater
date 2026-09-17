@@ -405,6 +405,22 @@ func set_paused(paused: bool) -> void:
 	_paused = paused
 
 
+## Build Bible Spec 02 uniform SaveLoad contract — delegates to the existing
+## production snapshot above (the canon-shaped one; legacy stocks_snapshot
+## stays reachable directly for old-save migration code, not through this
+## new contract).
+func save_state() -> Dictionary:
+	return get_production_snapshot()
+
+
+func load_state(data: Dictionary) -> void:
+	apply_production_snapshot(data)
+
+
+func reset_all() -> void:
+	reset_production()
+
+
 func _efficiency_level(district_id: StringName) -> int:
 	var upgrades := get_tree().root.get_node_or_null("Upgrades")
 	if upgrades == null or not upgrades.has_method("get_district_efficiency_level"):

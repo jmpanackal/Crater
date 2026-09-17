@@ -19,6 +19,16 @@ func _run() -> void:
 			community.skip_lie_prompt = true
 	if save_load:
 		save_load.clear_save()
+	# clear_save() only deletes the file — SaveLoad's own autoload _ready()
+	# already deferred-loads whatever save existed on disk BEFORE this
+	# test's _run() gets to execute (both are call_deferred from _init/
+	# _ready, and autoloads enter the tree first), so a stale leftover save
+	# from an earlier test run can still leave Resources/Districts/etc.
+	# seeded with old values. Reset the ones this test actually depends on
+	# explicitly rather than assuming "no save file" implies "fresh state".
+	var wallet: Node = root.get_node_or_null("Resources")
+	if wallet and wallet.has_method("reset_all"):
+		wallet.reset_all()
 
 	# --- Hit-stop Firmament shorter than Devil's Mouth ---
 	FeelFx.reset_debug()

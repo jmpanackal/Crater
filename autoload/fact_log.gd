@@ -98,3 +98,19 @@ func apply_snapshot(data: Array) -> void:
 ## Test / New Game helper.
 func clear_all() -> void:
 	_facts.clear()
+
+
+## Build Bible Spec 02 uniform SaveLoad contract — wraps get_snapshot()/
+## apply_snapshot() above, which stay the real implementation.
+func save_state() -> Dictionary:
+	return {"facts": get_snapshot()}
+
+
+func load_state(data: Dictionary) -> void:
+	var facts: Variant = data.get("facts", [])
+	if typeof(facts) == TYPE_ARRAY:
+		apply_snapshot(facts)
+
+
+func reset_all() -> void:
+	clear_all()

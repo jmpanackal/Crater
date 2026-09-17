@@ -129,3 +129,21 @@ func apply_snapshot(ids: Array) -> void:
 func clear_all() -> void:
 	_unlocked.clear()
 	records_changed.emit()
+
+
+## Build Bible Spec 02 uniform SaveLoad contract. Wrapped in a Dictionary
+## (get_snapshot()/apply_snapshot() above are natively an Array) purely to
+## keep every domain's save_state() return type consistent — the real data
+## is still exactly what get_snapshot() already produced.
+func save_state() -> Dictionary:
+	return {"records": get_snapshot()}
+
+
+func load_state(data: Dictionary) -> void:
+	var records: Variant = data.get("records", [])
+	if typeof(records) == TYPE_ARRAY:
+		apply_snapshot(records)
+
+
+func reset_all() -> void:
+	clear_all()

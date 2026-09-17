@@ -106,3 +106,13 @@ func reset_all() -> void:
 	for key in _amounts.keys():
 		set_amount(key, 0)
 	_dig_material_index = 0
+
+
+## Build Bible Spec 02 uniform SaveLoad contract — delegates to the existing
+## snapshot methods above, which stay the real implementation.
+func save_state() -> Dictionary:
+	return get_materials_snapshot()
+
+
+func load_state(data: Dictionary) -> void:
+	apply_materials_snapshot(data)

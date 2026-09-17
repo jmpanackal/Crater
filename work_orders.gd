@@ -210,6 +210,16 @@ func apply_snapshot(data: Dictionary) -> void:
 	work_order_changed.emit()
 
 
+## Build Bible Spec 02 uniform SaveLoad contract — delegates to the existing
+## snapshot methods above, which stay the real implementation.
+func save_state() -> Dictionary:
+	return get_snapshot()
+
+
+func load_state(data: Dictionary) -> void:
+	apply_snapshot(data)
+
+
 func are_all_ids_done_from(data: Dictionary) -> bool:
 	var done: Variant = data.get("completed", [])
 	if typeof(done) != TYPE_ARRAY:

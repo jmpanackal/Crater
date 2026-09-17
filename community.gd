@@ -166,3 +166,33 @@ func _complete_harvest_cycle() -> void:
 ## Test helper: freeze the countdown without clearing state.
 func set_paused(paused: bool) -> void:
 	_paused = paused
+
+
+## Build Bible Spec 02 uniform SaveLoad contract. Community never grew a
+## single existing snapshot method (trust/harvest_timer/pending_lie were
+## always three separate get/set pairs) — this is the first place they're
+## bundled together, and it delegates to the existing setters rather than
+## writing to the backing vars directly, so their own emit/clamp behavior
+## still runs on load.
+func save_state() -> Dictionary:
+	return {
+		"trust": trust,
+		"harvest_timer": harvest_timer,
+		"pending_lie": pending_lie,
+	}
+
+
+func load_state(data: Dictionary) -> void:
+	if data.has("trust"):
+		set_trust(int(data["trust"]))
+	if data.has("harvest_timer"):
+		set_harvest_timer(float(data["harvest_timer"]))
+	if data.has("pending_lie"):
+		set_pending_lie(bool(data["pending_lie"]))
+
+
+func reset_all() -> void:
+	set_trust(TRUST_DEFAULT)
+	set_harvest_timer(HARVEST_INTERVAL_SEC)
+	set_pending_lie(false)
+	skip_lie_prompt = false
