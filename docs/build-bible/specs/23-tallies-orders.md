@@ -1,6 +1,6 @@
 # Build Bible Spec 23 — Tallies + Approved Gear Orders
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #23 in [`../00-dependency-map.md`](../00-dependency-map.md). Proposed as a **thin** slice.
+**Status:** ✅ CONFIRMED (USER, 2026-09-17) — all design choices reviewed in chat and accepted. Build-order #23 in [`../00-dependency-map.md`](../00-dependency-map.md). Proposed as a **thin** slice.
 
 **Depends on:** Spec 22 (Districts), Spec 14 (Rig/Gear), Spec 19 (Trust).
 
@@ -21,12 +21,12 @@ The legitimate public-progression currency and its spend path, per canon §16/§
 - Districts may refuse an otherwise-affordable order when available output is needed for essential demand or committed work — a believable civic constraint, not an arbitrary shop lock (§25).
 - Rig/Gear already locks that equipping only happens at a valid station (Spec 14, choice 36) — this spec's Order flow has to respect that boundary rather than quietly bypassing it.
 
-## Design choices (new, this spec)
+## Design choices (✅ Confirmed, USER, 2026-09-17)
 
-- **Tallies get their own small Wallet autoload, separate from Trust**, even though both are "you did something good" currencies. §16/§17 already draw a hard line between them (transactional/spendable vs. social/not-spendable) — folding Tallies into Trust or another existing system would blur a distinction canon goes out of its way to state explicitly.
-- **Wallet reuses Trust's exact contract shape**: `earn(amount, reason)` / `spend(amount, reason) -> bool`, called by whichever system determined Tallies should move (primarily Jobs, Spec 24, at settlement) — Wallet never computes its own amounts or reaches into Jobs' data itself. Same one-directional push pattern as everywhere else in this Build Bible, for the same reason: keeps "why did my Tallies change" always traceable to one explicit call site.
-- **Ordering acquires ownership; it does not auto-equip.** `order(gear_id)` spends Tallies, draws the required amount from the relevant district via `District.request_withdrawal` (Spec 22) as "authorized District Output," checks any Access/Trust gate, and on success adds the item to Rig's existing owned-Gear list (Spec 14) — a small, forward-compatible extension of what Spec 14 already tracks, not a second competing ownership list. Actually fitting the new Gear to a slot still requires a separate `Rig.equip()` call at a valid station, exactly as Spec 14 already locked. Rejected: auto-equipping on order, which would quietly bypass the already-locked "major Rig changes only at proper stations" rule — an order counter isn't necessarily a valid station.
-- **A failed order is atomic and cleanly reasoned.** Insufficient Tallies, insufficient District Output, and a district refusing for demand reasons are three distinct, explainable failure reasons — nothing is spent or partially deducted on failure.
+- **Tallies get their own small Wallet autoload, separate from Trust** (option A), even though both are "you did something good" currencies. §16/§17 already draw a hard line between them (transactional/spendable vs. social/not-spendable) — folding Tallies into Trust or another existing system would blur a distinction canon goes out of its way to state explicitly.
+- **Wallet reuses Trust's exact contract shape** (option A): `earn(amount, reason)` / `spend(amount, reason) -> bool`, called by whichever system determined Tallies should move (primarily Jobs, Spec 24, at settlement) — Wallet never computes its own amounts or reaches into Jobs' data itself. Same one-directional push pattern as everywhere else in this Build Bible, for the same reason: keeps "why did my Tallies change" always traceable to one explicit call site.
+- **Ordering acquires ownership; it does not auto-equip** (option A). `order(gear_id)` spends Tallies, draws the required amount from the relevant district via `District.request_withdrawal` (Spec 22) as "authorized District Output," checks any Access/Trust gate, and on success adds the item to Rig's existing owned-Gear list (Spec 14) — a small, forward-compatible extension of what Spec 14 already tracks, not a second competing ownership list. Actually fitting the new Gear to a slot still requires a separate `Rig.equip()` call at a valid station, exactly as Spec 14 already locked. Rejected: auto-equipping on order, which would quietly bypass the already-locked "major Rig changes only at proper stations" rule — an order counter isn't necessarily a valid station.
+- **A failed order is atomic and cleanly reasoned** (option A). Insufficient Tallies, insufficient District Output, and a district refusing for demand reasons are three distinct, explainable failure reasons — nothing is spent or partially deducted on failure.
 
 ## State it owns
 

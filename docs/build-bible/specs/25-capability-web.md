@@ -1,6 +1,6 @@
 # Build Bible Spec 25 — Capability Web
 
-**Status:** DRAFT (AI-proposed, 2026-09-15), pending USER review. Build-order #25 in [`../00-dependency-map.md`](../00-dependency-map.md). Proposed as a **thin** slice.
+**Status:** ✅ CONFIRMED (USER, 2026-09-17) — all design choices reviewed in chat and accepted. Build-order #25 in [`../00-dependency-map.md`](../00-dependency-map.md). Proposed as a **thin** slice.
 
 **Depends on:** Spec 11 (Materials/Components/Records), Spec 01.
 
@@ -19,11 +19,11 @@ The Known → Understood → Available discovered-capability model from canon §
 - Home/workbench information surfaces (Gear / Approved Gear / Forbidden Designs / Discoveries) are DIRECTION-level UI guidance, not this spec's contract — the private Forbidden workspace itself is Spec 27's job.
 - **Already locked at the state-ownership level**: "Known / Understood / Available per technology | Capability Web | Authoritative (Known/Understood) + Derived (Available) | Submit discovery events" — Known/Understood are stored flags; Available is computed live, never stored, matching the same "derived, never saved as truth" pattern already used for Suspicion, Trust's standing state, and District condition.
 
-## Design choices (new, this spec)
+## Design choices (✅ Confirmed, USER, 2026-09-17)
 
-- **Known/Understood are set only through explicit, submitted discovery events — Capability Web never decides on its own that something became Known or Understood.** `submit_discovery(tech_id, level, source_context)` is called by whichever system caused the discovery (Materials/Components on pickup, Records on read, Dialogue on a Pulse Binder mention, Perception/Terrain on observing an old system). Same passive-recipient, reason-traceable contract shape already established for Trust and Wallet — and it's what guarantees §40's "never without an in-world reason" requirement structurally, rather than relying on every author to remember to justify it by convention.
-- **Available is computed live on every query, never cached or flipped-and-stored.** `is_available(tech_id)` re-checks current access/district capability/Material/Component/Tallies conditions each time it's asked. This is mostly a restatement of the already-locked ownership-table line, but it matters concretely: if the player later spends the Materials a tech needed, Available correctly reads false again on the next check instead of staying stuck true from an earlier pass — the exact class of stale-state bug a stored/cached flag would risk.
-- **Functional families are tags on a technology's own Content Definition, not separate registries it lives inside.** A single tech can carry multiple family tags at once, and leads/steering content simply reference those tags to bias what surfaces as a meaningful lead — directly matching §41's explicit "do not force technologies into mutually exclusive tree branches if they naturally serve multiple roles."
+- **Known/Understood are set only through explicit, submitted discovery events — Capability Web never decides on its own that something became Known or Understood** (option A). `submit_discovery(tech_id, level, source_context)` is called by whichever system caused the discovery (Materials/Components on pickup, Records on read, Dialogue on a Pulse Binder mention, Perception/Terrain on observing an old system). Same passive-recipient, reason-traceable contract shape already established for Trust and Wallet — and it's what guarantees §40's "never without an in-world reason" requirement structurally, rather than relying on every author to remember to justify it by convention.
+- **Available is computed live on every query, never cached or flipped-and-stored** (option A). `is_available(tech_id)` re-checks current access/district capability/Material/Component/Tallies conditions each time it's asked. This is mostly a restatement of the already-locked ownership-table line, but it matters concretely: if the player later spends the Materials a tech needed, Available correctly reads false again on the next check instead of staying stuck true from an earlier pass — the exact class of stale-state bug a stored/cached flag would risk.
+- **Functional families are tags on a technology's own Content Definition, not separate registries it lives inside** (option A). A single tech can carry multiple family tags at once, and leads/steering content simply reference those tags to bias what surfaces as a meaningful lead — directly matching §41's explicit "do not force technologies into mutually exclusive tree branches if they naturally serve multiple roles."
 
 ## State it owns
 
