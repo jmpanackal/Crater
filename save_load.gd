@@ -47,6 +47,16 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"WorkOrders",
 ]
 
+## Scene-tree nodes (not autoloads) that want to participate in save/load
+## register themselves here instead of being found by a root-relative name
+## — Terrain (a TileMapLayer that has to live inside the play scene's
+## hierarchy to render/collide correctly, not as a top-level autoload) is
+## the first user of this, but it's generic for whatever scene-owned system
+## needs it next (Player, NPCs, ...). Registered under the SAME "domains"
+## key namespace as autoload names in the save file — SaveLoad doesn't
+## distinguish the two once a node is resolved.
+var _scene_domains: Dictionary = {}
+
 
 func _ready() -> void:
 	# Load after sibling autoloads exist. Title screen may clear/reload explicitly.
@@ -57,19 +67,42 @@ func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
+func register_scene_domain(domain_name: String, node: Node) -> void:
+	_scene_domains[domain_name] = node
+
+
+func unregister_scene_domain(domain_name: String) -> void:
+	_scene_domains.erase(domain_name)
+
+
+## All currently-resolvable domain nodes, autoload and scene-registered
+## alike, keyed by domain name — the single list every save/load/reset pass
+## below iterates, so there's exactly one place that combines the two.
+func _all_domain_nodes() -> Dictionary:
+	var out := {}
+	for domain_name: String in DOMAIN_AUTOLOAD_NAMES:
+		var node := get_tree().root.get_node_or_null(domain_name)
+		if node != null:
+			out[domain_name] = node
+	for domain_name: Variant in _scene_domains.keys():
+		var node: Node = _scene_domains[domain_name]
+		if is_instance_valid(node):
+			out[str(domain_name)] = node
+	return out
+
+
 ## Writes every registered domain's save_state() to disk via an atomic write
 ## (temp file + rename) so a crash mid-save can never corrupt the existing
 ## save file (Spec 02 invariant: never a partial write).
 func save_game() -> bool:
 	var domains := {}
-	for domain_name: String in DOMAIN_AUTOLOAD_NAMES:
-		var node := get_tree().root.get_node_or_null(domain_name)
-		if node == null:
-			continue
+	var nodes := _all_domain_nodes()
+	for domain_name: Variant in nodes.keys():
+		var node: Node = nodes[domain_name]
 		if not node.has_method("save_state"):
 			push_warning("SaveLoad: %s has no save_state() yet — skipped" % domain_name)
 			continue
-		domains[domain_name] = node.save_state()
+		domains[str(domain_name)] = node.save_state()
 
 	var data := {
 		"schema_version": SCHEMA_VERSION,
@@ -130,13 +163,14 @@ func load_game() -> bool:
 		push_error("SaveLoad: save file missing domains data — refusing to load")
 		return false
 
-	for domain_name: String in DOMAIN_AUTOLOAD_NAMES:
-		if not (domains as Dictionary).has(domain_name):
+	var nodes := _all_domain_nodes()
+	for domain_name: Variant in nodes.keys():
+		if not (domains as Dictionary).has(str(domain_name)):
 			continue
-		var node := get_tree().root.get_node_or_null(domain_name)
-		if node == null or not node.has_method("load_state"):
+		var node: Node = nodes[domain_name]
+		if not node.has_method("load_state"):
 			continue
-		node.load_state((domains as Dictionary)[domain_name])
+		node.load_state((domains as Dictionary)[str(domain_name)])
 
 	var bus := get_tree().root.get_node_or_null("EventBus")
 	if bus != null:
@@ -147,9 +181,10 @@ func load_game() -> bool:
 ## Reset every registered domain for a New Game (also clears the save file).
 func new_game() -> void:
 	clear_save()
-	for domain_name: String in DOMAIN_AUTOLOAD_NAMES:
-		var node := get_tree().root.get_node_or_null(domain_name)
-		if node != null and node.has_method("reset_all"):
+	var nodes := _all_domain_nodes()
+	for domain_name: Variant in nodes.keys():
+		var node: Node = nodes[domain_name]
+		if node.has_method("reset_all"):
 			node.reset_all()
 	# theft_station_open is live physical-position state (set by HollowZone
 	# from where the player actually is), not part of any domain's saved

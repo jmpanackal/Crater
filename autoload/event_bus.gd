@@ -30,6 +30,13 @@ signal fact_recorded(fact: Dictionary)
 ## request. old_phase/new_phase are Clock's PHASE_* StringName constants.
 signal phase_changed(old_phase: StringName, new_phase: StringName)
 
+## Terrain (Build Bible Spec 06) removed a tile. Push, not pull (Spec 06's
+## own confirmed design choice): this is what future systems that don't
+## exist yet (Perception's noise, Material extraction, the Fact Log) react
+## to without Terrain needing to know who's listening. cell/direction are
+## the dug cell and the cardinal direction it was dug from.
+signal terrain_dug(cell: Vector2i, direction: Vector2i, is_firmament: bool, is_mouth: bool)
+
 ## SaveLoad lifecycle — cross-cutting because UI, debug tools, and future
 ## systems may all want to react to a save/load without depending on
 ## SaveLoad directly.

@@ -30,6 +30,19 @@ func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_NEAREST
 	tile_set = _build_tileset()
 	_fill_ground()
+	# Build Bible Spec 02's save contract only auto-discovers autoloads by
+	# root-relative name; Terrain has to live inside the play scene's
+	# hierarchy to render/collide correctly, so it registers itself with
+	# SaveLoad instead (see save_load.gd's register_scene_domain()).
+	var save_load := get_tree().root.get_node_or_null("SaveLoad") if is_inside_tree() else null
+	if save_load != null and save_load.has_method("register_scene_domain"):
+		save_load.register_scene_domain("Terrain", self)
+
+
+func _exit_tree() -> void:
+	var save_load := get_tree().root.get_node_or_null("SaveLoad")
+	if save_load != null and save_load.has_method("unregister_scene_domain"):
+		save_load.unregister_scene_domain("Terrain")
 
 
 ## Build TileSet from the dig-site sheet; every variant gets full-cell collision.
@@ -140,6 +153,53 @@ func has_tile(cell: Vector2i) -> bool:
 	return get_cell_source_id(cell) != -1
 
 
+## Build Bible Spec 06 contract surface — see docs/build-bible/specs/06-
+## destructible-terrain.md. The envelope is currently the same rectangle
+## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..15) — opt-in
+## destructibility per §63/the atlas's "fixed outer envelope of
+## destructible chunks" language: nothing outside it is diggable, full
+## stop, regardless of whether a real Zone (Spec 05, not authored yet)
+## eventually replaces this rectangle with real chunk-authored bounds.
+func is_within_dig_envelope(cell: Vector2i) -> bool:
+	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < 16
+
+
+## can_dig(position) from the spec's contract surface, in world space to
+## match dig_in_direction()'s existing convention. False outside the
+## authored envelope — true within it regardless of whether that specific
+## cell has already been dug (an already-dug cell is a legal dig ATTEMPT
+## that will simply find nothing there; only being outside the envelope
+## entirely is refused at this level).
+func can_dig(world_pos: Vector2) -> bool:
+	return is_within_dig_envelope(world_to_cell(world_pos))
+
+
+## dig(position) from the spec's contract surface: mutates terrain, emits
+## the EventBus dig event, and returns what was exposed/extracted. Refuses
+## cleanly (no mutation, no event) outside the authored envelope — Spec 06's
+## own failure case: "a no-op with feedback, never a crash or an unintended
+## tunnel into fixed geography." Delegates to the existing dig_in_direction/
+## destroy_cell internals rather than duplicating their logic.
+func dig(world_pos: Vector2, direction: Vector2i) -> Dictionary:
+	if not can_dig(world_pos):
+		return {"success": false, "reason": "outside_envelope"}
+	var destroyed := dig_in_direction(world_pos, direction)
+	return {"success": destroyed, "reason": "" if destroyed else "nothing_there"}
+
+
+## intact / depleted / none, per the spec's contract surface. No dedicated
+## Deposit concept exists yet (Build Bible Spec 12, Deposits + Extraction,
+## owns that) — until then this treats "has a tile" as intact and "within
+## the envelope but already dug" as depleted, matching canon's general
+## depletion-overlay principle (§6) without presuming Spec 12's real
+## deposit-vs-ordinary-rock distinction.
+func get_deposit_state(world_pos: Vector2) -> StringName:
+	var cell := world_to_cell(world_pos)
+	if not is_within_dig_envelope(cell):
+		return &"none"
+	return &"intact" if has_tile(cell) else &"depleted"
+
+
 func is_firmament_cell(cell: Vector2i) -> bool:
 	return cell.y <= FIRMAMENT_Y_MAX
 
@@ -172,6 +232,20 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if found != StringName():
 		FeelFx.spawn_record_float(self, world, "Record")
 	dig_completed.emit(cell, direction, found)
+	# Build Bible Spec 06's own confirmed design choice: digging is push,
+	# not pull. This EventBus event is ADDITIONAL to the direct
+	# Resources/Upgrades/Community/Journal calls above, not a replacement
+	# for them - those are pre-canon prototype stand-ins with their own
+	# future Build Bible specs (Materials #11, Rig/Gear #14, Trust #19,
+	# Capability Web #25), and rewiring their call sites to be pure
+	# EventBus listeners is each of THEIR migrations to do, not a side
+	# effect of implementing Terrain's own spec. This event exists for
+	# systems that don't have a direct call site at all yet - Perception
+	# (#17), Material extraction (#12), the Fact Log.
+	if is_inside_tree():
+		var bus := get_tree().root.get_node_or_null("EventBus")
+		if bus != null:
+			bus.terrain_dug.emit(cell, direction, is_firmament, is_mouth)
 	return true
 
 
@@ -260,3 +334,40 @@ func _to_cardinal(direction: Vector2i) -> Vector2i:
 	if direction.x != 0:
 		return Vector2i(signi(direction.x), 0)
 	return Vector2i.ZERO
+
+
+## Build Bible Spec 02 uniform SaveLoad contract, via register_scene_domain()
+## (see _ready() above) rather than autoload discovery.
+##
+## Persists as the set of currently-dug cells within the envelope — the
+## SIMPLEST of the representations 00-dependency-map.md's technical spike
+## is meant to choose between ("per-tile deltas... or full chunk snapshots,
+## or something else"). This is a working placeholder that round-trips
+## correctly, not a claim that the spike question is settled; Spec 06's own
+## text is explicit that the representation itself isn't this spec's call.
+## Scans rather than tracking a parallel dug-cells set, since the
+## TileMapLayer itself is already the authoritative state (Spec 01: no
+## shadow copies of something already readable from its owner) — the
+## envelope is only 256 cells, cheap to scan.
+func save_state() -> Dictionary:
+	var dug: Array = []
+	for x in range(DIG_START_X, DIG_END_X):
+		for y in range(16):
+			var cell := Vector2i(x, y)
+			if not has_tile(cell):
+				dug.append([cell.x, cell.y])
+	return {"dug_cells": dug}
+
+
+func load_state(data: Dictionary) -> void:
+	_fill_ground()  # reset envelope to fully intact, then reapply the delta
+	var dug: Variant = data.get("dug_cells", [])
+	if typeof(dug) != TYPE_ARRAY:
+		return
+	for entry: Variant in dug:
+		if typeof(entry) == TYPE_ARRAY and entry.size() == 2:
+			erase_cell(Vector2i(int(entry[0]), int(entry[1])))
+
+
+func reset_all() -> void:
+	_fill_ground()
