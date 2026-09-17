@@ -24,6 +24,12 @@ extends Node
 ## Emitted by FactLog itself, not by whatever called FactLog.record().
 signal fact_recorded(fact: Dictionary)
 
+## The Clock (Build Bible Spec 04) advanced from one civic phase to the
+## next. Fires exactly once per actual transition — a sleep-style advance
+## spanning multiple phases fires this once per phase crossed, not once per
+## request. old_phase/new_phase are Clock's PHASE_* StringName constants.
+signal phase_changed(old_phase: StringName, new_phase: StringName)
+
 ## SaveLoad lifecycle — cross-cutting because UI, debug tools, and future
 ## systems may all want to react to a save/load without depending on
 ## SaveLoad directly.

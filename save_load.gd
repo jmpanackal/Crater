@@ -37,6 +37,7 @@ const SCHEMA_VERSION := 1
 ## spec's save wiring without breaking everything else.
 const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"FactLog",
+	"Clock",
 	"Resources",
 	"Upgrades",
 	"Community",
