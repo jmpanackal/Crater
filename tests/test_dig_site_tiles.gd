@@ -59,7 +59,7 @@ func _run_tests() -> void:
 	var found := false
 	var hollow_bleed := false
 	for x in range(0, TerrainLayer.DIG_END_X + 2):
-		for y in range(0, 64):
+		for y in range(0, TerrainLayer.ENVELOPE_ROWS):
 			if not layer.has_tile(Vector2i(x, y)):
 				continue
 			if x < TerrainLayer.DIG_START_X:

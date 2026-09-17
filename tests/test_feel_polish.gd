@@ -69,7 +69,7 @@ func _run() -> void:
 	await process_frame
 	terrain.clear()
 	var firmament_cell := Vector2i(18, 2)
-	var mouth_cell := Vector2i(18, 48)
+	var mouth_cell := Vector2i(18, 60)
 	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 

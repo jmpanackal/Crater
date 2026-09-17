@@ -44,7 +44,7 @@ func _build_dressing() -> void:
 	var mouth := ColorRect.new()
 	mouth.name = "MouthGloom"
 	mouth.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile)
-	mouth.size = Vector2(width, float(16 - TerrainLayer.MOUTH_Y_MIN) * tile)
+	mouth.size = Vector2(width, float(TerrainLayer.ENVELOPE_ROWS - TerrainLayer.MOUTH_Y_MIN) * tile)
 	mouth.color = MOUTH_GLOOM
 	mouth.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mouth.z_index = 2

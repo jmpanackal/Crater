@@ -21,14 +21,22 @@ const TILE_SIZE := 16
 # Default atlas used by tests / simple fills (first SpriteFusion vein tile).
 const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 
-## Cells with y < this are Firmament rock (secret upward frontier).
-## Re-derived for TILE_SIZE=16 to cover the same world-y span as the old
-## 64px value (4): (4+1)*64 = 320px -> (320/16)-1 = 19.
-const FIRMAMENT_Y_MAX := 19
+## Total envelope depth in rows (Firmament + mid band + Devil's Mouth
+## combined). Locked 2026-09-17 via the macro-layout scale pass — dig
+## deliberately reaches deeper than Hollow's own 74-tile height (1.25x),
+## per the interactive scale editor in CONTEXT.md. The single source of
+## truth for envelope depth — reference this, not a literal, anywhere
+## that needs the total (dig_site_dressing.gd's mouth overlay height was
+## a hardcoded "16" that silently went stale across two earlier scale
+## passes before this constant existed; don't repeat that).
+const ENVELOPE_ROWS := 92
+## Cells with y <= this are Firmament rock (secret upward frontier).
+## 29 rows (0..28), same ~31% share of ENVELOPE_ROWS as the original split.
+const FIRMAMENT_Y_MAX := 28
 ## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
-## Re-derived for TILE_SIZE=16 to cover the same world-y as the old 64px
-## value (9): 9*64 = 576px -> 576/16 = 36.
-const MOUTH_Y_MIN := 36
+## Mid band is FIRMAMENT_Y_MAX+1 .. MOUTH_Y_MIN-1 (23 rows); Mouth is
+## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 (40 rows) — same ~25%/~44% split as before.
+const MOUTH_Y_MIN := 52
 
 var _atlas_coords: Array[Vector2i] = []
 var _pit_digs_since_warn := 0
@@ -111,8 +119,7 @@ func _fill_ground() -> void:
 		for y in range(0, FIRMAMENT_Y_MAX + 1):
 			_place_random(Vector2i(x, y))
 		# Mid band + Devil’s Mouth walls — downward public-ish danger.
-		# Re-derived for TILE_SIZE=16 from the old 64px range(5, 16): 5*4=20, 16*4=64.
-		for y in range(20, 64):
+		for y in range(FIRMAMENT_Y_MAX + 1, ENVELOPE_ROWS):
 			_place_random(Vector2i(x, y))
 
 
@@ -128,13 +135,13 @@ func has_tile(cell: Vector2i) -> bool:
 
 ## Build Bible Spec 06 contract surface — see docs/build-bible/specs/06-
 ## destructible-terrain.md. The envelope is currently the same rectangle
-## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..63) — opt-in
-## destructibility per §63/the atlas's "fixed outer envelope of
+## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..ENVELOPE_ROWS-1) —
+## opt-in destructibility per §63/the atlas's "fixed outer envelope of
 ## destructible chunks" language: nothing outside it is diggable, full
 ## stop, regardless of whether a real Zone (Spec 05, not authored yet)
 ## eventually replaces this rectangle with real chunk-authored bounds.
 func is_within_dig_envelope(cell: Vector2i) -> bool:
-	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < 64
+	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < ENVELOPE_ROWS
 
 
 ## can_dig(position) from the spec's contract surface, in world space to
@@ -321,11 +328,11 @@ func _to_cardinal(direction: Vector2i) -> Vector2i:
 ## Scans rather than tracking a parallel dug-cells set, since the
 ## TileMapLayer itself is already the authoritative state (Spec 01: no
 ## shadow copies of something already readable from its owner) — the
-## envelope is only 4096 cells, cheap to scan.
+## envelope is only 5888 cells, cheap to scan.
 func save_state() -> Dictionary:
 	var dug: Array = []
 	for x in range(DIG_START_X, DIG_END_X):
-		for y in range(64):
+		for y in range(ENVELOPE_ROWS):
 			var cell := Vector2i(x, y)
 			if not has_tile(cell):
 				dug.append([cell.x, cell.y])
