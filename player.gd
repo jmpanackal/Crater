@@ -261,7 +261,7 @@ func _ensure_contact_shadow() -> void:
 
 
 func _apply_horizontal_move(move_x: float, delta: float) -> void:
-	var x_speed := SPEED * (0.45 if _climbing else 1.0)
+	var x_speed := SPEED * (0.45 if _climbing else 1.0) * _hauling_speed_multiplier()
 	var target := move_x * x_speed
 	if _climbing:
 		# Ladder hops stay snappy so W/S + slight A/D feel responsive.
@@ -389,6 +389,8 @@ func _read_climb_axis() -> float:
 func _try_dig() -> void:
 	if terrain == null:
 		return
+	if not _can_afford_dig():
+		return
 
 	var dig_dir := _read_held_aim()
 	if dig_dir == Vector2i.ZERO:
@@ -459,6 +461,43 @@ static func facing_to_idle_anim(dir: Vector2i) -> StringName:
 	if x > 0 and y < 0:
 		return &"idle_north_east"
 	return &"idle_north_west"
+
+
+## Build Bible Spec 07 (Player Controller) contract hooks into Stamina
+## (Spec 08) and Hauling (Spec 13), neither of which exists yet in build
+## order. Contract-only per Spec 07's own failure-case note: method
+## signatures agreed, bodies stubbed, FAIL SAFE (unblocked / unaffected)
+## until those systems land for real — normal movement must never break
+## just because a dependency doesn't exist yet.
+##
+## Player Controller calls these systems' public APIs directly for
+## blocking-relevant actions (Spec 07, confirmed option A) — no
+## intermediary "Action" layer between input and consequence. This matches
+## Spec 01's "reads are open, writes are not" ownership rule: Player
+## Controller only ever reads/requests here, it never mutates Stamina's or
+## Hauling's own state.
+
+
+## True when a dig is currently affordable per Stamina's current block
+## state. Fails safe (true) when Stamina doesn't exist yet.
+func _can_afford_dig() -> bool:
+	var stamina := get_tree().root.get_node_or_null("Stamina")
+	if stamina == null or not stamina.has_method("can_afford"):
+		return true
+	return bool(stamina.can_afford("dig"))
+
+
+## Movement speed multiplier from Hauling's current loaded state — per the
+## locked G1 decision, being loaded makes climbing/ladders/ramps/jumps
+## strenuous and unlocks a slower loaded-movement speed. Player Controller
+## owns SPEED itself and only reads this adjustment (Spec 07, confirmed
+## option A) — Hauling never reaches in and sets it directly. Fails safe
+## (1.0, unaffected) when Hauling doesn't exist yet.
+func _hauling_speed_multiplier() -> float:
+	var hauling := get_tree().root.get_node_or_null("Hauling")
+	if hauling == null or not hauling.has_method("get_movement_speed_multiplier"):
+		return 1.0
+	return float(hauling.get_movement_speed_multiplier())
 
 
 func _build_idle_frames() -> SpriteFrames:
