@@ -1,8 +1,20 @@
 extends Node2D
 ## Lightweight Hollow NPC — works/lives near a district, talks on interact.
 ## Most lines are talk-only (#20 D). Rare choice prompts handled by callers.
+##
+## Build Bible Spec 10 — implements the generic Interactable duck-typed
+## interface (get_interact_prompt()/on_interact()) via a small child
+## InteractableRelay Area2D (interactable_relay.gd), so the player's
+## central Interaction component (not this script) decides when "talk"
+## actually triggers — exactly the per-object-type input handling Spec 10
+## exists to replace. A relay child, not this node itself becoming an
+## Area2D, because main.tscn already declares each NPC's node type as
+## Node2D — the script's base class alone can't change that. Visual/
+## facing/bob logic below is unchanged from before this migration.
 
 signal talk_requested(npc: Node2D, lines: PackedStringArray, choice_prompt: String)
+
+const InteractableRelayScript := preload("res://interactable_relay.gd")
 
 @export var npc_name: String = "Neighbor"
 @export var district_id: StringName = &"farms"
@@ -26,10 +38,28 @@ var _face_sign := 1.0
 
 
 func _ready() -> void:
+	_ensure_interactable_relay()
 	_wander_origin = position
 	_wander_t = randf() * TAU
 	_build_visuals()
 	_player = get_tree().get_first_node_in_group("player") as Node2D
+
+
+func _ensure_interactable_relay() -> void:
+	if get_node_or_null("InteractableRelay") != null:
+		return
+	var relay: Area2D = InteractableRelayScript.new()
+	relay.name = "InteractableRelay"
+	add_child(relay)
+	relay.setup(interact_radius)
+
+
+func get_interact_prompt() -> String:
+	return "Talk to %s" % npc_name
+
+
+func on_interact(_player_node) -> void:
+	talk_requested.emit(self, lines, choice_prompt)
 
 
 func _build_visuals() -> void:
@@ -116,14 +146,8 @@ func debug_face_sign() -> float:
 	return _face_sign
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not _is_player_near():
-		return
-	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E):
-		talk_requested.emit(self, lines, choice_prompt)
-		get_viewport().set_input_as_handled()
-
-
+## Still used for the label/hint hover visuals below — not for gating the
+## actual talk trigger anymore (Interaction, via Area2D overlap, owns that).
 func _is_player_near() -> bool:
 	if _player == null:
 		return false

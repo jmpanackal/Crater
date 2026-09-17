@@ -67,9 +67,30 @@ func _ready() -> void:
 		_sprite.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
 		_play_idle_for_facing()
 		_ensure_contact_shadow()
+	_ensure_interaction()
 	_last_safe_pos = global_position
 	_has_safe_pos = true
 	_was_on_floor = is_on_floor()
+
+
+const InteractionScript := preload("res://interaction.gd")
+
+
+## Build Bible Spec 10 — one central Area2D-based Interaction component
+## instead of every interactable type handling its own input. Instantiated
+## via preload rather than the Interaction class_name identifier — a
+## freshly added class_name isn't in the global script class cache until
+## an editor rescan, which a headless test run never triggers.
+func _ensure_interaction() -> void:
+	if get_node_or_null("Interaction") != null:
+		return
+	var interaction: Area2D = InteractionScript.new()
+	interaction.name = "Interaction"
+	add_child(interaction)
+
+
+func get_interaction() -> Node:
+	return get_node_or_null("Interaction")
 
 
 ## Test hooks — keep jump fairness verifiable without Input frame races.
@@ -193,6 +214,10 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("dig"):
 		_try_dig()
+	if Input.is_action_just_pressed("interact"):
+		var interaction := get_interaction()
+		if interaction != null:
+			interaction.try_interact(self)
 
 
 func _update_coyote_and_buffer(delta: float) -> void:
