@@ -1,6 +1,10 @@
 """Import SpriteFusion 32x32 dig tiles: copy, nearest-neighbor upscale to 64, pack atlas.
 
-Keeps Terrain TILE_SIZE=64 (player art + dig spacing) by upscaling sources 2x NN.
+NOTE (2026-09-17 scale correction): Terrain.TILE_SIZE is now 16px, not 64 —
+this tool's 64px output no longer matches and terrain.gd loads a flat-color
+placeholder instead. Re-run against a 16px target (or a straight copy of the
+32x32 sources, if that reads better at dig scale) before pointing Terrain
+back at generated art.
 """
 from __future__ import annotations
 

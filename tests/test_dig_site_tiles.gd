@@ -1,5 +1,7 @@
 extends SceneTree
-## Dig-site sheet is SpriteFusion veins upscaled to 64px (4x3 atlas); dig still works.
+## Dig-site tileset acceptance: flat-color placeholder tiles at 16px (the
+## scale-corrected TILE_SIZE — see terrain.gd's own comment on why the real
+## 64px SpriteFusion sheet isn't loaded until a 16px sheet is generated).
 
 
 func _init() -> void:
@@ -7,21 +9,6 @@ func _init() -> void:
 
 
 func _run_tests() -> void:
-	var tex: Texture2D = load("res://sprites/dig_site_tiles.png")
-	if tex == null:
-		push_error("FAIL dig_site_tiles.png missing")
-		quit(1)
-		return
-	if tex.get_width() != 256 or tex.get_height() != 192:
-		push_error("FAIL sheet size %dx%d (expected 256x192)" % [tex.get_width(), tex.get_height()])
-		quit(1)
-		return
-	if tex.get_width() % 64 != 0 or tex.get_height() % 64 != 0:
-		push_error("FAIL sheet not divisible by 64")
-		quit(1)
-		return
-	print("PASS sheet 256x192 / 64 cell (12 SpriteFusion tiles)")
-
 	var community: Node = root.get_node_or_null("Community")
 	if community:
 		community.set_paused(true)
@@ -34,30 +21,21 @@ func _run_tests() -> void:
 		push_error("FAIL no tileset")
 		quit(1)
 		return
-	if terrain.tile_set.tile_size != Vector2i(64, 64):
-		push_error("FAIL tile_size %s" % terrain.tile_set.tile_size)
+	if terrain.tile_set.tile_size != Vector2i(16, 16):
+		push_error("FAIL tile_size %s (expected 16x16)" % terrain.tile_set.tile_size)
 		quit(1)
 		return
 
 	var source: TileSetAtlasSource = terrain.tile_set.get_source(0) as TileSetAtlasSource
-	if source == null:
-		push_error("FAIL no atlas source")
+	if source == null or not source.has_tile(TerrainLayer.PLACEHOLDER_ATLAS):
+		push_error("FAIL missing placeholder atlas tile")
 		quit(1)
 		return
-	var expected := 0
-	for y in range(3):
-		for x in range(4):
-			var coord := Vector2i(x, y)
-			if not source.has_tile(coord):
-				push_error("FAIL missing atlas tile %s" % coord)
-				quit(1)
-				return
-			expected += 1
-	print("PASS all %d atlas tiles exist" % expected)
+	print("PASS 16px placeholder tileset built with the fallback atlas tile")
 
-	# Dig still removes adjacent cells at 64px spacing.
+	# Dig still removes adjacent cells at 16px spacing.
 	terrain.clear()
-	var center := Vector2i(8, 8)
+	var center := Vector2i(80, 80)
 	for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 		terrain.set_cell(center + d, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	var origin := terrain.to_global(terrain.map_to_local(center))
@@ -70,9 +48,10 @@ func _run_tests() -> void:
 			push_error("FAIL tile still present after dig %s" % d)
 			quit(1)
 			return
-	print("PASS dig removes 64px neighbors")
+	print("PASS dig removes 16px neighbors")
 
-	# Scene terrain filled with real atlas variants (not empty).
+	# Scene terrain filled with real placeholder tiles (not empty), confined
+	# to the authored envelope — no bleed into the Hollow.
 	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
 	await process_frame
@@ -80,17 +59,12 @@ func _run_tests() -> void:
 	var found := false
 	var hollow_bleed := false
 	for x in range(0, TerrainLayer.DIG_END_X + 2):
-		for y in range(0, 16):
+		for y in range(0, 64):
 			if not layer.has_tile(Vector2i(x, y)):
 				continue
 			if x < TerrainLayer.DIG_START_X:
 				hollow_bleed = true
 			found = true
-			var atlas: Vector2i = layer.get_cell_atlas_coords(Vector2i(x, y))
-			if atlas.x < 0 or atlas.y < 0 or atlas.x > 3 or atlas.y > 2:
-				push_error("FAIL unexpected atlas %s" % atlas)
-				quit(1)
-				return
 	if hollow_bleed:
 		push_error("FAIL dig tiles bleed into Hollow/approach (x < %d)" % TerrainLayer.DIG_START_X)
 		quit(1)

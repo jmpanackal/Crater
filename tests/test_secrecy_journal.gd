@@ -149,11 +149,11 @@ func _run_tests() -> void:
 		push_error("FAIL Firmament cell")
 		quit(1)
 		return
-	if not terrain.is_mouth_cell(Vector2i(12, 12)):
+	if not terrain.is_mouth_cell(Vector2i(12, 48)):
 		push_error("FAIL Devil’s Mouth cell")
 		quit(1)
 		return
-	if terrain.is_firmament_cell(Vector2i(12, 12)) or terrain.is_mouth_cell(Vector2i(12, 2)):
+	if terrain.is_firmament_cell(Vector2i(12, 48)) or terrain.is_mouth_cell(Vector2i(12, 2)):
 		push_error("FAIL frontier helpers crossed")
 		quit(1)
 		return

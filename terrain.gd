@@ -9,18 +9,26 @@ extends TileMapLayer
 signal dig_completed(cell: Vector2i, direction: Vector2i, found_record: StringName)
 signal frontier_notice(text: String)
 
-## Dig cells stay 64px to match player art / dig spacing. SpriteFusion sources
-## are 32x32 and nearest-neighbor upscaled into dig_site_tiles.png (4x3 atlas).
-const TILE_SIZE := 64
-const TILE_SHEET_PATH := "res://sprites/dig_site_tiles.png"
+## Scale correction (2026-09-17): dig cells were 64px, letting a single dig
+## cover more ground than the Stamina/Hauling/Fatigue systems intend to make
+## weighty. Unified to 16px so digging reads as incremental work, matching
+## Dome Keeper/Terraria precedent, per the scale-visualization pass in
+## CONTEXT.md. World-space envelope bounds below (DIG_START_X/END_X,
+## FIRMAMENT_Y_MAX, MOUTH_Y_MIN) are re-derived to cover the exact same
+## world-pixel footprint as before — only the grid fineness changed.
+const TILE_SIZE := 16
 
 # Default atlas used by tests / simple fills (first SpriteFusion vein tile).
 const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 
 ## Cells with y < this are Firmament rock (secret upward frontier).
-const FIRMAMENT_Y_MAX := 4
+## Re-derived for TILE_SIZE=16 to cover the same world-y span as the old
+## 64px value (4): (4+1)*64 = 320px -> (320/16)-1 = 19.
+const FIRMAMENT_Y_MAX := 19
 ## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
-const MOUTH_Y_MIN := 9
+## Re-derived for TILE_SIZE=16 to cover the same world-y as the old 64px
+## value (9): 9*64 = 576px -> 576/16 = 36.
+const MOUTH_Y_MIN := 36
 
 var _atlas_coords: Array[Vector2i] = []
 var _pit_digs_since_warn := 0
@@ -45,53 +53,15 @@ func _exit_tree() -> void:
 		save_load.unregister_scene_domain("Terrain")
 
 
-## Build TileSet from the dig-site sheet; every variant gets full-cell collision.
+## Builds the flat-color placeholder tileset. The real SpriteFusion art at
+## res://sprites/dig_site_tiles.png is sized for the old 64px grid — slicing
+## it at the new 16px TILE_SIZE would mis-crop every real tile into 16
+## garbled sub-pieces, not shrink them. A 16px dig-site sheet needs to be
+## generated before this loads real art again; until then the flat-color
+## fallback is correct on its own terms, not a stopgap — this project's
+## placeholder-art-first plan already calls for greybox art at this stage.
 func _build_tileset() -> TileSet:
-	var texture: Texture2D = load(TILE_SHEET_PATH)
-	if texture == null:
-		push_error("TerrainLayer: missing %s — using flat fallback" % TILE_SHEET_PATH)
-		return _build_fallback_tileset()
-
-	var tileset := TileSet.new()
-	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	tileset.add_physics_layer()
-
-	var atlas := TileSetAtlasSource.new()
-	atlas.texture = texture
-	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
-
-	_atlas_coords = _coords_for_texture(texture)
-	for coord in _atlas_coords:
-		atlas.create_tile(coord)
-
-	# Source must be on the TileSet before TileData physics edits are kept.
-	tileset.add_source(atlas)
-
-	var half := float(TILE_SIZE) / 2.0
-	var poly := PackedVector2Array([
-		Vector2(-half, -half),
-		Vector2(half, -half),
-		Vector2(half, half),
-		Vector2(-half, half),
-	])
-	for coord in _atlas_coords:
-		var tile_data := atlas.get_tile_data(coord, 0)
-		tile_data.add_collision_polygon(0)
-		tile_data.set_collision_polygon_points(0, 0, poly)
-
-	return tileset
-
-
-func _coords_for_texture(texture: Texture2D) -> Array[Vector2i]:
-	@warning_ignore("integer_division")
-	var cols: int = texture.get_width() / TILE_SIZE
-	@warning_ignore("integer_division")
-	var rows: int = texture.get_height() / TILE_SIZE
-	var coords: Array[Vector2i] = []
-	for y in range(rows):
-		for x in range(cols):
-			coords.append(Vector2i(x, y))
-	return coords
+	return _build_fallback_tileset()
 
 
 func _build_fallback_tileset() -> TileSet:
@@ -125,8 +95,10 @@ func _build_fallback_tileset() -> TileSet:
 
 ## Dig columns start past the Hollow exit ledge (world x = cell * TILE_SIZE).
 ## Hollow is pit-centered terraces ending at ~1024; dig must not bleed into home.
-const DIG_START_X := 16 # world 1024 — after Hollow exit ledge
-const DIG_END_X := 32 # exclusive; 16 columns of Firmament/Devil’s Mouth
+## Re-derived for TILE_SIZE=16 to cover the same world-x span as the old
+## 64px values (16..32, i.e. world 1024..2048): 1024/16 = 64, 2048/16 = 128.
+const DIG_START_X := 64 # world 1024 — after Hollow exit ledge
+const DIG_END_X := 128 # exclusive; 64 columns of Firmament/Devil’s Mouth
 
 
 func _fill_ground() -> void:
@@ -139,7 +111,8 @@ func _fill_ground() -> void:
 		for y in range(0, FIRMAMENT_Y_MAX + 1):
 			_place_random(Vector2i(x, y))
 		# Mid band + Devil’s Mouth walls — downward public-ish danger.
-		for y in range(5, 16):
+		# Re-derived for TILE_SIZE=16 from the old 64px range(5, 16): 5*4=20, 16*4=64.
+		for y in range(20, 64):
 			_place_random(Vector2i(x, y))
 
 
@@ -155,13 +128,13 @@ func has_tile(cell: Vector2i) -> bool:
 
 ## Build Bible Spec 06 contract surface — see docs/build-bible/specs/06-
 ## destructible-terrain.md. The envelope is currently the same rectangle
-## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..15) — opt-in
+## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..63) — opt-in
 ## destructibility per §63/the atlas's "fixed outer envelope of
 ## destructible chunks" language: nothing outside it is diggable, full
 ## stop, regardless of whether a real Zone (Spec 05, not authored yet)
 ## eventually replaces this rectangle with real chunk-authored bounds.
 func is_within_dig_envelope(cell: Vector2i) -> bool:
-	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < 16
+	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < 64
 
 
 ## can_dig(position) from the spec's contract surface, in world space to
@@ -348,11 +321,11 @@ func _to_cardinal(direction: Vector2i) -> Vector2i:
 ## Scans rather than tracking a parallel dug-cells set, since the
 ## TileMapLayer itself is already the authoritative state (Spec 01: no
 ## shadow copies of something already readable from its owner) — the
-## envelope is only 256 cells, cheap to scan.
+## envelope is only 4096 cells, cheap to scan.
 func save_state() -> Dictionary:
 	var dug: Array = []
 	for x in range(DIG_START_X, DIG_END_X):
-		for y in range(16):
+		for y in range(64):
 			var cell := Vector2i(x, y)
 			if not has_tile(cell):
 				dug.append([cell.x, cell.y])
