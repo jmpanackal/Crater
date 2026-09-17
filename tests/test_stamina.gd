@@ -39,7 +39,14 @@ func _run() -> void:
 	print("PASS a hauling block and a Rig Strain block coexist and release independently")
 
 	# --- 2. Overflow past the bar is only reachable via Overexertion,
-	# converts to fatigue exactly, and warns first (signal fires). ---
+	# converts to fatigue via Fatigue's fixed per-instance cost (Spec 09,
+	# NOT scaled to the shortfall — Stamina delegates the actual amount),
+	# and warns first (signal fires). ---
+	var fatigue: Node = root.get_node_or_null("Fatigue")
+	if fatigue == null:
+		push_error("FAIL Fatigue autoload missing")
+		quit(1)
+		return
 	stamina.reset_all()
 	var max_stamina: float = stamina.get_max_stamina()
 	stamina.spend(max_stamina)  # drain to exactly zero via the normal path
@@ -52,14 +59,16 @@ func _run() -> void:
 	var listener := func(fatigue_added: float) -> void: received.append(fatigue_added)
 	stamina.overexertion_triggered.connect(listener)
 
-	var overexert_cost := 30.0
-	var fatigue_added: float = stamina.overexert(overexert_cost)
-	if not is_equal_approx(fatigue_added, overexert_cost):
-		push_error("FAIL overexert shortfall expected %s, got %s" % [overexert_cost, fatigue_added])
+	var fixed_cost: float = fatigue.get_fixed_overexertion_cost()
+	# The requested cost's exact size shouldn't matter to the fatigue
+	# result — it's fixed per instance, not shortfall-scaled.
+	var fatigue_added: float = stamina.overexert(30.0)
+	if not is_equal_approx(fatigue_added, fixed_cost):
+		push_error("FAIL overexert fatigue expected the fixed cost %s, got %s" % [fixed_cost, fatigue_added])
 		quit(1)
 		return
-	if not is_equal_approx(float(stamina.get_block(stamina.SOURCE_FATIGUE)), overexert_cost):
-		push_error("FAIL overexert did not convert the shortfall into fatigue block exactly")
+	if not is_equal_approx(float(stamina.get_block(stamina.SOURCE_FATIGUE)), fixed_cost):
+		push_error("FAIL overexert did not apply the fixed fatigue cost to the block")
 		quit(1)
 		return
 	if not is_equal_approx(float(stamina.get_current()), 0.0):
@@ -71,7 +80,16 @@ func _run() -> void:
 		quit(1)
 		return
 	stamina.overexertion_triggered.disconnect(listener)
-	print("PASS overflow only happens via Overexertion, converts to fatigue exactly, and warns")
+
+	# A second overexertion at a very different requested cost adds the
+	# SAME fixed amount again — proving it's genuinely fixed, not scaled.
+	stamina.spend(max_stamina)  # drain the regenerated ceiling back to zero
+	var second_added: float = stamina.overexert(9999.0)
+	if not is_equal_approx(second_added, fixed_cost):
+		push_error("FAIL a wildly different requested cost changed the fixed fatigue amount: %s" % second_added)
+		quit(1)
+		return
+	print("PASS overflow only happens via Overexertion, converts to a FIXED fatigue cost per instance, and warns")
 
 	# A spend() alone (no overexert) never pushes blocked past max — the
 	# invariant only ever gets exceeded through the controlled Overexertion

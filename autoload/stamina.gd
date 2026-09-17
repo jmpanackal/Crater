@@ -15,6 +15,11 @@ extends Node
 
 const SOURCE_HAULING := &"hauling"
 const SOURCE_RIG_STRAIN := &"rig_strain"
+## Stamina stores this block's raw VALUE, but Fatigue (Build Bible Spec 09)
+## is the sole system expected to WRITE to it via request_block/
+## release_block — same "no shadow copies" reasoning Spec 01 already
+## applies elsewhere, just with Stamina as the storage and Fatigue as the
+## one writer for this specific slot.
 const SOURCE_FATIGUE := &"fatigue"
 
 const TUNING_DOMAIN := "stamina_tuning"
@@ -126,17 +131,33 @@ func spend(cost: float) -> void:
 ## Continuing a strenuous action past zero usable stamina (G21: automatic
 ## at zero stamina while holding the action, with a strong warning — the
 ## warning/first-time-prompt UI itself belongs to whatever calls this, not
-## to Stamina). The shortfall between cost and what's actually available
-## converts into fatigue block, exactly (G2) — current usable stamina is
-## left at zero, never negative. Returns the fatigue amount added so the
-## caller can drive its own warning UI.
+## to Stamina). Current usable stamina is left at zero, never negative.
+##
+## The actual fatigue conversion is Fatigue's call, not Stamina's (Build
+## Bible Spec 09, confirmed option A): a FIXED cost per instance, not
+## scaled to how far past zero the triggering action went — Stamina used
+## to compute a shortfall-scaled amount directly here before Spec 09
+## clarified that; this delegates to Fatigue.add_from_overexertion()
+## instead, which also refuses outright once already Exhausted (no further
+## Overexertion is possible until recovery clears it). Fails safe (no
+## fatigue consequence, 0.0 returned) if Fatigue isn't present, matching
+## every other "system doesn't exist yet" stub in this Build Bible.
+## Returns the fatigue amount actually added, so a caller can drive its
+## own warning UI.
 func overexert(cost: float) -> float:
-	var shortfall := maxf(0.0, cost - _current)
+	if is_exhausted():
+		return 0.0
+	var needed := cost > _current
 	_current = 0.0
-	if shortfall > 0.0:
-		request_block(SOURCE_FATIGUE, get_block(SOURCE_FATIGUE) + shortfall)
-		overexertion_triggered.emit(shortfall)
-	return shortfall
+	if not needed:
+		return 0.0
+	var fatigue := get_tree().root.get_node_or_null("Fatigue")
+	if fatigue == null or not fatigue.has_method("add_from_overexertion"):
+		return 0.0
+	var added: float = float(fatigue.add_from_overexertion())
+	if added > 0.0:
+		overexertion_triggered.emit(added)
+	return added
 
 
 ## True specifically when fatigue's OWN block alone has filled the bar
