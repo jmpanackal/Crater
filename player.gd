@@ -464,11 +464,10 @@ static func facing_to_idle_anim(dir: Vector2i) -> StringName:
 
 
 ## Build Bible Spec 07 (Player Controller) contract hooks into Stamina
-## (Spec 08) and Hauling (Spec 13), neither of which exists yet in build
-## order. Contract-only per Spec 07's own failure-case note: method
-## signatures agreed, bodies stubbed, FAIL SAFE (unblocked / unaffected)
-## until those systems land for real — normal movement must never break
-## just because a dependency doesn't exist yet.
+## (Spec 08, now built) and Hauling (Spec 13, not yet built). Contract-only
+## per Spec 07's own failure-case note: method signatures agreed, bodies
+## stubbed until real numbers exist — normal movement must never break just
+## because a dependency doesn't exist, or doesn't have a tuned cost yet.
 ##
 ## Player Controller calls these systems' public APIs directly for
 ## blocking-relevant actions (Spec 07, confirmed option A) — no
@@ -477,14 +476,24 @@ static func facing_to_idle_anim(dir: Vector2i) -> StringName:
 ## Controller only ever reads/requests here, it never mutates Stamina's or
 ## Hauling's own state.
 
+## Digging's real stamina cost is canon-OPEN — not decided or tuned
+## anywhere yet, despite digging being explicitly named a strenuous action
+## in canon §9. 0.0 (always affordable) preserves today's actual game feel
+## exactly rather than inventing a number; this is the one line to change
+## once a real tuning value exists.
+const DIG_STAMINA_COST := 0.0
+
 
 ## True when a dig is currently affordable per Stamina's current block
-## state. Fails safe (true) when Stamina doesn't exist yet.
+## state. Fails safe (true) when Stamina doesn't exist yet — real once
+## Stamina (Spec 08) is present, using can_afford(cost: float), matching
+## its actual API rather than the guessed shape this stub used before
+## Spec 08 existed.
 func _can_afford_dig() -> bool:
 	var stamina := get_tree().root.get_node_or_null("Stamina")
 	if stamina == null or not stamina.has_method("can_afford"):
 		return true
-	return bool(stamina.can_afford("dig"))
+	return bool(stamina.can_afford(DIG_STAMINA_COST))
 
 
 ## Movement speed multiplier from Hauling's current loaded state — per the

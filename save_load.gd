@@ -39,6 +39,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"FactLog",
 	"Clock",
 	"Zones",
+	"Stamina",
 	"Resources",
 	"Upgrades",
 	"Community",
