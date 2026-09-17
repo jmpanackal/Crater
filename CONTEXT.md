@@ -105,7 +105,8 @@ The confirmed [`docs/build-bible/`](docs/build-bible/) specs (32 systems, build 
 - **Spec 01 (Core Infrastructure) — done.** `autoload/event_bus.gd`, `autoload/fact_log.gd`, `autoload/tuning_registry.gd`, registered in `project.godot`. Authoritative State and Content Definitions are conventions, not files — documented in [`docs/godot-best-practices.md`](docs/godot-best-practices.md)'s "Core infrastructure conventions" section. Tests: `tests/test_core_infrastructure.gd`.
 - **Spec 02 (Save / Load + Versioning) — done.** `save_load.gd` rewritten around the uniform `save_state() -> Dictionary` / `load_state(Dictionary) -> void` / `reset_all()` contract now added to every domain autoload (thin wrappers around each domain's own existing snapshot methods — zero behavior change to any of them). Atomic write (temp file + rename), `schema_version` stored and strictly checked (a mismatch is rejected loudly, never silently migrated — the old prototype's unenforced `SAVE_VERSION` int and flat-keys format are intentionally not migrated; real migration is still the open spike question 00-dependency-map.md already flags). Tests: `tests/test_save_load.gd`.
 - **Known pre-existing flaky test (not caused by Spec 01/02):** `tests/test_feel_feedback.gd`'s "dig salvage float" check doesn't seed/force off `journal.gd`'s random Record-discovery roll (`try_find_on_dig`), so it can occasionally fail if that roll happens to fire during the dig it expects to only produce a Materials float. Confirmed present before touching either spec; not fixed here since it's an unrelated Journal/RNG-determinism issue, not a save/load or core-infrastructure one.
-- **Next up:** Spec 03 (Debug Tools).
+- **Spec 03 (Debug Tools Framework) — done.** `autoload/debug_console.gd` — registry pattern (`register_command`, `register_inspector`), a minimal always-there `help`/`dump`/`facts`/`set_trust`/`spawn_material` command set, and a debug-build-only overlay (`` ` `` / backtick to toggle, `toggle_debug_console` input action) built programmatically rather than as a `.tscn`. `dump <domain>` needs no per-domain registration — it falls back to that domain's existing Spec 02 `save_state()`. Tests: `tests/test_debug_console.gd`. Every later spec is expected to register its own commands into this rather than build a separate debug surface (teleport-to-chunk and force-phase land with Specs 04/05).
+- **Next up:** Spec 04 (World Clock).
 - The legacy flat-root systems below (Resources/Districts/Upgrades/Community/etc.) are **not yet migrated to canon shape** — they keep working via the existing autoloads (now also implementing the Spec 02 save contract) until their own Build Bible spec's turn comes up in build order.
 
 ### Implemented (Act 1 vertical slice — transitional)
@@ -147,6 +148,7 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `autoload/event_bus.gd` | Cross-cutting signals only (Build Bible Spec 01); no state |
 | `autoload/fact_log.gd` | Append-only Fact Log (Build Bible Spec 01) |
 | `autoload/tuning_registry.gd` | Loads/hot-reloads `.tres` tuning domains (Build Bible Spec 01) |
+| `autoload/debug_console.gd` | Registry-pattern debug console/overlay, debug-builds only (Build Bible Spec 03) |
 | `title_screen.tscn` | Campaign shell (main scene) |
 | `main.tscn` / `main.gd` | Play scene; NPC + notice wiring |
 | `resources.gd` | Salvage wallet (**pending rename → Materials inventory**) |
