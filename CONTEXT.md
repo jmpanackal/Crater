@@ -98,6 +98,14 @@ If a request erases theft / return / consequence / Act 1 "might be the whole gam
 
 > **Prototype ≠ canon.** The implemented slice below predates [`docs/mechanics-canon.md`](docs/mechanics-canon.md) and still uses retired mechanics (Harvest timer, Standing, Salvage wallet, Requisition panel, Shortage Risk/Cover, named district goods with reserve 1 / cap 6, siphon notice RNG, Dig Yield / Quiet Dig). Treat it as transitional; migration backlog lives in [`docs/terminology-transition.md`](docs/terminology-transition.md).
 
+### Build Bible migration (started 2026-09-17)
+
+The confirmed [`docs/build-bible/`](docs/build-bible/) specs (32 systems, build order in `00-dependency-map.md`) are now being implemented directly as GDScript, in build order, each system fully complete with passing tests before the next one starts — see each spec's own file for exactly what's confirmed vs. still OPEN.
+
+- **Spec 01 (Core Infrastructure) — done.** `autoload/event_bus.gd`, `autoload/fact_log.gd`, `autoload/tuning_registry.gd`, registered in `project.godot`. Authoritative State and Content Definitions are conventions, not files — documented in [`docs/godot-best-practices.md`](docs/godot-best-practices.md)'s "Core infrastructure conventions" section. Tests: `tests/test_core_infrastructure.gd`.
+- **Next up:** Spec 02 (Save/Load) — the existing `save_load.gd` predates this convention (it manually enumerates each autoload's snapshot method); rebuilding it is Spec 02's job, not a drive-by fix.
+- The legacy flat-root systems below (Resources/Districts/Upgrades/Community/etc.) are **not yet migrated** — they keep working via the existing autoloads until their own Build Bible spec's turn comes up in build order.
+
 ### Implemented (Act 1 vertical slice — transitional)
 
 - Campaign shell: **title → New Dig / Continue → play**; Esc saves and returns to title. No Act 2 tease.
@@ -134,6 +142,9 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 
 | File | Role |
 | --- | --- |
+| `autoload/event_bus.gd` | Cross-cutting signals only (Build Bible Spec 01); no state |
+| `autoload/fact_log.gd` | Append-only Fact Log (Build Bible Spec 01) |
+| `autoload/tuning_registry.gd` | Loads/hot-reloads `.tres` tuning domains (Build Bible Spec 01) |
 | `title_screen.tscn` | Campaign shell (main scene) |
 | `main.tscn` / `main.gd` | Play scene; NPC + notice wiring |
 | `resources.gd` | Salvage wallet (**pending rename → Materials inventory**) |

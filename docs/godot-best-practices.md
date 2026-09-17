@@ -45,6 +45,18 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 
 **Current shape:** flat root scripts + `main.tscn` play scene + `title_screen.tscn` shell is fine for a vertical slice. Split Hollow / Dig Site / UI into packed scenes when `main.tscn` or art iteration starts fighting itself.
 
+**New infrastructure lives under `autoload/`** (`event_bus.gd`, `fact_log.gd`, `tuning_registry.gd` — Build Bible Spec 01). This is the first feature cluster; legacy root-level autoloads (`resources.gd`, `districts.gd`, etc.) stay where they are unless a later pass specifically migrates them — don't fold that into an unrelated change.
+
+---
+
+## Core infrastructure conventions (Build Bible Spec 01)
+
+Two of Spec 01's five pieces are conventions, not new files — easy to miss since there's nothing to `grep` for by filename. Both apply to every autoload from here on, existing or new.
+
+**Authoritative State — one writer per value, no shadow copies.** Every piece of state has exactly one autoload allowed to mutate it (`Districts` owns district goods, `Resources` owns the wallet, and so on). Everyone else requests changes through that owner's public API — a method call, never a direct field write — and may freely *read* another domain's state through its getters. Nothing caches a second copy of a value that can be read from its owner; only derived/computed values get cached, never authoritative ones. This is already the shape `resources.gd` / `districts.gd` / `community.gd` follow — Spec 01 just makes it an explicit, binding rule for every system built from here on, not an emergent convention.
+
+**Content Definitions — Resource files, not code arrays.** Once a system has real authored content (Gear, Materials, Jobs, Districts, …), that content is a Godot `Resource` (`.tres`) file per item, not a `match` statement or a hardcoded `Dictionary` in a script — a designer/agent adds content by adding a file, not editing code. Content resources are read-only at runtime; a domain's *state* about a piece of content (e.g. "this Gear is currently equipped") lives in that domain's own authoritative state as a reference to the definition, never mutated onto the definition itself. Not retrofitted onto the existing prototype's `_defs`/`_good_defs` dictionaries in `districts.gd` — those migrate when their owning system gets rebuilt against its Build Bible spec, not as a drive-by change.
+
 ---
 
 ## Agent / author checklist
