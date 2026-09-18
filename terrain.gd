@@ -261,6 +261,20 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 		var bus := get_tree().root.get_node_or_null("EventBus")
 		if bus != null:
 			bus.terrain_dug.emit(cell, direction, is_firmament, is_mouth)
+		# Build Bible Spec 17: whether a dig is witnessable is THIS system's
+		# decision, not Perception's. Digging the Firmament is the
+		# restricted excavation canon forbids (§19 "excavated restricted
+		# wall"); ordinary civic digging isn't flagged. One source id for
+		# the sustained activity, so continuous Firmament mining seen by
+		# the same NPC is one fact per cooldown window, not one per cell.
+		# Zone-authored restricted flags (Spec 18) will widen this check.
+		if is_firmament:
+			var perception := get_tree().root.get_node_or_null("Perception")
+			if perception != null and perception.has_method("flag_witnessable"):
+				perception.flag_witnessable(
+					"firmament_dig", world, perception.FACT_EXCAVATED_RESTRICTED_WALL,
+					{"cell": [cell.x, cell.y], "direction": [direction.x, direction.y]}
+				)
 	return true
 
 
