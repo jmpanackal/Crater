@@ -531,6 +531,12 @@ func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
 		var quiet := 0
 		if upgrades and upgrades.has_method("get_quiet_dig_level"):
 			quiet = int(upgrades.get_quiet_dig_level())
+		# Build Bible Spec 14: quieting is a Gear effect now (Dampening Wrap,
+		# Quieting Coupler graft — Rig.EFFECT_QUIET_DIG), summed with the
+		# retired Upgrades level until that model is fully retired.
+		var rig := get_tree().root.get_node_or_null("Rig") if is_inside_tree() else null
+		if rig and rig.has_method("get_effect_sum"):
+			quiet += int(round(float(rig.get_effect_sum(&"quiet_dig_level"))))
 		var community := get_tree().root.get_node_or_null("Community") if is_inside_tree() else null
 		if community and community.has_method("roll_upward_dig_risk"):
 			community.roll_upward_dig_risk(quiet)

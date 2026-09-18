@@ -58,6 +58,22 @@ func _ready() -> void:
 	console.register_command("caches", "caches — list every cache and the current load.", _debug_caches)
 
 
+## Build Bible Spec 14: Hauling-dimension Gear changes the bundle capacity
+## and the block per unit (see get_bundle_capacity/get_block_per_unit), so
+## the block on a load already in tow must be re-derived whenever the Rig
+## changes — the hauling block is still Hauling's own request, sized by
+## Hauling; Rig never touches Stamina's "hauling" slot.
+func _on_rig_changed(_change: StringName, _id: StringName) -> void:
+	if is_loaded():
+		_apply_block()
+
+
+func _enter_tree() -> void:
+	var bus := get_tree().root.get_node_or_null("EventBus")
+	if bus != null and bus.has_signal("rig_changed") and not bus.rig_changed.is_connected(_on_rig_changed):
+		bus.rig_changed.connect(_on_rig_changed)
+
+
 func _process(delta: float) -> void:
 	_ensure_cache_nodes()
 	_update_bundle_visual(delta)
@@ -65,14 +81,30 @@ func _process(delta: float) -> void:
 
 # --- Tuning -----------------------------------------------------------------
 
+## Tuned base, plus whatever Hauling-dimension Gear adds (Build Bible Spec
+## 14: Rig.EFFECT_HAULING_CAPACITY — e.g. the Counterweight Frame). Reads
+## the Rig's effect total through its API; never Rig's block state.
 func get_bundle_capacity() -> int:
 	var tuning := _tuning()
-	return int(tuning.bundle_capacity) if tuning != null else 4
+	var base := int(tuning.bundle_capacity) if tuning != null else 4
+	return maxi(1, base + int(round(_rig_effect(&"hauling_capacity_bonus"))))
 
 
+## Tuned base per unit, reduced by Gear that "reduces the severity of the
+## hauling stamina block" (canon §65 Load Harness; Spec 14
+## Rig.EFFECT_HAULING_BLOCK_REDUCTION, a fraction, clamped so the block can
+## never go negative — no Gear raises maximum stamina).
 func get_block_per_unit() -> float:
 	var tuning := _tuning()
-	return float(tuning.stamina_block_per_unit) if tuning != null else 8.0
+	var base := float(tuning.stamina_block_per_unit) if tuning != null else 8.0
+	return base * clampf(1.0 - _rig_effect(&"hauling_block_reduction"), 0.0, 1.0)
+
+
+func _rig_effect(effect_id: StringName) -> float:
+	var rig := get_tree().root.get_node_or_null("Rig") if is_inside_tree() else null
+	if rig == null or not rig.has_method("get_effect_sum"):
+		return 0.0
+	return float(rig.get_effect_sum(effect_id))
 
 
 func get_loaded_speed_min_multiplier() -> float:

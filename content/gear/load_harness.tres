@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/gear_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gear_id = &"load_harness"
+display_name = "Load Harness"
+description = "Improves how hauled Material is supported (canon §65, Approved — Hauling / Endurance). Reduces the severity of the hauling stamina block; does not raise maximum stamina."
+kind = &"approved"
+category = &"rig"
+capacity_cost = 1
+effects = {
+"hauling_block_reduction": 0.35
+}

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/gear_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gear_id = &"dampening_wrap"
+display_name = "Dampening Wrap"
+description = "Legitimate Wickwork vibration-control equipment (canon §65, Approved — Secrecy). Reduces tool vibration/noise — for worker safety and structural stability, and naturally also useful for illicit excavation. Quiets upward digs by one level."
+kind = &"approved"
+category = &"utility"
+capacity_cost = 1
+effects = {
+"quiet_dig_level": 1.0
+}

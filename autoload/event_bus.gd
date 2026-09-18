@@ -72,3 +72,11 @@ signal haul_changed(material_id: StringName, amount: int)
 ## Hauling (Build Bible Spec 13): a cache was created (exists = true) or
 ## picked back up (exists = false) at position.
 signal cache_changed(position: Vector2, material_id: StringName, amount: int, exists: bool)
+
+## Rig (Build Bible Spec 14): the loadout changed. change is one of Rig's
+## CHANGE_* constants (equipped / unequipped / grafted / ungrafted / owned /
+## core_installed / loaded) and id the Gear or Core Improvement involved
+## (empty for a whole-state load). Cross-cutting because the systems that
+## consume Gear effects (Hauling's bundle capacity/block, Terrain's quiet
+## dig) need to re-derive without a reference to Rig.
+signal rig_changed(change: StringName, id: StringName)

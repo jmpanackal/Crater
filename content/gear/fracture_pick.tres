@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/gear_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gear_id = &"fracture_pick"
+display_name = "Fracture Pick"
+description = "A more efficient precision excavation approach (canon §65, Approved — Excavation). Weaker than brute-force pressure equipment but cheaper to sustain: each dig costs less stamina. (Its 'especially effective on Survey-revealed weak seams' role waits on Survey Gear existing.)"
+kind = &"approved"
+category = &"tool"
+capacity_cost = 1
+effects = {
+"dig_stamina_cost_reduction": 0.5
+}

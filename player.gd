@@ -528,7 +528,20 @@ func _can_afford_dig() -> bool:
 	var stamina := get_tree().root.get_node_or_null("Stamina")
 	if stamina == null or not stamina.has_method("can_afford"):
 		return true
-	return bool(stamina.can_afford(DIG_STAMINA_COST))
+	return bool(stamina.can_afford(dig_stamina_cost()))
+
+
+## The per-dig stamina cost after Gear (Build Bible Spec 14: excavation
+## Gear like the Fracture Pick reduces it — Rig.EFFECT_DIG_COST_REDUCTION,
+## a fraction). Baseline digging itself is never Gear-gated; Gear can only
+## make it cheaper. Still 0.0 in practice while DIG_STAMINA_COST is
+## untuned, but the hook is real so tuning it is one constant.
+func dig_stamina_cost() -> float:
+	var rig := get_tree().root.get_node_or_null("Rig")
+	if rig == null or not rig.has_method("get_effect_sum"):
+		return DIG_STAMINA_COST
+	var reduction := clampf(float(rig.get_effect_sum(&"dig_stamina_cost_reduction")), 0.0, 1.0)
+	return DIG_STAMINA_COST * (1.0 - reduction)
 
 
 ## Movement speed multiplier from Hauling's current loaded state — per the
