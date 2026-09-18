@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/district_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+district_id = &"wickwork"
+display_name = "Wickwork"
+capacity_contributors = [{
+"id": "rope_walk",
+"name": "The rope walk and binding benches",
+"amount": 4.0
+}, {
+"id": "lamp_housing_shop",
+"name": "Lamp-housing and seal shop",
+"amount": 2.0
+}]
+demand_contributors = [{
+"id": "basic_hollow_needs",
+"name": "Basic Hollow needs (bindings, lamp housings, work gear)",
+"amount": 3.0
+}, {
+"id": "lift_maintenance",
+"name": "Lift cable and harness maintenance",
+"amount": 1.0
+}]
+reserve_cap = 5.0
+starting_reserves = 2.0

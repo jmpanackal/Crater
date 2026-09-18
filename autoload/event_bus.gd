@@ -117,3 +117,15 @@ signal search_requested(context: StringName, reason: String)
 ## found_count = how many pieces of real evidence it turned up (0 =
 ## found_nothing).
 signal investigation_resolved(context: StringName, found_count: int)
+
+## District (Build Bible Spec 22): a district's cycle resolution ran —
+## once per district per civic cycle, on cycle_resolved. summary is the
+## resolution record (output / served / surplus_banked /
+## drawn_from_reserves / unmet / reserves_after / unexplained_loss /
+## discrepancy_logged). Jobs (Spec 24) spawn emergency work off unmet > 0.
+signal district_resolved(district_id: StringName, summary: Dictionary)
+
+## District (Build Bible Spec 22): Capacity/Demand contributors, Reserves
+## or the derived condition changed (a withdrawal, deposit, registration
+## or resolution). condition is the live derived label id.
+signal district_changed(district_id: StringName, condition: StringName)
