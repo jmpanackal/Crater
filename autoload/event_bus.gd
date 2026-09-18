@@ -80,3 +80,15 @@ signal cache_changed(position: Vector2, material_id: StringName, amount: int, ex
 ## consume Gear effects (Hauling's bundle capacity/block, Terrain's quiet
 ## dig) need to re-derive without a reference to Rig.
 signal rig_changed(change: StringName, id: StringName)
+
+## CivicCycle (Build Bible Spec 15): a civic cycle just ended — fired
+## exactly once per cycle, on the Clock's Ritual -> Rousing transition.
+## `cycle` is the 0-based index of the cycle that ENDED. This is the
+## district-resolution moment (canon §24); Districts (Spec 22) hang the
+## actual economics off it.
+signal cycle_resolved(cycle: int)
+
+## CivicCycle (Build Bible Spec 15): the automatic Ritual attendance check
+## ran for `cycle` as Ritual began. attended = false also means one
+## `ritual_missed` fact was just logged.
+signal ritual_checked(attended: bool, cycle: int)
