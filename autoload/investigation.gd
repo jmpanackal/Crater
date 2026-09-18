@@ -318,6 +318,12 @@ func _submit_trust_for(context: StringName, found: Array[Dictionary]) -> void:
 		where = str(zones.get_display_name(str(context)))
 	var reason := "A search of %s found %d fresh cut%s in restricted rock" % [where, found.size(), "" if found.size() == 1 else "s"]
 	trust.submit_trust_event(&"evidence_found", get_found_evidence_trust_delta(), reason)
+	# Build Bible Spec 21: a conflicting resolution is the in-fiction
+	# moment that exposes any claim the player made about this place.
+	var dialogue := get_tree().root.get_node_or_null("Dialogue")
+	var zone_id := _zone_for_context(context)
+	if dialogue != null and dialogue.has_method("expose_contradicted_claims_at") and zone_id != "":
+		dialogue.expose_contradicted_claims_at(StringName(zone_id))
 
 
 func _current_cycle() -> int:

@@ -92,6 +92,18 @@ func resolve_harvest_miss(lied: bool) -> void:
 	_miss_awaiting_resolve = false
 	if lied:
 		pending_lie = true
+		# Build Bible Spec 21: this prompt is a real questioning moment, so
+		# the lie is a real, checkable, trust-relevant claim ("I was at the
+		# Ritual") — contradicted by CivicCycle's ritual_missed fact for the
+		# cycle, exposed only when something surfaces it (see
+		# on_theft_noticed / on_caught_upward_dig below).
+		var dialogue := get_tree().root.get_node_or_null("Dialogue")
+		var clock := get_tree().root.get_node_or_null("Clock")
+		if dialogue != null and dialogue.has_method("make_claim"):
+			var cycle := int(clock.get_cycles_elapsed()) if clock != null else -1
+			dialogue.make_claim(StringName("harvest_alibi_%d" % cycle), true, {
+				"asserts": "attended_ritual", "cycle": cycle, "text": "I was at the Ritual — you must have missed me",
+			})
 		notice_message.emit("You lied about where you were. For now, it holds.")
 	else:
 		on_harvest_missed()
@@ -105,6 +117,20 @@ func set_pending_lie(value: bool) -> void:
 	pending_lie = value
 
 
+## Build Bible Spec 21: the legacy "your lie came apart" moments are the
+## in-fiction surfacing that exposes the alibi claim (Trust moves through
+## Dialogue -> Trust only if it's contradicted by the record).
+func _expose_alibi_claims() -> void:
+	var dialogue := get_tree().root.get_node_or_null("Dialogue")
+	var fact_log := get_tree().root.get_node_or_null("FactLog")
+	if dialogue == null or fact_log == null or not dialogue.has_method("expose_claim"):
+		return
+	for fact: Dictionary in fact_log.get_by_type(&"claim_made"):
+		var claim_id := str((fact["context"] as Dictionary).get("claim_id", ""))
+		if claim_id.begins_with("harvest_alibi_"):
+			dialogue.expose_claim(StringName(claim_id))
+
+
 ## Forbidden theft noticed — Trust drop; exposes a pending lie harder.
 func on_theft_noticed() -> void:
 	var penalty := THEFT_NOTICE_PENALTY
@@ -112,6 +138,7 @@ func on_theft_noticed() -> void:
 	if exposed:
 		penalty += LIE_EXPOSED_EXTRA_PENALTY
 		pending_lie = false
+		_expose_alibi_claims()
 	set_trust(trust - penalty)
 	if exposed:
 		notice_message.emit("The theft was noticed — and your earlier lie came apart. (−%d Trust)" % penalty)
@@ -134,6 +161,7 @@ func on_caught_upward_dig() -> void:
 	if exposed:
 		penalty += LIE_EXPOSED_EXTRA_PENALTY
 		pending_lie = false
+		_expose_alibi_claims()
 	set_trust(trust - penalty)
 	if exposed:
 		notice_message.emit("Caught digging the Firmament — and your lie cracked. (−%d Trust)" % penalty)
