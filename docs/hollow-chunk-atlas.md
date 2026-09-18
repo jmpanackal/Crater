@@ -31,11 +31,13 @@ During this pass, prioritize in this order:
 
 ### Interior-enclosure rule
 
-Only cells physically adjacent to the Devil’s Mouth may read out into its open depth. Every other wall district—including worker homes, Wickwork, Glowbeds, Mid-East dig access, lower-east housing, and Cistern service—must terminate into thick crater rock, a carved court, a local shaft, a retaining wall, or an inward-facing service bay. A walkable terrace in an interior district needs a visible rock-backed or enclosed far edge; it is never an unexplained balcony above blue abyss. Narrow sightlines through a guarded fracture are permitted, but they cannot replace a physically grounded route.
+Only cells physically adjacent to the Devil’s Mouth may read out into its open depth. Every other wall district—including worker homes, Wickwork, Glowbeds, Mid-East dig access, lower-east housing, and Cistern service—must terminate into thick crater rock, a carved court, a local shaft, a retaining wall, or an inward-facing service bay. A walkable terrace in an interior district needs a visible rock-backed or enclosed far edge; it is never an unexplained balcony above blue abyss. Narrow sightlines through a guarded fracture are permitted, but they cannot replace a physically grounded route. **Enclosed does not mean inaccessible:** every active interior needs a visible inbound/outbound door, stair, hatch, lift, or corridor; only its outward edge is sealed from the void.
 
 The west worker connector at `H-4-7`–`H-5-8` is the reference repair for this rule: one shared 2 × 2 master gives it an enclosed diagonal switchback, local hand freight, and a controlled entry toward Mid Heart. It has no operating lower-west lift and no open pit balcony.
 
-The lower continuation at `H-4`–`H-5`, rows `9`–`10`, follows the same rule: it is a shared, rock-backed worker/home approach with a short stair and a sealed eastern service side. `H-4-11` remains the immutable Home Court anchor; `H-5-11` is a contained service turnback, never a lift landing or a second exit.
+The lower continuation at `H-4`–`H-5`, rows `9`–`10`, is a shared, rock-backed worker/home approach with an offset diagonal stair, a small repair landing, and a utility spine. A focused `H-4`–`H-5`, rows `10`–`11` bridge master carries those stairs through a braced internal access level into Home Court and its service passage; it replaces the former sealed visual break. `H-3` ↔ `H-4` on rows `10`–`11` is a literal inward Dispatch-to-Home seam, with a compact stair/service level rather than a false void balcony or a dead end. `H-4` remains embedded in the wall, while `H-5` is the inner-rim transition: its guarded terraces face the Devil’s Mouth but do not provide a descent into it. The `H-5` ↔ `H-6` boundary in those two rows is a literal shared visual band: the `H-5` side stays a playable, railed rim while the `H-6` side stays depth-only, never an implied floor. The source Home Court image remains preserved as history; the live atlas uses the shared 2D correction.
+
+The quality-pass rebuild at `H-4`–`H-5`, rows `7`–`8` is now the lower-west worker-connector reference. Its single shared parent, [`refs/chunks/drafts/h4-h5-r7-r8-west-switchback-quality-master-v2-edge-locked-2026-09-15.png`](refs/chunks/drafts/h4-h5-r7-r8-west-switchback-quality-master-v2-edge-locked-2026-09-15.png), carries a continuous diagonal switchback through three readable elevations, an inhabited repair/rest band, and one **local hand-freight hoist**. Its outer 96-pixel bands were retained from the neighbor-bearing connector source, while the four center frames were regenerated from the same parent. The block remains rock-backed throughout; it does not depict an operating lower-west civic lift or an open Mouth balcony.
 
 ### Landmark-first spatial rule
 
@@ -48,6 +50,18 @@ At least one of each region’s major spaces must be an **open terrace** large e
 Every atlas cell must read as a side-scroller play space before it reads as concept art: one dominant collision floor, at most one clearly railed secondary ledge, and explicit stair/ramp landings. In a shared 2 × 2 master, use no more than three traversable elevations. Pipes, distant buildings, rigging, tank faces, and deep-Mouth silhouettes are background or blockers rather than ambiguous walkways. The rebuilt `H-8`–`H-9`, rows `6`–`7` Holding plate is the current Mid Heart reference: one public upper route, one short local descent, and a deliberate lower void cut.
 
 Every shared image must be normalized to its intended tile canvas before cropping: a 2 × 2 parent is exactly 2048 × 1152 before its four 1024 × 576 children are exported. This is map integrity, not just export hygiene: it makes routes, rock volumes, and void cuts literal across the internal seams. The rebuilt `H-6`–`H-7`, rows `6`–`7` West Exchange approach is the complementary reference: it is rock-backed except for one narrow, railed gangway into the Mouth-facing Holding edge.
+
+### Implementation-quality replacement gate
+
+The continuity-fill pass is over for any block selected for gameplay art. A replacement is **not** placeable merely because its isolated picture is attractive. Before it can replace an atlas frame, its author must record and verify all of the following:
+
+1. Read the current `story.md`, `art-direction.md`, `mechanics-canon.md`, and `hollow-build-brief.md` entries that govern the district and its travel system.
+2. Declare one cross-cell landmark and a concrete playable route through it: entrances, collision floors, stair/ramp landings, local lifts or hoists, and a valid exit. A sealed-looking room is acceptable only when it is a deliberate locked state with a visible alternate route.
+3. Classify every exposed side and corner as crater rock / interior shaft / Mouth depth / outer boundary / shared civic connector. Only the physical Mouth rim may show open depth.
+4. Generate one normalized shared parent, then crop its child frames. Preserve every already-approved exterior edge and corner from the neighbor-bearing source only when that preservation remains visually coherent. If a borrowed seam band makes a visible collage, reject the candidate instead of hiding the problem in the atlas.
+5. Review the reassembled parent at native 2 × 2 scale and in the full atlas. Confirm the same player scale, Wicklamp family, crater/salvage materials, district-specific function, clear foreground collision route, and no false floors or duplicate lift systems.
+
+The `H-4`–`H-5`, rows `7`–`8` lower-west switchback candidate generated on 2026-09-15 demonstrated this gate: its new interior improved the diagonal route, but its preserved border and internal seam bands created a visible style collage. It remains an unplaced draft. Future work must begin from a neighbor-compatible regional parent rather than compositing that incompatible candidate into the live atlas.
 
 ### Locked transport topology
 

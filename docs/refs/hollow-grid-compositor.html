@@ -1,0 +1,891 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hollow Level 0 topology atlas</title>
+<style>
+:root{color-scheme:dark;--bg:#071217;--panel:#102026;--cell:#1b292d;--void:#0b2130;--heart:#352522;--teal:#4db592;--amber:#e2ae62;--muted:#9fa9a5;--cell-w:164px;--cell-h:92.25px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#e4e2d3;font:13px/1.35 system-ui,sans-serif}header{padding:14px 20px;background:var(--panel);border-bottom:1px solid #1e3b44}h1{font-size:20px;margin:0}.legend{margin-top:3px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 10px;background:#445}.dot:first-child{margin-left:0}.dot.approved{background:var(--teal)}.dot.draft{background:var(--amber)}.dot.heart{background:#bf6f5b}.dot.void{background:#31596a}.controls{display:flex;gap:7px;margin-top:9px}.controls button{border:1px solid #42635e;border-radius:4px;background:#142c2b;color:#d6ddd5;padding:4px 8px;cursor:pointer;font:12px system-ui}.layout{display:grid;grid-template-columns:minmax(700px,1fr) 300px;gap:14px;padding:18px;align-items:start}.board-wrap{overflow:auto;max-height:calc(100vh - 132px);border:1px solid #1e3b44;background:#09191e}.atlas{position:relative;width:calc(var(--cell-w) * 18);height:calc(var(--cell-h) * 16);isolation:isolate;background:var(--cell);background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:var(--cell-w) var(--cell-h)}.depth{position:absolute;z-index:0;background:var(--void);opacity:.85}.heart-area{position:absolute;z-index:0;background:var(--heart);opacity:.55}.art-layer,.slot-layer{position:absolute;inset:0}.art-layer{z-index:3;pointer-events:none}.art-frame{position:absolute;overflow:hidden;margin:0;background:#071217;pointer-events:auto;cursor:pointer}.art-frame img{display:block;width:100%;height:100%;object-fit:cover}.art-frame.draft{box-shadow:inset 0 0 0 2px var(--amber)}.art-frame.approved{box-shadow:inset 0 0 0 2px var(--teal)}.slot-layer{z-index:2;display:grid;grid-template-columns:repeat(18,var(--cell-w));grid-template-rows:repeat(16,var(--cell-h))}.cell{appearance:none;position:relative;border:0;background:transparent;cursor:pointer;padding:0}.cell::after{content:"";position:absolute;right:7px;top:7px;width:7px;height:7px;border-radius:50%;background:#718883}.cell.void::after{background:#31596a}.cell.heart::after{background:#bf6f5b}.cell.draft::after{background:var(--amber)}.cell.approved::after{background:var(--teal)}.cell:hover,.cell.selected{background:#d8e7d41c;outline:2px solid #d8e7d4;outline-offset:-2px}.cell.has-image{pointer-events:none}.coord{display:none;position:absolute;left:5px;bottom:4px;padding:2px 4px;background:#071217d9;color:#c7d7d1;font:11px ui-monospace,monospace}body.ids-visible .coord{display:block}aside{position:sticky;top:12px;padding:14px;background:var(--panel);border:1px solid #29434a;min-height:280px}.slot-id{font:700 17px ui-monospace,monospace;color:#e2ae62}.slot-name{font-size:16px;margin-top:3px}.meta{color:var(--muted);margin-top:5px}.contract{margin:14px 0 0;padding-top:10px;border-top:1px solid #29434a}.contract h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#9db4a8;margin:0 0 6px}.contract p{margin:5px 0}.seams{padding:0;margin:6px 0;list-style:none}.seams li{padding:6px 0;border-top:1px solid #20383e}.seams code{color:#e2ae62}.asset-note{margin-top:12px;padding:8px;border-left:2px solid var(--amber);background:#1b292d;color:#c7d7d1}.asset-note strong{color:var(--amber)}.asset-link{display:inline-block;margin-top:7px;color:#8fd4c3;font-weight:650;text-decoration:none}.asset-link:hover{text-decoration:underline}@media(max-width:1050px){.layout{grid-template-columns:1fr}.board-wrap{max-height:none}aside{position:static}}
+</style>
+<header><h1>Hollow Level 0 topology · 18 × 16</h1><div class="legend"><span class="dot approved"></span>approved frame <span class="dot draft"></span>draft frame <span class="dot heart"></span>Mid Heart <span class="dot void"></span>Devil’s Mouth depth · fixed geography; artwork follows parent seam masters</div><div class="controls"><button id="ids-toggle" type="button">Show IDs</button></div></header>
+<main class="layout"><section class="board-wrap" aria-label="Continuous Hollow atlas"><div id="atlas" class="atlas"><div id="depth-layer"></div><div id="art-layer" class="art-layer"></div><div id="slot-layer" class="slot-layer"></div></div></section><aside id="inspector" aria-live="polite"></aside></main>
+<script>
+const depthLayer=document.querySelector('#depth-layer'),artLayer=document.querySelector('#art-layer'),slotLayer=document.querySelector('#slot-layer'),inspector=document.querySelector('#inspector'),idsToggle=document.querySelector('#ids-toggle');
+const CELL_W=164,CELL_H=92;
+const v3Approved={
+  'H-4-6':{status:'approved',image:'chunks/approved/h-4-6-mid-allotment-wash-court-v3-approved-2026-09-12.png',note:'Approved v3: mid-allotment wash court preserves the established Hollow stone, lamp, and support language while varying civic layout.'},
+  'H-5-6':{status:'approved',image:'chunks/approved/h-5-6-mid-allotment-lift-v3-approved-2026-09-12.png',note:'Approved v3: same left wall-mounted lift language continues into a varied mid-transit landing.'},
+  'H-4-7':{status:'approved',image:'chunks/approved/h-4-7-mid-allotment-cook-court-v3-approved-2026-09-12.png',note:'Approved v3: stepped communal allotment/cook court rather than repeated private facades.'},
+  'H-5-7':{status:'approved',image:'chunks/approved/h-5-7-left-lift-transit-v3-approved-2026-09-12.png',note:'Approved v3: same narrow left-lift transit structure with a distinct local landing layout.'}
+};
+const lowerBridgeDrafts={
+  'H-4-7':{status:'draft',image:'chunks/drafts/h-4-7-mid-allotment-cook-court-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only its lower 64-pixel band changes, from the shared mid-allotment-to-lower-worker source.'},
+  'H-5-7':{status:'draft',image:'chunks/drafts/h-5-7-left-lift-transit-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only its lower 64-pixel band changes, carrying the same narrow left lift into the lower transit.'},
+  'H-4-8':{status:'draft',image:'chunks/drafts/h-4-8-lower-worker-service-upper-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only its upper 64-pixel band changes, preserving the approved lower-worker interior.'},
+  'H-5-8':{status:'draft',image:'chunks/drafts/h-5-8-left-lift-transit-upper-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only its upper 64-pixel band changes, preserving the approved lower lift interior.'}
+};
+const wickworkApproved={
+  'H-4-4':{status:'approved',image:'chunks/approved/h-4-4-wickwork-upper-bay-v1-approved-2026-09-12.png',note:'Approved Wickwork anchor: upper spool and lampwick bay in the established Hollow construction language.'},
+  'H-5-4':{status:'approved',image:'chunks/approved/h-5-4-wickwork-upper-lift-v1-approved-2026-09-12.png',note:'Approved Wickwork anchor: upper lift-side work bay, using the existing narrow wall-mounted lift.'},
+  'H-4-5':{status:'approved',image:'chunks/approved/h-4-5-wickwork-repair-bay-v1-approved-2026-09-12.png',note:'Approved Wickwork anchor: offset repair, drying, and spool-work terrace rather than housing.'},
+  'H-5-5':{status:'approved',image:'chunks/approved/h-5-5-wickwork-lift-landing-v1-approved-2026-09-12.png',note:'Approved Wickwork anchor: lift landing with local repair and freight function.'}
+};
+const wickworkAllotmentBridgeDrafts={
+  'H-4-5':{status:'draft',image:'chunks/drafts/h-4-5-wickwork-repair-bay-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only the lower edge changes to a literal Wickwork-to-allotment source band.'},
+  'H-5-5':{status:'draft',image:'chunks/drafts/h-5-5-wickwork-lift-landing-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only the lower edge changes, continuing the same left lift.'},
+  'H-4-6':{status:'draft',image:'chunks/drafts/h-4-6-mid-allotment-wash-court-upper-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only the upper edge changes, preserving the approved wash-court interior.'},
+  'H-5-6':{status:'draft',image:'chunks/drafts/h-5-6-mid-allotment-lift-upper-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: only the upper edge changes, preserving the approved lift-side interior.'}
+};
+const highWestWickworkDrafts={
+  'H-2-4':{status:'draft',image:'chunks/drafts/h-2-4-high-west-dig-threshold-draft-v1-2026-09-12.png',note:'Draft High-West/Wickwork anchor: braced civic excavation threshold, not a route into Devil’s Mouth.'},
+  'H-3-4':{status:'draft',image:'chunks/drafts/h-3-4-high-west-dig-staging-draft-v1-2026-09-12.png',note:'Draft High-West/Wickwork anchor: controlled staging at the bounded lateral gallery.'},
+  'H-2-5':{status:'draft',image:'chunks/drafts/h-2-5-wickwork-west-terrace-draft-v1-2026-09-12.png',note:'Draft High-West/Wickwork anchor: broad lateral Wickwork terrace with repair and spool work.'},
+  'H-3-5':{status:'draft',image:'chunks/drafts/h-3-5-wickwork-west-service-draft-v1-2026-09-12.png',note:'Draft High-West/Wickwork anchor: stepped west service transition, not a repeated home façade.'}
+};
+const highWestWickworkBridgeDrafts={
+  'H-3-4':{status:'draft',image:'chunks/drafts/h-3-4-high-west-dig-staging-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the east edge is a literal High-West-to-Wickwork route band.'},
+  'H-4-4':{status:'draft',image:'chunks/drafts/h-4-4-wickwork-upper-bay-west-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the west edge is a literal High-West-to-Wickwork route band.'},
+  'H-3-5':{status:'draft',image:'chunks/drafts/h-3-5-wickwork-west-service-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the east edge continues the lower lateral route into Wickwork.'},
+  'H-4-5':{status:'draft',image:'chunks/drafts/h-4-5-wickwork-repair-bay-west-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the west edge continues the lower lateral route from High-West.'}
+};
+const highWestApproved={
+  'H-2-4':{status:'approved',image:'chunks/approved/h-2-4-high-west-dig-threshold-v1-approved-2026-09-12.png',note:'Approved High-West threshold: bounded lateral civic excavation, not Devil’s Mouth mining.'},
+  'H-3-4':{status:'approved',image:'chunks/approved/h-3-4-high-west-dig-staging-east-bridge-v1-approved-2026-09-12.png',note:'Approved High-West staging descendant with literal east route band into Wickwork.'},
+  'H-2-5':{status:'approved',image:'chunks/approved/h-2-5-wickwork-west-terrace-v1-approved-2026-09-12.png',note:'Approved west Wickwork terrace.'},
+  'H-3-5':{status:'approved',image:'chunks/approved/h-3-5-wickwork-west-service-east-bridge-v1-approved-2026-09-12.png',note:'Approved west service descendant with literal east route band into Wickwork.'},
+  'H-4-4':{status:'approved',image:'chunks/approved/h-4-4-wickwork-upper-bay-west-bridge-v1-approved-2026-09-12.png',note:'Approved Wickwork descendant with literal west route band from High-West.'},
+  'H-4-5':{status:'approved',image:'chunks/approved/h-4-5-wickwork-repair-bay-west-bridge-v1-approved-2026-09-12.png',note:'Approved Wickwork descendant with literal west route band from High-West.'}
+};
+const farHighWestDrafts={
+  'H-0-4':{status:'draft',image:'chunks/drafts/h-0-4-high-west-west-gate-draft-v1-2026-09-12.png',note:'Draft far High-West: controlled west gate and bounded lateral gallery mouth.'},
+  'H-1-4':{status:'draft',image:'chunks/drafts/h-1-4-high-west-brace-yard-draft-v1-2026-09-12.png',note:'Draft far High-West: braced inspection and material-staging yard.'},
+  'H-0-5':{status:'draft',image:'chunks/drafts/h-0-5-wickwork-far-west-supply-draft-v1-2026-09-12.png',note:'Draft far-west Wickwork supply terrace.'},
+  'H-1-5':{status:'draft',image:'chunks/drafts/h-1-5-wickwork-far-west-turnout-draft-v1-2026-09-12.png',note:'Draft far-west Wickwork cart turnout and service terrace.'}
+};
+const farHighWestBridgeDrafts={
+  'H-1-4':{status:'draft',image:'chunks/drafts/h-1-4-high-west-brace-yard-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: literal east edge band continues High-West staging.'},
+  'H-2-4':{status:'draft',image:'chunks/drafts/h-2-4-high-west-dig-threshold-west-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: literal west edge band continues the controlled High-West approach.'},
+  'H-1-5':{status:'draft',image:'chunks/drafts/h-1-5-wickwork-far-west-turnout-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: literal east edge band continues the lower Wickwork terrace.'},
+  'H-2-5':{status:'draft',image:'chunks/drafts/h-2-5-wickwork-west-terrace-west-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: literal west edge band continues the lower Wickwork terrace.'}
+};
+const highWestSwitchbackDrafts={
+  'H-0-3':{status:'draft',image:'chunks/drafts/h-0-3-high-west-switchback-upper-draft-v1-2026-09-12.png',note:'Draft landmark: upper switchback route through the High-West cliff.'},
+  'H-1-3':{status:'draft',image:'chunks/drafts/h-1-3-high-west-inspection-terrace-draft-v1-2026-09-12.png',note:'Draft landmark: broad open High-West inspection terrace.'},
+  'H-0-4':{status:'draft',image:'chunks/drafts/h-0-4-high-west-sealed-west-gate-draft-v1-2026-09-12.png',note:'Draft landmark: sealed far-west gallery and thick physical boundary.'},
+  'H-1-4':{status:'draft',image:'chunks/drafts/h-1-4-high-west-switchback-lower-draft-v1-2026-09-12.png',note:'Draft landmark: lower switchback and carved service bay.'}
+};
+const highWestSwitchbackApproachDrafts={
+  'H-1-3':{status:'draft',image:'chunks/drafts/h-1-3-high-west-inspection-terrace-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the inspection terrace now shares its east edge with the High-West approach.'},
+  'H-1-4':{status:'draft',image:'chunks/drafts/h-1-4-high-west-switchback-lower-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: the lower switchback continues into the High-West dig approach.'},
+  'H-2-3':{status:'draft',image:'chunks/drafts/h-2-3-high-west-approach-switchback-draft-v1-2026-09-12.png',note:'Draft High-West approach: carved continuation of the upper switchback, with no false interior void.'},
+  'H-2-4':{status:'draft',image:'chunks/drafts/h-2-4-high-west-dig-approach-switchback-draft-v1-2026-09-12.png',note:'Draft High-West dig approach: lower switchback route toward the regulated lateral gallery.'}
+};
+const highWestApproachGalleryDrafts={
+  'H-2-3':{status:'draft',image:'chunks/drafts/h-2-3-high-west-approach-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: High-West approach continues into the check terrace.'},
+  'H-2-4':{status:'draft',image:'chunks/drafts/h-2-4-high-west-dig-approach-east-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: High-West dig approach continues into the gallery threshold.'},
+  'H-3-3':{status:'draft',image:'chunks/drafts/h-3-3-high-west-check-terrace-draft-v1-2026-09-12.png',note:'Draft High-West check terrace: tall braced spine, open inspection landing, and upper route.'},
+  'H-3-4':{status:'draft',image:'chunks/drafts/h-3-4-high-west-gallery-threshold-draft-v1-2026-09-12.png',note:'Draft High-West gallery threshold: lower cart turnout and braced lateral dig mouth.'}
+};
+const highWestWickworkVerticalDrafts={
+  'H-3-4':{status:'draft',image:'chunks/drafts/h-3-4-high-west-gallery-threshold-lower-bridge-v1-draft-2026-09-12.png',note:'Draft vertical bridge descendant: gallery threshold descends into Wickwork.'},
+  'H-4-4':{status:'draft',image:'chunks/drafts/h-4-4-wickwork-upper-bay-lower-bridge-v1-draft-2026-09-12.png',note:'Draft vertical bridge descendant: Wickwork upper bay shares its lower edge with the production terrace.'},
+  'H-3-5':{status:'draft',image:'chunks/drafts/h-3-5-wickwork-west-service-upper-bridge-v1-draft-2026-09-12.png',note:'Draft Wickwork west service: upper edge continues the gallery descent.'},
+  'H-4-5':{status:'draft',image:'chunks/drafts/h-4-5-wickwork-repair-bay-upper-bridge-v1-draft-2026-09-12.png',note:'Draft Wickwork repair bay: upper edge continues the braced production route.'}
+};
+const midHeartHoldingCoreDrafts={
+  'H-7-6':{status:'draft',image:'chunks/drafts/h-7-6-mid-heart-holding-upper-draft-v1-2026-09-12.png',note:'Draft Mid Heart Holding upper: stepped public gathering raft and queue terraces.'},
+  'H-8-6':{status:'draft',image:'chunks/drafts/h-8-6-mid-heart-council-terrace-draft-v1-2026-09-12.png',note:'Draft Mid Heart Council terrace: weathered wreckage civic deck with void-facing gaps.'},
+  'H-7-7':{status:'draft',image:'chunks/drafts/h-7-7-mid-heart-holding-queue-draft-v1-2026-09-12.png',note:'Draft Mid Heart Holding queue: suspended lower terrace and civic circulation.'},
+  'H-8-7':{status:'draft',image:'chunks/drafts/h-8-7-mid-heart-holding-lower-draft-v1-2026-09-12.png',note:'Draft Mid Heart Holding lower: freight/service raft below the public band.'}
+};
+const midHeartWestExchangeDrafts={
+  'H-6-6':{status:'draft',image:'chunks/drafts/h-6-6-mid-heart-west-exchange-draft-v1-2026-09-12.png',note:'Draft Mid Heart West Exchange: Materials intake, Joss, and requisition deck.'},
+  'H-6-7':{status:'draft',image:'chunks/drafts/h-6-7-mid-heart-west-exchange-lower-draft-v1-2026-09-12.png',note:'Draft Mid Heart West Exchange lower: cargo deck and Holding-facing connector.'}
+};
+const glowbedsCoreDrafts={
+  'H-12-3':{status:'draft',image:'chunks/drafts/h-12-3-glowbeds-planter-court-draft-v1-2026-09-12.png',note:'Draft Glowbeds planter court: tidy void-facing cultivation terraces.'},
+  'H-13-3':{status:'draft',image:'chunks/drafts/h-13-3-glowbeds-guarded-grow-terrace-draft-v1-2026-09-12.png',note:'Draft Glowbeds guarded grow terrace: privileged upper cultivation beneath Ashram.'},
+  'H-12-4':{status:'draft',image:'chunks/drafts/h-12-4-glowbeds-lower-grow-bay-draft-v1-2026-09-12.png',note:'Draft Glowbeds lower grow bay: switchback and humid growth work.'},
+  'H-13-4':{status:'draft',image:'chunks/drafts/h-13-4-glowbeds-fiber-drying-terrace-draft-v1-2026-09-12.png',note:'Draft Glowbeds fiber drying terrace: lower cultivation processing band.'}
+};
+const deepCisternBoundaryDrafts={
+  'H-16-14':{status:'draft',image:'chunks/drafts/h-16-14-deep-cistern-settling-basin-draft-v1-2026-09-12.png',note:'Draft deep Cistern settling basin: Presswater column, pipe spine, and maintenance routes.'},
+  'H-17-14':{status:'draft',image:'chunks/drafts/h-17-14-far-east-cistern-floodgate-draft-v1-2026-09-12.png',note:'Draft far-east Cistern flood gate: hard boundary, not a route into another void.'},
+  'H-16-15':{status:'draft',image:'chunks/drafts/h-16-15-deep-cistern-maintenance-draft-v1-2026-09-12.png',note:'Draft deep Cistern maintenance: lower basin and local service lift.'},
+  'H-17-15':{status:'draft',image:'chunks/drafts/h-17-15-far-east-deep-boundary-draft-v1-2026-09-12.png',note:'Draft far-east deep boundary: sealed floodworks and buttressed termination.'}
+};
+const midHeartLowerFreightDrafts={
+  'H-7-7':{status:'draft',image:'chunks/drafts/h-7-7-mid-heart-holding-queue-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: Holding queue now shares its lower edge with the freight tier.'},
+  'H-8-7':{status:'draft',image:'chunks/drafts/h-8-7-mid-heart-holding-lower-bridge-v1-draft-2026-09-12.png',note:'Draft bridge descendant: Holding lower now shares its lower edge with the catchrail tier.'},
+  'H-7-8':{status:'draft',image:'chunks/drafts/h-7-8-mid-heart-lower-freight-maintenance-draft-v1-2026-09-12.png',note:'Draft Mid Heart lower freight: suspended maintenance raft beneath Holding.'},
+  'H-8-8':{status:'draft',image:'chunks/drafts/h-8-8-mid-heart-catchrail-draft-v1-2026-09-12.png',note:'Draft Mid Heart catchrail: broken lower cargo deck with void gaps.'}
+};
+const leftLiftWestExchangeRebuildDrafts={
+  'H-5-6':{status:'draft',image:'chunks/drafts/h-5-6-left-lift-transfer-v2-draft-2026-09-12.png',note:'Draft rebuilt left lift transfer: a continuous civic landing into West Exchange.'},
+  'H-6-6':{status:'draft',image:'chunks/drafts/h-6-6-west-exchange-intake-v2-draft-2026-09-12.png',note:'Draft rebuilt West Exchange intake: shares one master with the wall lift and freight landing.'},
+  'H-5-7':{status:'draft',image:'chunks/drafts/h-5-7-left-lift-freight-transfer-v2-draft-2026-09-12.png',note:'Draft rebuilt left lift freight transfer: continuous lower landing.'},
+  'H-6-7':{status:'draft',image:'chunks/drafts/h-6-7-west-exchange-freight-v2-draft-2026-09-12.png',note:'Draft rebuilt West Exchange freight: connected lower civic dock.'}
+};
+const leftLiftLowerFreightDrafts={
+  'H-5-7':{status:'draft',image:'chunks/drafts/h-5-7-left-lift-freight-transfer-lower-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band left-lift freight transfer: literal seams into West Exchange and its lower service tier.'},
+  'H-6-7':{status:'draft',image:'chunks/drafts/h-6-7-west-exchange-freight-lower-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band West Exchange freight transfer: literal seams into the wall lift and lower cargo intake.'},
+  'H-5-8':{status:'draft',image:'chunks/drafts/h-5-8-left-lift-service-freight-draft-v1-2026-09-12.png',note:'Draft left-lift lower service tier: a continuous local landing, not a blank void cell.'},
+  'H-6-8':{status:'draft',image:'chunks/drafts/h-6-8-mid-heart-lower-freight-cargo-draft-v1-2026-09-12.png',note:'Draft Mid Heart lower freight cargo tier: shared-band intake below West Exchange.'}
+};
+const canonicalLeftLiftDrafts={
+  'H-5-6':{status:'draft',image:'chunks/drafts/h-5-6-canonical-left-lift-v3-draft-2026-09-12.png',note:'Draft canonical left Presswater lift: the one visible cage is here; its shaft is fixed at one wall position.'},
+  'H-6-6':{status:'draft',image:'chunks/drafts/h-6-6-west-exchange-canonical-v3-draft-2026-09-12.png',note:'Draft West Exchange intake beside the single canonical lift shaft.'},
+  'H-5-7':{status:'draft',image:'chunks/drafts/h-5-7-canonical-lift-continuation-v3-draft-2026-09-12.png',note:'Draft canonical lift continuation: empty rails and maintenance landing, intentionally no second cage.'},
+  'H-5-8':{status:'draft',image:'chunks/drafts/h-5-8-canonical-lift-empty-continuation-v3-draft-2026-09-12.png',note:'Draft canonical lower lift continuation: uninterrupted shaft, intentionally no duplicate cage.'}
+};
+const eastServiceDrafts={
+  'H-9-6':{status:'draft',image:'chunks/drafts/h-9-6-mid-heart-east-service-care-v1-draft-2026-09-12.png',note:'Draft East Service care and civic-counter raft. West seam to Holding remains explicitly pending.'},
+  'H-10-6':{status:'draft',image:'chunks/drafts/h-10-6-mid-heart-east-service-notices-v1-draft-2026-09-12.png',note:'Draft East Service notices and queue deck with an eastward civic route.'},
+  'H-9-7':{status:'draft',image:'chunks/drafts/h-9-7-mid-heart-east-service-freight-v1-draft-2026-09-12.png',note:'Draft East Service lower freight raft below the civic counter.'},
+  'H-10-7':{status:'draft',image:'chunks/drafts/h-10-7-mid-heart-east-service-crossing-v1-draft-2026-09-12.png',note:'Draft East Service lower crossing with cargo handling and offset stairs.'}
+};
+const westExchangeHoldingBridgeDrafts={
+  'H-6-7':{status:'draft',image:'chunks/drafts/h-6-7-west-exchange-holding-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band West Exchange → Holding upper freight walk.'},
+  'H-7-7':{status:'draft',image:'chunks/drafts/h-7-7-holding-west-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band Holding west arrival: the diagonal civic/freight walk has a real continuous approach.'},
+  'H-6-8':{status:'draft',image:'chunks/drafts/h-6-8-west-exchange-lower-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band lower West Exchange transfer with lift-side freight support.'},
+  'H-7-8':{status:'draft',image:'chunks/drafts/h-7-8-holding-lower-bridge-v1-draft-2026-09-12.png',note:'Draft shared-band lower Holding arrival raft with separated void-visible cargo circulation.'}
+};
+const ashramEastGateDrafts={
+  'H-12-1':{status:'draft',image:'chunks/drafts/h-12-1-ashram-east-gate-v1-draft-2026-09-12.png',note:'Draft Ashram Heights void-facing east gate and Warden approach.'},
+  'H-13-1':{status:'draft',image:'chunks/drafts/h-13-1-ashram-east-inner-gate-v1-draft-2026-09-12.png',note:'Draft Ashram Heights maintained inner gate/terrace.'},
+  'H-12-2':{status:'draft',image:'chunks/drafts/h-12-2-ashram-east-gate-switchback-v1-draft-2026-09-12.png',note:'Draft Ashram Heights guarded ceremonial switchback above Glowbeds.'},
+  'H-13-2':{status:'draft',image:'chunks/drafts/h-13-2-ashram-east-terrace-switchback-v1-draft-2026-09-12.png',note:'Draft Ashram Heights ordered terrace and Warden inspection route.'}
+};
+const ashramGlowbedsTransitionDrafts={
+  'H-12-2':{status:'draft',image:'chunks/drafts/h-12-2-ashram-glowbeds-gate-v1-draft-2026-09-12.png',note:'Draft guarded Ashram-to-Glowbeds gate: processional stair and Presswater channel begin here.'},
+  'H-13-2':{status:'draft',image:'chunks/drafts/h-13-2-ashram-glowbeds-upper-terrace-v1-draft-2026-09-12.png',note:'Draft Ashram upper terrace with maintained guard route.'},
+  'H-12-3':{status:'draft',image:'chunks/drafts/h-12-3-glowbeds-guarded-entry-v1-draft-2026-09-12.png',note:'Draft Glowbeds guarded entry beneath Ashram Heights.'},
+  'H-13-3':{status:'draft',image:'chunks/drafts/h-13-3-glowbeds-watercourse-v1-draft-2026-09-12.png',note:'Draft maintained Glowbeds watercourse and cultivation terrace.'}
+};
+const eastDockDrafts={
+  'H-10-7':{status:'draft',image:'chunks/drafts/h-10-7-mid-heart-east-dock-upper-v1-draft-2026-09-12.png',note:'Draft Mid Heart east-dock upper terrace: offset civic/freight approach with a diagonal descent.'},
+  'H-11-7':{status:'draft',image:'chunks/drafts/h-11-7-mid-heart-east-dock-gate-v1-draft-2026-09-12.png',note:'Draft gated east service dock and wallward departure terrace.'},
+  'H-10-8':{status:'draft',image:'chunks/drafts/h-10-8-mid-heart-east-dock-freight-v1-draft-2026-09-12.png',note:'Draft suspended east-dock freight tier below the upper terrace.'},
+  'H-11-8':{status:'draft',image:'chunks/drafts/h-11-8-mid-heart-east-dock-lower-service-v1-draft-2026-09-12.png',note:'Draft lower east-dock service raft with chain hoist and maintenance route.'}
+};
+const midHeartCalmConnectorDrafts={
+  'H-8-7':{status:'draft',image:'chunks/drafts/h-8-7-mid-heart-holding-exit-v1-draft-2026-09-12.png',note:'Draft simplified Holding exit terrace: one clear queue route and diagonal descent.'},
+  'H-9-7':{status:'draft',image:'chunks/drafts/h-9-7-mid-heart-east-service-arrival-v1-draft-2026-09-12.png',note:'Draft simplified East Service arrival counter with open void between it and Holding.'},
+  'H-8-8':{status:'draft',image:'chunks/drafts/h-8-8-mid-heart-catchrail-raft-v1-draft-2026-09-12.png',note:'Draft compact catchrail cargo raft below Holding.'},
+  'H-9-8':{status:'draft',image:'chunks/drafts/h-9-8-mid-heart-cargo-gap-raft-v1-draft-2026-09-12.png',note:'Draft compact east cargo raft, deliberately separated by a broad void gap.'}
+};
+const midEastApproachDrafts={
+  'H-12-5':{status:'draft',image:'chunks/drafts/h-12-5-mid-east-service-court-draft-v1-2026-09-12.png',note:'Draft Mid-East service court: inhabited approach beneath Glowbeds.'},
+  'H-13-5':{status:'draft',image:'chunks/drafts/h-13-5-mid-east-switchback-terrace-draft-v1-2026-09-12.png',note:'Draft Mid-East switchback terrace: varied east-wall civic access.'},
+  'H-12-6':{status:'draft',image:'chunks/drafts/h-12-6-mid-east-clinic-court-draft-v1-2026-09-12.png',note:'Draft Mid-East clinic court: service/health terrace above the dig approach.'},
+  'H-13-6':{status:'draft',image:'chunks/drafts/h-13-6-mid-east-gallery-approach-draft-v1-2026-09-12.png',note:'Draft Mid-East gallery approach: lateral civic excavation access.'}
+};
+const cisternCoreDrafts={
+  'H-14-12':{status:'draft',image:'chunks/drafts/h-14-12-cistern-tank-reserve-draft-v1-2026-09-12.png',note:'Draft Cistern tank reserve: freight and Presswater reserve terrace.'},
+  'H-15-12':{status:'draft',image:'chunks/drafts/h-15-12-cistern-service-bay-draft-v1-2026-09-12.png',note:'Draft Cistern service bay: pipe-spine and local service lift.'},
+  'H-14-13':{status:'draft',image:'chunks/drafts/h-14-13-cistern-pressure-basin-draft-v1-2026-09-12.png',note:'Draft Cistern pressure basin: guarded utility work at the lower-right.'},
+  'H-15-13':{status:'draft',image:'chunks/drafts/h-15-13-cistern-sealbrine-chamber-draft-v1-2026-09-12.png',note:'Draft Cistern Sealbrine chamber: basin, delivery, and repair routes.'}
+};
+const glowbedsWalkableDrafts={
+  'H-12-3':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-walkable-a-v1-draft-2026-09-12.png',note:'Draft walkable Glowbeds upper entry: guarded terrace and broad continuous public route.'},
+  'H-13-3':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-walkable-b-v1-draft-2026-09-12.png',note:'Draft upper-east passenger lift recess: a separate guarded Mid-to-High lift, set inside the east wall.'},
+  'H-12-4':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-walkable-c-v1-draft-2026-09-12.png',note:'Draft walkable Glowbeds cultivation: broad main terrace with short local grade changes.'},
+  'H-13-4':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-walkable-d-v1-draft-2026-09-12.png',note:'Draft Glowbeds cultivation continuation: tidy grow work and a right-wall return route.'}
+};
+const cisternFreightDrafts={
+  'H-14-11':{status:'draft',image:'chunks/drafts/h14-h15-r11-r12-cistern-freight-a-v1-draft-2026-09-12.png',note:'Draft Cistern freight approach: lower-east service approach and void-facing transfer terrace.'},
+  'H-15-11':{status:'draft',image:'chunks/drafts/h14-h15-r11-r12-cistern-freight-b-v1-draft-2026-09-12.png',note:'Draft Cistern freight upper bay: heavy hydraulic cage and Cistern utility wall.'},
+  'H-14-12':{status:'draft',image:'chunks/drafts/h14-h15-r11-r12-cistern-freight-c-v1-draft-2026-09-12.png',note:'Draft Cistern freight lower landing: crane, stairs, and Presswater overflow/service channel.'},
+  'H-15-12':{status:'draft',image:'chunks/drafts/h14-h15-r11-r12-cistern-freight-d-v1-draft-2026-09-12.png',note:'Draft Cistern freight lower bay: heavy lift continuation, pipe wall, basin access, and local service route.'}
+};
+const midEastDigDrafts={
+  'H-14-7':{status:'draft',image:'chunks/drafts/h14-h15-r7-r8-mid-east-dig-0-v1-draft-2026-09-12.png',note:'Draft Mid-East dig front: public rail approach and wet civic inspection platform.'},
+  'H-15-7':{status:'draft',image:'chunks/drafts/h14-h15-r7-r8-mid-east-dig-1-v1-draft-2026-09-12.png',note:'Draft Mid-East braced lateral gallery gate: a wallward excavation threshold, not a descent into the Mouth.'},
+  'H-14-8':{status:'draft',image:'chunks/drafts/h14-h15-r7-r8-mid-east-dig-2-v1-draft-2026-09-12.png',note:'Draft Mid-East lower staging: tool carts, switchback/gantry, and return route.'},
+  'H-15-8':{status:'draft',image:'chunks/drafts/h14-h15-r7-r8-mid-east-dig-3-v1-draft-2026-09-12.png',note:'Draft Mid-East gallery support: braced wall infrastructure and pressure-seep service.'}
+};
+const lowerEastServiceDrafts={
+  'H-12-9':{status:'draft',image:'chunks/drafts/h12-h13-r9-r10-lower-east-service-0-v1-draft-2026-09-12.png',note:'Draft lower-east homes/clinic: inhabited terrace, wash court, and deliveries.'},
+  'H-13-9':{status:'draft',image:'chunks/drafts/h12-h13-r9-r10-lower-east-service-1-v1-draft-2026-09-12.png',note:'Draft lower-east service: uneven carved wall route with local stair and clinic access.'},
+  'H-12-10':{status:'draft',image:'chunks/drafts/h12-h13-r9-r10-lower-east-service-2-v1-draft-2026-09-12.png',note:'Draft lower-east freight yard: broad worker route and rail-cart staging toward Cistern.'},
+  'H-13-10':{status:'draft',image:'chunks/drafts/h12-h13-r9-r10-lower-east-service-3-v1-draft-2026-09-12.png',note:'Draft Cistern-directed service route: pipes, gauges, and a local walking connection.'}
+};
+const holdingCleanDrafts={
+  'H-7-6':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-clean-0-v1-draft-2026-09-12.png',note:'Draft simplified Holding: broad upper public hall, readable counters, and an open void edge.'},
+  'H-8-6':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-clean-1-v1-draft-2026-09-12.png',note:'Draft simplified Holding east: public gathering route and separated service threshold.'},
+  'H-7-7':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-clean-2-v1-draft-2026-09-12.png',note:'Draft Holding lower catchrail: one compact freight raft below, with void visible around it.'},
+  'H-8-7':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-clean-3-v1-draft-2026-09-12.png',note:'Draft Holding lower exit: short stair links and a distinct cargo/service raft, not a stacked row.'}
+};
+const mouthDepthDrafts={
+  'H-8-10':{status:'draft',image:'chunks/drafts/h8-h9-r10-r11-mouth-depth-0-v1-draft-2026-09-12.png',note:'Draft Devil’s Mouth depth: fog, remote wreck ribs, and no visible floor.'},
+  'H-9-10':{status:'draft',image:'chunks/drafts/h8-h9-r10-r11-mouth-depth-1-v1-draft-2026-09-12.png',note:'Draft Devil’s Mouth depth: distant silhouette only; no accessible structure.'},
+  'H-8-11':{status:'draft',image:'chunks/drafts/h8-h9-r10-r11-mouth-depth-2-v1-draft-2026-09-12.png',note:'Draft lower Mouth haze: endless vertical descent with sparse far lights.'},
+  'H-9-11':{status:'draft',image:'chunks/drafts/h8-h9-r10-r11-mouth-depth-3-v1-draft-2026-09-12.png',note:'Draft lower Mouth haze: no bottom or destination is visible.'}
+};
+const eastCisternLiftRevisionDrafts={
+  'H-16-11':{status:'draft',image:'chunks/drafts/h16-h17-r11-r12-east-cistern-lift-0-v1-draft-2026-09-12.png',note:'Draft east Cistern freight upper landing: local Low-to-Mid cargo station only.'},
+  'H-17-11':{status:'draft',image:'chunks/drafts/h16-h17-r11-r12-east-cistern-lift-1-v1-draft-2026-09-12.png',note:'Draft far-east Cistern freight wall: sealed boundary, not an upward lift continuation.'},
+  'H-16-12':{status:'draft',image:'chunks/drafts/h16-h17-r11-r12-east-cistern-lift-2-v1-draft-2026-09-12.png',note:'Draft east Cistern freight lower landing: rail cart, brine canisters, and hydraulic cage.'},
+  'H-17-12':{status:'draft',image:'chunks/drafts/h16-h17-r11-r12-east-cistern-lift-3-v1-draft-2026-09-12.png',note:'Draft sealed Cistern far-wall station: pipe spine, basin, and maintained termination.'}
+};
+const ashramPixelDrafts={
+  'H-12-1':{status:'draft',image:'chunks/drafts/h12-h13-r1-r2-ashram-pixel-0-v1-draft-2026-09-12.png',note:'Draft Ashram pixel-art revision: guarded, modest upper-wall route with teal bioluminescent lamps.'},
+  'H-13-1':{status:'draft',image:'chunks/drafts/h12-h13-r1-r2-ashram-pixel-1-v1-draft-2026-09-12.png',note:'Draft Ashram pixel-art inner route: tidy modest homes under natural rock.'},
+  'H-12-2':{status:'draft',image:'chunks/drafts/h12-h13-r1-r2-ashram-pixel-2-v1-draft-2026-09-12.png',note:'Draft Ashram pixel-art lower gate: broad player-scale terrace and shallow local steps.'},
+  'H-13-2':{status:'draft',image:'chunks/drafts/h12-h13-r1-r2-ashram-pixel-3-v1-draft-2026-09-12.png',note:'Draft Ashram pixel-art east route: natural overhanging rock, not a grand stone monument.'}
+};
+const westLiftStartDrafts={
+  'H-4-5':{status:'draft',image:'chunks/drafts/h4-h5-r5-r6-west-lift-start-0-v1-draft-2026-09-12.png',note:'Draft Wickwork terrace: broad repair floor at the actual west civic-lift start.'},
+  'H-5-5':{status:'draft',image:'chunks/drafts/h4-h5-r5-r6-west-lift-start-1-v1-draft-2026-09-12.png',note:'Draft west civic lift beginning: one cage at the Wickwork/Mid band only.'},
+  'H-4-6':{status:'draft',image:'chunks/drafts/h4-h5-r5-r6-west-lift-start-2-v1-draft-2026-09-12.png',note:'Draft west worker switchback: stairs descend toward lower workers, not a continuing lift shaft.'},
+  'H-5-6':{status:'draft',image:'chunks/drafts/h4-h5-r5-r6-west-lift-start-3-v1-draft-2026-09-12.png',note:'Draft west lift approach: the local stair and terrace make the start legible.'}
+};
+const upperMouthDepthDrafts={
+  'H-8-3':{status:'draft',image:'chunks/drafts/h8-h9-r3-r4-mouth-depth-0-v1-draft-2026-09-12.png',note:'Draft upper Mouth depth: sparse vertical fog and distant wreck ribs only.'},
+  'H-9-3':{status:'draft',image:'chunks/drafts/h8-h9-r3-r4-mouth-depth-1-v1-draft-2026-09-12.png',note:'Draft upper Mouth depth: no foreground route or platform.'},
+  'H-8-4':{status:'draft',image:'chunks/drafts/h8-h9-r3-r4-mouth-depth-2-v1-draft-2026-09-12.png',note:'Draft mid Mouth depth: dark shaft without a visible bottom.'},
+  'H-9-4':{status:'draft',image:'chunks/drafts/h8-h9-r3-r4-mouth-depth-3-v1-draft-2026-09-12.png',note:'Draft mid Mouth depth: remote lights remain atmospheric only.'}
+};
+const eastServiceCleanDrafts={
+  'H-9-6':{status:'draft',image:'chunks/drafts/h9-h10-r6-r7-east-service-clean-0-v1-draft-2026-09-12.png',note:'Draft East Service: single readable civic counter/service raft connected from Holding.'},
+  'H-10-6':{status:'draft',image:'chunks/drafts/h9-h10-r6-r7-east-service-clean-1-v1-draft-2026-09-12.png',note:'Draft East Service east end: neutral teal care niche and void-facing civic route.'},
+  'H-9-7':{status:'draft',image:'chunks/drafts/h9-h10-r6-r7-east-service-clean-2-v1-draft-2026-09-12.png',note:'Draft East Service lower cargo raft: isolated by void and linked by one short stair.'},
+  'H-10-7':{status:'draft',image:'chunks/drafts/h9-h10-r6-r7-east-service-clean-3-v1-draft-2026-09-12.png',note:'Draft East Service lower exit: compact freight raft rather than a continuous deck.'}
+};
+const deepMouthDepthDrafts={
+  'H-8-14':{status:'draft',image:'chunks/drafts/h8-h9-r14-r15-mouth-depth-0-v1-draft-2026-09-12.png',note:'Draft deep Mouth: nearly black fog and distant wreck silhouette, no floor.'},
+  'H-9-14':{status:'draft',image:'chunks/drafts/h8-h9-r14-r15-mouth-depth-1-v1-draft-2026-09-12.png',note:'Draft deep Mouth: no platform, route, or known bottom.'},
+  'H-8-15':{status:'draft',image:'chunks/drafts/h8-h9-r14-r15-mouth-depth-2-v1-draft-2026-09-12.png',note:'Draft abyss: fading blue haze into darkness.'},
+  'H-9-15':{status:'draft',image:'chunks/drafts/h8-h9-r14-r15-mouth-depth-3-v1-draft-2026-09-12.png',note:'Draft abyss: visible world ends in unknown downward depth.'}
+};
+const westExchangeCleanDrafts={
+  'H-6-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-exchange-clean-0-v1-draft-2026-09-13.png',note:'Draft West Exchange cleanup: broad materials turn-in and repair terrace.'},
+  'H-7-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-exchange-clean-1-v1-draft-2026-09-13.png',note:'Draft West Exchange / Holding edge: a clear civic handoff, not a pile of decks.'},
+  'H-6-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-exchange-clean-2-v1-draft-2026-09-13.png',note:'Draft West Exchange lower cargo raft: offset beneath the public terrace with void around it.'},
+  'H-7-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-exchange-clean-3-v1-draft-2026-09-13.png',note:'Draft Holding lower-west edge: diagonal transfer ramp into the separate freight raft.'}
+};
+const eastUpperPassengerGlowbedsDrafts={
+  'H-14-3':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-0-v1-draft-2026-09-13.png',note:'Draft upper east passenger line: guarded Glowbeds packing terrace and recessed cage.'},
+  'H-15-3':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-1-v1-draft-2026-09-13.png',note:'Draft upper east wall: tidy grow-work route; passenger lift is not a Cistern shaft.'},
+  'H-14-4':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-2-v1-draft-2026-09-13.png',note:'Draft passenger-line lower landing: short stair and maintained terrace.'},
+  'H-15-4':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-3-v1-draft-2026-09-13.png',note:'Draft outer east Glowbeds continuation: a walkable player-scale route.'}
+};
+const westAshramHighWestDrafts={
+  'H-0-1':{status:'draft',image:'chunks/drafts/h0-h1-r1-r2-ashram-highwest-gateway-0-v1-draft-2026-09-13.png',note:'Draft west Ashram gateway: guarded route within the sealed outer crater wall.'},
+  'H-1-1':{status:'draft',image:'chunks/drafts/h0-h1-r1-r2-ashram-highwest-gateway-1-v1-draft-2026-09-13.png',note:'Draft Ashram threshold: formal stair and modest sacred homes.'},
+  'H-0-2':{status:'draft',image:'chunks/drafts/h0-h1-r1-r2-ashram-highwest-gateway-2-v1-draft-2026-09-13.png',note:'Draft High-West upper boundary: regulated public passage, no void opening.'},
+  'H-1-2':{status:'draft',image:'chunks/drafts/h0-h1-r1-r2-ashram-highwest-gateway-3-v1-draft-2026-09-13.png',note:'Draft High-West lower service terrace with a clear walking route.'}
+};
+const midWestMouthDepthDrafts={
+  'H-6-10':{status:'draft',image:'chunks/drafts/h6-h7-r10-r11-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft Devil’s Mouth depth only: distant fog and wreck silhouettes, no route.'},
+  'H-7-10':{status:'draft',image:'chunks/drafts/h6-h7-r10-r11-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft Mouth depth only: no reachable structure or floor.'},
+  'H-6-11':{status:'draft',image:'chunks/drafts/h6-h7-r10-r11-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft deeper Mouth haze with sparse remote lights.'},
+  'H-7-11':{status:'draft',image:'chunks/drafts/h6-h7-r10-r11-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft deeper Mouth haze: the bottom remains unknown.'}
+};
+const eastMouthDepthDrafts={
+  'H-10-10':{status:'draft',image:'chunks/drafts/h10-h11-r10-r11-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft deep Mouth visual plate: background only.'},
+  'H-11-10':{status:'draft',image:'chunks/drafts/h10-h11-r10-r11-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft deep Mouth visual plate: no floor or platforms.'},
+  'H-10-11':{status:'draft',image:'chunks/drafts/h10-h11-r10-r11-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft deep Mouth visual plate: faded distant wreck forms.'},
+  'H-11-11':{status:'draft',image:'chunks/drafts/h10-h11-r10-r11-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft deep Mouth visual plate: unknown descent.'}
+};
+const westExchangeApproachDrafts={
+  'H-6-5':{status:'draft',image:'chunks/drafts/h6-h7-r5-r6-west-exchange-approach-0-v1-draft-2026-09-13.png',note:'Draft West Exchange approach: broad arrival terrace, public queue, and open void edge.'},
+  'H-7-5':{status:'draft',image:'chunks/drafts/h6-h7-r5-r6-west-exchange-approach-1-v1-draft-2026-09-13.png',note:'Draft civic intake approach: one continuous walkable route toward Holding.'},
+  'H-6-6':{status:'draft',image:'chunks/drafts/h6-h7-r5-r6-west-exchange-approach-2-v1-draft-2026-09-13.png',note:'Draft West Exchange public terrace below the approach.'},
+  'H-7-6':{status:'draft',image:'chunks/drafts/h6-h7-r5-r6-west-exchange-approach-3-v1-draft-2026-09-13.png',note:'Draft Holding-adjacent civic edge: a deliberate handoff, not a cluttered collage.'}
+};
+const lowerFreightCleanDrafts={
+  'H-7-8':{status:'draft',image:'chunks/drafts/h7-h8-r8-r9-lower-freight-clean-0-v1-draft-2026-09-13.png',note:'Draft Lower Freight: one large moored wreckage raft and a clear cargo route.'},
+  'H-8-8':{status:'draft',image:'chunks/drafts/h7-h8-r8-r9-lower-freight-clean-1-v1-draft-2026-09-13.png',note:'Draft Lower Freight east: small attached service deck with void around it.'},
+  'H-7-9':{status:'draft',image:'chunks/drafts/h7-h8-r8-r9-lower-freight-clean-2-v1-draft-2026-09-13.png',note:'Draft raft underside: hydraulic rig and cargo cage above open depth.'},
+  'H-8-9':{status:'draft',image:'chunks/drafts/h7-h8-r8-r9-lower-freight-clean-3-v1-draft-2026-09-13.png',note:'Draft lower Heart void edge: no continuous city strip.'}
+};
+const cisternLowerBoundaryDrafts={
+  'H-14-14':{status:'draft',image:'chunks/drafts/h14-h15-r14-r15-cistern-lower-boundary-0-v1-draft-2026-09-13.png',note:'Draft deep Cistern service: tank spine and broad maintenance catwalk.'},
+  'H-15-14':{status:'draft',image:'chunks/drafts/h14-h15-r14-r15-cistern-lower-boundary-1-v1-draft-2026-09-13.png',note:'Draft far-east service: controlled pipe turn and sealed outer boundary.'},
+  'H-14-15':{status:'draft',image:'chunks/drafts/h14-h15-r14-r15-cistern-lower-boundary-2-v1-draft-2026-09-13.png',note:'Draft lower Cistern: contained basin, short stair, no Mouth view.'},
+  'H-15-15':{status:'draft',image:'chunks/drafts/h14-h15-r14-r15-cistern-lower-boundary-3-v1-draft-2026-09-13.png',note:'Draft far-east floodgate / maintained hard limit.'}
+};
+const westMakerLandmarkDrafts={
+  'H-2-6':{status:'draft',image:'chunks/drafts/h2-h3-r6-r7-west-maker-landmark-0-v1-draft-2026-09-13.png',note:'Draft west homes: varied carved units under a large switchback.'},
+  'H-3-6':{status:'draft',image:'chunks/drafts/h2-h3-r6-r7-west-maker-landmark-1-v1-draft-2026-09-13.png',note:'Draft west terrace: void-facing communal route and multi-cell stair landmark.'},
+  'H-2-7':{status:'draft',image:'chunks/drafts/h2-h3-r6-r7-west-maker-landmark-2-v1-draft-2026-09-13.png',note:'Draft lower maker court: distinct workshop space below homes.'},
+  'H-3-7':{status:'draft',image:'chunks/drafts/h2-h3-r6-r7-west-maker-landmark-3-v1-draft-2026-09-13.png',note:'Draft west lower route: landmark stair completes through multiple cells.'}
+};
+const upperCentralMouthDepthDrafts={
+  'H-8-1':{status:'draft',image:'chunks/drafts/h8-h9-r1-r2-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft upper Devil’s Mouth: straight-down haze and distant wreck form only.'},
+  'H-9-1':{status:'draft',image:'chunks/drafts/h8-h9-r1-r2-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft upper Devil’s Mouth: no horizon, floor, or route.'},
+  'H-8-2':{status:'draft',image:'chunks/drafts/h8-h9-r1-r2-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft Mouth opening depth: restrained background for nearby Ashram walls.'},
+  'H-9-2':{status:'draft',image:'chunks/drafts/h8-h9-r1-r2-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft Mouth opening depth: vertical unknown remains hidden below.'}
+};
+const midEastFarGalleryDrafts={
+  'H-16-7':{status:'draft',image:'chunks/drafts/h16-h17-r7-r8-mid-east-far-gallery-0-v1-draft-2026-09-13.png',note:'Draft Mid-East far gallery: bounded public excavation with a continuous walking floor.'},
+  'H-17-7':{status:'draft',image:'chunks/drafts/h16-h17-r7-r8-mid-east-far-gallery-1-v1-draft-2026-09-13.png',note:'Draft far-right dig limit: braced, sealed rock face and tool staging.'},
+  'H-16-8':{status:'draft',image:'chunks/drafts/h16-h17-r7-r8-mid-east-far-gallery-2-v1-draft-2026-09-13.png',note:'Draft lower gallery: rail-cart turn-out and short inspection stair.'},
+  'H-17-8':{status:'draft',image:'chunks/drafts/h16-h17-r7-r8-mid-east-far-gallery-3-v1-draft-2026-09-13.png',note:'Draft far boundary: no void, lift, or unbounded mine.'}
+};
+const southCentralMouthDepthDrafts={
+  'H-8-12':{status:'draft',image:'chunks/drafts/h8-h9-r12-r13-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft lower Devil’s Mouth: black depth fog and remote wreck rib only.'},
+  'H-9-12':{status:'draft',image:'chunks/drafts/h8-h9-r12-r13-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft lower Devil’s Mouth: no settlement, platform, or visible bottom.'},
+  'H-8-13':{status:'draft',image:'chunks/drafts/h8-h9-r12-r13-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft deep haze: background-only unknown descent.'},
+  'H-9-13':{status:'draft',image:'chunks/drafts/h8-h9-r12-r13-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft deep haze: all foreground access remains outside the Mouth.'}
+};
+const westHomeCourtSwitchbackDrafts={
+  'H-2-10':{status:'draft',image:'chunks/drafts/h2-h3-r10-r11-west-home-court-switchback-0-v1-draft-2026-09-13.png',note:'Draft lower-west homes/market: start of the landmark switchback toward Home Court.'},
+  'H-3-10':{status:'draft',image:'chunks/drafts/h2-h3-r10-r11-west-home-court-switchback-1-v1-draft-2026-09-13.png',note:'Draft Home Court approach: open work terrace and the upper part of the switchback.'},
+  'H-2-11':{status:'draft',image:'chunks/drafts/h2-h3-r10-r11-west-home-court-switchback-2-v1-draft-2026-09-13.png',note:'Draft lower home/maker edge with contained west rock.'},
+  'H-3-11':{status:'draft',image:'chunks/drafts/h2-h3-r10-r11-west-home-court-switchback-3-v1-draft-2026-09-13.png',note:'Draft lower switchback: varied connector toward Home Court, not a lift.'}
+};
+const eastDockCleanDrafts={
+  'H-10-7':{status:'draft',image:'chunks/drafts/h10-h11-r7-r8-east-dock-clean-0-v1-draft-2026-09-13.png',note:'Draft East Dock: one main service/freight raft with a clear player route.'},
+  'H-11-7':{status:'draft',image:'chunks/drafts/h10-h11-r7-r8-east-dock-clean-1-v1-draft-2026-09-13.png',note:'Draft East Dock outer landing and crane, with void remaining open.'},
+  'H-10-8':{status:'draft',image:'chunks/drafts/h10-h11-r7-r8-east-dock-clean-2-v1-draft-2026-09-13.png',note:'Draft East Dock lower edge: one small offset cargo float.'},
+  'H-11-8':{status:'draft',image:'chunks/drafts/h10-h11-r7-r8-east-dock-clean-3-v1-draft-2026-09-13.png',note:'Draft East Dock lower route: diagonal connector and broad void gaps.'}
+};
+const eastLowerServiceLandmarkDrafts={
+  'H-12-11':{status:'draft',image:'chunks/drafts/h12-h13-r11-r12-east-lower-service-landmark-0-v1-draft-2026-09-13.png',note:'Draft lower-east service: broad lived-in terrace above the Cistern approach.'},
+  'H-13-11':{status:'draft',image:'chunks/drafts/h12-h13-r11-r12-east-lower-service-landmark-1-v1-draft-2026-09-13.png',note:'Draft lower-east repair/wash court with dark Mouth depth behind the left rail.'},
+  'H-12-12':{status:'draft',image:'chunks/drafts/h12-h13-r11-r12-east-lower-service-landmark-2-v1-draft-2026-09-13.png',note:'Draft Cisternward service approach with a tall continuous diagonal route.'},
+  'H-13-12':{status:'draft',image:'chunks/drafts/h12-h13-r11-r12-east-lower-service-landmark-3-v1-draft-2026-09-13.png',note:'Draft lower-east service landmark: freightward connector without an all-height lift.'}
+};
+const eastAshramBoundaryDrafts={
+  'H-16-1':{status:'draft',image:'chunks/drafts/h16-h17-r1-r2-ashram-east-boundary-0-v1-draft-2026-09-13.png',note:'Draft far-east Ashram: contained upper homes and guarded public walk.'},
+  'H-17-1':{status:'draft',image:'chunks/drafts/h16-h17-r1-r2-ashram-east-boundary-1-v1-draft-2026-09-13.png',note:'Draft Ashram far boundary: sealed storage/door in natural crater rock.'},
+  'H-16-2':{status:'draft',image:'chunks/drafts/h16-h17-r1-r2-ashram-east-boundary-2-v1-draft-2026-09-13.png',note:'Draft upper east Ashram continuation: one clear public stair.'},
+  'H-17-2':{status:'draft',image:'chunks/drafts/h16-h17-r1-r2-ashram-east-boundary-3-v1-draft-2026-09-13.png',note:'Draft hard far-east Ashram boundary, not an exterior view.'}
+};
+const westAshramInnerDrafts={
+  'H-2-1':{status:'draft',image:'chunks/drafts/h2-h3-r1-r2-ashram-west-inner-0-v1-draft-2026-09-13.png',note:'Draft inner west Ashram: modest homes and Warden check approach.'},
+  'H-3-1':{status:'draft',image:'chunks/drafts/h2-h3-r1-r2-ashram-west-inner-1-v1-draft-2026-09-13.png',note:'Draft west Ashram gateway: shallow stair shared across the master.'},
+  'H-2-2':{status:'draft',image:'chunks/drafts/h2-h3-r1-r2-ashram-west-inner-2-v1-draft-2026-09-13.png',note:'Draft inner Ashram lower route: enclosed and guarded.'},
+  'H-3-2':{status:'draft',image:'chunks/drafts/h2-h3-r1-r2-ashram-west-inner-3-v1-draft-2026-09-13.png',note:'Draft Ashram-to-High-West threshold: no lift or void.'}
+};
+const midHeartNorthApproachDrafts={
+  'H-8-5':{status:'draft',image:'chunks/drafts/h8-h9-r5-r6-midheart-north-approach-0-v1-draft-2026-09-13.png',note:'Draft north Holding approach: offset civic rafts with void visible.'},
+  'H-9-5':{status:'draft',image:'chunks/drafts/h8-h9-r5-r6-midheart-north-approach-1-v1-draft-2026-09-13.png',note:'Draft East Service north approach: one short diagonal connector.'},
+  'H-8-6':{status:'draft',image:'chunks/drafts/h8-h9-r5-r6-midheart-north-approach-2-v1-draft-2026-09-13.png',note:'Draft Holding upper edge: separated civic raft, not one unbroken bridge.'},
+  'H-9-6':{status:'draft',image:'chunks/drafts/h8-h9-r5-r6-midheart-north-approach-3-v1-draft-2026-09-13.png',note:'Draft east Holding edge: moored service raft with broad gaps.'}
+};
+const eastLowerUtilityDrafts={
+  'H-16-9':{status:'draft',image:'chunks/drafts/h16-h17-r9-r10-east-lower-utility-0-v1-draft-2026-09-13.png',note:'Draft lower-east utility: broad maintenance terrace and oxidized pipe spine.'},
+  'H-17-9':{status:'draft',image:'chunks/drafts/h16-h17-r9-r10-east-lower-utility-1-v1-draft-2026-09-13.png',note:'Draft far-east utility boundary: sealed rock and service hardware.'},
+  'H-16-10':{status:'draft',image:'chunks/drafts/h16-h17-r9-r10-east-lower-utility-2-v1-draft-2026-09-13.png',note:'Draft lower utility shelf: local stair, bench, trolley, and gauges.'},
+  'H-17-10':{status:'draft',image:'chunks/drafts/h16-h17-r9-r10-east-lower-utility-3-v1-draft-2026-09-13.png',note:'Draft far-east lower boundary: no void or full-height lift.'}
+};
+const topWestMouthDepthDrafts={
+  'H-6-0':{status:'draft',image:'chunks/drafts/h6-h7-r0-r1-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft upper Mouth depth: cold fog and distant ribs only.'},'H-7-0':{status:'draft',image:'chunks/drafts/h6-h7-r0-r1-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft upper Mouth depth: no route or floor.'},'H-6-1':{status:'draft',image:'chunks/drafts/h6-h7-r0-r1-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft upper Mouth haze.'},'H-7-1':{status:'draft',image:'chunks/drafts/h6-h7-r0-r1-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft upper Mouth haze.'}
+};
+const topEastMouthDepthDrafts={
+  'H-10-0':{status:'draft',image:'chunks/drafts/h10-h11-r0-r1-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft upper Mouth depth: background only.'},'H-11-0':{status:'draft',image:'chunks/drafts/h10-h11-r0-r1-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft upper Mouth depth: no horizon or platforms.'},'H-10-1':{status:'draft',image:'chunks/drafts/h10-h11-r0-r1-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft upper Mouth haze.'},'H-11-1':{status:'draft',image:'chunks/drafts/h10-h11-r0-r1-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft upper Mouth haze.'}
+};
+const deepWestMouthDepthDrafts={
+  'H-6-14':{status:'draft',image:'chunks/drafts/h6-h7-r14-r15-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft deepest Mouth: near-black fog, no route or light.'},'H-7-14':{status:'draft',image:'chunks/drafts/h6-h7-r14-r15-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft deepest Mouth: no floor.'},'H-6-15':{status:'draft',image:'chunks/drafts/h6-h7-r14-r15-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft unknown black descent.'},'H-7-15':{status:'draft',image:'chunks/drafts/h6-h7-r14-r15-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft unknown black descent.'}
+};
+const eastGlowbedsBoundaryDrafts={
+  'H-16-3':{status:'draft',image:'chunks/drafts/h16-h17-r3-r4-glowbeds-east-boundary-0-v1-draft-2026-09-13.png',note:'Draft far-east Glowbeds: tidy closed grow tunnel and walking route.'},'H-17-3':{status:'draft',image:'chunks/drafts/h16-h17-r3-r4-glowbeds-east-boundary-1-v1-draft-2026-09-13.png',note:'Draft Glowbeds hard boundary: sealed outer rock.'},'H-16-4':{status:'draft',image:'chunks/drafts/h16-h17-r3-r4-glowbeds-east-boundary-2-v1-draft-2026-09-13.png',note:'Draft Glowbeds lower shelf / water channel.'},'H-17-4':{status:'draft',image:'chunks/drafts/h16-h17-r3-r4-glowbeds-east-boundary-3-v1-draft-2026-09-13.png',note:'Draft Glowbeds sealed boundary hatch.'}
+};
+const westAshramHighWestTransitionDrafts={
+  'H-4-1':{status:'draft',image:'chunks/drafts/h4-h5-r1-r2-ashram-highwest-transition-0-v1-draft-2026-09-13.png',note:'Draft west Ashram/High-West transition: roofed homes and guarded threshold.'},'H-5-1':{status:'draft',image:'chunks/drafts/h4-h5-r1-r2-ashram-highwest-transition-1-v1-draft-2026-09-13.png',note:'Draft High-West-bound turnback, no lift or void.'},'H-4-2':{status:'draft',image:'chunks/drafts/h4-h5-r1-r2-ashram-highwest-transition-2-v1-draft-2026-09-13.png',note:'Draft broad stepped descent.'},'H-5-2':{status:'draft',image:'chunks/drafts/h4-h5-r1-r2-ashram-highwest-transition-3-v1-draft-2026-09-13.png',note:'Draft regulated lower route toward High-West.'}
+};
+const midWestWorkerAnchorDrafts={
+  'H-0-6':{status:'draft',image:'chunks/drafts/h0-h1-r6-r7-midwest-worker-anchor-0-v1-draft-2026-09-13.png',note:'Draft west worker homes/maker lane and multi-cell switchback.'},'H-1-6':{status:'draft',image:'chunks/drafts/h0-h1-r6-r7-midwest-worker-anchor-1-v1-draft-2026-09-13.png',note:'Draft protected void-facing terrace.'},'H-0-7':{status:'draft',image:'chunks/drafts/h0-h1-r6-r7-midwest-worker-anchor-2-v1-draft-2026-09-13.png',note:'Draft west family/maker lower route.'},'H-1-7':{status:'draft',image:'chunks/drafts/h0-h1-r6-r7-midwest-worker-anchor-3-v1-draft-2026-09-13.png',note:'Draft worker switchback continuation.'}
+};
+const cisternApproachDrafts={
+  'H-14-9':{status:'draft',image:'chunks/drafts/h14-h15-r9-r10-cistern-approach-0-v1-draft-2026-09-13.png',note:'Draft Cistern approach: shared pressure-pipe spine and maintenance bridge.'},'H-15-9':{status:'draft',image:'chunks/drafts/h14-h15-r9-r10-cistern-approach-1-v1-draft-2026-09-13.png',note:'Draft Cistern approach: enclosed repair terrace.'},'H-14-10':{status:'draft',image:'chunks/drafts/h14-h15-r9-r10-cistern-approach-2-v1-draft-2026-09-13.png',note:'Draft lower brine catch platform and short local stair.'},'H-15-10':{status:'draft',image:'chunks/drafts/h14-h15-r9-r10-cistern-approach-3-v1-draft-2026-09-13.png',note:'Draft utility transition, not a lift or housing strip.'}
+};
+const deepEastMouthDepthDrafts={
+  'H-10-14':{status:'draft',image:'chunks/drafts/h10-h11-r14-r15-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft deepest Mouth: black-blue fog only.'},'H-11-14':{status:'draft',image:'chunks/drafts/h10-h11-r14-r15-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft deepest Mouth: no floor or lights.'},'H-10-15':{status:'draft',image:'chunks/drafts/h10-h11-r14-r15-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft unknown descent.'},'H-11-15':{status:'draft',image:'chunks/drafts/h10-h11-r14-r15-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft unknown descent.'}
+};
+const workerBottomWestDrafts={
+  'H-0-8':{status:'draft',image:'chunks/drafts/h0-h1-r8-r9-worker-bottomwest-0-v1-draft-2026-09-13.png',note:'Draft west worker homes/wash lane and Bottom-West descent.'},'H-1-8':{status:'draft',image:'chunks/drafts/h0-h1-r8-r9-worker-bottomwest-1-v1-draft-2026-09-13.png',note:'Draft lateral descent route toward Bottom-West.'},'H-0-9':{status:'draft',image:'chunks/drafts/h0-h1-r8-r9-worker-bottomwest-2-v1-draft-2026-09-13.png',note:'Draft lower worker services contained by outer rock.'},'H-1-9':{status:'draft',image:'chunks/drafts/h0-h1-r8-r9-worker-bottomwest-3-v1-draft-2026-09-13.png',note:'Draft braced turnback to the public dig approach.'}
+};
+const westWorkerLandmarkDrafts={
+  'H-2-8':{status:'draft',image:'chunks/drafts/h2-h3-r8-r9-worker-landmark-0-v1-draft-2026-09-13.png',note:'Draft worker/maker terrace with landmark diagonal stair.'},'H-3-8':{status:'draft',image:'chunks/drafts/h2-h3-r8-r9-worker-landmark-1-v1-draft-2026-09-13.png',note:'Draft safe Mouth-facing work terrace.'},'H-2-9':{status:'draft',image:'chunks/drafts/h2-h3-r8-r9-worker-landmark-2-v1-draft-2026-09-13.png',note:'Draft lower maker/wash route.'},'H-3-9':{status:'draft',image:'chunks/drafts/h2-h3-r8-r9-worker-landmark-3-v1-draft-2026-09-13.png',note:'Draft multi-cell stair continuation.'}
+};
+const cisternDeepTransitionDrafts={
+  'H-12-13':{status:'draft',image:'chunks/drafts/h12-h13-r13-r14-cistern-deep-transition-0-v1-draft-2026-09-13.png',note:'Draft Cistern manifold / shared upper service terrace.'},'H-13-13':{status:'draft',image:'chunks/drafts/h12-h13-r13-r14-cistern-deep-transition-1-v1-draft-2026-09-13.png',note:'Draft pressure basin and service door.'},'H-12-14':{status:'draft',image:'chunks/drafts/h12-h13-r13-r14-cistern-deep-transition-2-v1-draft-2026-09-13.png',note:'Draft lower inspection ledge above deep maintenance.'},'H-13-14':{status:'draft',image:'chunks/drafts/h12-h13-r13-r14-cistern-deep-transition-3-v1-draft-2026-09-13.png',note:'Draft enclosed brine catch / valve continuation.'}
+};
+const upperMidWestMouthDepthDrafts={
+  'H-6-2':{status:'draft',image:'chunks/drafts/h6-h7-r2-r3-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft Mouth depth: cold fog and distant ribs only.'},'H-7-2':{status:'draft',image:'chunks/drafts/h6-h7-r2-r3-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft Mouth depth: no accessible route.'},'H-6-3':{status:'draft',image:'chunks/drafts/h6-h7-r2-r3-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft vertical void depth.'},'H-7-3':{status:'draft',image:'chunks/drafts/h6-h7-r2-r3-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft vertical void depth.'}
+};
+const upperMidEastMouthDepthDrafts={
+  'H-10-2':{status:'draft',image:'chunks/drafts/h10-h11-r2-r3-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft Mouth depth: background-only haze.'},'H-11-2':{status:'draft',image:'chunks/drafts/h10-h11-r2-r3-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft Mouth depth: no horizon or platform.'},'H-10-3':{status:'draft',image:'chunks/drafts/h10-h11-r2-r3-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft vertical void depth.'},'H-11-3':{status:'draft',image:'chunks/drafts/h10-h11-r2-r3-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft vertical void depth.'}
+};
+const midEastStagingDrafts={
+  'H-16-5':{status:'draft',image:'chunks/drafts/h16-h17-r5-r6-mideast-staging-0-v1-draft-2026-09-13.png',note:'Draft Mid-East staging: braced gallery and continuous walking floor.'},'H-17-5':{status:'draft',image:'chunks/drafts/h16-h17-r5-r6-mideast-staging-1-v1-draft-2026-09-13.png',note:'Draft far-east staging boundary: gate and reinforced storage rock.'},'H-16-6':{status:'draft',image:'chunks/drafts/h16-h17-r5-r6-mideast-staging-2-v1-draft-2026-09-13.png',note:'Draft Mid-East lower service shelf with short switchback.'},'H-17-6':{status:'draft',image:'chunks/drafts/h16-h17-r5-r6-mideast-staging-3-v1-draft-2026-09-13.png',note:'Draft far-east side-wall limit: no lift or exterior void.'}
+};
+const heartWestMouthDepthDrafts={
+  'H-6-4':{status:'draft',image:'chunks/drafts/h6-h7-r4-r5-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft dark Mouth background above West Exchange.'},'H-7-4':{status:'draft',image:'chunks/drafts/h6-h7-r4-r5-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft depth: no route or floor.'},'H-6-5':{status:'draft',image:'chunks/drafts/h6-h7-r4-r5-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft quiet Mouth haze behind Mid Heart.'},'H-7-5':{status:'draft',image:'chunks/drafts/h6-h7-r4-r5-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft quiet Mouth haze behind Mid Heart.'}
+};
+const heartEastMouthDepthDrafts={
+  'H-10-4':{status:'draft',image:'chunks/drafts/h10-h11-r4-r5-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft dark Mouth background above East Service.'},'H-11-4':{status:'draft',image:'chunks/drafts/h10-h11-r4-r5-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft depth: no structures or route.'},'H-10-5':{status:'draft',image:'chunks/drafts/h10-h11-r4-r5-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft quiet Mouth haze behind Mid Heart.'},'H-11-5':{status:'draft',image:'chunks/drafts/h10-h11-r4-r5-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft quiet Mouth haze behind Mid Heart.'}
+};
+const midEastInnerApproachDrafts={
+  'H-14-5':{status:'draft',image:'chunks/drafts/h14-h15-r5-r6-mideast-inner-approach-0-v1-draft-2026-09-13.png',note:'Draft Mid-East inner service/checkpoint terrace.'},'H-15-5':{status:'draft',image:'chunks/drafts/h14-h15-r5-r6-mideast-inner-approach-1-v1-draft-2026-09-13.png',note:'Draft embedded hull rib and regulated side route.'},'H-14-6':{status:'draft',image:'chunks/drafts/h14-h15-r5-r6-mideast-inner-approach-2-v1-draft-2026-09-13.png',note:'Draft local stair to shallow lower work shelf.'},'H-15-6':{status:'draft',image:'chunks/drafts/h14-h15-r5-r6-mideast-inner-approach-3-v1-draft-2026-09-13.png',note:'Draft inner Mid-East approach: no lift or exterior void.'}
+};
+const lowerMidWestMouthDepthDrafts={
+  'H-6-12':{status:'draft',image:'chunks/drafts/h6-h7-r12-r13-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft lower Mouth: near-black background-only fog.'},'H-7-12':{status:'draft',image:'chunks/drafts/h6-h7-r12-r13-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft lower Mouth: no route or floor.'},'H-6-13':{status:'draft',image:'chunks/drafts/h6-h7-r12-r13-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft lower Mouth haze.'},'H-7-13':{status:'draft',image:'chunks/drafts/h6-h7-r12-r13-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft lower Mouth haze.'}
+};
+const lowerMidEastMouthDepthDrafts={
+  'H-10-12':{status:'draft',image:'chunks/drafts/h10-h11-r12-r13-mouth-depth-0-v1-draft-2026-09-13.png',note:'Draft lower Mouth: near-black background-only fog.'},'H-11-12':{status:'draft',image:'chunks/drafts/h10-h11-r12-r13-mouth-depth-1-v1-draft-2026-09-13.png',note:'Draft lower Mouth: no route or floor.'},'H-10-13':{status:'draft',image:'chunks/drafts/h10-h11-r12-r13-mouth-depth-2-v1-draft-2026-09-13.png',note:'Draft lower Mouth haze.'},'H-11-13':{status:'draft',image:'chunks/drafts/h10-h11-r12-r13-mouth-depth-3-v1-draft-2026-09-13.png',note:'Draft lower Mouth haze.'}
+};
+const firmamentEdgeBandDrafts={
+  'H-0-0':{status:'draft',image:'chunks/drafts/h0-h1-r0-firmament-west-roof-0-v1-draft-2026-09-13.png',note:'Draft far-west Firmament edge: crushing roof rock and narrow maintenance rail.'},'H-1-0':{status:'draft',image:'chunks/drafts/h0-h1-r0-firmament-west-roof-1-v1-draft-2026-09-13.png',note:'Draft west roof limit: embedded hull ribs, no open exterior.'},'H-16-0':{status:'draft',image:'chunks/drafts/h16-h17-r0-firmament-east-roof-0-v1-draft-2026-09-13.png',note:'Draft far-east Firmament edge: sealed upper roof and guarded rail.'},'H-17-0':{status:'draft',image:'chunks/drafts/h16-h17-r0-firmament-east-roof-1-v1-draft-2026-09-13.png',note:'Draft far-east roof limit: no exterior or ordinary rooms.'}
+};
+const westSwitchbackRepairDrafts={
+  'H-4-7':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-repair-0-v1-draft-2026-09-13.png',note:'Topology repair draft: west worker switchback, replacing obsolete lower lift lineage.'},'H-5-7':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-repair-1-v1-draft-2026-09-13.png',note:'Topology repair draft: inactive local maintenance hardware only; no operating cage.'},'H-4-8':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-repair-2-v1-draft-2026-09-13.png',note:'Topology repair draft: descending worker route toward lower-west homes.'},'H-5-8':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-repair-3-v1-draft-2026-09-13.png',note:'Topology repair draft: switchback continuity, with explicit future r6/r9 seam work.'}
+};
+const midEastBridgeRepairDrafts={
+  'H-12-7':{status:'draft',image:'chunks/drafts/h12-h13-r7-r8-mideast-bridge-repair-0-v1-draft-2026-09-13.png',note:'Topology repair: Mid-East inner gate and continuous public approach.'},'H-13-7':{status:'draft',image:'chunks/drafts/h12-h13-r7-r8-mideast-bridge-repair-1-v1-draft-2026-09-13.png',note:'Topology repair: regulated outer staging with walkable route.'},'H-12-8':{status:'draft',image:'chunks/drafts/h12-h13-r7-r8-mideast-bridge-repair-2-v1-draft-2026-09-13.png',note:'Topology repair: lower Mid-East support shelf and short diagonal.'},'H-13-8':{status:'draft',image:'chunks/drafts/h12-h13-r7-r8-mideast-bridge-repair-3-v1-draft-2026-09-13.png',note:'Topology repair: outward dig gate, not a Mouth platform.'}
+};
+const midHeartWestRepairDrafts={
+  'H-6-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-midheart-west-repair-0-v1-draft-2026-09-13.png',note:'Structural repair: West Exchange upper civic terrace.'},'H-7-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-midheart-west-repair-1-v1-draft-2026-09-13.png',note:'Structural repair: Mid Heart west arrival and open void edge.'},'H-6-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-midheart-west-repair-2-v1-draft-2026-09-13.png',note:'Structural repair: lower cargo raft with broad walkable deck.'},'H-7-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-midheart-west-repair-3-v1-draft-2026-09-13.png',note:'Structural repair: offset lower freight connector.'}
+};
+const eastAshramRepairDrafts={
+  'H-14-1':{status:'draft',image:'chunks/drafts/h14-h15-r1-r2-east-ashram-repair-0-v1-draft-2026-09-13.png',note:'East Ashram repair: guarded modest wall housing and shallow public route.'},'H-15-1':{status:'draft',image:'chunks/drafts/h14-h15-r1-r2-east-ashram-repair-1-v1-draft-2026-09-13.png',note:'East Ashram repair: outer sacred gate terrace.'},'H-14-2':{status:'draft',image:'chunks/drafts/h14-h15-r1-r2-east-ashram-repair-2-v1-draft-2026-09-13.png',note:'East Ashram repair: lower guarded terrace and stair.'},'H-15-2':{status:'draft',image:'chunks/drafts/h14-h15-r1-r2-east-ashram-repair-3-v1-draft-2026-09-13.png',note:'East Ashram repair: outer wall approach.'}
+};
+const firmamentWestBandDrafts={
+  'H-2-0':{status:'draft',image:'chunks/drafts/h2-h5-r0-firmament-band-0-v1-draft-2026-09-13.png',note:'Firmament band: continuous mythic ceiling, no rooms.'},'H-3-0':{status:'draft',image:'chunks/drafts/h2-h5-r0-firmament-band-1-v1-draft-2026-09-13.png',note:'Firmament band: embedded wreck ribs and natural strata.'},'H-4-0':{status:'draft',image:'chunks/drafts/h2-h5-r0-firmament-band-2-v1-draft-2026-09-13.png',note:'Firmament band: continuous roof rock.'},'H-5-0':{status:'draft',image:'chunks/drafts/h2-h5-r0-firmament-band-3-v1-draft-2026-09-13.png',note:'Firmament band: Mouth-facing ceiling transition.'}
+};
+const mouthDeepRepairDrafts={
+  'H-9-9':{status:'draft',image:'chunks/drafts/h9-h11-r9-mouth-depth-0-v1-draft-2026-09-13.png',note:'Mouth visual-depth repair: abyss fog and distant wreck silhouette only.'},'H-10-9':{status:'draft',image:'chunks/drafts/h9-h11-r9-mouth-depth-1-v1-draft-2026-09-13.png',note:'Mouth visual-depth repair: no occupied platform or floor.'},'H-11-9':{status:'draft',image:'chunks/drafts/h9-h11-r9-mouth-depth-2-v1-draft-2026-09-13.png',note:'Mouth visual-depth repair: endless descent.'}
+};
+const midHeartEastRepairDrafts={
+  'H-10-6':{status:'draft',image:'chunks/drafts/h10-h11-r6-r7-midheart-east-repair-0-v1-draft-2026-09-13.png',note:'Mid Heart repair: East Service upper terrace.'},'H-11-6':{status:'draft',image:'chunks/drafts/h10-h11-r6-r7-midheart-east-repair-1-v1-draft-2026-09-13.png',note:'Mid Heart repair: east dock connection.'},'H-10-7':{status:'draft',image:'chunks/drafts/h10-h11-r6-r7-midheart-east-repair-2-v1-draft-2026-09-13.png',note:'Mid Heart repair: lower east service deck.'},'H-11-7':{status:'draft',image:'chunks/drafts/h10-h11-r6-r7-midheart-east-repair-3-v1-draft-2026-09-13.png',note:'Mid Heart repair: east dock lower terrace.'}
+};
+const cisternFreightRepairDrafts={
+  'H-15-10':{status:'draft',image:'chunks/drafts/h15-h16-r10-r11-cistern-freight-repair-0-v1-draft-2026-09-13.png',note:'Cistern repair: freight approach and broad mid landing.'},'H-16-10':{status:'draft',image:'chunks/drafts/h15-h16-r10-r11-cistern-freight-repair-1-v1-draft-2026-09-13.png',note:'Cistern repair: continuous Low-to-Mid freight shaft.'},'H-15-11':{status:'draft',image:'chunks/drafts/h15-h16-r10-r11-cistern-freight-repair-2-v1-draft-2026-09-13.png',note:'Cistern repair: lower service and switchback.'},'H-16-11':{status:'draft',image:'chunks/drafts/h15-h16-r10-r11-cistern-freight-repair-3-v1-draft-2026-09-13.png',note:'Cistern repair: heavy lift lower continuation; not passenger route.'}
+};
+const glowbeds2dRepairDrafts={
+  'H-12-3':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-2d-repair-0-v1-draft-2026-09-13.png',note:'Glowbeds repair: tidy upper cultivation route.'},'H-13-3':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-2d-repair-1-v1-draft-2026-09-13.png',note:'Glowbeds repair: guarded grow terrace.'},'H-12-4':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-2d-repair-2-v1-draft-2026-09-13.png',note:'Glowbeds repair: walkable lower planter route.'},'H-13-4':{status:'draft',image:'chunks/drafts/h12-h13-r3-r4-glowbeds-2d-repair-3-v1-draft-2026-09-13.png',note:'Glowbeds repair: shallow stair and cultivation deck.'}
+};
+const highWestTransitionDrafts={
+  'H-4-3':{status:'draft',image:'chunks/drafts/h4-h5-r3-highwest-transition-0-v1-draft-2026-09-13.png',note:'High-West repair: guarded checkpoint and short local stair.'},'H-5-3':{status:'draft',image:'chunks/drafts/h4-h5-r3-highwest-transition-1-v1-draft-2026-09-13.png',note:'High-West repair: Wickwork-facing transition, no lower lift.'}
+};
+const upperMouthGapDrafts={
+  'H-8-0':{status:'draft',image:'chunks/drafts/h8-h9-r0-upper-mouth-depth-0-v1-draft-2026-09-13.png',note:'Upper Mouth visual depth: ceiling recession and abyss fog only.'},'H-9-0':{status:'draft',image:'chunks/drafts/h8-h9-r0-upper-mouth-depth-1-v1-draft-2026-09-13.png',note:'Upper Mouth visual depth: no civic structures.'}
+};
+const cisternDeepGapDrafts={
+  'H-12-15':{status:'draft',image:'chunks/drafts/h12-h13-r15-cistern-deep-0-v1-draft-2026-09-13.png',note:'Deep Cistern repair: lateral maintenance route.'},'H-13-15':{status:'draft',image:'chunks/drafts/h12-h13-r15-cistern-deep-1-v1-draft-2026-09-13.png',note:'Deep Cistern repair: sealed far-wall pressure boundary.'}
+};
+const mouthWestDepthRepairDrafts={
+  'H-6-9':{status:'draft',image:'chunks/drafts/h6-h7-r9-mouth-depth-repair-0-v1-draft-2026-09-13.png',note:'Mouth repair: visual abyss only, no settlement or floor.'},'H-7-9':{status:'draft',image:'chunks/drafts/h6-h7-r9-mouth-depth-repair-1-v1-draft-2026-09-13.png',note:'Mouth repair: endless visual depth under Mid Heart.'}
+};
+const cisternFarEdgeDrafts={
+  'H-16-13':{status:'draft',image:'chunks/drafts/h16-h17-r13-cistern-far-edge-0-v1-draft-2026-09-13.png',note:'Cistern repair: settling line and continuous service walk.'},'H-17-13':{status:'draft',image:'chunks/drafts/h16-h17-r13-cistern-far-edge-1-v1-draft-2026-09-13.png',note:'Cistern repair: sealed far-east service boundary.'}
+};
+const westCivicIngressRepairDrafts={
+  'H-5-6':{status:'draft',image:'chunks/drafts/h5-h6-r6-r7-west-civic-lift-ingress-0-v1-draft-2026-09-13.png',note:'West ingress repair: the sole mid-level civic cage and protected landing.'},'H-6-6':{status:'draft',image:'chunks/drafts/h5-h6-r6-r7-west-civic-lift-ingress-1-v1-draft-2026-09-13.png',note:'West ingress repair: West Exchange begins at the civic intake.'},'H-5-7':{status:'draft',image:'chunks/drafts/h5-h6-r6-r7-west-civic-lift-ingress-2-v1-draft-2026-09-13.png',note:'West ingress repair: lower cargo switchback, not an operating lift.'},'H-6-7':{status:'draft',image:'chunks/drafts/h5-h6-r6-r7-west-civic-lift-ingress-3-v1-draft-2026-09-13.png',note:'West ingress repair: lower freight handoff and open void edge.'}
+};
+const holdingCoreRepairDrafts={
+  'H-7-6':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-core-repair-0-v1-draft-2026-09-13.png',note:'Holding repair: broad upper civic gathering hall.'},'H-8-6':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-core-repair-1-v1-draft-2026-09-13.png',note:'Holding repair: stepped gathering route and void edge.'},'H-7-7':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-core-repair-2-v1-draft-2026-09-13.png',note:'Holding repair: lower open floor and catchrail.'},'H-8-7':{status:'draft',image:'chunks/drafts/h7-h8-r6-r7-holding-core-repair-3-v1-draft-2026-09-13.png',note:'Holding repair: offset lower civic connector.'}
+};
+const eastHeartEgressRepairDrafts={
+  'H-11-6':{status:'draft',image:'chunks/drafts/h11-h12-r6-r7-east-egress-repair-0-v1-draft-2026-09-13.png',note:'East Heart repair: regulated dock and egress.'},'H-12-6':{status:'draft',image:'chunks/drafts/h11-h12-r6-r7-east-egress-repair-1-v1-draft-2026-09-13.png',note:'East Heart repair: compact east-wall arrival.'},'H-11-7':{status:'draft',image:'chunks/drafts/h11-h12-r6-r7-east-egress-repair-2-v1-draft-2026-09-13.png',note:'East Heart repair: lower dock understructure.'},'H-12-7':{status:'draft',image:'chunks/drafts/h11-h12-r6-r7-east-egress-repair-3-v1-draft-2026-09-13.png',note:'East Heart repair: guarded route toward Mid-East.'}
+};
+const heartVoidCutDrafts={'H-9-8':{status:'draft',image:'chunks/drafts/h9-r8-midheart-void-cut-v1-draft-2026-09-13.png',note:'Deliberate Mid Heart void cut: dangling catchrail only, no continuous lower road.'}};
+const westHeartUpperTransitionDrafts={
+  'H-5-5':{status:'draft',image:'chunks/drafts/h5-h6-r5-r6-west-heart-upper-transition-0-v1-draft-2026-09-13.png',note:'West Heart transition: Wickwork lift bay.'},'H-6-5':{status:'draft',image:'chunks/drafts/h5-h6-r5-r6-west-heart-upper-transition-1-v1-draft-2026-09-13.png',note:'West Heart transition: deliberate Mouth overhang/void.'},'H-5-6':{status:'draft',image:'chunks/drafts/h5-h6-r5-r6-west-heart-upper-transition-2-v1-draft-2026-09-13.png',note:'West Heart transition: single civic-lift landing.'},'H-6-6':{status:'draft',image:'chunks/drafts/h5-h6-r5-r6-west-heart-upper-transition-3-v1-draft-2026-09-13.png',note:'West Heart transition: West Exchange intake.'}
+};
+const eastHeartUpperTransitionDrafts={
+  'H-11-5':{status:'draft',image:'chunks/drafts/h11-h12-r5-r6-east-heart-upper-transition-0-v1-draft-2026-09-13.png',note:'East Heart transition: deliberate Mouth overhang/void.'},'H-12-5':{status:'draft',image:'chunks/drafts/h11-h12-r5-r6-east-heart-upper-transition-1-v1-draft-2026-09-13.png',note:'East Heart transition: inhabited east-wall approach.'},'H-11-6':{status:'draft',image:'chunks/drafts/h11-h12-r5-r6-east-heart-upper-transition-2-v1-draft-2026-09-13.png',note:'East Heart transition: regulated dock.'},'H-12-6':{status:'draft',image:'chunks/drafts/h11-h12-r5-r6-east-heart-upper-transition-3-v1-draft-2026-09-13.png',note:'East Heart transition: gated wall egress.'}
+};
+const eastFirmamentInnerDrafts={'H-12-0':{status:'draft',image:'chunks/drafts/h12-h13-r0-east-firmament-0-v1-draft-2026-09-13.png',note:'East Firmament roof band.'},'H-13-0':{status:'draft',image:'chunks/drafts/h12-h13-r0-east-firmament-1-v1-draft-2026-09-13.png',note:'East Firmament roof band.'}};
+const eastFirmamentOuterDrafts={'H-14-0':{status:'draft',image:'chunks/drafts/h14-h15-r0-east-firmament-0-v1-draft-2026-09-13.png',note:'East Firmament roof bridge.'},'H-15-0':{status:'draft',image:'chunks/drafts/h14-h15-r0-east-firmament-1-v1-draft-2026-09-13.png',note:'East Firmament roof bridge.'}};
+const midHeartCentralHandoffDrafts={
+  'H-8-6':{status:'draft',image:'chunks/drafts/h-8-6-midheart-central-handoff-v1-draft-2026-09-13.png',note:'Shared Holding-to-East-Service master: stepped public route and void edge.'},
+  'H-9-6':{status:'draft',image:'chunks/drafts/h-9-6-midheart-central-handoff-v1-draft-2026-09-13.png',note:'Shared Holding-to-East-Service master: compact East Service arrival.'},
+  'H-8-7':{status:'draft',image:'chunks/drafts/h-8-7-midheart-central-handoff-v1-draft-2026-09-13.png',note:'Shared lower Heart master: offset freight/catchrail platform.'},
+  'H-9-7':{status:'draft',image:'chunks/drafts/h-9-7-midheart-central-handoff-v1-draft-2026-09-13.png',note:'Shared lower Heart master: deliberate void beside the lower route.'}
+};
+const lowerHoldingVoidDrafts={
+  'H-8-8':{status:'draft',image:'chunks/drafts/h-8-8-lower-holding-void-v1-draft-2026-09-13.png',note:'Shared lower Holding/Mouth master: walkable catchrail and maintenance ledge.'},
+  'H-9-8':{status:'draft',image:'chunks/drafts/h-9-8-lower-holding-void-v1-draft-2026-09-13.png',note:'Shared lower Holding/Mouth master: intentional open abyss, no road.'},
+  'H-8-9':{status:'draft',image:'chunks/drafts/h-8-9-lower-holding-void-v1-draft-2026-09-13.png',note:'Shared lower Holding/Mouth master: uninterrupted deep fog and distant wreck silhouettes.'},
+  'H-9-9':{status:'draft',image:'chunks/drafts/h-9-9-lower-holding-void-v1-draft-2026-09-13.png',note:'Shared lower Holding/Mouth master: uninterrupted deep fog and distant wreck silhouettes.'}
+};
+const westMouthShoulderDrafts={
+  'H-5-4':{status:'draft',image:'chunks/drafts/h-5-4-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: Wickwork threshold on solid wall.'},
+  'H-6-4':{status:'draft',image:'chunks/drafts/h-6-4-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: rock overhang ending into blue-black depth.'},
+  'H-7-4':{status:'draft',image:'chunks/drafts/h-7-4-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: open Devil’s Mouth, deliberately unoccupied.'},
+  'H-5-5':{status:'draft',image:'chunks/drafts/h-5-5-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: guarded wall-side local route.'},
+  'H-6-5':{status:'draft',image:'chunks/drafts/h-6-5-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: void-facing structural lip.'},
+  'H-7-5':{status:'draft',image:'chunks/drafts/h-7-5-west-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared west Mouth shoulder: open Devil’s Mouth, no platform.'}
+};
+const eastHeartGangwayDrafts={
+  'H-10-6':{status:'draft',image:'chunks/drafts/H-10-6-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: East Service dock and rigid railed gangway.'},
+  'H-11-6':{status:'draft',image:'chunks/drafts/H-11-6-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: solid wall landing from the gangway.'},
+  'H-10-7':{status:'draft',image:'chunks/drafts/H-10-7-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: supported dock understructure above the void.'},
+  'H-11-7':{status:'draft',image:'chunks/drafts/H-11-7-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: stepped wall route toward Mid-East.'},
+  'H-10-8':{status:'draft',image:'chunks/drafts/H-10-8-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: deliberate open depth below the civic route.'},
+  'H-11-8':{status:'draft',image:'chunks/drafts/H-11-8-east-heart-gangway-v2-draft-2026-09-13.png',note:'Shared East Heart exit: braced lower wall edge above the Mouth.'}
+};
+const eastMouthShoulderDrafts={
+  'H-10-4':{status:'draft',image:'chunks/drafts/h-10-4-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: uninterrupted blue-black Mouth depth.'},
+  'H-11-4':{status:'draft',image:'chunks/drafts/h-11-4-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: void-facing rock/metal lip.'},
+  'H-12-4':{status:'draft',image:'chunks/drafts/h-12-4-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: guarded solid-wall approach.'},
+  'H-10-5':{status:'draft',image:'chunks/drafts/h-10-5-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: open Mouth, no platform.'},
+  'H-11-5':{status:'draft',image:'chunks/drafts/h-11-5-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: regulated void-facing overhang.'},
+  'H-12-5':{status:'draft',image:'chunks/drafts/h-12-5-east-mouth-shoulder-v1-draft-2026-09-13.png',note:'Shared east Mouth shoulder: local descent toward the East exit.'}
+};
+const highWestSolidInteriorDrafts={
+  'H-2-3':{status:'draft',image:'chunks/drafts/h-2-3-high-west-enclosed-approach-v2-draft-2026-09-13.png',note:'Shared High-West interior master: enclosed approach in solid rock.'},
+  'H-3-3':{status:'draft',image:'chunks/drafts/h-3-3-high-west-enclosed-check-terrace-v2-draft-2026-09-13.png',note:'Shared High-West interior master: sheltered checkpoint terrace.'},
+  'H-2-4':{status:'draft',image:'chunks/drafts/h-2-4-high-west-braced-dig-approach-v2-draft-2026-09-13.png',note:'Shared High-West interior master: braced lateral dig approach.'},
+  'H-3-4':{status:'draft',image:'chunks/drafts/h-3-4-high-west-sealed-dig-gate-v2-draft-2026-09-13.png',note:'Shared High-West interior master: sealed lateral dig gate.'},
+  'H-2-5':{status:'draft',image:'chunks/drafts/h-2-5-wickwork-low-repair-terrace-v2-draft-2026-09-13.png',note:'Shared High-West interior master: rock-backed Wickwork repair terrace.'},
+  'H-3-5':{status:'draft',image:'chunks/drafts/h-3-5-wickwork-sheltered-service-bay-v2-draft-2026-09-13.png',note:'Shared High-West interior master: sheltered Wickwork service bay.'}
+};
+const eastCisternEnclosedDrafts={
+  'H-14-10':{status:'draft',image:'chunks/drafts/h-14-10-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: enclosed lower-east street.'},
+  'H-15-10':{status:'draft',image:'chunks/drafts/h-15-10-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: grounded freight landing.'},
+  'H-16-10':{status:'draft',image:'chunks/drafts/h-16-10-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: contained shaft head and service corridor.'},
+  'H-14-11':{status:'draft',image:'chunks/drafts/h-14-11-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: rock-backed approach and housing edge.'},
+  'H-15-11':{status:'draft',image:'chunks/drafts/h-15-11-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: local freight shaft landing.'},
+  'H-16-11':{status:'draft',image:'chunks/drafts/h-16-11-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: local freight shaft, not a pit balcony.'},
+  'H-14-12':{status:'draft',image:'chunks/drafts/h-14-12-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: enclosed tank reserve.'},
+  'H-15-12':{status:'draft',image:'chunks/drafts/h-15-12-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: pump/service bay.'},
+  'H-16-12':{status:'draft',image:'chunks/drafts/h-16-12-east-cistern-enclosed-v1-draft-2026-09-13.png',note:'Shared Cistern interior master: sealed pipe service.'}
+};
+const westLowerInteriorDrafts={
+  'H-2-9':{status:'draft',image:'chunks/drafts/h-2-9-lower-worker-homes-interior-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: enclosed homes.'},
+  'H-3-9':{status:'draft',image:'chunks/drafts/h-3-9-lower-worker-service-corridor-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: rock-backed service corridor.'},
+  'H-2-10':{status:'draft',image:'chunks/drafts/h-2-10-lower-worker-wash-court-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: enclosed wash court.'},
+  'H-3-10':{status:'draft',image:'chunks/drafts/h-3-10-lower-worker-stairwell-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: protected stairwell.'},
+  'H-2-11':{status:'draft',image:'chunks/drafts/h-2-11-lower-worker-market-court-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: contained market court.'},
+  'H-3-11':{status:'draft',image:'chunks/drafts/h-3-11-dispatch-side-enclosed-route-v1-draft-2026-09-13.png',note:'Shared lower-worker interior master: enclosed route toward Dispatch and Home Court.'}
+};
+const midEastDigInteriorDrafts={
+  'H-13-6':{status:'draft',image:'chunks/drafts/h-13-6-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: contained wall approach.'},
+  'H-14-6':{status:'draft',image:'chunks/drafts/h-14-6-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: enclosed inspection route.'},
+  'H-15-6':{status:'draft',image:'chunks/drafts/h-15-6-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: controlled staging.'},
+  'H-13-7':{status:'draft',image:'chunks/drafts/h-13-7-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: rock-backed route.'},
+  'H-14-7':{status:'draft',image:'chunks/drafts/h-14-7-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: rock-backed work deck, not a pit balcony.'},
+  'H-15-7':{status:'draft',image:'chunks/drafts/h-15-7-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: braced lateral excavation gate.'},
+  'H-13-8':{status:'draft',image:'chunks/drafts/h-13-8-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: retained support shelf.'},
+  'H-14-8':{status:'draft',image:'chunks/drafts/h-14-8-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: bounded tool/cart approach.'},
+  'H-15-8':{status:'draft',image:'chunks/drafts/h-15-8-mid-east-dig-front-enclosed-v1-2026-09-13.png',note:'Shared Mid-East dig-front master: gallery entrance receding into the right wall.'}
+};
+const midWestWorkerInteriorDrafts={
+  'H-0-6':{status:'draft',image:'chunks/drafts/h-0-6-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: solid rock-backed maker lane.'},
+  'H-1-6':{status:'draft',image:'chunks/drafts/h-1-6-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: enclosed family/maker bays.'},
+  'H-2-6':{status:'draft',image:'chunks/drafts/h-2-6-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: braced local worker route.'},
+  'H-3-6':{status:'draft',image:'chunks/drafts/h-3-6-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: embedded service shaft and thick rock.'},
+  'H-0-7':{status:'draft',image:'chunks/drafts/h-0-7-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: rock-backed family lane.'},
+  'H-1-7':{status:'draft',image:'chunks/drafts/h-1-7-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: enclosed wash/service court.'},
+  'H-2-7':{status:'draft',image:'chunks/drafts/h-2-7-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: short internal switchback.'},
+  'H-3-7':{status:'draft',image:'chunks/drafts/h-3-7-midwest-worker-solid-interior-v2-draft-2026-09-13.png',note:'Shared west worker master: solid wall transition toward Mid band.'}
+};
+const eastLowerServiceInteriorDrafts={
+  'H-12-9':{status:'draft',image:'chunks/drafts/h-12-9-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: controlled inner-wall clinic edge.'},
+  'H-13-9':{status:'draft',image:'chunks/drafts/h-13-9-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: rock-backed clinic/housing court.'},
+  'H-12-10':{status:'draft',image:'chunks/drafts/h-12-10-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: enclosed service street.'},
+  'H-13-10':{status:'draft',image:'chunks/drafts/h-13-10-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: retaining-wall freight route.'},
+  'H-12-11':{status:'draft',image:'chunks/drafts/h-12-11-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: Cistern approach threshold.'},
+  'H-13-11':{status:'draft',image:'chunks/drafts/h-13-11-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: enclosed pipe/freight hall.'},
+  'H-12-12':{status:'draft',image:'chunks/drafts/h-12-12-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: tank reserve/manifold room.'},
+  'H-13-12':{status:'draft',image:'chunks/drafts/h-13-12-east-lower-service-enclosed-v1-draft-2026-09-13.png',note:'Shared lower-east interior master: retaining wall into Cistern tanks.'}
+};
+const glowbedsInteriorDrafts={
+  'H-14-3':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-0-v2-draft-2026-09-13.png',note:'Shared Glowbeds interior master: tidy upper cultivation path.'},
+  'H-15-3':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-1-v2-draft-2026-09-13.png',note:'Shared Glowbeds interior master: enclosed packing and lift approach.'},
+  'H-14-4':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-2-v2-draft-2026-09-13.png',note:'Shared Glowbeds interior master: protected fungal grow terrace.'},
+  'H-15-4':{status:'draft',image:'chunks/drafts/h14-h15-r3-r4-east-upper-passenger-glowbeds-3-v2-draft-2026-09-13.png',note:'Shared Glowbeds interior master: recessed guarded passenger-lift shaft.'}
+};
+const westWorkerEnclosedJunctionDrafts={
+  'H-2-8':{status:'draft',image:'chunks/drafts/h-2-8-worker-maker-enclosed-junction-v2-draft-2026-09-13.png',note:'Shared worker interior junction: enclosed upper route.'},
+  'H-3-8':{status:'draft',image:'chunks/drafts/h-3-8-worker-maker-enclosed-junction-v2-draft-2026-09-13.png',note:'Shared worker interior junction: rock-backed stair/service transition.'},
+  'H-2-9':{status:'draft',image:'chunks/drafts/h-2-9-worker-maker-enclosed-junction-v2-draft-2026-09-13.png',note:'Shared worker interior junction: enclosed lower route.'},
+  'H-3-9':{status:'draft',image:'chunks/drafts/h-3-9-worker-maker-enclosed-junction-v2-draft-2026-09-13.png',note:'Shared worker interior junction: enclosed lower service corridor.'}
+};
+/* Each occupied coordinate owns one correctly proportioned image frame. */
+const assets={'H-0-10':{status:'approved',image:'chunks/approved/h-0-10-lower-worker-market-anchor-v1-2026-09-12.png',note:'Approved West Dispatch anchor-derived worker-market frame. It shares literal source pixels with H-1-10, H-0-11, and H-1-11.'},'H-1-10':{status:'approved',image:'chunks/approved/h-1-10-lower-worker-market-anchor-v1-2026-09-12.png',note:'Approved West Dispatch anchor-derived worker-market frame. It shares literal source pixels with H-0-10, H-0-11, and H-1-11.'},'H-0-11':{status:'approved',image:'chunks/approved/h-0-11-west-dispatch-anchor-v1-2026-09-12.png',note:'Approved West Dispatch anchor-derived apron frame. It shares literal source pixels with H-1-11.'},'H-1-11':{status:'approved',image:'chunks/approved/h-1-11-west-dispatch-bridge-v1-2026-09-12.png',note:'Approved West Dispatch anchor-derived apron frame with a 64-pixel east bridge band into H-2-11.'},'H-2-10':{status:'approved',image:'chunks/approved/h-2-10-lower-worker-market-anchor-v1-2026-09-12.png',note:'Approved anchor-derived frame. It shares literal source pixels with H-3-10, H-2-11, and H-3-11.'},'H-3-10':{status:'approved',image:'chunks/approved/h-3-10-lower-switchback-upper-anchor-v1-2026-09-12.png',note:'Approved anchor-derived frame. It shares literal source pixels with H-2-10, H-2-11, and H-3-11.'},'H-2-11':{status:'approved',image:'chunks/approved/h-2-11-west-dispatch-bridge-v1-2026-09-12.png',note:'Approved West Dispatch anchor-derived frame with a 64-pixel west bridge band from H-1-11 and an exact east seam into H-3-11.'},'H-3-11':{status:'approved',image:'chunks/approved/h-3-11-lower-switchback-bridge-v1-2026-09-12.png',note:'Approved anchor-derived interior with an approved 64-pixel east bridge band into Home Court. Its west seam with H-2-11 remains exact.'},'H-4-11':{status:'approved',image:'chunks/approved/h-4-11-home-court-bridge-v1-2026-09-12.png',note:'Approved Home Court descendant. The original Home Court source is preserved; only its 64-pixel west edge uses the approved Lower Switchback bridge band.'},'H-0-12':{status:'approved',image:'chunks/approved/h-0-12-bottom-west-approach-anchor-v1-2026-09-12.png',note:'Approved Bottom-West anchor-derived approach frame. It shares literal source pixels with H-1-12, H-0-13, and H-1-13.'},'H-1-12':{status:'approved',image:'chunks/approved/h-1-12-bottom-west-approach-anchor-v1-2026-09-12.png',note:'Approved Bottom-West anchor-derived approach frame. It shares literal source pixels with H-0-12, H-0-13, and H-1-13.'},'H-0-13':{status:'approved',image:'chunks/approved/h-0-13-bottom-west-dig-anchor-v1-2026-09-12.png',note:'Approved Bottom-West anchor-derived dig frame. Its outer boundary remains visibly braced and finite.'},'H-1-13':{status:'approved',image:'chunks/approved/h-1-13-bottom-west-dig-anchor-v1-2026-09-12.png',note:'Approved Bottom-West anchor-derived dig frame. Its outer boundary remains visibly braced and finite.'}};
+Object.assign(assets,{'H-0-11':{status:'approved',image:'chunks/approved/h-0-11-west-dispatch-bottom-west-bridge-v1-2026-09-12.png',note:'Approved Dispatch descendant with a 64-pixel lower bridge band into Bottom-West.'},'H-1-11':{status:'approved',image:'chunks/approved/h-1-11-west-dispatch-combined-bridge-v1-2026-09-12.png',note:'Approved Dispatch descendant with both its east Dispatch bridge and lower Bottom-West bridge band.'},'H-0-12':{status:'approved',image:'chunks/approved/h-0-12-bottom-west-approach-bridge-v1-2026-09-12.png',note:'Approved Bottom-West approach descendant with a 64-pixel upper bridge band from Dispatch.'},'H-1-12':{status:'approved',image:'chunks/approved/h-1-12-bottom-west-approach-bridge-v1-2026-09-12.png',note:'Approved Bottom-West approach descendant with a 64-pixel upper bridge band from Dispatch.'}});
+Object.assign(assets,{'H-2-12':{status:'approved',image:'chunks/approved/h-2-12-bottom-west-threshold-anchor-v1-2026-09-12.png',note:'Approved Bottom-West threshold anchor-derived frame. It shares literal source pixels with H-3-12, H-2-13, and H-3-13.'},'H-3-12':{status:'approved',image:'chunks/approved/h-3-12-bottom-west-threshold-anchor-v1-2026-09-12.png',note:'Approved Bottom-West threshold anchor-derived frame. It shares literal source pixels with H-2-12, H-2-13, and H-3-13.'},'H-2-13':{status:'approved',image:'chunks/approved/h-2-13-bottom-west-dig-anchor-v1-2026-09-12.png',note:'Approved Bottom-West dig anchor-derived frame. It remains a bounded civic excavation volume.'},'H-3-13':{status:'approved',image:'chunks/approved/h-3-13-bottom-west-dig-anchor-v1-2026-09-12.png',note:'Approved Bottom-West dig anchor-derived frame. It remains a bounded civic excavation volume.'}});
+Object.assign(assets,{'H-1-12':{status:'approved',image:'chunks/approved/h-1-12-bottom-west-approach-combined-bridge-v1-2026-09-12.png',note:'Approved Bottom-West approach descendant with both its Dispatch descent and Threshold bridge bands.'},'H-2-12':{status:'approved',image:'chunks/approved/h-2-12-bottom-west-threshold-bridge-v1-2026-09-12.png',note:'Approved Bottom-West threshold descendant with a 64-pixel west bridge band from the approach.'},'H-1-13':{status:'approved',image:'chunks/approved/h-1-13-bottom-west-dig-bridge-v1-2026-09-12.png',note:'Approved Bottom-West dig descendant with a 64-pixel east bridge band into Threshold.'},'H-2-13':{status:'approved',image:'chunks/approved/h-2-13-bottom-west-dig-bridge-v1-2026-09-12.png',note:'Approved Bottom-West dig descendant with a 64-pixel west bridge band from the approach.'},'H-4-12':{status:'approved',image:'chunks/approved/h-4-12-bottom-west-staging-anchor-v1-2026-09-12.png',note:'Approved Bottom-West staging anchor-derived frame. It shares literal source pixels with H-5-12, H-4-13, and H-5-13.'},'H-5-12':{status:'approved',image:'chunks/approved/h-5-12-bottom-west-staging-anchor-v1-2026-09-12.png',note:'Approved Bottom-West staging anchor-derived frame. It shares literal source pixels with H-4-12, H-4-13, and H-5-13.'},'H-4-13':{status:'approved',image:'chunks/approved/h-4-13-bottom-west-dig-anchor-v1-2026-09-12.png',note:'Approved Bottom-West dig anchor-derived frame. It remains a bounded civic excavation volume.'},'H-5-13':{status:'approved',image:'chunks/approved/h-5-13-bottom-west-return-service-anchor-v1-2026-09-12.png',note:'Approved Bottom-West return-service anchor-derived frame.'}});
+Object.assign(assets,{'H-4-10':{status:'approved',image:'chunks/approved/h-4-10-home-court-approach-anchor-v1-2026-09-12.png',note:'Approved Home Court approach anchor-derived frame. Its lower seam into preserved Home Court still requires a bridge band.'},'H-5-10':{status:'approved',image:'chunks/approved/h-5-10-home-court-approach-anchor-v1-2026-09-12.png',note:'Approved Home Court approach anchor-derived frame. It shares literal source pixels with the left lift landing below.'},'H-5-11':{status:'approved',image:'chunks/approved/h-5-11-left-lift-landing-anchor-v1-2026-09-12.png',note:'Approved left Presswater lift landing anchor-derived frame. Its west seam into preserved Home Court still requires a bridge band.'},'H-0-14':{status:'approved',image:'chunks/approved/h-0-14-bottom-west-deep-anchor-v1-2026-09-12.png',note:'Approved deep Bottom-West anchor-derived frame. It continues the bounded civic excavation toward its final barrier.'},'H-1-14':{status:'approved',image:'chunks/approved/h-1-14-bottom-west-collapsed-chamber-anchor-v1-2026-09-12.png',note:'Approved collapsed-chamber anchor-derived frame. It shares literal source pixels with the other deep-boundary frames.'},'H-0-15':{status:'approved',image:'chunks/approved/h-0-15-far-west-deep-boundary-anchor-v1-2026-09-12.png',note:'Approved far-west deep-boundary anchor-derived frame. It is a sealed crater-wall limit, not an open void.'},'H-1-15':{status:'approved',image:'chunks/approved/h-1-15-west-lower-service-anchor-v1-2026-09-12.png',note:'Approved west lower-service anchor-derived frame. It contains the maintained later gate/service stop.'}});
+Object.assign(assets,{'H-4-10':{status:'approved',image:'chunks/approved/h-4-10-home-court-approach-bridge-v1-2026-09-12.png',note:'Approved approach descendant with a literal 64-pixel lower bridge band into Home Court.'},'H-4-11':{status:'approved',image:'chunks/approved/h-4-11-home-court-lift-bridge-v1-2026-09-12.png',note:'Approved preserved Home Court descendant with literal upper and east bridge bands. Its original interior remains intact.'},'H-5-11':{status:'approved',image:'chunks/approved/h-5-11-left-lift-landing-bridge-v1-2026-09-12.png',note:'Approved left Presswater lift landing descendant with a literal 64-pixel west bridge band from Home Court.'}});
+Object.assign(assets,{'H-0-13':{status:'approved',image:'chunks/approved/h-0-13-bottom-west-dig-deep-bridge-v1-2026-09-12.png',note:'Approved Bottom-West dig descendant with a literal lower band into the deep boundary.'},'H-1-13':{status:'approved',image:'chunks/approved/h-1-13-bottom-west-dig-deep-bridge-v1-2026-09-12.png',note:'Approved Bottom-West dig descendant with literal lower and east bridge bands.'},'H-0-14':{status:'approved',image:'chunks/approved/h-0-14-bottom-west-deep-vertical-bridge-v1-2026-09-12.png',note:'Approved deep-boundary descendant with a literal upper band from the public dig route.'},'H-1-14':{status:'approved',image:'chunks/approved/h-1-14-bottom-west-collapsed-chamber-vertical-bridge-v1-2026-09-12.png',note:'Approved collapsed-chamber descendant with a literal upper band from the public dig route.'},'H-3-12':{status:'approved',image:'chunks/approved/h-3-12-bottom-west-threshold-staging-bridge-v1-2026-09-12.png',note:'Approved threshold descendant with a literal east band into staging.'},'H-4-12':{status:'approved',image:'chunks/approved/h-4-12-bottom-west-staging-threshold-bridge-v1-2026-09-12.png',note:'Approved staging descendant with a literal west band from the threshold.'},'H-3-13':{status:'approved',image:'chunks/approved/h-3-13-bottom-west-dig-staging-bridge-v1-2026-09-12.png',note:'Approved bounded-dig descendant with a literal east band into staging.'},'H-4-13':{status:'approved',image:'chunks/approved/h-4-13-bottom-west-dig-threshold-bridge-v1-2026-09-12.png',note:'Approved bounded-dig descendant with a literal west band from the threshold.'}});
+Object.assign(assets,{'H-2-14':{status:'approved',image:'chunks/approved/h-2-14-bottom-west-middle-deep-anchor-v1-2026-09-12.png',note:'Approved middle-deep anchor-derived frame. It completes the bounded public excavation’s late approach.'},'H-3-14':{status:'approved',image:'chunks/approved/h-3-14-bottom-west-collapsed-chamber-anchor-v1-2026-09-12.png',note:'Approved collapsed-chamber anchor-derived frame. It shares literal source pixels with the other middle-deep frames.'},'H-2-15':{status:'approved',image:'chunks/approved/h-2-15-far-west-deep-boundary-anchor-v1-2026-09-12.png',note:'Approved far-west boundary anchor-derived frame. It is a sealed lateral limit, not a void.'},'H-3-15':{status:'approved',image:'chunks/approved/h-3-15-west-lower-hidden-service-anchor-v1-2026-09-12.png',note:'Approved hidden-service anchor-derived frame. It is a later-access maintenance boundary.'}});
+Object.assign(assets,{'H-1-14':{status:'approved',image:'chunks/approved/h-1-14-bottom-west-collapsed-chamber-deep-middle-bridge-v1-2026-09-12.png',note:'Approved collapse descendant with literal upper and east bands.'},'H-2-14':{status:'approved',image:'chunks/approved/h-2-14-bottom-west-middle-deep-west-bridge-v1-2026-09-12.png',note:'Approved middle-deep descendant with a literal west band from the deep boundary.'},'H-1-15':{status:'approved',image:'chunks/approved/h-1-15-west-lower-service-deep-middle-bridge-v1-2026-09-12.png',note:'Approved lower-service descendant with a literal east band into middle-deep rock.'},'H-2-15':{status:'approved',image:'chunks/approved/h-2-15-far-west-deep-boundary-west-bridge-v1-2026-09-12.png',note:'Approved far-west boundary descendant with a literal west band from lower service.'}});
+Object.assign(assets,{'H-4-14':{status:'approved',image:'chunks/approved/h-4-14-bottom-west-locked-boundary-anchor-v1-2026-09-12.png',note:'Approved locked-boundary anchor-derived frame. It ends routine public excavation.'},'H-5-14':{status:'approved',image:'chunks/approved/h-5-14-bottom-west-locked-service-anchor-v1-2026-09-12.png',note:'Approved locked-service anchor-derived frame. It is a guarded later-access boundary.'},'H-4-15':{status:'approved',image:'chunks/approved/h-4-15-west-lower-maintenance-anchor-v1-2026-09-12.png',note:'Approved lower-maintenance anchor-derived frame. It is secure service space, not empty reserve.'},'H-5-15':{status:'approved',image:'chunks/approved/h-5-15-west-lower-hidden-service-anchor-v1-2026-09-12.png',note:'Approved lower hidden-service anchor-derived frame. It is an intentionally bounded later route.'}});
+Object.assign(assets,{'H-3-14':{status:'approved',image:'chunks/approved/h-3-14-bottom-west-collapsed-chamber-locked-bridge-v1-2026-09-12.png',note:'Approved collapsed-chamber descendant with a literal east band into the final locked boundary.'},'H-4-14':{status:'approved',image:'chunks/approved/h-4-14-bottom-west-locked-boundary-west-bridge-v1-2026-09-12.png',note:'Approved locked-boundary descendant with a literal west band from the collapse approach.'},'H-3-15':{status:'approved',image:'chunks/approved/h-3-15-west-lower-hidden-service-locked-bridge-v1-2026-09-12.png',note:'Approved hidden-service descendant with a literal east band into lower maintenance.'},'H-4-15':{status:'approved',image:'chunks/approved/h-4-15-west-lower-maintenance-west-bridge-v1-2026-09-12.png',note:'Approved lower-maintenance descendant with a literal west band from hidden service.'}});
+Object.assign(assets,{'H-4-8':{status:'approved',image:'chunks/approved/h-4-8-lower-worker-service-anchor-v1-2026-09-12.png',note:'Approved lower-worker service anchor-derived frame. It shares literal source pixels with the lift-transit and lower-passage frames.'},'H-5-8':{status:'approved',image:'chunks/approved/h-5-8-left-lift-transit-anchor-v1-2026-09-12.png',note:'Approved left civic lift transit anchor-derived frame.'},'H-4-9':{status:'approved',image:'chunks/approved/h-4-9-lower-worker-passage-anchor-v1-2026-09-12.png',note:'Approved lower-worker passage anchor-derived frame.'},'H-5-9':{status:'approved',image:'chunks/approved/h-5-9-left-lift-lower-anchor-v1-2026-09-12.png',note:'Approved left civic lift lower anchor-derived frame.'}});
+Object.assign(assets,{'H-4-9':{status:'approved',image:'chunks/approved/h-4-9-lower-worker-passage-home-bridge-v1-2026-09-12.png',note:'Approved lower-worker passage descendant with a literal lower band into Home Court approach.'},'H-5-9':{status:'approved',image:'chunks/approved/h-5-9-left-lift-lower-home-bridge-v1-2026-09-12.png',note:'Approved lift-lower descendant with a literal lower band into Home Court approach.'},'H-4-10':{status:'approved',image:'chunks/approved/h-4-10-home-court-approach-lower-bridge-v1-2026-09-12.png',note:'Approved Home Court approach descendant with literal upper and lower bridge bands.'},'H-5-10':{status:'approved',image:'chunks/approved/h-5-10-home-court-approach-lower-bridge-v1-2026-09-12.png',note:'Approved Home Court approach descendant with a literal upper band from lower worker/lift transit.'}});
+const seams={'H-3-11':[{edge:'west',to:'H-2-11',mode:'walk / shallow outbound grade',height:'lower third',state:'approved shared anchor'}, {edge:'east',to:'H-4-11',mode:'walk / shallow ascending grade',height:'lower third',state:'approved shared bridge band'}],'H-4-10':[{edge:'south',to:'H-4-11',mode:'shallow protected grade',height:'lower edge',state:'approved shared bridge band'}],'H-4-11':[{edge:'west',to:'H-3-11',mode:'walk / shallow ascending grade',height:'lower third',state:'approved shared bridge band'},{edge:'north',to:'H-4-10',mode:'shallow protected grade',height:'upper edge',state:'approved shared bridge band'},{edge:'east',to:'H-5-11',mode:'walk to left lift landing',height:'mid-low terrace',state:'approved shared bridge band'}],'H-5-11':[{edge:'west',to:'H-4-11',mode:'walk from Home Court to left lift landing',height:'mid-low terrace',state:'approved shared bridge band'}]};
+Object.assign(seams,{
+  'H-5-6':[{edge:'east',to:'H-6-6',mode:'protected civic intake',height:'upper terrace',state:'draft contract'}],
+  'H-6-6':[{edge:'west',to:'H-5-6',mode:'protected civic intake',height:'upper terrace',state:'draft contract'},{edge:'east',to:'H-7-6',mode:'West Exchange to Holding',height:'upper terrace',state:'draft contract'}],
+  'H-7-6':[{edge:'west',to:'H-6-6',mode:'West Exchange to Holding',height:'upper terrace',state:'draft contract'},{edge:'east',to:'H-8-6',mode:'Holding main concourse',height:'upper terrace',state:'draft contract'}],
+  'H-8-6':[{edge:'west',to:'H-7-6',mode:'Holding main concourse',height:'upper terrace',state:'draft contract'},{edge:'east',to:'H-9-6',mode:'narrow civic connector',height:'mid terrace',state:'draft contract'}],
+  'H-9-6':[{edge:'west',to:'H-8-6',mode:'narrow civic connector',height:'mid terrace',state:'draft contract'},{edge:'east',to:'H-10-6',mode:'East Service arrival',height:'mid terrace',state:'draft contract'}],
+  'H-10-6':[{edge:'west',to:'H-9-6',mode:'East Service arrival',height:'mid terrace',state:'draft contract'},{edge:'east',to:'H-11-6',mode:'east dock approach',height:'mid terrace',state:'draft contract'}],
+  'H-11-6':[{edge:'west',to:'H-10-6',mode:'east dock approach',height:'mid terrace',state:'draft contract'},{edge:'east',to:'H-12-6',mode:'regulated east-wall egress',height:'mid terrace',state:'draft contract'}],
+  'H-12-6':[{edge:'west',to:'H-11-6',mode:'regulated east-wall egress',height:'mid terrace',state:'draft contract'}],
+  'H-14-4':[{edge:'south',to:'H-14-5',mode:'guarded passenger-lift arrival',height:'east inner wall',state:'draft contract'}],
+  'H-14-5':[{edge:'north',to:'H-14-4',mode:'guarded passenger-lift arrival',height:'east inner wall',state:'draft contract'}],
+  'H-14-10':[{edge:'east',to:'H-15-10',mode:'Cistern freight landing',height:'work terrace',state:'draft contract'}],
+  'H-15-10':[{edge:'west',to:'H-14-10',mode:'Cistern freight landing',height:'work terrace',state:'draft contract'},{edge:'south',to:'H-15-11',mode:'freight shaft only',height:'right-side shaft',state:'draft contract'}],
+  'H-15-11':[{edge:'north',to:'H-15-10',mode:'freight shaft only',height:'right-side shaft',state:'draft contract'},{edge:'east',to:'H-16-11',mode:'lower freight service',height:'lower landing',state:'draft contract'}],
+  'H-16-11':[{edge:'west',to:'H-15-11',mode:'lower freight service',height:'lower landing',state:'draft contract'}]
+});
+Object.assign(seams,{
+  'H-6-5':[{edge:'south',to:'H-6-6',mode:'open overhang above West Exchange',height:'void-facing lower edge',state:'draft shared master'}],
+  'H-6-6':[...(seams['H-6-6']||[]),{edge:'north',to:'H-6-5',mode:'open overhang above West Exchange',height:'void-facing upper edge',state:'draft shared master'}],
+  'H-8-6':[...(seams['H-8-6']||[]),{edge:'south',to:'H-8-7',mode:'Holding stepped civic descent',height:'right half / lower terrace',state:'draft shared master'}],
+  'H-8-7':[...(seams['H-8-7']||[]),{edge:'north',to:'H-8-6',mode:'Holding stepped civic descent',height:'right half / upper terrace',state:'draft shared master'}],
+  'H-9-6':[...(seams['H-9-6']||[]),{edge:'south',to:'H-9-7',mode:'East Service return via short stair',height:'left half / lower terrace',state:'draft shared master'}],
+  'H-9-7':[...(seams['H-9-7']||[]),{edge:'north',to:'H-9-6',mode:'East Service return via short stair',height:'left half / upper terrace',state:'draft shared master'}],
+  'H-11-5':[{edge:'south',to:'H-11-6',mode:'open overhang above regulated east dock',height:'void-facing lower edge',state:'draft shared master'}],
+  'H-11-6':[...(seams['H-11-6']||[]),{edge:'north',to:'H-11-5',mode:'open overhang above regulated east dock',height:'void-facing upper edge',state:'draft shared master'}]
+});
+function role(c,r){if(c>=6&&c<=11){if(r>=6&&r<=8){const n=[['West Exchange','Holding upper','Council terrace','East Service care','East Service shop','East dock'],['West Exchange lower','Holding queue','Holding lower','Lower crossing','Notices','East dock'],['Lower Freight cargo','Lower Freight maintenance','Catchrail','Service deck','West dock','East dock']];return{name:`Mid Heart · ${n[r-6][c-6]}`,kind:'heart',use:'active civic raft or deck'}}return{name:r<3?'Upper Mouth fog':r<6?'Heart-band void':r<10?'Lower Mouth settlement depth':r<14?'Deep wreck haze':'Black descent',kind:'void',use:'visual depth'}}if(c<=5){if(r===0)return{name:'Firmament-adjacent roof',use:'upper visual layer'};if(r<=2)return{name:c<3?'Ashram west residence':'Ashram west gate / terrace',use:'inhabited, guarded upper band'};if(r<=4)return{name:c<4?(r===3?'High-West approach':'High-West dig envelope'):(r===3?'High-West checkpoint':'Wickwork upper bay'),kind:r===4&&c<4?'dig':'',use:r===4&&c<4?'bounded civic excavation':'active upper-west use'};if(r<=6)return{name:c<4?(r===5?'Wickwork terrace':'Wickwork repair / loom'):(r===5?'Wickwork shuttered repair bay':'Mid allotment street'),use:'active or inhabited'};if(r<=8)return{name:c<4?'Mid allotments / lower worker homes':(c===5?'Left civic lift transit':'Lower worker service'),use:'active or inhabited'};if(r===9)return{name:c<4?'Lower worker court / homes':(c===5?'Left civic lift lower':'Lower worker passage'),use:'active or inhabited'};if(r===10)return{name:c<3?'Lower worker market / service':(c===3?'Lower Switchback upper':'Home Court approach'),use:'active or inhabited'};if(r===11)return{name:c===4?'Home Court':c===3?'Lower Switchback':c<=2?'West Dispatch Yard':'Left lift landing',use:'active opening-route neighborhood'};if(r===12)return{name:c<2?'Bottom-West approach':c<4?'Bottom-West threshold':'Bottom-West staging',use:'active civic route'};if(r===13)return{name:c<5?'Bottom-West dig envelope':'Bottom-West return service',kind:c<5?'dig':'',use:c<5?'bounded civic excavation':'active return route'};if(r===14)return{name:c<4?'Bottom-West dig / collapsed chamber':'Bottom-West locked boundary',kind:c<4?'dig':'',use:c<4?'bounded civic excavation':'present barrier; later gate'};return{name:c<3?'Far-west deep boundary':'West lower rock / hidden service',use:'current barrier or maintained service'}}if(r===0)return{name:'Firmament-adjacent roof',use:'upper visual layer'};if(r<=2)return{name:c<15?'Ashram east gate / terrace':'Ashram east residence',use:'inhabited, guarded upper band'};if(r<=4)return{name:c<15?'Glowbeds terrace / grow room':c<17?'Glowbeds drying / packing':'Glowbeds fallow grow-hang',use:'active cultivation'};if(r<=6)return{name:c<15?'Mid-East inhabited approach':c<17?'Mid-East checkpoint / service':'Mid-East staging',use:'active or inhabited'};if(r<=8)return{name:c<15?'Mid-East dig envelope':c<17?'Mid-East pressure dig':'Mid-East locked boundary',kind:c<17?'dig':'',use:c<17?'bounded civic excavation':'present barrier; later gate'};if(r<=10)return{name:c<15?'Lower-East homes / clinic':c<17?'Lower-East repair / freight':'Lower-East service corridor',use:'active or inhabited'};if(r===11)return{name:c<15?'Lower-East service / Cistern approach':c<17?'Cistern upper pipe service':'Right lift lower transit',use:'active service'};if(r===12)return{name:c<15?'Cistern freight / tank reserve':c<17?'Cistern service bay':'Cistern sealed pump alcove',use:'active service'};if(r===13)return{name:c<15?'Cistern pressure basin':c<17?'Cistern Sealbrine chamber':'Cistern settling service',use:'active utility'};if(r===14)return{name:c<15?'Cistern deep basin':c<17?'Seep service gallery':'Seep locked continuation',use:'active utility or present barrier'};return{name:c<15?'Deep Cistern maintenance':c<17?'Deep seep gallery':'Far-east deep boundary',use:'maintained lower service or barrier'}}
+function id(c,r){return`H-${c}-${r}`}function x(v){return`${v*CELL_W}px`}function y(v){return`${v*CELL_H}px`}
+function build(){
+  depthLayer.innerHTML='';artLayer.innerHTML='';slotLayer.innerHTML='';
+  for(let r=0;r<16;r++)for(let c=0;c<18;c++){
+    const slot=id(c,r),s=role(c,r),asset=assets[slot],d=document.createElement('div');
+    d.className=s.kind==='void'?'depth':s.kind==='heart'?'heart-area':'';
+    if(d.className){d.style.left=x(c);d.style.top=y(r);d.style.width=x(1);d.style.height=y(1);depthLayer.append(d)}
+    if(asset){
+      const e=document.createElement('div'),img=document.createElement('img');
+      e.className=`art-frame ${asset.status}`;e.style.left=x(c);e.style.top=y(r);e.style.width=x(1);e.style.height=y(1);
+      e.tabIndex=0;e.setAttribute('role','button');e.setAttribute('aria-label',`${slot}, ${s.name}. Right-click to copy or open the full-size image.`);
+      img.src=asset.image;img.alt=`${slot} · ${s.name}`;img.title='Right-click to copy or open the full-size image';
+      e.append(img);e.onclick=()=>select(slot);e.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select(slot)}};artLayer.append(e)
+    }
+    const b=document.createElement('button');b.type='button';b.className=`cell ${s.kind||''} ${asset?`${asset.status} has-image`:''}`;b.title=`${slot} · ${s.name}`;b.setAttribute('aria-label',`${slot}, ${s.name}`);b.innerHTML=`<span class="coord">${slot}</span>`;b.onclick=()=>select(slot);slotLayer.append(b)
+  }
+}
+let selected='H-4-11',showIds=false;
+function select(slot){selected=slot;Array.from(slotLayer.children).forEach(e=>e.classList.toggle('selected',e.getAttribute('aria-label').startsWith(slot+',')));renderInspector()}
+function renderInspector(){
+  const [_,c,r]=selected.split('-'),s=role(Number(c),Number(r)),asset=assets[selected],ss=seams[selected]||[];
+  inspector.innerHTML=`<div class="slot-id">${selected}</div><div class="slot-name">${s.name}</div><div class="meta">${asset?`${asset.status} image reference · ${s.use}`:`planned slot · ${s.use}`}</div>${asset?`<div class="asset-note"><strong>${asset.image}</strong><br>${asset.note}<br><a class="asset-link" href="${asset.image}" target="_blank" rel="noopener">Open full-size image ↗</a></div>`:''}<div class="contract"><h2>Seams</h2>${ss.length?`<ul class="seams">${ss.map(x=>`<li><code>${x.edge} → ${x.to}</code><br>${x.mode} · ${x.height}<br><span class="meta">${x.state}</span></li>`).join('')}</ul>`:'<p class="meta">No player seam defined yet.</p>'}</div><div class="contract"><h2>Atlas rule</h2><p class="meta">Each occupied cell contains one full 16:9 reference image. Neighbor images must be made with matching seam contracts before either becomes implementation-qualified.</p></div>`
+}
+idsToggle.onclick=()=>{showIds=!showIds;document.body.classList.toggle('ids-visible',showIds);idsToggle.textContent=showIds?'Hide IDs':'Show IDs'};
+const baseRole=role,levelZeroNames={'H-0-0':'Firmament-adjacent west wall roof','H-1-0':'Firmament-adjacent west wall roof','H-2-0':'Firmament-adjacent west wall roof','H-3-0':'Firmament-adjacent west wall roof','H-4-0':'Firmament-adjacent west wall roof','H-5-0':'Firmament-adjacent west wall roof','H-12-0':'Firmament-adjacent east wall roof','H-13-0':'Firmament-adjacent east wall roof','H-14-0':'Firmament-adjacent east wall roof','H-15-0':'Firmament-adjacent east wall roof','H-16-0':'Firmament-adjacent east wall roof','H-17-0':'Firmament-adjacent east wall roof'},transportCorrections={'H-4-7':'West worker switchback','H-5-7':'West worker switchback','H-4-8':'West worker switchback','H-5-8':'West worker switchback','H-4-9':'Lower west worker route','H-5-9':'Lower west worker route','H-5-11':'Home Court service passage','H-6-9':'Mouth depth','H-7-9':'Mouth depth','H-8-9':'Mouth depth','H-9-9':'Mouth depth','H-10-9':'Mouth depth','H-11-9':'Mouth depth','H-9-8':'Mid Heart void cut','H-12-7':'Mid-East inner gate','H-13-7':'Mid-East outer staging','H-12-8':'Mid-East support shelf','H-13-8':'Mid-East excavation gate','H-15-10':'Cistern freight landing','H-16-10':'Cistern freight shaft','H-15-11':'Cistern freight lower service','H-16-11':'Cistern freight lower shaft','H-17-11':'Cistern far-wall service'};
+role=(c,r)=>{const result=baseRole(c,r),key=id(c,r),name=transportCorrections[key]||levelZeroNames[key];return name?{...result,name,use:levelZeroNames[key]?'natural roof strata above carved, guarded wall habitation':result.use}:result};build();select(selected);
+</script>
+<script>
+Object.assign(assets,v3Approved);
+Object.assign(assets,lowerBridgeDrafts);
+Object.assign(assets,wickworkApproved);
+Object.assign(assets,wickworkAllotmentBridgeDrafts);
+Object.assign(assets,highWestWickworkDrafts);
+Object.assign(assets,highWestWickworkBridgeDrafts);
+Object.assign(assets,highWestApproved);
+Object.assign(assets,farHighWestDrafts);
+Object.assign(assets,farHighWestBridgeDrafts);
+Object.assign(assets,highWestSwitchbackDrafts);
+Object.assign(assets,highWestSwitchbackApproachDrafts);
+Object.assign(assets,highWestApproachGalleryDrafts);
+Object.assign(assets,highWestWickworkVerticalDrafts);
+Object.assign(assets,midHeartHoldingCoreDrafts);
+Object.assign(assets,midHeartWestExchangeDrafts);
+Object.assign(assets,glowbedsCoreDrafts);
+Object.assign(assets,deepCisternBoundaryDrafts);
+Object.assign(assets,midHeartLowerFreightDrafts);
+Object.assign(assets,leftLiftWestExchangeRebuildDrafts);
+Object.assign(assets,leftLiftLowerFreightDrafts);
+Object.assign(assets,canonicalLeftLiftDrafts);
+Object.assign(assets,westExchangeHoldingBridgeDrafts);
+Object.assign(assets,eastServiceDrafts);
+Object.assign(assets,ashramEastGateDrafts);
+Object.assign(assets,ashramGlowbedsTransitionDrafts);
+Object.assign(assets,eastDockDrafts);
+Object.assign(assets,midHeartCalmConnectorDrafts);
+Object.assign(assets,midEastApproachDrafts);
+Object.assign(assets,cisternCoreDrafts);
+Object.assign(assets,glowbedsWalkableDrafts);
+Object.assign(assets,cisternFreightDrafts);
+Object.assign(assets,midEastDigDrafts);
+Object.assign(assets,lowerEastServiceDrafts);
+Object.assign(assets,holdingCleanDrafts);
+Object.assign(assets,mouthDepthDrafts);
+Object.assign(assets,eastCisternLiftRevisionDrafts);
+Object.assign(assets,ashramPixelDrafts);
+Object.assign(assets,westLiftStartDrafts);
+Object.assign(assets,upperMouthDepthDrafts);
+Object.assign(assets,eastServiceCleanDrafts);
+Object.assign(assets,deepMouthDepthDrafts);
+Object.assign(assets,westExchangeCleanDrafts);
+Object.assign(assets,eastUpperPassengerGlowbedsDrafts);
+Object.assign(assets,westAshramHighWestDrafts);
+Object.assign(assets,midWestMouthDepthDrafts);
+Object.assign(assets,eastMouthDepthDrafts);
+Object.assign(assets,westExchangeApproachDrafts);
+Object.assign(assets,lowerFreightCleanDrafts);
+Object.assign(assets,cisternLowerBoundaryDrafts);
+Object.assign(assets,westMakerLandmarkDrafts);
+Object.assign(assets,upperCentralMouthDepthDrafts);
+Object.assign(assets,midEastFarGalleryDrafts);
+Object.assign(assets,southCentralMouthDepthDrafts);
+Object.assign(assets,westHomeCourtSwitchbackDrafts);
+Object.assign(assets,eastDockCleanDrafts);
+Object.assign(assets,eastLowerServiceLandmarkDrafts);
+Object.assign(assets,eastAshramBoundaryDrafts);
+Object.assign(assets,westAshramInnerDrafts);
+Object.assign(assets,midHeartNorthApproachDrafts);
+Object.assign(assets,eastLowerUtilityDrafts);
+Object.assign(assets,topWestMouthDepthDrafts);
+Object.assign(assets,topEastMouthDepthDrafts);
+Object.assign(assets,deepWestMouthDepthDrafts);
+Object.assign(assets,eastGlowbedsBoundaryDrafts);
+Object.assign(assets,westAshramHighWestTransitionDrafts);
+Object.assign(assets,midWestWorkerAnchorDrafts);
+Object.assign(assets,cisternApproachDrafts);
+Object.assign(assets,deepEastMouthDepthDrafts);
+Object.assign(assets,workerBottomWestDrafts);
+Object.assign(assets,westWorkerLandmarkDrafts);
+Object.assign(assets,cisternDeepTransitionDrafts);
+Object.assign(assets,upperMidWestMouthDepthDrafts);
+Object.assign(assets,upperMidEastMouthDepthDrafts);
+Object.assign(assets,midEastStagingDrafts);
+Object.assign(assets,heartWestMouthDepthDrafts);
+Object.assign(assets,heartEastMouthDepthDrafts);
+Object.assign(assets,midEastInnerApproachDrafts);
+Object.assign(assets,lowerMidWestMouthDepthDrafts);
+Object.assign(assets,lowerMidEastMouthDepthDrafts);
+Object.assign(assets,firmamentEdgeBandDrafts);
+Object.assign(assets,westSwitchbackRepairDrafts);
+Object.assign(assets,midEastBridgeRepairDrafts);
+Object.assign(assets,midHeartWestRepairDrafts);
+Object.assign(assets,eastAshramRepairDrafts);
+Object.assign(assets,firmamentWestBandDrafts);
+Object.assign(assets,mouthDeepRepairDrafts);
+Object.assign(assets,midHeartEastRepairDrafts);
+Object.assign(assets,cisternFreightRepairDrafts);
+Object.assign(assets,glowbeds2dRepairDrafts);
+Object.assign(assets,highWestTransitionDrafts);
+Object.assign(assets,upperMouthGapDrafts);
+Object.assign(assets,cisternDeepGapDrafts);
+Object.assign(assets,mouthWestDepthRepairDrafts);
+Object.assign(assets,cisternFarEdgeDrafts);
+Object.assign(assets,westCivicIngressRepairDrafts);
+Object.assign(assets,holdingCoreRepairDrafts);
+Object.assign(assets,eastHeartEgressRepairDrafts);
+Object.assign(assets,heartVoidCutDrafts);
+Object.assign(assets,westHeartUpperTransitionDrafts);
+Object.assign(assets,eastHeartUpperTransitionDrafts);
+Object.assign(assets,eastFirmamentInnerDrafts);
+Object.assign(assets,eastFirmamentOuterDrafts);
+Object.assign(assets,midHeartCentralHandoffDrafts);
+Object.assign(assets,lowerHoldingVoidDrafts);
+Object.assign(assets,westMouthShoulderDrafts);
+Object.assign(assets,eastHeartGangwayDrafts);
+Object.assign(assets,eastMouthShoulderDrafts);
+Object.assign(assets,highWestSolidInteriorDrafts);
+Object.assign(assets,eastCisternEnclosedDrafts);
+Object.assign(assets,westLowerInteriorDrafts);
+Object.assign(assets,midEastDigInteriorDrafts);
+Object.assign(assets,midWestWorkerInteriorDrafts);
+Object.assign(assets,eastLowerServiceInteriorDrafts);
+Object.assign(assets,glowbedsInteriorDrafts);
+Object.assign(assets,westWorkerEnclosedJunctionDrafts);
+// Grounded west-worker switchback refresh.  This is one shared 2 x 2 parent
+// cropped into its four exact cells, so the diagonal, routes, and rock volume
+// continue literally across the internal seams.  It supersedes the obsolete
+// lower-lift-looking repair while retaining only local hand freight hardware.
+Object.assign(assets,{
+  'H-4-7':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-grounded-0-v3-draft-2026-09-14.png',note:'Grounded worker switchback: enclosed upper arrival, not an abyss balcony.'},
+  'H-5-7':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-grounded-1-v3-draft-2026-09-14.png',note:'Grounded worker switchback: rock-backed upper run and retained salvage ribs.'},
+  'H-4-8':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-grounded-2-v3-draft-2026-09-14.png',note:'Grounded worker switchback: lower enclosed workers’ terrace.'},
+  'H-5-8':{status:'draft',image:'chunks/drafts/h4-h5-r7-r8-west-switchback-grounded-3-v3-draft-2026-09-14.png',note:'Grounded worker switchback: protected freight handoff with controlled Mid Heart opening.'}
+});
+// Mid Heart Holding is rebuilt as one shared 2 x 2 parent.  Its public route,
+// short descent, and lower void cut are literal continuations across the four
+// cells and obey the side-scroller collision/readability constraints.
+Object.assign(assets,{
+  'H-8-6':{status:'draft',image:'chunks/drafts/h8-h9-r6-r7-midheart-holding-2d-0-v3-draft-2026-09-14.png',note:'2D Holding core: broad public gathering route and civic counter.'},
+  'H-9-6':{status:'draft',image:'chunks/drafts/h8-h9-r6-r7-midheart-holding-2d-1-v3-draft-2026-09-14.png',note:'2D Holding core: compact East Service threshold and protected public landing.'},
+  'H-8-7':{status:'draft',image:'chunks/drafts/h8-h9-r6-r7-midheart-holding-2d-2-v3-draft-2026-09-14.png',note:'2D Holding core: lower freight/catchrail deck reached by one readable stair.'},
+  'H-9-7':{status:'draft',image:'chunks/drafts/h8-h9-r6-r7-midheart-holding-2d-3-v3-draft-2026-09-14.png',note:'2D Holding core: deliberate lower void cut, with non-walkable depth only.'}
+});
+// True 2048 x 1152 High-West parent: the four 1024 x 576 crops share their
+// rock ceiling, floor, and single protected stair rather than merely having
+// similarly named artwork.
+Object.assign(assets,{
+  'H-2-3':{status:'draft',image:'chunks/drafts/h2-h3-r3-r4-highwest-2d-0-v4-draft-2026-09-14.png',note:'High-West 2D master: guarded upper approach and continuous rock ceiling.'},
+  'H-3-3':{status:'draft',image:'chunks/drafts/h2-h3-r3-r4-highwest-2d-1-v4-draft-2026-09-14.png',note:'High-West 2D master: braced checkpoint with matched lateral floor.'},
+  'H-2-4':{status:'draft',image:'chunks/drafts/h2-h3-r3-r4-highwest-2d-2-v4-draft-2026-09-14.png',note:'High-West 2D master: lower protected cart lane.'},
+  'H-3-4':{status:'draft',image:'chunks/drafts/h2-h3-r3-r4-highwest-2d-3-v4-draft-2026-09-14.png',note:'High-West 2D master: regulated lateral excavation threshold.'}
+});
+// The West Exchange now approaches Holding as an actual shared 2 x 2 side-view
+// block.  It contains one compact exchange district, a readable stair/landing,
+// and a deliberately narrow Mouth-facing gangway instead of another straight
+// civic bridge over the void.
+Object.assign(assets,{
+  'H-6-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-heart-approach-2d-0-v3-draft-2026-09-14.png',note:'West Exchange 2D approach: rock-backed civic counter and broad public landing.'},
+  'H-7-6':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-heart-approach-2d-1-v3-draft-2026-09-14.png',note:'West Exchange 2D approach: elevated clamp and narrow Holding-facing gangway.'},
+  'H-6-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-heart-approach-2d-2-v3-draft-2026-09-14.png',note:'West Exchange 2D approach: enclosed lower freight shelves and worker route.'},
+  'H-7-7':{status:'draft',image:'chunks/drafts/h6-h7-r6-r7-west-heart-approach-2d-3-v3-draft-2026-09-14.png',note:'West Exchange 2D approach: protected offset descent beside visible Mouth depth.'}
+});
+// Home Court is inward-facing, but it is not a sealed, inaccessible dead end.
+// Its east door is a shared indoor passage into the contained service room;
+// only the service room's far edge terminates in solid crater rock.
+Object.assign(seams,{
+  'H-4-10':[{edge:'south',to:'H-4-11',mode:'protected stair into Home Court',height:'lower-west landing',state:'draft shared master'}],
+  'H-5-10':[{edge:'south',to:'H-5-11',mode:'internal stair to Home Court service',height:'lower-east landing',state:'draft shared master'},{edge:'east',to:'H-6-10',mode:'guarded Mouth rim lookout',height:'lower terrace',state:'draft visual rim'}],
+  'H-4-11':[{edge:'west',to:'H-3-11',mode:'walk / shallow ascending grade',height:'lower third',state:'approved shared bridge band'},{edge:'north',to:'H-4-10',mode:'protected stair from approach',height:'upper edge',state:'draft shared master'},{edge:'east',to:'H-5-11',mode:'indoor Home Court service passage',height:'lower third',state:'draft shared master'}],
+  'H-5-11':[{edge:'west',to:'H-4-11',mode:'indoor Home Court service entry',height:'lower third',state:'draft shared master'},{edge:'north',to:'H-5-10',mode:'internal stair / hatch from approach',height:'upper-east',state:'draft shared master'},{edge:'east',to:'H-6-11',mode:'protected Mouth rim',height:'lower terrace',state:'draft visual rim; no descent'}]
+});
+// Lower-west Home approach: shared, enclosed 2 x 2 worker route.  It removes
+// the legacy lower lift visual while preserving H-4-11 itself as the approved
+// Home Court anchor directly below this block.
+Object.assign(assets,{
+  'H-4-9':{status:'draft',image:'chunks/drafts/h4-h5-r9-r10-home-approach-2d-0-v2-draft-2026-09-14.png',note:'Shared 2D approach master: compact worker lane and upper stair start.'},
+  'H-5-9':{status:'draft',image:'chunks/drafts/h4-h5-r9-r10-home-approach-2d-1-v2-draft-2026-09-14.png',note:'Shared 2D approach master: enclosed repair landing and utility spine.'},
+  'H-4-10':{status:'draft',image:'chunks/drafts/h4-h5-r10-r11-home-rim-access-0-v2-draft-2026-09-14.png',note:'Shared Home-rim master: protected stair from worker route into the embedded Home Court band.'},
+  'H-5-10':{status:'draft',image:'chunks/drafts/h4-h5-r10-r11-home-rim-access-1-v2-draft-2026-09-14.png',note:'Shared Home-rim master: internal stair and guarded Mouth-facing rim landing.'}
+});
+Object.assign(assets,{
+  'H-2-9':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-0-v2-draft-2026-09-14.png',note:'2D lower-worker master: enclosed wash/service route.'},
+  'H-3-9':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-1-v2-draft-2026-09-14.png',note:'2D lower-worker master: rock-backed service and storage bay.'},
+  'H-2-10':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-2-v2-draft-2026-09-14.png',note:'2D Dispatch master: readable shared service landing.'},
+  'H-3-10':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-3-v2-draft-2026-09-14.png',note:'2D Dispatch master: short landing stair, repair bench, and shutter.'},
+  'H-2-11':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-4-v2-draft-2026-09-14.png',note:'2D Dispatch master: lower logistics lane entering from west.'},
+  'H-3-11':{status:'draft',image:'chunks/drafts/h2-h3-r9-r11-dispatch-2d-5-v2-draft-2026-09-14.png',note:'2D Dispatch master: protected Home Court approach at lower-third height.'},
+  'H-4-11':{status:'draft',image:'chunks/drafts/h4-h5-r10-r11-home-rim-access-2-v2-draft-2026-09-14.png',note:'Shared Home-rim master: modest Home Court with a visible north stair and real east indoor doorway.'},
+  'H-5-11':{status:'draft',image:'chunks/drafts/h4-h5-r10-r11-home-rim-access-3-v2-draft-2026-09-14.png',note:'Shared Home-rim master: reachable service passage that opens safely to the Devil’s Mouth rim.'}
+});
+// H-5 and H-6 share a literal 96px bridge band at the lower Home-rim edge.
+// The band preserves H-5 as a protected walkable lookout and H-6 as visual
+// Mouth depth only: it deliberately introduces no floor or descent.
+Object.assign(assets,{
+  'H-5-10':{status:'draft',image:'chunks/drafts/h5-r10-rim-mouth-bridge-v2-draft-2026-09-14.png',note:'Protected Home-rim terrace, joined by a shared edge band to Mouth depth only.'},
+  'H-6-10':{status:'draft',image:'chunks/drafts/h6-r10-rim-mouth-bridge-v2-draft-2026-09-14.png',note:'Devil’s Mouth visual depth, sharing the guarded H-5 rim edge; no reachable floor.'},
+  'H-5-11':{status:'draft',image:'chunks/drafts/h5-r11-rim-mouth-bridge-v2-draft-2026-09-14.png',note:'Protected lower Home-rim service terrace, sharing the H-6 void edge.'},
+  'H-6-11':{status:'draft',image:'chunks/drafts/h6-r11-rim-mouth-bridge-v2-draft-2026-09-14.png',note:'Lower Devil’s Mouth depth plate, continuous from H-5’s rail; no descent.'}
+});
+Object.assign(seams,{
+  'H-5-10':[{edge:'south',to:'H-5-11',mode:'internal stair to Home Court service',height:'lower-east landing',state:'draft shared master'},{edge:'east',to:'H-6-10',mode:'guarded Mouth rim / depth transition',height:'full visual edge',state:'draft literal shared bridge band; no descent'}],
+  'H-5-11':[{edge:'west',to:'H-4-11',mode:'indoor Home Court service entry',height:'lower third',state:'draft shared master'},{edge:'north',to:'H-5-10',mode:'internal stair / hatch from approach',height:'upper-east',state:'draft shared master'},{edge:'east',to:'H-6-11',mode:'protected Mouth rim / depth transition',height:'full visual edge',state:'draft literal shared bridge band; no descent'}],
+  'H-6-10':[{edge:'west',to:'H-5-10',mode:'guarded rim into Mouth visual depth',height:'full visual edge',state:'draft literal shared bridge band; no descent'}],
+  'H-6-11':[{edge:'west',to:'H-5-11',mode:'protected rim into Mouth visual depth',height:'full visual edge',state:'draft literal shared bridge band; no descent'}]
+});
+// Dispatch and Home Court also share a literal edge band.  This is an inward
+// worker route, so it stays rock-backed and connected—never a false Mouth
+// balcony or a sealed Home Court dead end.
+Object.assign(assets,{
+  'H-3-10':{status:'draft',image:'chunks/drafts/h3-r10-dispatch-home-bridge-v2-draft-2026-09-14.png',note:'Dispatch-to-Home upper handoff, with a literal shared inward route band.'},
+  'H-4-10':{status:'draft',image:'chunks/drafts/h4-r10-dispatch-home-bridge-v1-draft-2026-09-14.png',note:'Home approach with its west Dispatch route visibly continuing inward.'},
+  'H-3-11':{status:'draft',image:'chunks/drafts/h3-r11-dispatch-home-bridge-v2-draft-2026-09-14.png',note:'Lower Dispatch-to-Home handoff, continuing the shared worker route.'},
+  'H-4-11':{status:'draft',image:'chunks/drafts/h4-r11-dispatch-home-bridge-v1-draft-2026-09-14.png',note:'Modest Home Court, retaining its east service door and now visibly reached from Dispatch.'}
+});
+Object.assign(seams,{
+  'H-3-10':[{edge:'south',to:'H-3-11',mode:'compact internal stair / service level',height:'shared central shaft',state:'draft shared parent'},{edge:'east',to:'H-4-10',mode:'inward worker passage',height:'full visual edge',state:'draft literal shared bridge band'}],
+  'H-4-10':[{edge:'south',to:'H-4-11',mode:'protected stair into Home Court',height:'lower-west landing',state:'draft shared master'},{edge:'west',to:'H-3-10',mode:'inward Dispatch passage',height:'full visual edge',state:'draft literal shared bridge band'}],
+  'H-3-11':[{edge:'east',to:'H-4-11',mode:'walk / shallow ascending grade',height:'full visual edge',state:'draft literal shared bridge band'},{edge:'north',to:'H-3-10',mode:'compact internal stair / service level',height:'shared central shaft',state:'draft shared parent'}],
+  'H-4-11':[{edge:'west',to:'H-3-11',mode:'walk / shallow ascending grade',height:'full visual edge',state:'draft literal shared bridge band'},{edge:'north',to:'H-4-10',mode:'protected stair from approach',height:'upper edge',state:'draft shared master'},{edge:'east',to:'H-5-11',mode:'indoor Home Court service passage',height:'lower third',state:'draft shared master'}]
+});
+// Implementation-quality replacement: one edge-locked shared parent keeps
+// all neighboring contracts while the lower-west worker connector gains
+// readable domestic/service detail around its continuous diagonal switchback.
+Object.assign(assets,{
+  'H-4-7':{status:'draft',image:'chunks/drafts/h4-r7-west-switchback-quality-v2-draft-2026-09-15.png',note:'Implementation-quality lower-west connector: high worker arrival and diagonal switchback; exterior neighbor seams are retained.'},
+  'H-5-7':{status:'draft',image:'chunks/drafts/h5-r7-west-switchback-quality-v2-draft-2026-09-15.png',note:'Implementation-quality lower-west connector: central repair landing and rock-backed switchback continuation.'},
+  'H-4-8':{status:'draft',image:'chunks/drafts/h4-r8-west-switchback-quality-v2-draft-2026-09-15.png',note:'Implementation-quality lower-west connector: inhabited lower-worker terrace with a clear stair continuation.'},
+  'H-5-8':{status:'draft',image:'chunks/drafts/h5-r8-west-switchback-quality-v2-draft-2026-09-15.png',note:'Implementation-quality lower-west connector: local hand-freight landing and service exit; no passenger lift.'}
+});
+build();
+select(selected);
+</script>
