@@ -50,6 +50,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Wallet",
 	"Jobs",
 	"CapabilityWeb",
+	"Diversion",
 	"Resources",
 	"Upgrades",
 	"Community",

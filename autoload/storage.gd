@@ -259,6 +259,65 @@ func get_components(component_id: StringName = &"") -> Array[Dictionary]:
 	return out
 
 
+# --- Concealed storage (Build Bible Spec 26) ------------------------------------
+## Diverted District Output stashed at the player's concealed workspace,
+## integer units per district (canon §47/§62: accumulates across cycles
+## toward a Forbidden build; larger stockpiles are stronger evidence if
+## found — Spec 27 reads this on a residence search). Capacity is
+## canon-OPEN, so none is enforced yet.
+
+var _concealed: Dictionary = {}  # district_id -> int
+
+
+func deposit_concealed(district_id: StringName, amount: int) -> bool:
+	if amount <= 0 or district_id == &"":
+		return false
+	_concealed[district_id] = get_concealed(district_id) + amount
+	_emit_changed(&"concealed", district_id, get_concealed(district_id))
+	return true
+
+
+## All-or-nothing, like withdraw_material.
+func withdraw_concealed(district_id: StringName, amount: int) -> bool:
+	if amount <= 0 or get_concealed(district_id) < amount:
+		return false
+	var next := get_concealed(district_id) - amount
+	if next == 0:
+		_concealed.erase(district_id)
+	else:
+		_concealed[district_id] = next
+	_emit_changed(&"concealed", district_id, next)
+	return true
+
+
+func get_concealed(district_id: StringName) -> int:
+	return int(_concealed.get(district_id, 0))
+
+
+func get_concealed_total() -> int:
+	var total := 0
+	for key: Variant in _concealed.keys():
+		total += int(_concealed[key])
+	return total
+
+
+func get_concealed_snapshot() -> Dictionary:
+	var out: Dictionary = {}
+	for key: Variant in _concealed.keys():
+		out[str(key)] = int(_concealed[key])
+	return out
+
+
+## Confiscation (a residence search that found the stockpile, Spec 27):
+## everything concealed is gone. Returns what was taken.
+func clear_concealed() -> Dictionary:
+	var taken := get_concealed_snapshot()
+	_concealed.clear()
+	for key: Variant in taken.keys():
+		_emit_changed(&"concealed", StringName(str(key)), 0)
+	return taken
+
+
 # --- Cross-cutting ------------------------------------------------------------
 
 func _emit_changed(kind: StringName, id: StringName, new_count: int) -> void:
@@ -280,6 +339,7 @@ func save_state() -> Dictionary:
 		"materials": get_materials_snapshot(),
 		"components": components,
 		"next_component_uid": _next_component_uid,
+		"concealed": get_concealed_snapshot(),
 	}
 
 
@@ -309,12 +369,20 @@ func load_state(data: Dictionary) -> void:
 	for entry: Dictionary in _components:
 		highest = maxi(highest, int(entry["uid"]))
 	_next_component_uid = maxi(int(data.get("next_component_uid", 1)), highest + 1)
+	_concealed.clear()
+	var concealed: Variant = data.get("concealed", {})
+	if typeof(concealed) == TYPE_DICTIONARY:
+		for key: Variant in (concealed as Dictionary).keys():
+			var amount := int((concealed as Dictionary)[key])
+			if amount > 0:
+				_concealed[StringName(str(key))] = amount
 
 
 func reset_all() -> void:
 	_materials.clear()
 	_components.clear()
 	_next_component_uid = 1
+	_concealed.clear()
 
 
 func _debug_add_component(args: Array[String]) -> String:

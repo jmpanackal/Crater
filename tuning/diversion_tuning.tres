@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/diversion_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+take_hold_seconds = 1.6
+noise_tick_seconds = 0.5
+carry_threshold_open = 4

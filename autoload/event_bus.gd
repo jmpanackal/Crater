@@ -153,3 +153,8 @@ signal job_settled(job_id: StringName, record: Dictionary)
 ## (known / understood) because a submitted discovery justified it.
 ## Available is derived and never announced — ask get_state().
 signal technology_discovered(tech_id: StringName, level: StringName)
+
+## Diversion (Build Bible Spec 26): one unit of a district's output was
+## taken unrecorded and now rides on the player. Purely informational —
+## Trust never moves from this; being seen is a witness fact.
+signal diversion_taken(district_id: StringName, amount: int)

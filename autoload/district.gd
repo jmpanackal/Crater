@@ -358,6 +358,19 @@ func deposit(district_id: StringName, amount: float, source_context: Dictionary 
 	return accepted
 
 
+## A loss the books didn't know about is now accounted for (an open return
+## of diverted output, Spec 26 G5-C; a confession; an investigation's
+## finding). Lowers what the books expect so the next check doesn't count
+## it as unexplained. Returns the amount explained.
+func explain_loss(district_id: StringName, amount: float) -> float:
+	if not is_known_district(district_id) or amount <= 0.0:
+		return 0.0
+	var state := _state(district_id)
+	var explained := minf(amount, float(state["ledger_reserves"]))
+	state["ledger_reserves"] = float(state["ledger_reserves"]) - explained
+	return explained
+
+
 # --- Cycle resolution (canon §24's locked order + G4-C step 6) -----------------------------------
 
 func _on_cycle_resolved(cycle: int) -> void:
