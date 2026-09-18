@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/suspicion_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+window_cycles = 3
+weight_witness_sight = 2.0
+weight_witness_sound = 1.0
+weight_found_evidence = 3.0
+weight_district_discrepancy = 2.0
+threshold_base = 4.0
+threshold_per_trust_point = 0.05
+default_search_tier = &"basic"
+found_evidence_trust_delta = -10.0

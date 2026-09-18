@@ -105,3 +105,15 @@ signal evidence_changed(cell: Vector2i, sealed_tier: StringName, exists: bool)
 ## that's what UI shows), delta the applied change, reason the required
 ## human-readable explanation to surface (§17: reasons, never "+3 Trust").
 signal trust_changed(standing: StringName, delta: float, reason: String)
+
+## Investigation (Build Bible Spec 20): a search was requested for a
+## context (an NPC id, zone id, district id or incident id) — by the
+## generic suspicion threshold or an authored trigger. Investigation
+## resolves the WORLD half itself (Evidence.resolve_search); Homes (Spec
+## 27) listens here to resolve a residence/workspace search.
+signal search_requested(context: StringName, reason: String)
+
+## Investigation (Build Bible Spec 20): the search for `context` resolved;
+## found_count = how many pieces of real evidence it turned up (0 =
+## found_nothing).
+signal investigation_resolved(context: StringName, found_count: int)
