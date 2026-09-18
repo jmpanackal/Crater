@@ -55,18 +55,20 @@ func _run() -> void:
 	print("PASS districts on distinct elevations + Vaultward mark")
 
 	# Horizontal-play rule: carved rooms + public terraces, not ladder-only.
-	if HollowLayout.farms_terrace_tiles() < 5 or HollowLayout.farms_gallery_tiles() < 4:
+	# Thresholds are in HollowLayout.TILE units (16px); they were x4 smaller
+	# when TILE was 64 and mean the same real-world spans as before.
+	if HollowLayout.farms_terrace_tiles() < 20 or HollowLayout.farms_gallery_tiles() < 16:
 		push_error(
 			"FAIL Farms horizontal span terrace=%d gallery=%d"
 			% [HollowLayout.farms_terrace_tiles(), HollowLayout.farms_gallery_tiles()]
 		)
 		quit(1)
 		return
-	if HollowLayout.wick_left_street_tiles() < 5:
+	if HollowLayout.wick_left_street_tiles() < 20:
 		push_error("FAIL Wick left street too short: %d" % HollowLayout.wick_left_street_tiles())
 		quit(1)
 		return
-	if HollowLayout.cistern_terrace_tiles() < 2:
+	if HollowLayout.cistern_terrace_tiles() < 8:
 		push_error("FAIL Cistern terrace too short: %d" % HollowLayout.cistern_terrace_tiles())
 		quit(1)
 		return

@@ -4,8 +4,13 @@ extends Object
 ## Upper / Mid / Lower civic anchors each contain inhabited sub-levels.
 ## Primary vertical travel: three Presswater cage lifts. Dig Site at TerrainLayer.DIG_START_X.
 ## Band tops are tile-aligned (multiples of TILE) so FloorVisual lips match collision.
+## TILE relaxed 64 -> 16 (2026-09-18): the 64px rule dated from textured 64px
+## floor sheets needing exact seam alignment; floor is flat-color 16px
+## placeholder now (see CONTEXT.md), so 16px alignment is all that's required.
+## That relaxation is what let the +128px height growth below be spread
+## evenly (+16 per gap) instead of dumped into one band.
 
-const TILE := 64
+const TILE := 16
 
 ## Broad uninterrupted Devil's Mouth void (no full-width floor).
 const PIT_LEFT := 288.0
@@ -17,19 +22,21 @@ const MIN_BAND_GAP := 128.0
 
 ## --- Vertical society bands (deck tops; multiples of TILE) ---
 ## Vaultward sits beneath the Firmament — locked until late Act 1.
+## Heights grown 1088 -> 1216 total (2026-09-18 macro-layout lock), +16px on
+## every gap so the whole stack stretches evenly rather than one band.
 const VAULTWARD_Y := 0.0
 ## Upper band: quiet residences + Glowbeds cultivation.
-const UPPER_RES_Y := 64.0
-const FARMS_Y := 192.0 ## Glowbeds main gallery (alias kept)
-const GLOW_SUB_Y := 320.0 ## Glowbeds hang / fiber racks
+const UPPER_RES_Y := 80.0
+const FARMS_Y := 224.0 ## Glowbeds main gallery (alias kept)
+const GLOW_SUB_Y := 368.0 ## Glowbeds hang / fiber racks
 ## Mid band: Wickwork, Mid Heart, allotments.
-const WICK_Y := 512.0
-const HEART_Y := 512.0 ## Mid Heart civic cluster base
-const MID_ALLOT_Y := 640.0 ## mid allotment / residential street
+const WICK_Y := 576.0
+const HEART_Y := 576.0 ## Mid Heart civic cluster base
+const MID_ALLOT_Y := 720.0 ## mid allotment / residential street
 ## Lower band: working terraces, Cistern, seep galleries.
-const LOWER_WORK_Y := 768.0 ## crowded worker terraces — Act 1 spawn band
-const CISTERN_Y := 960.0
-const SEEP_Y := 1088.0 ## lower seep / service gallery threshold
+const LOWER_WORK_Y := 864.0 ## crowded worker terraces — Act 1 spawn band
+const CISTERN_Y := 1072.0
+const SEEP_Y := 1216.0 ## lower seep / service gallery threshold
 
 ## Left cliff carved rooms (negative X into rock).
 const HOLLOW_LEFT := -576.0
@@ -48,7 +55,7 @@ const LEFT_DECK_WIDTH := 256.0
 
 const FLOOR_THICKNESS := 32.0
 const BRIDGE_THICKNESS := 20.0
-## Shift FloorVisual so rock lips sit on collision tops (64px tiles, lip mid-tile).
+## Shift FloorVisual so rock lips sit on collision tops (lip two tiles into the 16px grid).
 const FLOOR_VISUAL_INSET := 32.0
 
 ## --- Lift network (Presswater-powered; not fast travel) ---
@@ -238,7 +245,7 @@ static func floor_visual_world_y(deck_top_y: float) -> float:
 
 
 static func floor_visual_lip_y(deck_top_y: float) -> float:
-	## Expected rock-lip Y inside a 64px ledge tile (mid-tile after inset).
+	## Expected rock-lip Y of the ledge visual (after inset it lands on the deck top).
 	return floor_visual_world_y(deck_top_y) + FLOOR_VISUAL_INSET
 
 

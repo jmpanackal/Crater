@@ -246,5 +246,10 @@ func _run_tests() -> void:
 		return
 	print("PASS Joss dialogue length")
 
+	# Don't leave the mid-order save on disk: SaveLoad auto-loads it at the
+	# next Godot launch, seeding the NEXT test run with Presswater above
+	# reserve (this test runs near-last alphabetically, so it leaked into
+	# the following full-suite run and tripped test_hollow_lift).
+	save_load.clear_save()
 	print("ALL PASS test_work_orders")
 	quit(0)

@@ -24,7 +24,10 @@ const FRICTION := 1800.0
 const AIR_ACCEL := 1000.0
 const AIR_FRICTION := 400.0
 ## Soft respawn if we drop past Hollow/dig void (below seep band).
-const VOID_FALL_Y := 1200.0
+## Below this the player has fallen past the deepest deck (SEEP_Y=1216) into the
+## Mouth and gets soft-respawned. Keeps the same ~112px margin under Seep it
+## always had; must move if SEEP_Y does.
+const VOID_FALL_Y := 1328.0
 
 
 @export var terrain: TerrainLayer

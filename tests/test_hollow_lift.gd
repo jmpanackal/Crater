@@ -58,6 +58,12 @@ func _run() -> void:
 
 	# Reserve — secondaries parked; essential still available (no softlock).
 	districts.set_good_amount(districts.PRESSWATER, districts.PROTECTED_RESERVE)
+	# is_parked() reads a flag refreshed in _physics_process, not computed live
+	# like service_speed_mult() — give the lifts a tick to notice the change.
+	# (Previously passed only when the startup Presswater already sat at
+	# reserve; a leftover save with more Presswater exposed the missing await.)
+	for _i in range(3):
+		await physics_frame
 	if float(heart.call("service_speed_mult")) < 0.99:
 		push_error("FAIL essential unavailable at reserve")
 		quit(1)
@@ -102,7 +108,7 @@ func _run() -> void:
 		await physics_frame
 
 	Input.action_press("ui_up")
-	for _i in range(280):
+	for _i in range(_ride_frames(heart, HollowLayout.LOWER_WORK_Y, HollowLayout.WICK_Y)):
 		await physics_frame
 		if absf(float(heart.position.y) - HollowLayout.WICK_Y) <= 3.0:
 			break
@@ -116,7 +122,7 @@ func _run() -> void:
 	print("PASS Heart hoist rides Lower → Mid")
 
 	Input.action_press("ui_up")
-	for _i in range(280):
+	for _i in range(_ride_frames(heart, HollowLayout.WICK_Y, HollowLayout.FARMS_Y)):
 		await physics_frame
 		if absf(float(heart.position.y) - HollowLayout.FARMS_Y) <= 3.0:
 			break
@@ -139,7 +145,7 @@ func _run() -> void:
 	for _i in range(8):
 		await physics_frame
 	Input.action_press("ui_up")
-	for _i in range(220):
+	for _i in range(_ride_frames(left, HollowLayout.GLOW_SUB_Y, HollowLayout.FARMS_Y)):
 		await physics_frame
 		if absf(float(left.position.y) - HollowLayout.FARMS_Y) <= 3.0:
 			break
@@ -166,7 +172,7 @@ func _run() -> void:
 	press_w.physical_keycode = KEY_W
 	press_w.pressed = true
 	Input.parse_input_event(press_w)
-	for _i in range(280):
+	for _i in range(_ride_frames(heart, HollowLayout.LOWER_WORK_Y, HollowLayout.WICK_Y)):
 		await physics_frame
 		if absf(float(heart.position.y) - HollowLayout.WICK_Y) <= 3.0:
 			break
@@ -184,3 +190,13 @@ func _run() -> void:
 
 	print("HOLLOW_LIFT_TESTS_PASSED")
 	quit(0)
+
+
+## Physics-frame budget for a full ride between two stops, derived from the
+## lift's own move_speed at 60Hz plus a settle margin. Was four hardcoded
+## magic numbers (280/220) that silently broke the moment the Hollow's band
+## gaps grew: Mid->Glowbeds is 352px at 72px/s = ~293 frames, over the old
+## 280 budget by exactly the ~6px the hoist was then found short.
+func _ride_frames(lift: Node, from_y: float, to_y: float) -> int:
+	var speed := maxf(1.0, float(lift.get("move_speed")))
+	return int(ceil(absf(to_y - from_y) / speed * 60.0)) + 40
