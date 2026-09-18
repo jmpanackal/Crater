@@ -185,6 +185,12 @@ func _relevance(fact: Dictionary, context: StringName) -> float:
 			if location == context or StringName(str(ctx.get("investigation_context", ""))) == context:
 				return _weight("weight_found_evidence", 3.0)
 			return 0.0
+		&"rescued_from_restricted_area":
+			# Build Bible Spec 30: being carried out of restricted rock is
+			# as good as evidence — for that place and for the player's home.
+			if location == context or context == RESIDENCE_CONTEXT:
+				return _weight("weight_found_evidence", 3.0)
+			return 0.0
 		FACT_DISTRICT_DISCREPANCY:
 			# Repeated unexplained district losses also point at the player's
 			# home (canon §62 lists them as a believable search trigger).

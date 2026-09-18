@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/rescue_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fall_fatigue = 20.0
+fall_lost_phases = 1
+stranded_grace_seconds = 45.0
+fatigue_after_rescue = 30.0
+contraband_found_trust_delta = -8.0

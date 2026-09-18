@@ -105,6 +105,30 @@ func request_advance_to_next_rousing() -> bool:
 	return true
 
 
+## Build Bible Spec 30: a severe failure or rescue REQUESTS lost civic
+## time. The Clock stays the sole mover — it advances the phases itself
+## and fires one phase_changed per transition — but unlike the sleep
+## request this isn't phase-gated: being carried home is not a choice.
+## `reason` is required (a forced advance must always be explainable).
+func request_forced_advance(phases: int, reason: String) -> bool:
+	if reason.strip_edges() == "" or phases <= 0:
+		return false
+	for _i in range(phases):
+		_advance_phase()
+	return true
+
+
+## Build Bible Spec 30: a rescue costs the rest of the cycle — advance to
+## the next Rousing from ANY phase (one event per transition crossed).
+func request_forced_advance_to_next_rousing(reason: String) -> bool:
+	if reason.strip_edges() == "":
+		return false
+	_advance_phase()
+	while _phase != PHASE_ROUSING:
+		_advance_phase()
+	return true
+
+
 func _phase_length_seconds(phase: StringName) -> float:
 	var tuning := _tuning()
 	var cycle_minutes := 35.0

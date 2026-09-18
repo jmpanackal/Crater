@@ -325,6 +325,12 @@ func _soft_respawn_if_void() -> void:
 	var dest := _last_safe_pos if _has_safe_pos else HollowLayout.nearest_safe_stand(global_position)
 	if dest == Vector2.ZERO:
 		dest = HollowLayout.nearest_safe_stand(global_position)
+	# Build Bible Spec 30 (G22-B): a void fall is a severe fall — fatigue,
+	# the haul left behind at safe ground, lost civic time. Rescue owns
+	# those consequences; the controller only reports it (fail-safe).
+	var rescue := get_tree().root.get_node_or_null("Rescue")
+	if rescue != null and rescue.has_method("report_severe_fall"):
+		rescue.report_severe_fall(global_position, dest)
 	collision_mask = WORLD_COLLISION_MASK
 	_climbing = false
 	_climb_axis_release_required = false

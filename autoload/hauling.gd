@@ -244,6 +244,26 @@ func cache_at(world_pos: Vector2) -> Dictionary:
 	return {"success": true, "reason": "", "uid": uid}
 
 
+## Build Bible Spec 30: a load dropped by a severe fall or left behind by
+## a rescue becomes a cache wherever that happened — the frontier-only
+## rule for player-CHOSEN caches doesn't apply; the bundle simply stays
+## behind, recoverable (canon §54). Same result shape as cache_at().
+func force_cache_at(world_pos: Vector2) -> Dictionary:
+	if not is_loaded():
+		return {"success": false, "reason": "nothing_to_cache", "uid": -1}
+	var uid := _next_cache_uid
+	_next_cache_uid += 1
+	var record := {"uid": uid, "position": world_pos, "material_id": _material_id, "amount": _amount}
+	_caches.append(record)
+	var id := _material_id
+	var amount := _amount
+	_clear_load()
+	_ensure_cache_nodes()
+	_emit_haul_changed_for(id)
+	_emit_cache_changed(world_pos, id, amount, true)
+	return {"success": true, "reason": "", "uid": uid}
+
+
 ## Picks a cache back up into the bundle. Fails if the bundle can't take it
 ## (wrong type loaded / no room) — the cache stays exactly where it was.
 func retrieve_cache(uid: int) -> Dictionary:

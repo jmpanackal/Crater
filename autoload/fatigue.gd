@@ -65,6 +65,28 @@ func add_from_overexertion() -> float:
 	return amount
 
 
+## Build Bible Spec 30: fatigue from a severe fall or a rescue — a fixed,
+## explainable amount added to the block (capped at the bar). Returns the
+## amount actually added.
+func add_fatigue(amount: float) -> float:
+	var stamina := _stamina()
+	if stamina == null or amount <= 0.0:
+		return 0.0
+	var before := get_current()
+	var next := minf(float(stamina.get_max_stamina()), before + amount)
+	stamina.request_block(stamina.SOURCE_FATIGUE, next)
+	return next - before
+
+
+## Build Bible Spec 30: a rescue leaves the player at a known fatigue level
+## (partial recovery — rescuers carry you home, they don't rest you).
+func set_fatigue(amount: float) -> void:
+	var stamina := _stamina()
+	if stamina == null:
+		return
+	stamina.request_block(stamina.SOURCE_FATIGUE, clampf(amount, 0.0, float(stamina.get_max_stamina())))
+
+
 ## Full recovery — called by sleep, via the Clock's cycle-advance.
 func recover_full() -> void:
 	var stamina := _stamina()

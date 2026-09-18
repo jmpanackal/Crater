@@ -189,3 +189,16 @@ signal project_changed(project_id: StringName, status: StringName)
 ## effect (Capacity, maintenance Demand, story flag) is now in place. The
 ## world-facing change (a repaired lift, a new rope walk) keys off this.
 signal project_completed(project_id: StringName, district_id: StringName)
+
+## Rescue (Build Bible Spec 30): the derived failure state changed
+## (none / strained / exhausted / stranded) — the telegraphing hook for
+## breathing audio, warnings, the exhausted animation.
+signal strain_state_changed(state: StringName)
+
+## Rescue (Build Bible Spec 30): a severe fall happened (G22-B); the
+## player woke at safe_pos with fatigue, lost time, and the haul cached.
+signal severe_fall(fall_pos: Vector2, safe_pos: Vector2)
+
+## Rescue (Build Bible Spec 30): the player was rescued. restricted =
+## from a restricted zone; contraband_units = stolen output found on them.
+signal rescued(forced: bool, restricted: bool, contraband_units: int)
