@@ -35,3 +35,16 @@ extends Resource
 ## obstruction geometry — canon §19: "not intended to become an acoustics
 ## simulation."
 @export var enclosed: bool = false
+
+## This zone's footprint in shared Hollow world space, for position ->
+## zone lookups (Zones.get_zone_at). Build Bible Spec 18 needs it to ask
+## "is the cell being dug inside a restricted zone." An empty rect means
+## the zone has no footprint authored yet and is never returned by a
+## position lookup — the zone still exists for schedules and seams.
+@export var world_rect: Rect2 = Rect2()
+
+## Build Bible Spec 18: digging inside a restricted zone leaves persistent
+## evidence on the terrain delta (and is witnessable, Spec 17). A
+## sanctioned zone (ordinary civic excavation) leaves none. Authored
+## content decides; Terrain only reads it.
+@export var restricted: bool = false

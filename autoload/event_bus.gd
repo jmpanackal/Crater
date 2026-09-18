@@ -92,3 +92,10 @@ signal cycle_resolved(cycle: int)
 ## ran for `cycle` as Ritual began. attended = false also means one
 ## `ritual_missed` fact was just logged.
 signal ritual_checked(attended: bool, cycle: int)
+
+## Terrain (Build Bible Spec 18): a dug cell's evidence state changed.
+## exists = true when a restricted dig just left evidence (sealed_tier
+## empty) or a seal completed (sealed_tier = the tier achieved);
+## exists = false when the delta was reset. Purely informational — nothing
+## is discovered by this event; discovery is a search (Evidence.resolve_search).
+signal evidence_changed(cell: Vector2i, sealed_tier: StringName, exists: bool)

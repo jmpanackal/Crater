@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/component_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+component_id = &"seal_kit_fine"
+display_name = "Fine seal kit"
+description = "A better kit: matched rock dust, slow-set binder, a Wickwork trowel. Survives a deliberate look, not a targeted search with tools (Build Bible Spec 18: Improved concealment). Exact recipe open."
+seal_tier = &"improved"

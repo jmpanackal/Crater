@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/evidence_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+seal_hold_seconds = 1.5
+search_radius = 96.0

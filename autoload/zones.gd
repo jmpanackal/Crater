@@ -151,6 +151,33 @@ func get_display_name(zone_id: String) -> String:
 	return name if name != "" else zone_id
 
 
+## Position -> zone (Build Bible Spec 18): the first authored zone whose
+## world_rect contains the point, in sorted-id order for determinism.
+## "" when no authored footprint covers it.
+func get_zone_at(world_pos: Vector2) -> String:
+	for zone_id: String in get_authored_zone_ids():
+		var zone: Resource = _zones[zone_id]
+		var rect: Rect2 = zone.get("world_rect")
+		if rect.size.x > 0.0 and rect.size.y > 0.0 and rect.has_point(world_pos):
+			return zone_id
+	return ""
+
+
+func is_zone_restricted(zone_id: String) -> bool:
+	var zone: Resource = _zones.get(zone_id, null)
+	if zone == null:
+		return false
+	return bool(zone.get("restricted"))
+
+
+## True only when an authored zone covers the point AND is restricted.
+## A point no zone covers is not restricted by this lookup — the caller
+## decides its own fallback (Terrain falls back to the Firmament band).
+func is_restricted_at(world_pos: Vector2) -> bool:
+	var zone_id := get_zone_at(world_pos)
+	return zone_id != "" and is_zone_restricted(zone_id)
+
+
 ## Build Bible Spec 17's coarse enclosed/open flag. Unknown zone = open.
 func is_zone_enclosed(zone_id: String) -> bool:
 	var zone: Resource = _zones.get(zone_id, null)

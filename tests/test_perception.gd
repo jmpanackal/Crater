@@ -260,7 +260,7 @@ func _run() -> void:
 		_fail("firmament dig failed: %s" % [dug])
 		return
 	var witnessed: Array = fact_log.get_by_type(&"excavated_restricted_wall")
-	if witnessed.size() != 1 or (witnessed[0]["witnesses"] as Array) != ["pell"] or str((witnessed[0]["context"] as Dictionary).get("source_id", "")) != "firmament_dig":
+	if witnessed.size() != 1 or (witnessed[0]["witnesses"] as Array) != ["pell"] or str((witnessed[0]["context"] as Dictionary).get("source_id", "")) != str(terrain.EVIDENCE_SOURCE_ID):
 		_fail("real Firmament dig beside Pell should log exactly one witness fact by pell: %s" % [witnessed])
 		return
 	# A second Firmament cell right away is the same sustained activity —

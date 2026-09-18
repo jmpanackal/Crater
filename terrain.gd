@@ -143,6 +143,7 @@ func _fill_ground() -> void:
 	# Dig site past Hollow terraces + exit ledge (see HollowLayout.EXIT_RIGHT).
 	# Firmament rock (secret) above the walk ledge; Devil’s Mouth walls deeper below.
 	_seed_deposits()
+	_clear_evidence()
 	if _atlas_coords.is_empty():
 		return
 	for x in range(DIG_START_X, DIG_END_X):
@@ -211,6 +212,142 @@ func get_deposit_state(world_pos: Vector2) -> StringName:
 	return &"depleted" if bool(_deposits[cell]["depleted"]) else &"intact"
 
 
+# --- Build Bible Spec 18: physical evidence on the dug-cell delta ------------
+## Evidence is a flag on THIS layer's own delta (Spec 18, option A) — no
+## second registry. cell -> {"sealed_tier": StringName} where &"" = exposed.
+const SealNodeScript := preload("res://seal_node.gd")
+const EVIDENCE_SOURCE_ID := "restricted_dig"
+var _evidence: Dictionary = {}
+var _evidence_nodes: Dictionary = {}  # cell -> SealNode (only while exposed)
+
+
+## Is digging this cell restricted excavation? Reads the authored zone's
+## `restricted` flag (Spec 18: "Terrain reads the zone's authored
+## sanctioned/restricted flag") and falls back to the Firmament band when
+## no authored footprint covers the cell — the band canon forbids digging
+## either way, so the answer never silently flips to "sanctioned" just
+## because a zone isn't authored yet.
+func is_restricted_dig_cell(cell: Vector2i) -> bool:
+	var world := to_global(map_to_local(cell))
+	var zones := get_tree().root.get_node_or_null("Zones") if is_inside_tree() else null
+	if zones != null and zones.has_method("get_zone_at") and str(zones.get_zone_at(world)) != "":
+		return bool(zones.is_restricted_at(world))
+	return is_firmament_cell(cell)
+
+
+func _leave_evidence(cell: Vector2i) -> void:
+	if _evidence.has(cell):
+		return
+	_evidence[cell] = {"sealed_tier": &""}
+	_spawn_seal_node(cell)
+	_emit_evidence_changed(cell, &"", true)
+
+
+func has_evidence(cell: Vector2i) -> bool:
+	return _evidence.has(cell)
+
+
+func get_evidence_cells() -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for key: Variant in _evidence.keys():
+		out.append(key)
+	return out
+
+
+## {} if the cell holds no evidence, else {"cell", "position",
+## "sealed_tier", "zone_id"} — a copy, never the record.
+func get_evidence_info(cell: Vector2i) -> Dictionary:
+	if not _evidence.has(cell):
+		return {}
+	var world := to_global(map_to_local(cell))
+	var zone_id := ""
+	var zones := get_tree().root.get_node_or_null("Zones") if is_inside_tree() else null
+	if zones != null and zones.has_method("get_zone_at"):
+		zone_id = str(zones.get_zone_at(world))
+	return {
+		"cell": cell,
+		"position": world,
+		"sealed_tier": StringName(str(_evidence[cell]["sealed_tier"])),
+		"zone_id": zone_id,
+	}
+
+
+func get_evidence_records() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for key: Variant in _evidence.keys():
+		out.append(get_evidence_info(key))
+	return out
+
+
+func get_evidence_node(cell: Vector2i) -> Node:
+	var node: Variant = _evidence_nodes.get(cell, null)
+	if node == null or not is_instance_valid(node):
+		return null
+	return node
+
+
+## Called when a seal hold completes (seal_node.gd) or by Evidence.seal().
+## Consumes ONE instance of the kit Component (Spec 11), records the tier
+## it achieves (kit tier + Secrecy Gear, via Evidence.achievable_tier) and
+## frees the exposed-evidence interactable. Refuses cleanly — nothing
+## consumed — if there's no evidence here, it's already sealed, the kit
+## isn't a seal kit, or none is owned. {"success", "reason", "tier"}.
+func complete_seal(cell: Vector2i, kit_id: StringName) -> Dictionary:
+	if not _evidence.has(cell):
+		return {"success": false, "reason": "no_evidence_here", "tier": &""}
+	if StringName(str(_evidence[cell]["sealed_tier"])) != &"":
+		return {"success": false, "reason": "already_sealed", "tier": &""}
+	var evidence := get_tree().root.get_node_or_null("Evidence") if is_inside_tree() else null
+	var storage := get_tree().root.get_node_or_null("Storage") if is_inside_tree() else null
+	if evidence == null or storage == null:
+		return {"success": false, "reason": "no_evidence_system", "tier": &""}
+	if not bool(evidence.is_seal_kit(kit_id)):
+		return {"success": false, "reason": "not_a_seal_kit", "tier": &""}
+	var owned: Array[Dictionary] = storage.get_components(kit_id)
+	if owned.is_empty():
+		return {"success": false, "reason": "no_kit", "tier": &""}
+	var tier: StringName = evidence.achievable_tier(kit_id)
+	if not bool(storage.remove_component(int(owned[0]["uid"]))):
+		return {"success": false, "reason": "no_kit", "tier": &""}
+	_evidence[cell]["sealed_tier"] = tier
+	_free_seal_node(cell)
+	_emit_evidence_changed(cell, tier, true)
+	return {"success": true, "reason": "", "tier": tier}
+
+
+func _spawn_seal_node(cell: Vector2i) -> void:
+	_free_seal_node(cell)
+	var node: Area2D = SealNodeScript.new()
+	node.setup(self, cell)
+	add_child(node)
+	node.position = map_to_local(cell)
+	_evidence_nodes[cell] = node
+
+
+func _free_seal_node(cell: Vector2i) -> void:
+	var node: Variant = _evidence_nodes.get(cell, null)
+	_evidence_nodes.erase(cell)
+	if node != null and is_instance_valid(node):
+		(node as Node).queue_free()
+
+
+func _clear_evidence() -> void:
+	for key: Variant in _evidence_nodes.keys():
+		var node: Variant = _evidence_nodes[key]
+		if node != null and is_instance_valid(node):
+			(node as Node).queue_free()
+	_evidence_nodes.clear()
+	_evidence.clear()
+
+
+func _emit_evidence_changed(cell: Vector2i, tier: StringName, exists: bool) -> void:
+	if not is_inside_tree():
+		return
+	var bus := get_tree().root.get_node_or_null("EventBus")
+	if bus != null:
+		bus.evidence_changed.emit(cell, tier, exists)
+
+
 func is_firmament_cell(cell: Vector2i) -> bool:
 	return cell.y <= FIRMAMENT_Y_MAX
 
@@ -257,22 +394,27 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	# effect of implementing Terrain's own spec. This event exists for
 	# systems that don't have a direct call site at all yet - Perception
 	# (#17), Material extraction (#12), the Fact Log.
+	# Build Bible Specs 17/18: whether a dig is restricted is THIS system's
+	# decision (the zone's authored flag, Firmament band as fallback), not
+	# Perception's or Evidence's. A restricted dig does two things at once
+	# — the spec is explicit they aren't mutually exclusive: it leaves
+	# persistent evidence on this delta (Spec 18) AND is witnessable right
+	# now (Spec 17). Ordinary civic digging does neither.
+	var restricted := is_restricted_dig_cell(cell)
+	if restricted:
+		_leave_evidence(cell)
 	if is_inside_tree():
 		var bus := get_tree().root.get_node_or_null("EventBus")
 		if bus != null:
 			bus.terrain_dug.emit(cell, direction, is_firmament, is_mouth)
-		# Build Bible Spec 17: whether a dig is witnessable is THIS system's
-		# decision, not Perception's. Digging the Firmament is the
-		# restricted excavation canon forbids (§19 "excavated restricted
-		# wall"); ordinary civic digging isn't flagged. One source id for
-		# the sustained activity, so continuous Firmament mining seen by
-		# the same NPC is one fact per cooldown window, not one per cell.
-		# Zone-authored restricted flags (Spec 18) will widen this check.
-		if is_firmament:
+		# One source id for the sustained activity, so continuous restricted
+		# mining seen by the same NPC is one fact per cooldown window, not
+		# one per cell.
+		if restricted:
 			var perception := get_tree().root.get_node_or_null("Perception")
 			if perception != null and perception.has_method("flag_witnessable"):
 				perception.flag_witnessable(
-					"firmament_dig", world, perception.FACT_EXCAVATED_RESTRICTED_WALL,
+					EVIDENCE_SOURCE_ID, world, perception.FACT_EXCAVATED_RESTRICTED_WALL,
 					{"cell": [cell.x, cell.y], "direction": [direction.x, direction.y]}
 				)
 	return true
@@ -640,7 +782,13 @@ func save_state() -> Dictionary:
 		if bool(r["exposed"]) or bool(r["depleted"]):
 			var c: Vector2i = key
 			deposits.append({"cell": [c.x, c.y], "exposed": bool(r["exposed"]), "depleted": bool(r["depleted"])})
-	return {"dug_cells": dug, "deposits": deposits}
+	# Evidence (Build Bible Spec 18): the flag and its concealment tier
+	# ride along with the delta they belong to — no separate save format.
+	var evidence: Array = []
+	for key: Variant in _evidence.keys():
+		var c2: Vector2i = key
+		evidence.append({"cell": [c2.x, c2.y], "sealed_tier": str(_evidence[key]["sealed_tier"])})
+	return {"dug_cells": dug, "deposits": deposits, "evidence": evidence}
 
 
 func load_state(data: Dictionary) -> void:
@@ -651,22 +799,38 @@ func load_state(data: Dictionary) -> void:
 			if typeof(entry) == TYPE_ARRAY and entry.size() == 2:
 				erase_cell(Vector2i(int(entry[0]), int(entry[1])))
 	var deposits: Variant = data.get("deposits", [])
-	if typeof(deposits) != TYPE_ARRAY:
-		return
-	for entry: Variant in deposits:
-		if typeof(entry) != TYPE_DICTIONARY:
-			continue
-		var e: Dictionary = entry
-		var cell_arr: Variant = e.get("cell", null)
-		if typeof(cell_arr) != TYPE_ARRAY or (cell_arr as Array).size() != 2:
-			continue
-		var cell := Vector2i(int(cell_arr[0]), int(cell_arr[1]))
-		if not _deposits.has(cell):
-			continue  # a pocket the current content no longer authors
-		if bool(e.get("depleted", false)):
-			_deposits[cell]["depleted"] = true
-		if bool(e.get("exposed", false)) or bool(e.get("depleted", false)):
-			_expose_deposit_cell(cell, false)
+	if typeof(deposits) == TYPE_ARRAY:
+		for entry: Variant in deposits:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var e: Dictionary = entry
+			var cell_arr: Variant = e.get("cell", null)
+			if typeof(cell_arr) != TYPE_ARRAY or (cell_arr as Array).size() != 2:
+				continue
+			var cell := Vector2i(int(cell_arr[0]), int(cell_arr[1]))
+			if not _deposits.has(cell):
+				continue  # a pocket the current content no longer authors
+			if bool(e.get("depleted", false)):
+				_deposits[cell]["depleted"] = true
+			if bool(e.get("exposed", false)) or bool(e.get("depleted", false)):
+				_expose_deposit_cell(cell, false)
+	# Evidence (Build Bible Spec 18): restore each flag + tier; only
+	# still-exposed evidence gets its seal interactable back. Restoration
+	# emits nothing — it isn't a new dig.
+	var evidence: Variant = data.get("evidence", [])
+	if typeof(evidence) == TYPE_ARRAY:
+		for entry: Variant in evidence:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var e: Dictionary = entry
+			var cell_arr: Variant = e.get("cell", null)
+			if typeof(cell_arr) != TYPE_ARRAY or (cell_arr as Array).size() != 2:
+				continue
+			var cell := Vector2i(int(cell_arr[0]), int(cell_arr[1]))
+			var tier := StringName(str(e.get("sealed_tier", "")))
+			_evidence[cell] = {"sealed_tier": tier}
+			if tier == &"":
+				_spawn_seal_node(cell)
 
 
 func reset_all() -> void:

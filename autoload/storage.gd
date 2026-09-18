@@ -201,6 +201,17 @@ func get_component_display_name(component_id: StringName) -> String:
 	return display if display != "" else str(component_id)
 
 
+## One authored field of a Component definition (e.g. "seal_tier" for
+## Build Bible Spec 18), or `default` if unknown. Reads only — the
+## definition itself is never handed out.
+func get_component_field(component_id: StringName, field: String, default: Variant = null) -> Variant:
+	var def: Resource = _component_defs.get(component_id, null)
+	if def == null:
+		return default
+	var value: Variant = def.get(field)
+	return default if value == null else value
+
+
 ## Adds one instance of a known Component, with optional per-instance data
 ## (which specific recovered part, condition, provenance — whatever a later
 ## system wants to hang on it). Returns the instance's stable uid, or -1 for

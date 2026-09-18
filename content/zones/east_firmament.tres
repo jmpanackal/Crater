@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"east_firmament"
+display_name = "Firmament (east face)"
+world_origin = Vector2(1024, 0)
+seams = []
+enclosed = true
+world_rect = Rect2(1024, 0, 1024, 464)
+restricted = true

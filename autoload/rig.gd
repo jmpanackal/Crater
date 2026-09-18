@@ -70,6 +70,11 @@ const EFFECT_HAULING_CAPACITY := &"hauling_capacity_bonus"
 const EFFECT_HAULING_BLOCK_REDUCTION := &"hauling_block_reduction"
 const EFFECT_QUIET_DIG := &"quiet_dig_level"
 const EFFECT_DIG_COST_REDUCTION := &"dig_stamina_cost_reduction"
+## Build Bible Spec 18: Secrecy-build Gear raises the concealment tier a
+## seal kit achieves by this many steps (Basic -> Improved -> Advanced).
+## No authored Gear provides it yet — which Secrecy Gear improves which
+## tier is that spec's own open item; the hook is what's locked.
+const EFFECT_SEAL_TIER_BONUS := &"seal_tier_bonus"
 
 ## Change kinds carried by EventBus.rig_changed.
 const CHANGE_EQUIPPED := &"equipped"

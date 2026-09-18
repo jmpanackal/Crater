@@ -14,3 +14,9 @@ extends Resource
 @export var display_name: String = ""
 
 @export_multiline var description: String = ""
+
+## Build Bible Spec 18: if this Component is a seal kit, the concealment
+## tier it achieves when used to seal evidence — Evidence.TIER_BASIC /
+## TIER_IMPROVED / TIER_ADVANCED (canon §62's qualitative tiers). Empty
+## for anything that isn't a seal kit.
+@export var seal_tier: StringName = &""
