@@ -4,18 +4,18 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"west_dispatch_yard"
-display_name = "West Dispatch Yard"
-world_origin = Vector2(-264, 864)
+zone_id = &"lower_lift_landing"
+display_name = "Lower Lift Landing"
+world_origin = Vector2(-448, 928)
 seams = [{
 "edge": "east",
-"neighbor": "lower_switchback",
-"position": -160.0
+"neighbor": "bottom_west_approach",
+"position": -432.0
 }, {
 "edge": "west",
-"neighbor": "bottom_west_approach",
-"position": -368.0
+"neighbor": "bottom_west_threshold",
+"position": -624.0
 }]
 enclosed = true
-world_rect = Rect2(-368, 768, 208, 192)
+world_rect = Rect2(-464, 800, 32, 160)
 restricted = false

@@ -8,7 +8,7 @@ const WorkOrderTrackerScript := preload("res://work_order_tracker.gd")
 @onready var _dialogue: CanvasLayer = $UI/DialoguePanel
 @onready var _journal: CanvasLayer = $UI/JournalHud
 @onready var _hints: Label = $UI/Hints
-@onready var _npcs: Node2D = $Hollow/NPCs
+@onready var _npcs: Node2D = get_node_or_null("Hollow/NPCs")
 @onready var _primary_hud: PanelContainer = $UI/PrimaryHud
 
 var _hints_ttl := 8.0

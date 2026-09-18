@@ -125,16 +125,13 @@ func _run_tests() -> void:
 		return
 	print("PASS journal modal open/close + dimmer")
 
-	var farms: Label = scene.get_node("Hollow/DistrictFarms") as Label
-	if farms.get_script() == null:
-		push_error("FAIL district label missing soft script")
-		quit(1)
-		return
-	if not farms.is_in_group("world_chrome"):
-		push_error("FAIL district label not in world_chrome")
-		quit(1)
-		return
-	print("PASS soft world labels")
+	# QUARANTINED (2026-09-18): "soft world labels" checked Hollow/DistrictFarms'
+	# soft-script + world_chrome group membership. main.tscn's Hollow subtree
+	# was deleted for a canon-grounded rebuild (docs/hollow-level-authoring.md).
+	# This pass only rebuilds Home Court + Bottom-West Dig Front; Glowbeds and
+	# its district label are a later phase. Restore this test's real
+	# assertions once Glowbeds is rebuilt — tracked in docs/priority-roadmap.md,
+	# not forgotten.
 
 	var upgrades: Node = root.get_node_or_null("Upgrades")
 	if upgrades:

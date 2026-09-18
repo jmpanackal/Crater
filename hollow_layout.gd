@@ -110,85 +110,106 @@ const LADDER_FARMS_X := LIFT_X
 ## Presswater → lift service thresholds (Districts.PROTECTED_RESERVE / THIN).
 const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
-## --- Opening-route west wing (Bottom-West) ---
-## Lower band lateral expansion west of Home Court, per hollow-chunk-map.md's
-## opening route: Home Court -> Lower Switchback -> West Dispatch Yard ->
-## Bottom-West Approach -> Bottom-West Threshold -> First Expansion Gallery
-## (+ Collapsed Side Chamber branch). Only LOWER_WORK_Y extends this far west
-## — HOLLOW_LEFT stays the shared boundary for the bands above; Bottom-West is
-## a new lateral dig project, not a retrofit of the existing vertical stack.
-## All breakpoints are TILE-aligned. Replaces the old single flat
-## "LowerWorkWest" deck (HOLLOW_LEFT+64 .. LIFT_OPEN_X) with a landmarked
-## sequence (2026-09-18 opening-route layout pass).
+## --- Opening-route west wing (Bottom-West Dig Front) ---
+## Per hollow-chunk-map.md / mechanics-canon.md §52 and the confirmed spatial
+## blueprint (docs/hollow-level-authoring.md): Home Court -> Lower Switchback
+## -> West Dispatch Yard -> Bottom-West Approach (a real 3-flight descent) ->
+## Lower Lift Landing (a mid-descent landing + shortcut) -> Bottom-West
+## Threshold -> First Expansion Gallery (+ Collapsed Side Chamber branch).
+## Bottom-West Dig Front sits MEASURABLY BELOW Home Court (mirroring Cistern
+## sitting below Glowbeds on the east wall) — not beside it at the same
+## elevation. A prior pass got this wrong (a flat westward strip); see the
+## blueprint's v4 correction. All breakpoints are TILE-aligned.
 const HOME_COURT_LEFT := -64.0
-const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, LIFT_OPEN_X, LOWER_WORK_Y, FLOOR_THICKNESS)
+const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
 
-const LOWER_SWITCHBACK_LEFT := -384.0
-const LOWER_SWITCHBACK_DIP_Y := LOWER_WORK_Y + 32.0
-const LOWER_SWITCHBACK_RAMP_DOWN := Vector4(-384.0, -288.0, LOWER_WORK_Y, LOWER_SWITCHBACK_DIP_Y)
-const LOWER_SWITCHBACK_FLOOR := Vector4(-288.0, -160.0, LOWER_SWITCHBACK_DIP_Y, FLOOR_THICKNESS)
-const LOWER_SWITCHBACK_RAMP_UP := Vector4(-160.0, HOME_COURT_LEFT, LOWER_SWITCHBACK_DIP_Y, LOWER_WORK_Y)
+## Lower Switchback: a local dip ("slopes down and back up around a carved
+## support mass" — hollow-chunk-map.md), not the big descent into Bottom-West.
+const SWITCHBACK_DIP_Y := LOWER_WORK_Y + 32.0
+const SWITCHBACK_STAIR_DOWN := Vector4(-160.0, LOWER_WORK_Y, -128.0, SWITCHBACK_DIP_Y)
+const SWITCHBACK_FLOOR := Vector4(-128.0, -96.0, SWITCHBACK_DIP_Y, FLOOR_THICKNESS)
+const SWITCHBACK_STAIR_UP := Vector4(-96.0, SWITCHBACK_DIP_Y, HOME_COURT_LEFT, LOWER_WORK_Y)
 
-const WEST_DISPATCH_LEFT := -768.0
-const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, LOWER_SWITCHBACK_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
-const WEST_DISPATCH_PLATFORM_Y := LOWER_WORK_Y - 32.0
-const WEST_DISPATCH_PLATFORM_RAMP_UP := Vector4(-672.0, -608.0, LOWER_WORK_Y, WEST_DISPATCH_PLATFORM_Y)
-const WEST_DISPATCH_PLATFORM := Vector4(-608.0, -512.0, WEST_DISPATCH_PLATFORM_Y, FLOOR_THICKNESS)
-const WEST_DISPATCH_PLATFORM_RAMP_DOWN := Vector4(-512.0, -448.0, WEST_DISPATCH_PLATFORM_Y, LOWER_WORK_Y)
+const WEST_DISPATCH_LEFT := -368.0
+const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, -160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
 
-const BOTTOM_WEST_APPROACH_LEFT := -1152.0
-const APPROACH_DIP_Y := LOWER_WORK_Y + 32.0
-const APPROACH_FLAT_A := Vector4(BOTTOM_WEST_APPROACH_LEFT, -1088.0, LOWER_WORK_Y, FLOOR_THICKNESS)
-const APPROACH_RAMP_DOWN := Vector4(-1088.0, -1024.0, LOWER_WORK_Y, APPROACH_DIP_Y)
-const APPROACH_FLAT_B := Vector4(-1024.0, -928.0, APPROACH_DIP_Y, FLOOR_THICKNESS)
-const APPROACH_RAMP_UP := Vector4(-928.0, -864.0, APPROACH_DIP_Y, LOWER_WORK_Y)
-const APPROACH_FLAT_C := Vector4(-864.0, WEST_DISPATCH_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+## Bottom-West Approach — the real descent: 3 shallow flights + 2 landings,
+## dropping a full band (LOWER_WORK_Y -> BOTTOM_WEST_Y), same drop scale as
+## LOWER_WORK_Y -> CISTERN_Y (208px) elsewhere in the stack.
+const BOTTOM_WEST_Y := LOWER_WORK_Y + 192.0
+const APPROACH_LANDING1_Y := LOWER_WORK_Y + 64.0
+const APPROACH_LANDING2_Y := LOWER_WORK_Y + 128.0
+const APPROACH_FLIGHT1 := Vector4(WEST_DISPATCH_LEFT, LOWER_WORK_Y, -432.0, APPROACH_LANDING1_Y)
+## Lower Lift Landing — the named reconnection point from mechanics-canon.md
+## §52. Growth-reserved (docs/hollow-level-authoring.md Rule 5): this is where
+## the real West Civic Lift's lower stop connects once Wickwork is rebuilt: not
+## built as a functioning hollow_lift.gd instance this pass, since a single-
+## stop lift with no upper destination would be a half-finished mechanic.
+const LOWER_LIFT_LANDING := Vector4(-464.0, -432.0, APPROACH_LANDING1_Y, FLOOR_THICKNESS)
+const APPROACH_FLIGHT2 := Vector4(-464.0, APPROACH_LANDING1_Y, -528.0, APPROACH_LANDING2_Y)
+const APPROACH_LANDING2 := Vector4(-560.0, -528.0, APPROACH_LANDING2_Y, FLOOR_THICKNESS)
+const APPROACH_FLIGHT3 := Vector4(-560.0, APPROACH_LANDING2_Y, -624.0, BOTTOM_WEST_Y)
 
-const BOTTOM_WEST_THRESHOLD_LEFT := -1408.0
-const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_APPROACH_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+## Shortcut ladder: Lower Lift Landing <-> Bottom-West Threshold, bypassing
+## flights 2-3. A second, distinct ascent/descent route between the same two
+## elevations (Rule 4's verticality ratio) and constructive backtracking once
+## the dig site's been visited once via the long way.
+const LADDER_SHORTCUT_X := -448.0
+const LADDER_SHORTCUT_TOP_Y := APPROACH_LANDING1_Y
+const LADDER_SHORTCUT_BOTTOM_Y := BOTTOM_WEST_Y
 
-const GALLERY_LEFT := -1792.0
-const GALLERY_DIP_Y := LOWER_WORK_Y + 16.0
+const BOTTOM_WEST_THRESHOLD_LEFT := -880.0
+const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -624.0, BOTTOM_WEST_Y, FLOOR_THICKNESS)
 
-## Collapsed Side Chamber — optional branch, reached by a short local climb
-## down from the Gallery's west wall (not a walkway; matches the "crawl/step/
-## short climb" read in hollow-chunk-map.md, same Area2D pattern as
-## LadderUpper/LadderMid/LadderCistern). The ladder opening sits right at
-## GALLERY_LEFT, so the Gallery's main floor needs no separate west sliver —
-## it simply starts on the far side of the opening.
+## First Expansion Gallery = the Bottom-West dig site's entry chamber (blueprint's
+## "Bottom-West Dig Front"). Collapsed Side Chamber branches off its west wall via
+## a short local climb (not a walkway — "crawl/step/short climb" per
+## hollow-chunk-map.md), same Area2D pattern as LadderUpper/LadderMid/LadderCistern.
+## The ladder opening sits right at GALLERY_LEFT, so the Gallery's main floor
+## needs no separate west sliver.
+const GALLERY_LEFT := -1136.0
 const LADDER_CHAMBER_OPEN_X := GALLERY_LEFT
 const LADDER_CHAMBER_X := LADDER_CHAMBER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-const CHAMBER_ALCOVE_Y := LOWER_WORK_Y + 64.0
-const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -1696.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
-
-const GALLERY_FLOOR_A := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, -1600.0, LOWER_WORK_Y, FLOOR_THICKNESS)
-const GALLERY_RAMP_DOWN := Vector4(-1600.0, -1536.0, LOWER_WORK_Y, GALLERY_DIP_Y)
-const GALLERY_FLOOR_B := Vector4(-1536.0, -1472.0, GALLERY_DIP_Y, FLOOR_THICKNESS)
-const GALLERY_RAMP_UP := Vector4(-1472.0, BOTTOM_WEST_THRESHOLD_LEFT, GALLERY_DIP_Y, LOWER_WORK_Y)
+const CHAMBER_ALCOVE_Y := BOTTOM_WEST_Y + 64.0
+const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -1040.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
+const GALLERY_FLOOR := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_Y, FLOOR_THICKNESS)
 
 const OPENING_ROUTE_LEFT := GALLERY_LEFT ## westmost extent of the opening route
 
 
+## Flat decks only (stairs are separate calls) — used by hollow_terrain.gd to
+## paint matching visual + collision tiles together (single source of truth).
 static func opening_route_deck_rects() -> Array[Vector4]:
-	## Flat decks only (ramps are separate polygons) — used by hollow_floor.gd
-	## to keep the visual tile layer in sync with hollow_decks.gd's collision.
 	return [
 		HOME_COURT_DECK,
-		LOWER_SWITCHBACK_FLOOR,
+		SWITCHBACK_FLOOR,
 		WEST_DISPATCH_YARD,
-		WEST_DISPATCH_PLATFORM,
-		APPROACH_FLAT_A,
-		APPROACH_FLAT_B,
-		APPROACH_FLAT_C,
+		LOWER_LIFT_LANDING,
+		APPROACH_LANDING2,
 		BOTTOM_WEST_THRESHOLD,
-		GALLERY_FLOOR_A,
-		GALLERY_FLOOR_B,
+		GALLERY_FLOOR,
 		CHAMBER_ALCOVE,
+	]
+
+
+## Stair flights: (x0, y0, x1, y1) — same Vector4 shape as decks, consumed by
+## hollow_terrain.gd's paint_stairs(x0, y0, x1, y1).
+static func opening_route_stair_rects() -> Array[Vector4]:
+	return [
+		SWITCHBACK_STAIR_DOWN,
+		SWITCHBACK_STAIR_UP,
+		APPROACH_FLIGHT1,
+		APPROACH_FLIGHT2,
+		APPROACH_FLIGHT3,
 	]
 
 
 static func ladder_chamber_open_end() -> float:
 	return LADDER_CHAMBER_OPEN_X + LADDER_OPENING
+
+
+static func ladder_shortcut_shaft_height() -> float:
+	return LADDER_SHORTCUT_BOTTOM_Y - LADDER_SHORTCUT_TOP_Y
 
 
 static func lift_open_end() -> float:

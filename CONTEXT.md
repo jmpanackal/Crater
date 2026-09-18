@@ -266,7 +266,7 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `hollow_layout.gd` | Devil’s Mouth / terrace world metrics |
 | `hollow_zone.gd` | Opens siphon station in Hollow |
 | `hollow_npc.gd` | District NPC body: idle/talk (Spec 10 relay) + scheduled placement/absence via `npc_id` (Build Bible Spec 16) |
-| `hollow_floor.gd` | Terrace floor TileMap visuals |
+| `hollow_terrain.gd` | Terrace floor TileMap: collision + visuals on one tile, single source of truth (see `docs/hollow-level-authoring.md`) — replaces the retired `hollow_decks.gd`/`hollow_floor.gd` split |
 | `terrain.gd` | Diggable TileMapLayer; Firmament/Devil’s Mouth frontiers |
 | `feel_fx.gd` | Dig/land grit, soft shake, micro dig hitch, restrained +Salvage/Record floats (**→ Materials**) |
 | `feel_audio.gd` | Procedural dig/land click stubs with pitch randomize |

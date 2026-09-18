@@ -131,31 +131,18 @@ func _run() -> void:
 		return
 	print("PASS dig site entry threshold")
 
-	var npc: Node2D = scene.get_node_or_null("Hollow/NPCs/Pell") as Node2D
+	# QUARANTINED (2026-09-18): "NPC face toward player + bob parts" drove
+	# Hollow/NPCs/Pell to prove facing + bob-part presence. main.tscn's
+	# Hollow subtree was deleted for a canon-grounded rebuild
+	# (docs/hollow-level-authoring.md). This pass only rebuilds Home Court +
+	# Bottom-West Dig Front; Glowbeds and its NPC are a later phase. Restore
+	# this test's real assertions once Glowbeds/Pell are rebuilt — tracked in
+	# docs/priority-roadmap.md, not forgotten.
 	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
-	if npc == null or player == null:
-		push_error("FAIL NPC/player missing")
+	if player == null:
+		push_error("FAIL player missing")
 		quit(1)
 		return
-	player.global_position = npc.global_position + Vector2(80, 0)
-	await process_frame
-	await process_frame
-	if not npc.has_method("debug_face_sign") or float(npc.debug_face_sign()) <= 0.0:
-		push_error("FAIL NPC did not face player to the right")
-		quit(1)
-		return
-	player.global_position = npc.global_position + Vector2(-80, 0)
-	await process_frame
-	await process_frame
-	if float(npc.debug_face_sign()) >= 0.0:
-		push_error("FAIL NPC did not face player to the left")
-		quit(1)
-		return
-	if npc.get_node_or_null("Body") == null or npc.get_node_or_null("Head") == null:
-		push_error("FAIL NPC body/head missing for bob")
-		quit(1)
-		return
-	print("PASS NPC face toward player + bob parts")
 
 	var panel: Node = scene.get_node_or_null("UI/UpgradePanel")
 	var community_live: Node = root.get_node_or_null("Community")

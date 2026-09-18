@@ -170,8 +170,11 @@ func _run() -> void:
 		return
 	print("PASS bypassing a closed gate is a witnessable restricted entry; an open gate is just a way")
 
-	# --- 4. main.tscn's Vaultward gate is a real gate: closed at start,
-	# open with the Ashram Heights residence. ---
+	# --- 4. QUARANTINED (2026-09-18): main.tscn's Vaultward gate — main.tscn's
+	# Hollow subtree was deleted for a canon-grounded rebuild
+	# (docs/hollow-level-authoring.md). This pass only rebuilds Home Court +
+	# Bottom-West Dig Front; Ashram Heights/Vaultward is a later phase. Restore
+	# once Vaultward is rebuilt — tracked in docs/priority-roadmap.md.
 	homes.reset_all()
 	npcs.unregister_agent(&"pell")
 	pell.queue_free()
@@ -180,24 +183,7 @@ func _run() -> void:
 	ward.queue_free()
 	body.queue_free()
 	await process_frame
-	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
-	root.add_child(scene)
-	await process_frame
-	await process_frame
-	if not (access.get_gate_ids() as Array).has(&"vaultward"):
-		_fail("main.tscn has no registered Vaultward gate: %s" % [access.get_gate_ids()])
-		return
-	if bool(access.is_open(&"vaultward")) or str(access.can_pass(&"vaultward")["reason"]) != "residence_too_low":
-		_fail("Vaultward should be closed at the start: %s" % [access.can_pass(&"vaultward")])
-		return
-	homes.grant_residence(&"ashram_heights", "test")
-	await process_frame
-	if not bool(access.is_open(&"vaultward")):
-		_fail("Vaultward should open with the Ashram Heights residence")
-		return
-	print("PASS main.tscn's Vaultward gate is closed at start and opens with Ashram Heights")
 
-	scene.queue_free()
 	save_load.clear_save()
 	for n in [trust, story, homes]:
 		n.reset_all()

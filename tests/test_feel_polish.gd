@@ -210,16 +210,13 @@ func _run() -> void:
 		return
 	print("PASS Harvest lie dimmer + Journal subtitle")
 
-	# Soft fog drift node present.
-	if scene.get_node_or_null("Hollow/FarHaze") == null:
-		push_error("FAIL FarHaze parallax polish missing")
-		quit(1)
-		return
-	if scene.get_node_or_null("Hollow/PitShaftVeil") == null:
-		push_error("FAIL PitShaftVeil parallax layer missing")
-		quit(1)
-		return
-	print("PASS Hollow FarHaze + PitShaftVeil depth polish")
+	# QUARANTINED (2026-09-18): "Hollow FarHaze + PitShaftVeil depth polish"
+	# checked Hollow/FarHaze and Hollow/PitShaftVeil parallax dressing.
+	# main.tscn's Hollow subtree was deleted for a canon-grounded rebuild
+	# (docs/hollow-level-authoring.md). This pass only rebuilds Home Court +
+	# Bottom-West Dig Front; that depth-polish dressing is a later phase.
+	# Restore this test's real assertions once it is rebuilt — tracked in
+	# docs/priority-roadmap.md, not forgotten.
 
 	# Help text mentions climb.
 	var hints: Label = scene.get_node_or_null("UI/Hints") as Label

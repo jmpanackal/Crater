@@ -143,48 +143,15 @@ func _run() -> void:
 		return
 	print("PASS absent player gets exactly one ritual_missed fact; present player gets none")
 
-	# --- 3. The real play scene has a Ritual ground over Mid Heart: the
-	# Mid Heart stand point counts as present, the home spawn does not, and
-	# sleeping from Gathering away from Mid Heart logs one missed Ritual. ---
+	# --- 3. QUARANTINED (2026-09-18): the real play scene's Ritual ground over
+	# Mid Heart — main.tscn's Hollow subtree was deleted for a canon-grounded
+	# rebuild (docs/hollow-level-authoring.md). This pass only rebuilds Home
+	# Court + Bottom-West Dig Front; Mid Heart and its Ritual ground are a
+	# later phase. Restore this test's real assertions once Mid Heart is
+	# rebuilt — tracked in docs/priority-roadmap.md, not forgotten.
 	ground.queue_free()
 	_body.queue_free()
 	await process_frame
-	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
-	root.add_child(scene)
-	await process_frame
-	await process_frame
-	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
-	var scene_ground: Node = scene.get_node_or_null("Hollow/RitualGround")
-	if player == null or scene_ground == null:
-		_fail("main.tscn missing Player or Hollow/RitualGround")
-		return
-	_body = player
-	var mid_heart: Vector2 = HollowLayout.safe_stand_points()[8]  # Mid Heart center
-	player.velocity = Vector2.ZERO
-	await _move_body_to(mid_heart)
-	for _i in range(5):
-		await physics_frame
-	if not bool(civic.is_player_at_ritual()):
-		_fail("player standing at Mid Heart center (%s) is not on the scene's Ritual ground" % mid_heart)
-		return
-	player.velocity = Vector2.ZERO
-	await _move_body_to(HollowLayout.player_spawn_point())
-	for _i in range(5):
-		await physics_frame
-	if bool(civic.is_player_at_ritual()):
-		_fail("player at the home spawn still counts as at Ritual")
-		return
-	fact_log.clear_all()
-	console.execute("force_phase gathering")
-	var sleep_cycle: int = int(clock.get_cycles_elapsed())
-	if not bool(clock.request_advance_to_next_rousing()):
-		_fail("sleep-advance from Gathering refused")
-		return
-	var slept_through: Array = fact_log.get_by_type(&"ritual_missed")
-	if slept_through.size() != 1 or int(slept_through[0]["cycle"]) != sleep_cycle:
-		_fail("sleeping through Ritual away from Mid Heart should log exactly one ritual_missed: %s" % [slept_through])
-		return
-	print("PASS main.tscn's Ritual ground covers Mid Heart; sleeping through Ritual elsewhere is one missed Ritual")
 
 	# --- 4. Persistence through the real SaveLoad path; presence is live
 	# state and never saved. ---
@@ -212,7 +179,5 @@ func _run() -> void:
 	fact_log.clear_all()
 	civic.reset_all()
 	clock.reset_all()
-	scene.queue_free()
-	await process_frame
 	print("CIVIC_CYCLE_TESTS_PASSED")
 	quit(0)

@@ -205,9 +205,7 @@ func _run() -> void:
 		return
 	print("PASS a held action stays unwitnessed until an interval re-check finds someone newly in range")
 
-	# --- 7. Real path: an off-screen NPC never perceives; and in main.tscn
-	# a Firmament dig (Terrain's own restricted-dig decision) is witnessed
-	# by the real Pell, while an ordinary civic dig is not flagged at all. ---
+	# --- 7. An off-screen NPC never perceives. ---
 	zones.unregister_loaded_zone("glowbeds")
 	await process_frame
 	if bool(npcs.is_agent_loaded(&"pell")):
@@ -217,6 +215,17 @@ func _run() -> void:
 	if not offscreen.is_empty():
 		_fail("an off-screen NPC ran a live perception check")
 		return
+	print("PASS off-screen NPCs never perceive")
+
+	# --- 8. QUARANTINED (2026-09-18): the "real path" section covered a real
+	# Firmament dig in main.tscn witnessed by the real Pell (Hollow/NPCs/Pell)
+	# beside Glowbeds' idle point (Hollow/Zones/Glowbeds/Idle1), plus proof an
+	# ordinary civic dig is never flagged. main.tscn's Hollow subtree was
+	# deleted for a canon-grounded rebuild (docs/hollow-level-authoring.md).
+	# This pass only rebuilds Home Court + Bottom-West Dig Front; Glowbeds and
+	# its NPC are a later phase. Restore this test's real assertions once
+	# Glowbeds is rebuilt — tracked in docs/priority-roadmap.md, not
+	# forgotten.
 	npcs.unregister_agent(&"pell")
 	npcs.unregister_agent(&"rook")
 	pell.queue_free()
@@ -224,70 +233,10 @@ func _run() -> void:
 	glow_anchor.queue_free()
 	wick_anchor.queue_free()
 	await process_frame
-	fact_log.clear_all()
-	perception.clear_cooldowns()
-	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
-	root.add_child(scene)
-	await process_frame
-	await process_frame
-	var terrain: TerrainLayer = scene.get_node("Terrain") as TerrainLayer
-	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
-	var real_pell: Node2D = scene.get_node("Hollow/NPCs/Pell") as Node2D
-	var idle: Node2D = scene.get_node("Hollow/Zones/Glowbeds/Idle1") as Node2D
-	if terrain == null or player == null or real_pell == null or idle == null:
-		_fail("main.tscn missing Terrain/Player/Pell/Glowbeds idle point")
-		return
-	terrain.reset_all()
-	var firmament_cell := Vector2i(terrain.DIG_START_X + 2, terrain.FIRMAMENT_Y_MAX - 4)
-	var mouth_cell := Vector2i(terrain.DIG_START_X + 2, terrain.MOUTH_Y_MIN + 6)
-	if not terrain.is_firmament_cell(firmament_cell) or terrain.is_firmament_cell(mouth_cell):
-		_fail("test cells not in the expected bands")
-		return
-	var target_world: Vector2 = terrain.to_global(terrain.map_to_local(firmament_cell))
-	# Move Glowbeds' idle point beside the dig, re-place Pell there, and
-	# stand the player between them so Pell faces the dig.
-	idle.global_position = target_world + Vector2(-96, 8)
-	npcs.place_all_agents()
-	player.global_position = target_world + Vector2(-40, 0)
-	player.velocity = Vector2.ZERO
-	for _i in range(4):
-		await physics_frame
-	if real_pell.global_position.distance_to(idle.global_position) > 12.0 or not bool(npcs.is_agent_loaded(&"pell")):
-		_fail("real Pell not re-placed beside the dig (%s vs %s)" % [real_pell.global_position, idle.global_position])
-		return
-	var dug: Dictionary = terrain.dig(terrain.to_global(terrain.map_to_local(firmament_cell + Vector2i.LEFT)), Vector2i.RIGHT)
-	if not bool(dug["success"]):
-		_fail("firmament dig failed: %s" % [dug])
-		return
-	var witnessed: Array = fact_log.get_by_type(&"excavated_restricted_wall")
-	if witnessed.size() != 1 or (witnessed[0]["witnesses"] as Array) != ["pell"] or str((witnessed[0]["context"] as Dictionary).get("source_id", "")) != str(terrain.EVIDENCE_SOURCE_ID):
-		_fail("real Firmament dig beside Pell should log exactly one witness fact by pell: %s" % [witnessed])
-		return
-	# A second Firmament cell right away is the same sustained activity —
-	# cooldown, no second fact.
-	terrain.dig(terrain.to_global(terrain.map_to_local(firmament_cell)), Vector2i.RIGHT)
-	if (fact_log.get_by_type(&"excavated_restricted_wall") as Array).size() != 1:
-		_fail("continuous Firmament mining logged one fact per cell")
-		return
-	# An ordinary (Devil's Mouth band) dig is never flagged.
-	var mouth_world: Vector2 = terrain.to_global(terrain.map_to_local(mouth_cell))
-	idle.global_position = mouth_world + Vector2(-96, 8)
-	npcs.place_all_agents()
-	player.global_position = mouth_world + Vector2(-40, 0)
-	for _i in range(3):
-		await physics_frame
-	perception.clear_cooldowns()
-	terrain.dig(terrain.to_global(terrain.map_to_local(mouth_cell + Vector2i.LEFT)), Vector2i.RIGHT)
-	if (fact_log.get_by_type(&"excavated_restricted_wall") as Array).size() != 1:
-		_fail("an ordinary civic dig was flagged as restricted")
-		return
-	print("PASS off-screen NPCs never perceive; a real Firmament dig beside Pell is witnessed once, civic digging never")
 
 	fact_log.clear_all()
 	perception.clear_cooldowns()
 	save_load.clear_save()
 	clock.reset_all()
-	scene.queue_free()
-	await process_frame
 	print("PERCEPTION_TESTS_PASSED")
 	quit(0)

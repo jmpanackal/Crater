@@ -150,46 +150,19 @@ func _run() -> void:
 	player.velocity = Vector2.ZERO
 	for _i in range(10):
 		await physics_frame
-	# Ladder grab while loaded spends once; unloaded grab is free.
-	var ladder_stand := Vector2(HollowLayout.LADDER_CISTERN_OPEN_X - 32.0, HollowLayout.LOWER_WORK_Y - 32.0)
-	player.global_position = ladder_stand
-	player.velocity = Vector2.ZERO
-	for _i in range(5):
-		await physics_frame
-	stamina.reset_all()
-	hauling._apply_block()
-	var before_grab: float = float(stamina.get_current())
-	Input.action_press("ui_down")
-	for _i in range(4):
-		await physics_frame
-	Input.action_release("ui_down")
-	if not player.is_climbing() or float(stamina.get_current()) > before_grab - cost * 0.5:
-		push_error("FAIL loaded ladder grab did not spend stamina (climbing=%s, %s -> %s)" % [player.is_climbing(), before_grab, stamina.get_current()])
-		quit(1)
-		return
-	Input.action_press("ui_accept")
-	await physics_frame
-	Input.action_release("ui_accept")
+	print("PASS jumps are strenuous exactly while a bundle is attached")
+
+	# QUARANTINED (2026-09-18): "ladder grabs are strenuous exactly while
+	# loaded" (loaded grab spends once; unloaded grab is free) drove
+	# Hollow/LadderCistern's climb zone via HollowLayout.LADDER_CISTERN_OPEN_X
+	# / LOWER_WORK_Y. main.tscn's Hollow subtree was deleted for a
+	# canon-grounded rebuild (docs/hollow-level-authoring.md). This pass only
+	# rebuilds Home Court + Bottom-West Dig Front; the Cistern ladder is a
+	# later phase. Restore this test's real assertions once the Cistern
+	# ladder is rebuilt — tracked in docs/priority-roadmap.md, not forgotten.
 	hauling.deposit_at_storage()
-	player.global_position = ladder_stand
-	player.velocity = Vector2.ZERO
 	player.collision_mask = 1
-	for _i in range(8):
-		await physics_frame
 	stamina.reset_all()
-	var before_free_grab: float = float(stamina.get_current())
-	Input.action_press("ui_down")
-	for _i in range(4):
-		await physics_frame
-	Input.action_release("ui_down")
-	if float(stamina.get_current()) < before_free_grab - 0.5:
-		push_error("FAIL unloaded ladder grab cost stamina")
-		quit(1)
-		return
-	Input.action_press("ui_accept")
-	await physics_frame
-	Input.action_release("ui_accept")
-	print("PASS jumps and ladder grabs are strenuous exactly while a bundle is attached")
 
 	# --- 4. Caches: a valid frontier spot works; Hollow civic space and
 	# un-dug rock fail cleanly with a reason; the cache survives a real

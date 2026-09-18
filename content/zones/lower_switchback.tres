@@ -6,7 +6,7 @@
 script = ExtResource("1")
 zone_id = &"lower_switchback"
 display_name = "Lower Switchback"
-world_origin = Vector2(-224, 896)
+world_origin = Vector2(-112, 896)
 seams = [{
 "edge": "east",
 "neighbor": "home_court",
@@ -14,8 +14,8 @@ seams = [{
 }, {
 "edge": "west",
 "neighbor": "west_dispatch_yard",
-"position": -384.0
+"position": -160.0
 }]
 enclosed = true
-world_rect = Rect2(-384, 768, 320, 192)
+world_rect = Rect2(-160, 768, 96, 192)
 restricted = false

@@ -85,116 +85,17 @@ func _run() -> void:
 		return
 	print("PASS schedules load as content; off-screen presence is queryable for zones never loaded")
 
-	# --- 2. In the real scene, each body sits at an idle point of its
-	# scheduled zone, and a phase transition (a real Clock event) moves
-	# everyone to their next zone. ---
-	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
-	root.add_child(scene)
-	await process_frame
-	await process_frame
-	await process_frame
-	var loaded_ids: Array[String] = zones.get_loaded_zone_ids()
-	var expected_ids: Array[String] = [
-		"bottom_west_approach",
-		"bottom_west_threshold",
-		"cistern",
-		"collapsed_side_chamber",
-		"first_expansion_gallery",
-		"glowbeds",
-		"home_court",
-		"lower_switchback",
-		"mid_heart",
-		"west_dispatch_yard",
-		"wickwork",
-	]
-	if loaded_ids != expected_ids:
-		_fail("main.tscn zone anchors not registered: %s" % [loaded_ids])
-		return
-	var pell: Node2D = scene.get_node("Hollow/NPCs/Pell") as Node2D
-	var sila: Node2D = scene.get_node("Hollow/NPCs/Sila") as Node2D
-	var joss: Node2D = scene.get_node("Hollow/NPCs/Joss") as Node2D
-	if clock.get_phase() != &"rousing":
-		_fail("clock not at rousing at scene start")
-		return
-	if not _near_any(pell.global_position, zones.get_idle_points("glowbeds"), 12.0):
-		_fail("Pell not at a Glowbeds idle point during rousing: %s" % pell.global_position)
-		return
-	if not _near_any(sila.global_position, zones.get_idle_points("cistern"), 12.0):
-		_fail("Sila not at a Cistern idle point during rousing: %s" % sila.global_position)
-		return
-	if not bool(npcs.is_agent_loaded(&"pell")) or (npcs.get_loaded_agents() as Array).size() != 4:
-		_fail("all four bodies should be loaded in main.tscn (%d)" % (npcs.get_loaded_agents() as Array).size())
-		return
-	console.execute("force_phase ritual")  # rousing -> ... -> ritual: real phase_changed events
-	await process_frame
-	var heart_points: Array[Vector2] = zones.get_idle_points("mid_heart")
-	for body: Node2D in [pell, sila, joss, scene.get_node("Hollow/NPCs/Rook") as Node2D]:
-		if not _near_any(body.global_position, heart_points, 12.0) or not body.visible:
-			_fail("%s not at a Mid Heart idle point during ritual: %s" % [body.name, body.global_position])
-			return
-	# Four bodies, four points — nobody stacked on the same spot.
-	var used: Array = []
-	for body: Node2D in [pell, sila, joss, scene.get_node("Hollow/NPCs/Rook") as Node2D]:
-		var key := int(round((body.global_position.x + 5.0) / 10.0))  # coarse, wander-tolerant
-		if used.has(key):
-			_fail("two NPCs placed on the same Mid Heart idle point")
-			return
-		used.append(key)
-	console.execute("force_advance 1")  # ritual -> rousing
-	await process_frame
-	if not _near_any(pell.global_position, zones.get_idle_points("glowbeds"), 12.0) or not _near_any(sila.global_position, zones.get_idle_points("cistern"), 12.0):
-		_fail("bodies did not return to their districts at rousing")
-		return
-	if str(npcs.get_current_zone(&"joss")) != "mid_heart" or not _near_any(joss.global_position, heart_points, 12.0):
-		_fail("Joss should stay at Mid Heart every phase")
-		return
-	print("PASS bodies match their schedule for the current phase, and follow real phase transitions")
-
-	# --- 3. A body whose scheduled zone is NOT loaded is absent (hidden,
-	# not interactable) but still scheduled/queryable; it returns when the
-	# zone loads again. ---
-	var cistern_anchor: Node = scene.get_node("Hollow/Zones/Cistern")
-	zones.unregister_loaded_zone("cistern")
-	await process_frame
-	if bool(zones.is_zone_loaded("cistern")) or bool(npcs.is_agent_loaded(&"sila")) or sila.visible:
-		_fail("Sila should be absent while the Cistern zone is unloaded (loaded=%s visible=%s)" % [npcs.is_agent_loaded(&"sila"), sila.visible])
-		return
-	var relay: Area2D = sila.get_node_or_null("InteractableRelay") as Area2D
-	if relay == null or relay.monitorable:
-		_fail("absent NPC is still interactable")
-		return
-	if (npcs.get_scheduled_npcs_at("cistern", &"rousing") as Array) != [&"sila"] or str(npcs.get_current_zone(&"sila")) != "cistern":
-		_fail("off-screen Sila lost her schedule")
-		return
-	if (npcs.get_loaded_agents() as Array).size() != 3:
-		_fail("loaded agents should be 3 with Sila off-screen")
-		return
-	var where: String = console.execute("where_is sila")
-	if not where.contains("off-screen"):
-		_fail("where_is did not report off-screen: '%s'" % where)
-		return
-	zones.register_loaded_zone("cistern", cistern_anchor)
-	await process_frame
-	if not bool(npcs.is_agent_loaded(&"sila")) or not sila.visible or not relay.monitorable:
-		_fail("Sila did not return when the Cistern zone loaded again")
-		return
-	if not _near_any(sila.global_position, zones.get_idle_points("cistern"), 12.0):
-		_fail("returned Sila not at a Cistern idle point")
-		return
-	print("PASS an NPC whose zone isn't loaded is absent but still scheduled; returns when it loads")
-
-	# --- 4. Unloading the scene clears loaded zones and bodies (live state,
-	# never saved). ---
-	scene.queue_free()
-	await process_frame
-	await process_frame
-	if not (zones.get_loaded_zone_ids() as Array).is_empty() or not (npcs.get_loaded_agents() as Array).is_empty():
-		_fail("loaded zones/bodies survived the scene leaving the tree: %s" % [zones.get_loaded_zone_ids()])
-		return
-	if not (npcs.save_state() as Dictionary).is_empty():
-		_fail("Npcs should own no saved state")
-		return
-	print("PASS loaded zones and bodies are live scene state that clears with the scene")
+	# --- 2-4. QUARANTINED (2026-09-18): these covered real-scene NPC
+	# placement/movement across phase transitions, an NPC going absent when
+	# its zone unloads and returning when it reloads, and loaded zones/bodies
+	# clearing when the scene unloads — all driven by main.tscn's old
+	# district NPCs (Pell/Sila/Joss/Rook) and zone anchors (glowbeds,
+	# wickwork, mid_heart, cistern). main.tscn's Hollow subtree was deleted
+	# for a canon-grounded rebuild (docs/hollow-level-authoring.md). This pass
+	# only rebuilds Home Court + Bottom-West Dig Front; those NPCs and
+	# districts are a later phase. Restore these tests' real assertions once
+	# NPCs are rebuilt into the new districts — tracked in
+	# docs/priority-roadmap.md, not forgotten.
 
 	save_load.clear_save()
 	clock.reset_all()
