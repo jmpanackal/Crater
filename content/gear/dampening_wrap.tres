@@ -13,3 +13,7 @@ capacity_cost = 1
 effects = {
 "quiet_dig_level": 1.0
 }
+order_district = &"wickwork"
+order_tallies = 5
+order_output = 1.0
+order_min_trust = &"relied_on"

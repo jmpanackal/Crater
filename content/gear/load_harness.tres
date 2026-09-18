@@ -13,3 +13,7 @@ capacity_cost = 1
 effects = {
 "hauling_block_reduction": 0.35
 }
+order_district = &"wickwork"
+order_tallies = 6
+order_output = 2.0
+order_min_trust = &""

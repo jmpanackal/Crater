@@ -198,6 +198,12 @@ func get_gear_info(gear_id: StringName) -> Dictionary:
 		"category": StringName(str(def.get("category"))),
 		"capacity_cost": get_gear_capacity_cost(gear_id),
 		"effects": _effects_of(def),
+		# Build Bible Spec 23 order terms (Orders reads these; empty
+		# order_district = not orderable).
+		"order_district": StringName(str(def.get("order_district"))),
+		"order_tallies": int(def.get("order_tallies")),
+		"order_output": float(def.get("order_output")),
+		"order_min_trust": StringName(str(def.get("order_min_trust"))),
 	}
 
 

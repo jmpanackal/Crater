@@ -35,3 +35,15 @@ extends Resource
 ## Rig.get_effect_sum(). Consumers read the ids Rig declares as EFFECT_*
 ## constants; an id nothing consumes yet is simply inert data.
 @export var effects: Dictionary = {}
+
+## Build Bible Spec 23 — how Approved Gear is ORDERED (canon §28: Tallies
+## + authorized District Output; Access/Trust may matter). Empty
+## order_district = not orderable (grafts are never ordered — they are
+## privately built, Spec 28).
+@export var order_district: StringName = &""
+## Tallies price.
+@export var order_tallies: int = 0
+## Authorized District Output units drawn from that district's Reserves.
+@export var order_output: float = 0.0
+## Minimum Trust standing id required to order (Trust's ladder), or empty.
+@export var order_min_trust: StringName = &""

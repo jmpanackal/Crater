@@ -129,3 +129,12 @@ signal district_resolved(district_id: StringName, summary: Dictionary)
 ## or the derived condition changed (a withdrawal, deposit, registration
 ## or resolution). condition is the live derived label id.
 signal district_changed(district_id: StringName, condition: StringName)
+
+## Wallet (Build Bible Spec 23): Tallies moved. balance is the new total,
+## delta the change (negative for a spend), reason the required
+## explanation — canon §16: Tallies stay understandable.
+signal tallies_changed(balance: int, delta: int, reason: String)
+
+## Orders (Build Bible Spec 23): an Approved Gear order succeeded — the
+## Gear is now OWNED (Rig's list), not equipped.
+signal gear_ordered(gear_id: StringName, district_id: StringName, tallies_spent: int, output_drawn: float)

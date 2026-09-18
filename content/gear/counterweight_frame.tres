@@ -13,3 +13,7 @@ capacity_cost = 3
 effects = {
 "hauling_capacity_bonus": 2.0
 }
+order_district = &"wickwork"
+order_tallies = 10
+order_output = 3.0
+order_min_trust = &"accepted"

@@ -13,3 +13,7 @@ capacity_cost = 1
 effects = {
 "dig_stamina_cost_reduction": 0.5
 }
+order_district = &"wickwork"
+order_tallies = 8
+order_output = 2.0
+order_min_trust = &""
