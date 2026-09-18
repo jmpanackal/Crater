@@ -306,11 +306,21 @@ func load_state(data: Dictionary) -> void:
 	var tier := StringName(str(data.get("tier", "lower")))
 	_tier = tier if TIER_ORDER.has(tier) else TIER_LOWER
 	_concealment_bonus = maxi(0, int(data.get("concealment_bonus", 0)))
+	_emit_residence_changed()  # gates (Spec 31) re-evaluate on a load too
 
 
 func reset_all() -> void:
 	_tier = TIER_LOWER
 	_concealment_bonus = 0
+	_emit_residence_changed()
+
+
+## Loading is inert (Spec 02) — this is a state notification, not a
+## "welcome back" side effect: Access derives open/closed from it.
+func _emit_residence_changed() -> void:
+	var bus := get_tree().root.get_node_or_null("EventBus") if is_inside_tree() else null
+	if bus != null and bus.has_signal("residence_changed"):
+		bus.residence_changed.emit(_tier)
 
 
 # --- Debug ------------------------------------------------------------------------------------

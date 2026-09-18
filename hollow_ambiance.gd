@@ -1,4 +1,6 @@
 extends Node2D
+
+const AccessGateScript := preload("res://access_gate.gd")
 ## Runtime Hollow livability: Devil's Mouth drama, carved rooms, district kits, lantern grammar.
 ## No PixelLab — ColorRect / PointLight2D / soft particles that read as lived-in.
 
@@ -715,17 +717,20 @@ func _add_vaultward_gate() -> void:
 	root.add_child(bar)
 
 	# Collision wall: no free climb from upper residences into Vaultward.
-	var body := StaticBody2D.new()
+	# Build Bible Spec 31: a real access gate — solid until the player holds
+	# the Ashram Heights residence (the build brief's "Gate + collision
+	# block. Not free at start"), explained in the world without numbers.
+	var body: StaticBody2D = AccessGateScript.new()
 	body.name = "VaultwardBlock"
-	body.collision_layer = 1
-	body.collision_mask = 0
+	body.gate_id = &"vaultward"
+	body.required_residence = &"ashram_heights"
+	body.display_name = "Vaultward gate"
+	body.explanation = "The Council's seal. Only Ashram Heights residents pass beneath the Firmament."
+	body.barrier_size = Vector2(96.0, 40.0)
+	body.beyond_offset = Vector2(0.0, -56.0)
+	body.beyond_size = Vector2(96.0, 48.0)
+	body.position = Vector2(HollowLayout.HOLLOW_LEFT + 236.0, HollowLayout.VAULTWARD_Y - 20.0)
 	root.add_child(body)
-	var col := CollisionShape2D.new()
-	var shape := RectangleShape2D.new()
-	shape.size = Vector2(96.0, 40.0)
-	col.shape = shape
-	col.position = Vector2(HollowLayout.HOLLOW_LEFT + 236.0, HollowLayout.VAULTWARD_Y - 20.0)
-	body.add_child(col)
 
 
 func _add_society_life_cues() -> void:
