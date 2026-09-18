@@ -152,14 +152,6 @@ const APPROACH_FLIGHT2 := Vector4(-464.0, APPROACH_LANDING1_Y, -528.0, APPROACH_
 const APPROACH_LANDING2 := Vector4(-560.0, -528.0, APPROACH_LANDING2_Y, FLOOR_THICKNESS)
 const APPROACH_FLIGHT3 := Vector4(-560.0, APPROACH_LANDING2_Y, -624.0, BOTTOM_WEST_Y)
 
-## Shortcut ladder: Lower Lift Landing <-> Bottom-West Threshold, bypassing
-## flights 2-3. A second, distinct ascent/descent route between the same two
-## elevations (Rule 4's verticality ratio) and constructive backtracking once
-## the dig site's been visited once via the long way.
-const LADDER_SHORTCUT_X := -448.0
-const LADDER_SHORTCUT_TOP_Y := APPROACH_LANDING1_Y
-const LADDER_SHORTCUT_BOTTOM_Y := BOTTOM_WEST_Y
-
 const BOTTOM_WEST_THRESHOLD_LEFT := -880.0
 const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -624.0, BOTTOM_WEST_Y, FLOOR_THICKNESS)
 
@@ -206,10 +198,6 @@ static func opening_route_stair_rects() -> Array[Vector4]:
 
 static func ladder_chamber_open_end() -> float:
 	return LADDER_CHAMBER_OPEN_X + LADDER_OPENING
-
-
-static func ladder_shortcut_shaft_height() -> float:
-	return LADDER_SHORTCUT_BOTTOM_Y - LADDER_SHORTCUT_TOP_Y
 
 
 static func lift_open_end() -> float:

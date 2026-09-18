@@ -59,6 +59,15 @@ height change is never a single mandatory ladder. Applies at every wall-column
 boundary, not only at the three named lifts (west civic, east upper passenger, east
 Cistern freight).
 
+**"Major" means between named locations/districts, not every internal flight.**
+A first attempt at Bottom-West Approach's 3-flight, 2-landing descent (one district's
+own internal route) added a redundant shortcut ladder mid-staircase to satisfy this
+rule literally — it added no real gameplay value (the staircase was already varied
+and walkable both ways) and just read as an unexplained prop, which the user called
+out directly. Removed. A multi-flight staircase with landings that changes direction
+already satisfies the spirit of this rule on its own; don't bolt on a second route
+just to check a box.
+
 **Not-a-straight-line rule:** a sequence of named locations (a quest route, a
 district's internal layout) is not automatically a physical line. Switchbacks double
 back; corridors fold; rooms stack. A "Lower Switchback" changes elevation — it isn't

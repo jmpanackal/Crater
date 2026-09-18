@@ -56,15 +56,6 @@ script = ExtResource("6_hollow")
 position = Vector2(-488, 985)
 shape = SubResource("RectangleShape2D_hollow_area")
 
-[node name="LadderShortcut" type="Area2D" parent="Hollow"]
-position = Vector2(-468, 928)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 128)
-hint_text = "[W/S] shortcut ladder"
-
 [node name="LadderChamber" type="Area2D" parent="Hollow"]
 position = Vector2(-1124, 1056)
 collision_layer = 0

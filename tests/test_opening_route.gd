@@ -125,7 +125,12 @@ func _run() -> void:
 		return
 	print("PASS Home Court floor has real physics collision")
 
-	# --- 7. Climb shafts exist and reach the elevations they claim to. ---
+	# --- 7. The Collapsed Side Chamber climb shaft exists and reaches the
+	# elevation it claims to. (No shortcut ladder — a first pass added one to
+	# literally satisfy "2 ascent routes" per band transition, but it added
+	# no real gameplay value on top of an already-varied 3-flight staircase
+	# and just read as an unexplained prop; removed per
+	# docs/hollow-level-authoring.md Rule 4's clarification.) ---
 	var ladder_chamber: Area2D = scene.get_node_or_null("Hollow/LadderChamber") as Area2D
 	if ladder_chamber == null or not ladder_chamber.has_method("deck_bottom_y"):
 		push_error("FAIL LadderChamber missing")
@@ -138,32 +143,37 @@ func _run() -> void:
 		)
 		quit(1)
 		return
+	print("PASS Collapsed Side Chamber ladder reaches its claimed elevation")
 
-	var ladder_shortcut: Area2D = scene.get_node_or_null("Hollow/LadderShortcut") as Area2D
-	if ladder_shortcut == null or not ladder_shortcut.has_method("deck_bottom_y"):
-		push_error("FAIL LadderShortcut missing")
-		quit(1)
-		return
-	if absf(ladder_shortcut.deck_top_y() - HollowLayout.LADDER_SHORTCUT_TOP_Y) > 1.0:
-		push_error("FAIL LadderShortcut top Y wrong: %s" % ladder_shortcut.deck_top_y())
-		quit(1)
-		return
-	if absf(ladder_shortcut.deck_bottom_y() - HollowLayout.LADDER_SHORTCUT_BOTTOM_Y) > 1.0:
-		push_error("FAIL LadderShortcut bottom Y wrong: %s" % ladder_shortcut.deck_bottom_y())
-		quit(1)
-		return
-	print("PASS Collapsed Side Chamber ladder and the Lower Lift Landing shortcut both reach their claimed elevations")
-
-	# --- 8. Verticality ratio (docs/hollow-level-authoring.md Rule 4): the
-	# Home Court <-> Bottom-West elevation change has 2 distinct connections
-	# (the long staircase via Bottom-West Approach, and the LadderShortcut),
-	# not a single mandatory route. ---
+	# --- 8. Bottom-West Approach reads as a real descent (multiple flights +
+	# landings that change direction), not one flat ramp with a single slope. ---
 	var stair_count := HollowLayout.opening_route_stair_rects().size()
 	if stair_count < 2:
 		push_error("FAIL expected multiple stair flights for the descent, got %d" % stair_count)
 		quit(1)
 		return
-	print("PASS at least 2 distinct routes exist between Home Court's and Bottom-West's elevations")
+	print("PASS the descent uses multiple flights + landings, not one monotonous climb")
+
+	# --- 9. No gaps between consecutive flights/landings — every stair now
+	# paints both its endpoints (hollow_terrain.gd's paint_stairs), so a
+	# flight's edge always lands flush on the floor it hands off to. Walk the
+	# full painted footprint of the descent and confirm every tile column
+	# from Bottom-West Approach's east edge to the Threshold's east edge has
+	# at least one painted cell — a real bug found in-engine (a 1-tile hole
+	# between a flight and the landing/threshold it should meet). ---
+	var scan_x0 := int(round(HollowLayout.WEST_DISPATCH_LEFT / 16.0))
+	var scan_x1 := int(round(HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT / 16.0))
+	for tx in range(scan_x1, scan_x0):
+		var found := false
+		for ty in range(50, 70):
+			if terrain.get_cell_source_id(Vector2i(tx, ty)) != -1:
+				found = true
+				break
+		if not found:
+			push_error("FAIL gap in the descent at tile column %d — no painted cell in any row" % tx)
+			quit(1)
+			return
+	print("PASS the Bottom-West Approach descent has no column gaps")
 
 	print("OPENING_ROUTE_TESTS_PASSED")
 	quit(0)

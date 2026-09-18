@@ -98,18 +98,24 @@ func paint_floor(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURC
 ## which left visible gaps in the staircase's silhouette (confirmed in-engine); a
 ## filled solid-block staircase (Terraria's own convention, cited in terrain.gd) has
 ## no such gap and reads as one continuous ascending mass.
+## Inclusive of BOTH x0 and x1 (unlike paint_floor's exclusive-x1 span convention):
+## a flight's own endpoints are where it hands off to the flat floor at each end, and
+## paint_floor already excludes ITS x1/includes its x0 at a shared boundary — a stair
+## whose x1 also excluded that same column left it painted by neither side, a real
+## 1-tile gap confirmed in-engine between a flight and the landing/threshold it
+## should land flush on.
 func paint_stairs(x0_px: float, y0_px: float, x1_px: float, y1_px: float) -> void:
 	var x0 := int(round(x0_px / TILE_SIZE))
 	var x1 := int(round(x1_px / TILE_SIZE))
 	var y0 := int(round(y0_px / TILE_SIZE))
 	var y1 := int(round(y1_px / TILE_SIZE))
-	var steps := absi(x1 - x0)
-	if steps == 0:
+	var span := absi(x1 - x0)
+	if span == 0:
 		return
 	var dir := 1 if x1 > x0 else -1
 	var y_bottom := maxi(y0, y1)
-	for i in range(steps):
-		var t := float(i) / float(steps)
+	for i in range(span + 1):
+		var t := float(i) / float(span)
 		var x := x0 + i * dir
 		var y := int(round(lerpf(float(y0), float(y1), t)))
 		for fy in range(y, y_bottom + 1):
