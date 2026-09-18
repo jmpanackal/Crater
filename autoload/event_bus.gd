@@ -202,3 +202,8 @@ signal severe_fall(fall_pos: Vector2, safe_pos: Vector2)
 ## Rescue (Build Bible Spec 30): the player was rescued. restricted =
 ## from a restricted zone; contraband_units = stolen output found on them.
 signal rescued(forced: bool, restricted: bool, contraband_units: int)
+
+## Firmament (Build Bible Spec 32): the Firmament stage rose (monotonic):
+## inaccessible -> foreshadowed -> reachable -> excavation_started ->
+## partial_breach -> breached.
+signal firmament_stage_changed(old_stage: StringName, new_stage: StringName)
