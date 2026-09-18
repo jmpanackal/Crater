@@ -110,6 +110,86 @@ const LADDER_FARMS_X := LIFT_X
 ## Presswater → lift service thresholds (Districts.PROTECTED_RESERVE / THIN).
 const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
+## --- Opening-route west wing (Bottom-West) ---
+## Lower band lateral expansion west of Home Court, per hollow-chunk-map.md's
+## opening route: Home Court -> Lower Switchback -> West Dispatch Yard ->
+## Bottom-West Approach -> Bottom-West Threshold -> First Expansion Gallery
+## (+ Collapsed Side Chamber branch). Only LOWER_WORK_Y extends this far west
+## — HOLLOW_LEFT stays the shared boundary for the bands above; Bottom-West is
+## a new lateral dig project, not a retrofit of the existing vertical stack.
+## All breakpoints are TILE-aligned. Replaces the old single flat
+## "LowerWorkWest" deck (HOLLOW_LEFT+64 .. LIFT_OPEN_X) with a landmarked
+## sequence (2026-09-18 opening-route layout pass).
+const HOME_COURT_LEFT := -64.0
+const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, LIFT_OPEN_X, LOWER_WORK_Y, FLOOR_THICKNESS)
+
+const LOWER_SWITCHBACK_LEFT := -384.0
+const LOWER_SWITCHBACK_DIP_Y := LOWER_WORK_Y + 32.0
+const LOWER_SWITCHBACK_RAMP_DOWN := Vector4(-384.0, -288.0, LOWER_WORK_Y, LOWER_SWITCHBACK_DIP_Y)
+const LOWER_SWITCHBACK_FLOOR := Vector4(-288.0, -160.0, LOWER_SWITCHBACK_DIP_Y, FLOOR_THICKNESS)
+const LOWER_SWITCHBACK_RAMP_UP := Vector4(-160.0, HOME_COURT_LEFT, LOWER_SWITCHBACK_DIP_Y, LOWER_WORK_Y)
+
+const WEST_DISPATCH_LEFT := -768.0
+const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, LOWER_SWITCHBACK_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+const WEST_DISPATCH_PLATFORM_Y := LOWER_WORK_Y - 32.0
+const WEST_DISPATCH_PLATFORM_RAMP_UP := Vector4(-672.0, -608.0, LOWER_WORK_Y, WEST_DISPATCH_PLATFORM_Y)
+const WEST_DISPATCH_PLATFORM := Vector4(-608.0, -512.0, WEST_DISPATCH_PLATFORM_Y, FLOOR_THICKNESS)
+const WEST_DISPATCH_PLATFORM_RAMP_DOWN := Vector4(-512.0, -448.0, WEST_DISPATCH_PLATFORM_Y, LOWER_WORK_Y)
+
+const BOTTOM_WEST_APPROACH_LEFT := -1152.0
+const APPROACH_DIP_Y := LOWER_WORK_Y + 32.0
+const APPROACH_FLAT_A := Vector4(BOTTOM_WEST_APPROACH_LEFT, -1088.0, LOWER_WORK_Y, FLOOR_THICKNESS)
+const APPROACH_RAMP_DOWN := Vector4(-1088.0, -1024.0, LOWER_WORK_Y, APPROACH_DIP_Y)
+const APPROACH_FLAT_B := Vector4(-1024.0, -928.0, APPROACH_DIP_Y, FLOOR_THICKNESS)
+const APPROACH_RAMP_UP := Vector4(-928.0, -864.0, APPROACH_DIP_Y, LOWER_WORK_Y)
+const APPROACH_FLAT_C := Vector4(-864.0, WEST_DISPATCH_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+
+const BOTTOM_WEST_THRESHOLD_LEFT := -1408.0
+const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_APPROACH_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+
+const GALLERY_LEFT := -1792.0
+const GALLERY_DIP_Y := LOWER_WORK_Y + 16.0
+
+## Collapsed Side Chamber — optional branch, reached by a short local climb
+## down from the Gallery's west wall (not a walkway; matches the "crawl/step/
+## short climb" read in hollow-chunk-map.md, same Area2D pattern as
+## LadderUpper/LadderMid/LadderCistern). The ladder opening sits right at
+## GALLERY_LEFT, so the Gallery's main floor needs no separate west sliver —
+## it simply starts on the far side of the opening.
+const LADDER_CHAMBER_OPEN_X := GALLERY_LEFT
+const LADDER_CHAMBER_X := LADDER_CHAMBER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
+const CHAMBER_ALCOVE_Y := LOWER_WORK_Y + 64.0
+const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -1696.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
+
+const GALLERY_FLOOR_A := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, -1600.0, LOWER_WORK_Y, FLOOR_THICKNESS)
+const GALLERY_RAMP_DOWN := Vector4(-1600.0, -1536.0, LOWER_WORK_Y, GALLERY_DIP_Y)
+const GALLERY_FLOOR_B := Vector4(-1536.0, -1472.0, GALLERY_DIP_Y, FLOOR_THICKNESS)
+const GALLERY_RAMP_UP := Vector4(-1472.0, BOTTOM_WEST_THRESHOLD_LEFT, GALLERY_DIP_Y, LOWER_WORK_Y)
+
+const OPENING_ROUTE_LEFT := GALLERY_LEFT ## westmost extent of the opening route
+
+
+static func opening_route_deck_rects() -> Array[Vector4]:
+	## Flat decks only (ramps are separate polygons) — used by hollow_floor.gd
+	## to keep the visual tile layer in sync with hollow_decks.gd's collision.
+	return [
+		HOME_COURT_DECK,
+		LOWER_SWITCHBACK_FLOOR,
+		WEST_DISPATCH_YARD,
+		WEST_DISPATCH_PLATFORM,
+		APPROACH_FLAT_A,
+		APPROACH_FLAT_B,
+		APPROACH_FLAT_C,
+		BOTTOM_WEST_THRESHOLD,
+		GALLERY_FLOOR_A,
+		GALLERY_FLOOR_B,
+		CHAMBER_ALCOVE,
+	]
+
+
+static func ladder_chamber_open_end() -> float:
+	return LADDER_CHAMBER_OPEN_X + LADDER_OPENING
+
 
 static func lift_open_end() -> float:
 	return LIFT_OPEN_X + LIFT_OPENING

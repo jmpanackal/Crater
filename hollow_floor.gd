@@ -98,7 +98,7 @@ func _paint_terraces() -> void:
 	_paint_span(freight_open + 1, exit_r, wick_y, SOURCE_LEDGE)
 
 	# Lower working band + Mouth transfer span.
-	_paint_span(left + 1, heart_open, lower_y, SOURCE_LEDGE)
+	_paint_opening_route()
 	_paint_span(pit_l, pit_r, lower_y, SOURCE_BRIDGE)
 	_paint_span(pit_r, cistern_ladder, lower_y, SOURCE_LEDGE)
 	_paint_span(cistern_ladder + 1, freight_open, lower_y, SOURCE_LEDGE)
@@ -114,6 +114,16 @@ func _paint_terraces() -> void:
 func _paint_span(x0: int, x1: int, y: int, source_id: int) -> void:
 	for x in range(x0, x1):
 		set_cell(Vector2i(x, y), source_id, ATLAS_TOP_MID)
+
+
+func _paint_opening_route() -> void:
+	## Mirrors hollow_decks.gd's collision for the opening-route west wing —
+	## one painted span per flat deck rect (ramps get no flat tile row).
+	for rect in HollowLayout.opening_route_deck_rects():
+		var x0 := int(rect.x / TILE_SIZE)
+		var x1 := int(rect.y / TILE_SIZE)
+		var y := int(rect.z / TILE_SIZE)
+		_paint_span(x0, x1, y, SOURCE_LEDGE)
 
 
 func painted_cell_count() -> int:

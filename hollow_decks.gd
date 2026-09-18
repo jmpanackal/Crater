@@ -130,13 +130,7 @@ func _rebuild() -> void:
 	)
 
 	# --- Lower working terraces (spawn band) ---
-	_add_deck(
-		"LowerWorkWest",
-		HollowLayout.HOLLOW_LEFT + 64.0,
-		HollowLayout.LIFT_OPEN_X,
-		HollowLayout.LOWER_WORK_Y,
-		t
-	)
+	_add_opening_route()
 	_add_deck(
 		"LowerSpan",
 		HollowLayout.LOWER_SPAN_LEFT,
@@ -210,6 +204,43 @@ func _rebuild() -> void:
 
 func _add_deck_v4(deck_name: String, r: Vector4) -> void:
 	_add_deck(deck_name, r.x, r.y, r.z, r.w)
+
+
+func _add_ramp_v4(ramp_name: String, r: Vector4, thickness: float) -> void:
+	_add_ramp(ramp_name, r.x, r.y, r.z, r.w, thickness)
+
+
+## Opening-route west wing: Home Court -> Lower Switchback -> West Dispatch
+## Yard -> Bottom-West Approach -> Bottom-West Threshold -> First Expansion
+## Gallery (+ Collapsed Side Chamber branch). See HollowLayout for breakpoints.
+func _add_opening_route() -> void:
+	var rt := 16.0 ## ramp thickness, matches existing GlowbedsHangRamp/allotment ramps
+
+	_add_deck_v4("HomeCourtDeck", HollowLayout.HOME_COURT_DECK)
+
+	_add_ramp_v4("SwitchbackRampDown", HollowLayout.LOWER_SWITCHBACK_RAMP_DOWN, rt)
+	_add_deck_v4("SwitchbackFloor", HollowLayout.LOWER_SWITCHBACK_FLOOR)
+	_add_ramp_v4("SwitchbackRampUp", HollowLayout.LOWER_SWITCHBACK_RAMP_UP, rt)
+
+	_add_deck_v4("WestDispatchYard", HollowLayout.WEST_DISPATCH_YARD)
+	_add_ramp_v4("DispatchPlatformRampUp", HollowLayout.WEST_DISPATCH_PLATFORM_RAMP_UP, rt)
+	_add_deck_v4("DispatchPlatform", HollowLayout.WEST_DISPATCH_PLATFORM)
+	_add_ramp_v4("DispatchPlatformRampDown", HollowLayout.WEST_DISPATCH_PLATFORM_RAMP_DOWN, rt)
+
+	_add_deck_v4("ApproachFlatA", HollowLayout.APPROACH_FLAT_A)
+	_add_ramp_v4("ApproachRampDown", HollowLayout.APPROACH_RAMP_DOWN, rt)
+	_add_deck_v4("ApproachFlatB", HollowLayout.APPROACH_FLAT_B)
+	_add_ramp_v4("ApproachRampUp", HollowLayout.APPROACH_RAMP_UP, rt)
+	_add_deck_v4("ApproachFlatC", HollowLayout.APPROACH_FLAT_C)
+
+	_add_deck_v4("BottomWestThreshold", HollowLayout.BOTTOM_WEST_THRESHOLD)
+
+	_add_deck_v4("GalleryFloorA", HollowLayout.GALLERY_FLOOR_A)
+	_add_ramp_v4("GalleryRampDown", HollowLayout.GALLERY_RAMP_DOWN, rt)
+	_add_deck_v4("GalleryFloorB", HollowLayout.GALLERY_FLOOR_B)
+	_add_ramp_v4("GalleryRampUp", HollowLayout.GALLERY_RAMP_UP, rt)
+
+	_add_deck_v4("ChamberAlcove", HollowLayout.CHAMBER_ALCOVE)
 
 
 func _add_deck(deck_name: String, x0: float, x1: float, top_y: float, thickness: float) -> void:

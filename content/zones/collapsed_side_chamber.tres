@@ -4,14 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"home_court"
-display_name = "Home Court"
-world_origin = Vector2(120, 864)
+zone_id = &"collapsed_side_chamber"
+display_name = "Collapsed Side Chamber"
+world_origin = Vector2(-1744, 928)
 seams = [{
-"edge": "west",
-"neighbor": "lower_switchback",
-"position": -64.0
+"edge": "north",
+"neighbor": "first_expansion_gallery",
+"position": 864.0
 }]
 enclosed = true
-world_rect = Rect2(-64, 768, 288, 192)
+world_rect = Rect2(-1792, 896, 96, 128)
 restricted = false

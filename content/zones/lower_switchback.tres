@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"lower_switchback"
+display_name = "Lower Switchback"
+world_origin = Vector2(-224, 896)
+seams = [{
+"edge": "east",
+"neighbor": "home_court",
+"position": -64.0
+}, {
+"edge": "west",
+"neighbor": "west_dispatch_yard",
+"position": -384.0
+}]
+enclosed = true
+world_rect = Rect2(-384, 768, 320, 192)
+restricted = false

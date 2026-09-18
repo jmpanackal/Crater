@@ -45,6 +45,7 @@ func _ready() -> void:
 	_paint_cliff_bands()
 	_add_carved_rooms()
 	_add_terrace_punctuation()
+	_add_opening_route_dressing()
 	_add_deck_architecture()
 	_add_heart_structure()
 	_add_bridge_crossing()
@@ -307,6 +308,39 @@ func _add_terrace_punctuation() -> void:
 	_step_riser(root, "CisternStepB", 780.0, HollowLayout.CISTERN_Y)
 	_visual_ramp(root, "CisternAlcoveRamp", 868.0, HollowLayout.CISTERN_Y, 24.0)
 	_room_entrance(root, "CisternServiceDoor", 860.0, HollowLayout.CISTERN_Y, CISTERN_LIGHT)
+
+
+func _add_opening_route_dressing() -> void:
+	## Greybox-tier room-read cues for the west wing (Home Court -> ... ->
+	## First Expansion Gallery + Collapsed Side Chamber). Phase 0 already
+	## locked "greybox is fine" — this is entrances/steps/rock backing, not a
+	## prop pass. Real art comes later per priority-roadmap.md's Phase 3.
+	if get_node_or_null("OpeningRouteDressing") != null:
+		return
+	var root := Node2D.new()
+	root.name = "OpeningRouteDressing"
+	root.z_index = 1
+	add_child(root)
+
+	# Room-boundary doorways so the corridor reads as distinct spaces.
+	_room_entrance(root, "SwitchbackDoor", HollowLayout.HOME_COURT_LEFT, HollowLayout.LOWER_WORK_Y, WOOD)
+	_room_entrance(root, "DispatchDoor", HollowLayout.LOWER_SWITCHBACK_LEFT, HollowLayout.LOWER_WORK_Y, WARM)
+	_room_entrance(root, "ApproachDoor", HollowLayout.WEST_DISPATCH_LEFT, HollowLayout.LOWER_WORK_Y, WOOD_DARK)
+	_room_entrance(root, "ThresholdDoor", HollowLayout.BOTTOM_WEST_APPROACH_LEFT, HollowLayout.LOWER_WORK_Y, WARM)
+	_room_entrance(root, "GalleryDoor", HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT, HollowLayout.LOWER_WORK_Y, COPPER)
+
+	# Step cues at the elevation changes.
+	_step_riser(root, "SwitchbackDipStep", -320.0, HollowLayout.LOWER_SWITCHBACK_DIP_Y)
+	_step_riser(root, "ApproachDipStep", -1000.0, HollowLayout.APPROACH_DIP_Y)
+	_step_riser(root, "GalleryDipStep", -1560.0, HollowLayout.GALLERY_DIP_Y)
+
+	# Sealed far-west rock wall so the Gallery reads as bounded, not endless.
+	_band(
+		"GalleryFarWall",
+		Rect2(HollowLayout.GALLERY_LEFT - 12.0, HollowLayout.LOWER_WORK_Y - 96.0, 12.0, 160.0),
+		ROCK
+	)
+	_room_entrance(root, "ChamberDoor", HollowLayout.LADDER_CHAMBER_X, HollowLayout.CHAMBER_ALCOVE_Y, ROCK)
 
 
 func _visual_ramp(parent: Node, ramp_name: String, x: float, deck_y: float, width: float) -> void:

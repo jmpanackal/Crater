@@ -94,7 +94,20 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	var loaded_ids: Array[String] = zones.get_loaded_zone_ids()
-	if loaded_ids != ["cistern", "glowbeds", "home_court", "mid_heart", "wickwork"]:
+	var expected_ids: Array[String] = [
+		"bottom_west_approach",
+		"bottom_west_threshold",
+		"cistern",
+		"collapsed_side_chamber",
+		"first_expansion_gallery",
+		"glowbeds",
+		"home_court",
+		"lower_switchback",
+		"mid_heart",
+		"west_dispatch_yard",
+		"wickwork",
+	]
+	if loaded_ids != expected_ids:
 		_fail("main.tscn zone anchors not registered: %s" % [loaded_ids])
 		return
 	var pell: Node2D = scene.get_node("Hollow/NPCs/Pell") as Node2D

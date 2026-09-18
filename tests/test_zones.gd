@@ -1,16 +1,13 @@
 extends SceneTree
 ## Build Bible Spec 05 (Authored Topology / Zones) acceptance tests.
 ##
-## Real authored zone content (Home Court, Lower Switchback, etc.) is
-## explicitly blocked per the spec's own header on a separate camera/
-## tile-scale production decision — this test exercises the loading and
-## seam-validation CONTRACT with synthetic fixture zones instead, matching
-## what's actually testable today.
-##
-## Not covered here, and why:
-## - "The opening route's ~8 zones load as one coherent scene with no
-##   visible gaps or misaligned collision at any seam" — needs the real,
-##   currently-blocked authored content; nothing to check yet.
+## This test exercises the loading and seam-validation CONTRACT in isolation
+## with synthetic fixture zones, so it stays fast and independent of any real
+## content. See tests/test_opening_route.gd for the same contract exercised
+## against the real authored opening-route zones (Home Court, Lower
+## Switchback, etc.) — that's where "the opening route's ~8 zones load as one
+## coherent scene with no visible gaps or misaligned collision at any seam"
+## is actually checked.
 
 
 const FIXTURE_DIR := "res://content/zones/"

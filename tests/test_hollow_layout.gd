@@ -147,8 +147,8 @@ func _run() -> void:
 		push_error("FAIL Lower Heart freight span missing")
 		quit(1)
 		return
-	if floor_body.get_node_or_null("LowerWorkWest") == null:
-		push_error("FAIL lower working terrace missing")
+	if floor_body.get_node_or_null("HomeCourtDeck") == null:
+		push_error("FAIL lower working terrace (Home Court) missing")
 		quit(1)
 		return
 	if floor_body.get_node_or_null("GlowSubWest") == null:

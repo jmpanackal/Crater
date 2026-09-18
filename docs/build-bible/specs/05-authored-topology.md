@@ -1,6 +1,6 @@
 # Build Bible Spec 05 — Authored Topology / Zones
 
-**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #5 in [`../00-dependency-map.md`](../00-dependency-map.md). Blocked on a camera/tile-scale lock (production decision, not a design gap) before real chunk art can target real pixel dimensions.
+**Status:** ✅ CONFIRMED (USER, 2026-09-15) — all design choices reviewed in chat and accepted. Build-order #5 in [`../00-dependency-map.md`](../00-dependency-map.md). The camera/tile-scale lock this spec was blocked on landed 2026-09-18 (`TILE_SIZE := 16`); the opening route's real zones are now authored (`content/zones/*.tres`, `main.tscn`'s `Hollow/Zones`) and covered by `tests/test_opening_route.gd`.
 
 **Depends on:** Spec 01 (Content Definitions / Authoritative State conventions).
 

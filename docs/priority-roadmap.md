@@ -79,13 +79,14 @@ change.*
 Already scoped in [`docs/superpowers/plans/2026-09-12-full-hollow-chunk-atlas.md`](superpowers/plans/2026-09-12-full-hollow-chunk-atlas.md)
 Task 4 — don't re-plan it, execute it:
 
-- [ ] Approve a seam-locked `H-3-11` ↔ `H-4-11` master (draft exists, unapproved).
-- [ ] Generate `H-2-11` West Dispatch with its seam contracts.
-- [ ] Generate Bottom-West Approach + Threshold as one outward strip.
-- [ ] Generate First Expansion Gallery, Collapsed Side Chamber, Lower Lift Landing.
-- [ ] Stop there — do **not** scale to the full 288-cell atlas yet. Prove the opening route (~8 chunks) end-to-end in Godot first.
+- [x] Approve a seam-locked `H-3-11` ↔ `H-4-11` master — done (see `hollow-chunk-atlas.md`'s opening-route status table; this was stale here).
+- [x] Generate `H-2-11` West Dispatch with its seam contracts — approved.
+- [x] Generate Bottom-West Approach + Threshold as one outward strip — approved.
+- [x] Generate First Expansion Gallery, Collapsed Side Chamber — approved (Lower Lift Landing superseded by the locked stairs/switchback topology; see `hollow-chunk-atlas.md`'s "Locked transport topology").
+- [x] **Build the opening route as real, walkable Godot geometry** (2026-09-18): `content/zones/*.tres` + `main.tscn`'s `Hollow/Zones` now author all 7 opening-route zones (Home Court → Lower Switchback → West Dispatch Yard → Bottom-West Approach → Bottom-West Threshold → First Expansion Gallery → Collapsed Side Chamber) with real seams, and `hollow_decks.gd`/`hollow_floor.gd` build matching walkable collision/visuals. Greybox, per Phase 0's #8 decision — not the reference art above. Covered by `tests/test_opening_route.gd`.
+- [ ] Stop there — do **not** scale to the full 288-cell atlas yet, and don't wire actual digging into First Expansion Gallery yet (`terrain.gd` only supports one hardcoded envelope today — a real follow-up, not done here).
 
-**Exit condition:** the opening route (Home Court → Lower Lift Landing) is walkable in-engine with seam-correct art, not just approved reference images.
+**Exit condition:** the opening route (Home Court → First Expansion Gallery) is walkable in-engine — **done**. Connecting onward into Mid Heart/West Exchange remains `hollow-chunk-map.md`'s own stated "Next slice."
 
 ---
 
