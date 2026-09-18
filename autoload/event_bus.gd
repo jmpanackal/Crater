@@ -42,3 +42,11 @@ signal terrain_dug(cell: Vector2i, direction: Vector2i, is_firmament: bool, is_m
 ## SaveLoad directly.
 signal save_completed()
 signal load_completed()
+
+## Storage (Build Bible Spec 11) changed what the player holds. kind is
+## Storage.KIND_MATERIAL or Storage.KIND_COMPONENT; new_count is the
+## resulting total for that id (a Material's stored count, or how many
+## instances of that Component are now owned). Cross-cutting because HUDs,
+## Jobs settling a delivery, and the Capability Web all care without
+## needing a reference to Storage.
+signal storage_changed(kind: StringName, id: StringName, new_count: int)

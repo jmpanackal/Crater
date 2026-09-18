@@ -213,16 +213,24 @@ func _register_builtin_commands() -> void:
 		return "Trust set to %d" % community.get_trust()
 	)
 
-	register_command("spawn_material", "spawn_material <id> <amount> — grant Materials directly, bypassing digging.", func(args: Array[String]) -> String:
+	# Targets Storage (Build Bible Spec 11), the canon Materials owner — not
+	# the retired Salvage wallet (resources.gd), which still exists only for
+	# the retired mechanics awaiting their own specs' migration. Storage
+	# rejects retired ids (sporemeal, lampwick, ...), so this command also
+	# teaches the locked vocabulary instead of silently minting old names.
+	register_command("spawn_material", "spawn_material <id> <amount> — add Materials to personal storage directly, bypassing hauling.", func(args: Array[String]) -> String:
 		if args.size() < 2:
 			return "Usage: spawn_material <id> <amount>"
-		var wallet := get_tree().root.get_node_or_null("Resources")
-		if wallet == null:
-			return "Resources autoload not found."
+		var storage := get_tree().root.get_node_or_null("Storage")
+		if storage == null:
+			return "Storage autoload not found."
 		var material_id := StringName(args[0])
 		var amount := int(args[1])
-		wallet.add(material_id, amount)
-		return "%s: %d (was %d)" % [material_id, wallet.get_amount(material_id), wallet.get_amount(material_id) - amount]
+		var before: int = int(storage.get_material_count(material_id))
+		if not bool(storage.deposit_material(material_id, amount)):
+			var known: Array[StringName] = storage.get_material_ids()
+			return "Refused: '%s' is not a known Material (or amount <= 0). Known: %s" % [args[0], ", ".join(PackedStringArray(known))]
+		return "%s: %d (was %d)" % [material_id, storage.get_material_count(material_id), before]
 	)
 
 

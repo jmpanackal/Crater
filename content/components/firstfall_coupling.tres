@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/component_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+component_id = &"firstfall_coupling"
+display_name = "Firstfall coupling"
+description = "An intact ship-derived joining part — a manufactured Component, not bulk Material. Placeholder Act 1 content: 'Firstfall' is the in-world word for old ship relics, so the id is plausible, but which specific Components exist is not canon-locked (Spec 11 ships one so the contract is real)."

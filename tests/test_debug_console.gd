@@ -114,9 +114,24 @@ func _run() -> void:
 		push_error("FAIL set_trust did not set Community.trust")
 		quit(1)
 		return
+	# spawn_material targets Storage (Build Bible Spec 11), the canon
+	# Materials owner, not the retired Resources wallet.
+	var storage: Node = root.get_node_or_null("Storage")
+	if storage == null:
+		push_error("FAIL Storage autoload missing")
+		quit(1)
+		return
+	storage.reset_all()
 	var spawn_result: String = console.execute("spawn_material sutral 3")
-	if wallet.get_amount(&"sutral") != 3 or not spawn_result.contains("3"):
-		push_error("FAIL spawn_material did not grant Materials")
+	if int(storage.get_material_count(&"sutral")) != 3 or not spawn_result.contains("3"):
+		push_error("FAIL spawn_material did not add Materials to Storage: %s" % spawn_result)
+		quit(1)
+		return
+	# A retired name is refused with a message, not minted (Spec 11 enforces
+	# the locked roster as data).
+	var refused: String = console.execute("spawn_material sporemeal 3")
+	if not refused.begins_with("Refused") or int(storage.get_material_count(&"sporemeal")) != 0:
+		push_error("FAIL spawn_material accepted a retired Material name: %s" % refused)
 		quit(1)
 		return
 	print("PASS set_trust and spawn_material work against the current systems")
@@ -124,5 +139,6 @@ func _run() -> void:
 	console.unregister_command("ping_test")
 	fact_log.clear_all()
 	wallet.reset_all()
+	storage.reset_all()
 	print("DEBUG_CONSOLE_TESTS_PASSED")
 	quit(0)
