@@ -45,5 +45,18 @@ func _run() -> void:
 		return
 	print("PASS unpainted region has no collision")
 
+	# A staircase must read as one solid ascending mass, not single diagonal
+	# tiles that only touch at a corner — confirmed in-engine as a visible
+	# gap in the staircase's silhouette. paint_stairs(64,96, 128,112) spans
+	# tile columns 4-7 at row 6/7; the bottom row (y=7) must be fully
+	# contiguous across every column, proving each step fills down to the
+	# flight's base rather than leaving corner gaps between steps.
+	for x in range(4, 8):
+		if terrain.get_cell_source_id(Vector2i(x, 7)) == -1:
+			push_error("FAIL staircase has a gap at column %d row 7 — steps aren't solid-filled" % x)
+			quit(1)
+			return
+	print("PASS staircase is a solid ascending mass, no corner gaps between steps")
+
 	print("HOLLOW_TERRAIN_TESTS_PASSED")
 	quit(0)

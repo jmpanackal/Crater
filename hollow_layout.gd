@@ -123,12 +123,14 @@ const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 const HOME_COURT_LEFT := -64.0
 const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
 
-## Lower Switchback: a local dip ("slopes down and back up around a carved
-## support mass" — hollow-chunk-map.md), not the big descent into Bottom-West.
-const SWITCHBACK_DIP_Y := LOWER_WORK_Y + 32.0
-const SWITCHBACK_STAIR_DOWN := Vector4(-160.0, LOWER_WORK_Y, -128.0, SWITCHBACK_DIP_Y)
-const SWITCHBACK_FLOOR := Vector4(-128.0, -96.0, SWITCHBACK_DIP_Y, FLOOR_THICKNESS)
-const SWITCHBACK_STAIR_UP := Vector4(-96.0, SWITCHBACK_DIP_Y, HOME_COURT_LEFT, LOWER_WORK_Y)
+## Lower Switchback: hollow-chunk-map.md describes this as "sloping down and
+## back up around a carved support mass," but that's a landmark prop that
+## doesn't exist yet in this greybox pass — an elevation dip with nothing
+## visually justifying it just reads as broken terrain (confirmed in-engine),
+## per docs/hollow-level-authoring.md's "don't break up flat terrain without a
+## reason." Flat for now; the dip is the art/dressing pass's job once the
+## support-mass prop exists to hang it on, not a shape invented ahead of it.
+const SWITCHBACK_FLOOR := Vector4(-160.0, HOME_COURT_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
 
 const WEST_DISPATCH_LEFT := -368.0
 const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, -160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
@@ -196,8 +198,6 @@ static func opening_route_deck_rects() -> Array[Vector4]:
 ## hollow_terrain.gd's paint_stairs(x0, y0, x1, y1).
 static func opening_route_stair_rects() -> Array[Vector4]:
 	return [
-		SWITCHBACK_STAIR_DOWN,
-		SWITCHBACK_STAIR_UP,
 		APPROACH_FLIGHT1,
 		APPROACH_FLIGHT2,
 		APPROACH_FLIGHT3,

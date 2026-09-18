@@ -29,6 +29,20 @@ const AIR_FRICTION := 400.0
 ## always had; must move if SEEP_Y does.
 const VOID_FALL_Y := 1328.0
 
+## QOL step-up: walking into a ledge exactly one dig/floor tile higher than
+## the current stand auto-climbs it instead of requiring a jump (a one-tile
+## rise is a stair riser, not an obstacle). Matches TerrainLayer/hollow_terrain
+## TILE_SIZE (16px) plus a small tolerance for tile-edge rounding.
+const STEP_HEIGHT := 16.0
+const STEP_PROBE_X := 4.0
+## test_move()'s default safe_margin (0.08) treats an exact flush touch as a
+## collision — a raised probe sitting precisely on top of the target tile
+## registered as "still blocked" even with zero real overlap (confirmed while
+## building this). A couple of extra px of real clearance during the test
+## avoids that false positive; floor_snap_length (8, see _ready()) easily
+## re-seats the body onto the tile afterward.
+const STEP_CLEARANCE := 2.0
+
 
 @export var terrain: TerrainLayer
 
@@ -210,6 +224,8 @@ func _physics_process(delta: float) -> void:
 	elif move_x != 0.0:
 		_facing_8 = Vector2i.RIGHT if move_x > 0.0 else Vector2i.LEFT
 
+	if is_on_floor() and not _climbing:
+		_try_step_up(move_x)
 	_apply_horizontal_move(move_x, delta)
 	if not is_on_floor() and velocity.y > 0.0:
 		_land_impact = maxf(_land_impact, velocity.y / 450.0)
@@ -308,6 +324,37 @@ func _apply_horizontal_move(move_x: float, delta: float) -> void:
 	if move_x == 0.0:
 		rate = FRICTION if on_ground else AIR_FRICTION
 	velocity.x = move_toward(velocity.x, target, rate * delta)
+
+
+## QOL: if walking horizontally would bump a ledge exactly one tile (up to
+## STEP_HEIGHT) above the current stand, hop the body up onto it instead of
+## stopping dead at the riser. Only fires when there's solid floor waiting at
+## the higher position (never steps up into open air) and the space directly
+## above is clear (never steps into a ceiling).
+func _try_step_up(move_x: float) -> void:
+	if move_x == 0.0:
+		return
+	var direction := Vector2(signf(move_x), 0.0)
+	var probe := direction * STEP_PROBE_X
+	if not test_move(global_transform, probe):
+		return # not actually blocked — nothing to step up onto
+	# Raise with a little extra clearance so the test doesn't flush-touch the
+	# target tile's top (see STEP_CLEARANCE) — a real gap, not exactly zero.
+	var raised := global_transform.translated(Vector2(0.0, -(STEP_HEIGHT + STEP_CLEARANCE)))
+	if test_move(raised, Vector2.ZERO):
+		return # ceiling right above — can't raise the body at all
+	if test_move(raised, probe):
+		return # still blocked at the raised height — not a 1-tile step
+	var settle := raised.translated(probe)
+	if not test_move(settle, Vector2(0.0, STEP_HEIGHT + STEP_CLEARANCE + 2.0)):
+		return # no floor waiting up there — would step into open air
+	# Move up AND forward together — raising Y alone leaves the body floating
+	# with no horizontal progress yet, racing gravity/move_and_slide over the
+	# following frames to clear the corner (confirmed unreliable in testing).
+	# Landing directly past the corner lets floor_snap settle it onto the
+	# tile next tick (floor_snap_length=8 easily covers STEP_CLEARANCE=2).
+	global_position = settle.origin
+	velocity.y = minf(velocity.y, 0.0)
 
 
 func _remember_safe_ground() -> void:

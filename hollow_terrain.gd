@@ -93,6 +93,11 @@ func paint_floor(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURC
 ## Paint a one-tile-per-column staircase between two deck tops (Rule 2 — no floating
 ## ramp polygons). y0_px/y1_px are the walkable tops at x0_px/x1_px respectively; both
 ## must be TILE_SIZE-aligned and the run is stepped one column at a time between them.
+## Each column is filled from its own step down to the lower end, not just its single
+## top tile — two diagonally-adjacent single tiles only share a corner, not an edge,
+## which left visible gaps in the staircase's silhouette (confirmed in-engine); a
+## filled solid-block staircase (Terraria's own convention, cited in terrain.gd) has
+## no such gap and reads as one continuous ascending mass.
 func paint_stairs(x0_px: float, y0_px: float, x1_px: float, y1_px: float) -> void:
 	var x0 := int(round(x0_px / TILE_SIZE))
 	var x1 := int(round(x1_px / TILE_SIZE))
@@ -102,11 +107,13 @@ func paint_stairs(x0_px: float, y0_px: float, x1_px: float, y1_px: float) -> voi
 	if steps == 0:
 		return
 	var dir := 1 if x1 > x0 else -1
+	var y_bottom := maxi(y0, y1)
 	for i in range(steps):
 		var t := float(i) / float(steps)
 		var x := x0 + i * dir
 		var y := int(round(lerpf(float(y0), float(y1), t)))
-		set_cell(Vector2i(x, y), SOURCE_STAIR, ATLAS_TOP_MID)
+		for fy in range(y, y_bottom + 1):
+			set_cell(Vector2i(x, fy), SOURCE_STAIR, ATLAS_TOP_MID)
 
 
 func painted_cell_count() -> int:

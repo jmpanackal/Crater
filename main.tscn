@@ -88,7 +88,7 @@ script = ExtResource("21_zone_anchor")
 zone_id = "lower_switchback"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerSwitchback"]
-position = Vector2(-112, 896)
+position = Vector2(-112, 864)
 
 [node name="WestDispatchYard" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
