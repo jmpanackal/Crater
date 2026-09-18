@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/technology_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+tech_id = &"harness_reinforcement"
+display_name = "Harness Reinforcement"
+description = "A Core Improvement (Spec 14) — rebuilding the harness frame for more Capacity. Known from the start (Wickwork does this work), Understood once a hand has earned standing; Available with two Ravelstone for the braces and 8 Tallies of shop time. Placeholder G6 'mixed source' content."
+kind = &"core_improvement"
+families = Array[StringName]([&"rig_core", &"hauling"])
+gear_id = &"harness_reinforcement"
+starts_known = true
+starts_understood = false
+understood_from_records = Array[StringName]([&"nursery_rhyme"])
+requires_materials = {
+"ravelstone": 2
+}
+requires_tallies = 8
+requires_trust = &"accepted"

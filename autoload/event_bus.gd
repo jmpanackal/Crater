@@ -148,3 +148,8 @@ signal job_changed(job_id: StringName, stage: StringName)
 ## broken_commitment/unengaged), delivered/required, tallies paid,
 ## trust_delta submitted (0 if none), tier, work_type.
 signal job_settled(job_id: StringName, record: Dictionary)
+
+## CapabilityWeb (Build Bible Spec 25): a technology rose to a new level
+## (known / understood) because a submitted discovery justified it.
+## Available is derived and never announced — ask get_state().
+signal technology_discovered(tech_id: StringName, level: StringName)

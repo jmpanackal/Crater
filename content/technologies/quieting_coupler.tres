@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/technology_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+tech_id = &"quieting_coupler"
+display_name = "Quieting Coupler"
+description = "A Forbidden design — a graft (canon §67). Nobody shows you this exists: recovering a Firstfall coupling makes it Known (a strange Component), the folded Firmament note makes it Understood (a Record teaching the procedure). Available needs the Component, matching Verdigris substrate, and a Mid Reach workspace; the diverted-output cost and fabrication are Spec 28's."
+kind = &"forbidden_design"
+families = Array[StringName]([&"secrecy", &"excavation"])
+gear_id = &"quieting_coupler"
+starts_known = false
+starts_understood = false
+known_from_components = Array[StringName]([&"firstfall_coupling"])
+understood_from_records = Array[StringName]([&"firmament_note"])
+requires_materials = {
+"verdigris": 2
+}
+requires_components = Array[StringName]([&"firstfall_coupling"])
+requires_residence = &"mid_reach"

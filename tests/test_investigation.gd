@@ -265,8 +265,12 @@ func _run() -> void:
 		return
 	for _i in range(4):
 		await physics_frame
-	if fact_log.count() != 0 or float(investigation.get_suspicion(&"pell")) != 0.0:
-		_fail("an ordinary NPC produced a fact about a graft: %s" % [fact_log.get_all()])
+	# Grafting legitimately logs a Spec 25 `discovery` fact (understanding
+	# the design); what must NOT exist is any WITNESS fact — one with an
+	# npc_id/sense — or any suspicion on the NPC beside the graft.
+	var witness_facts := (fact_log.get_all() as Array).filter(func(f: Dictionary) -> bool: return (f["context"] as Dictionary).has("npc_id"))
+	if not witness_facts.is_empty() or float(investigation.get_suspicion(&"pell")) != 0.0:
+		_fail("an ordinary NPC produced a witness fact about a graft: %s" % [witness_facts])
 		return
 	rig.reset_all()
 	print("PASS an ordinary loaded NPC beside an exposed graft never produces a witness fact")
