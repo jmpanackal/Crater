@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/job_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+job_id = &"emergency_wickwork"
+title = "Wickwork shortfall — braces needed"
+description = "Wickwork came up short this cycle and the mid-band cable braces are waiting. Anyone who hauls Sutral to the rope walk helps; nobody promised anything. Emergency / World Need (G5-B): completing it lends Wickwork temporary Capacity for a few cycles."
+work_type = &"emergency"
+deadline_shape = &"this_cycle"
+deadline_cycles = 1
+tier = 0
+min_trust = &""
+district_id = &"wickwork"
+material_id = &"sutral"
+required_amount = 2
+tallies_reward = 4
+spawn_on_unmet_demand = true

@@ -48,6 +48,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Trust",
 	"District",
 	"Wallet",
+	"Jobs",
 	"Resources",
 	"Upgrades",
 	"Community",

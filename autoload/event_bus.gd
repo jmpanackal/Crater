@@ -138,3 +138,13 @@ signal tallies_changed(balance: int, delta: int, reason: String)
 ## Orders (Build Bible Spec 23): an Approved Gear order succeeded — the
 ## Gear is now OWNED (Rig's list), not equipped.
 signal gear_ordered(gear_id: StringName, district_id: StringName, tallies_spent: int, output_drawn: float)
+
+## Jobs (Build Bible Spec 24): a job instance changed stage (offered /
+## accepted / in_progress / settled).
+signal job_changed(job_id: StringName, stage: StringName)
+
+## Jobs (Build Bible Spec 24): a job settled — the single resolution
+## point. record: outcome (poor/adequate/strong/exceptional/
+## broken_commitment/unengaged), delivered/required, tallies paid,
+## trust_delta submitted (0 if none), tier, work_type.
+signal job_settled(job_id: StringName, record: Dictionary)

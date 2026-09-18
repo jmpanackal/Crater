@@ -174,6 +174,20 @@ func deposit_at_storage() -> bool:
 	return true
 
 
+## Delivering (Build Bible Spec 24): the load leaves the player's hands
+## for a worksite/job — the block is released and the bundle emptied —
+## and the caller (Jobs) decides what the units become. Returns what was
+## handed over: {"material_id", "amount"} (amount 0 if nothing was towed).
+func hand_over_load() -> Dictionary:
+	var handed := get_load()
+	if not is_loaded():
+		return handed
+	var id := _material_id
+	_clear_load()
+	_emit_haul_changed_for(id)
+	return handed
+
+
 ## Movement speed multiplier for the player controller: 1.0 empty, down to
 ## the tuned minimum at a full bundle.
 func get_movement_speed_multiplier() -> float:
