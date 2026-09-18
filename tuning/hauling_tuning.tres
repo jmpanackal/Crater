@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/hauling_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bundle_capacity = 4
+stamina_block_per_unit = 8.0
+loaded_speed_min_multiplier = 0.55
+strenuous_action_cost = 10.0

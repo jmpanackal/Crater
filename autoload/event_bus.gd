@@ -63,3 +63,12 @@ signal material_extracted(material_id: StringName, amount: int, cell: Vector2i)
 ## Jobs settling a delivery, and the Capability Web all care without
 ## needing a reference to Storage.
 signal storage_changed(kind: StringName, id: StringName, new_count: int)
+
+## Hauling (Build Bible Spec 13): the towed bundle changed. amount is the
+## bundle's new total for material_id; 0 means it was just released
+## (deposited or cached) and material_id says what it held.
+signal haul_changed(material_id: StringName, amount: int)
+
+## Hauling (Build Bible Spec 13): a cache was created (exists = true) or
+## picked back up (exists = false) at position.
+signal cache_changed(position: Vector2, material_id: StringName, amount: int, exists: bool)

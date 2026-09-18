@@ -45,6 +45,13 @@ func get_interact_prompt() -> String:
 
 
 func on_interact(_player: Node) -> void:
+	# Arriving at home storage with a bundle in tow deposits it (Build
+	# Bible Spec 13: depositing releases the hauling block and turns the
+	# physical load into Storage's abstract count) — this interactable is
+	# what gates "at storage"; Hauling itself doesn't check position.
+	var hauling := get_tree().root.get_node_or_null("Hauling") if is_inside_tree() else null
+	if hauling != null and hauling.has_method("is_loaded") and bool(hauling.is_loaded()):
+		hauling.deposit_at_storage()
 	opened.emit(residence_id, get_storage())
 
 

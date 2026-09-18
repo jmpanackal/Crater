@@ -63,6 +63,7 @@ var _deposit_overlay: TileMapLayer
 
 
 func _ready() -> void:
+	add_to_group("terrain")
 	texture_filter = TEXTURE_FILTER_NEAREST
 	tile_set = _build_tileset()
 	_build_deposit_overlay()
@@ -317,11 +318,17 @@ func complete_extraction(cell: Vector2i) -> int:
 	var record: Dictionary = _deposits[cell]
 	if not bool(record["exposed"]) or bool(record["depleted"]):
 		return 0
+	var material_id: StringName = record["material_id"]
+	var amount: int = int(record["amount"])
+	# You can't take what you can't carry (Spec 13): if the bundle can't
+	# hold this load — wrong type towed, or no room — the deposit stays
+	# intact for a later trip rather than depleting into nothing.
+	var hauling := get_tree().root.get_node_or_null("Hauling") if is_inside_tree() else null
+	if hauling != null and hauling.has_method("can_attach") and not bool(hauling.can_attach(material_id, amount)):
+		return 0
 	record["depleted"] = true
 	_set_deposit_overlay(cell, DEPOSIT_DEPLETED_ATLAS)
 	_free_deposit_node(cell)
-	var material_id: StringName = record["material_id"]
-	var amount: int = int(record["amount"])
 	_grant_extracted(material_id, amount)
 	var world := to_global(map_to_local(cell))
 	var display := str(material_id)

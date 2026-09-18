@@ -29,12 +29,14 @@ func _run() -> void:
 	var storage: Node = root.get_node_or_null("Storage")
 	var event_bus: Node = root.get_node_or_null("EventBus")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	if storage == null or event_bus == null or save_load == null:
-		push_error("FAIL missing autoloads (Storage / EventBus / SaveLoad)")
+	var hauling: Node = root.get_node_or_null("Hauling")
+	if storage == null or event_bus == null or save_load == null or hauling == null:
+		push_error("FAIL missing autoloads (Storage / EventBus / SaveLoad / Hauling)")
 		quit(1)
 		return
 	Input.action_release("interact")
 	storage.reset_all()
+	hauling.reset_all()
 
 	var terrain := TerrainLayer.new()
 	root.add_child(terrain)
@@ -125,7 +127,9 @@ func _run() -> void:
 	print("PASS digging exposes a deposit without granting it; it's a Spec 10 interactable with a prompt")
 
 	# --- 3. Completing the hold-to-extract grants the Material and flips
-	# the visual to depleted; the deposit is finite. ---
+	# the visual to depleted; the deposit is finite. With Hauling (Spec 13)
+	# present the Material becomes a physical towed bundle first — it only
+	# reaches Storage's abstract count when deposited at home. ---
 	Input.action_press("interact")
 	if not interaction.try_interact(null) or not bool(node.is_extracting()):
 		push_error("FAIL Interact did not begin the extraction hold")
@@ -134,12 +138,21 @@ func _run() -> void:
 	var hold_frames := int(ceil(float(node.hold_seconds()) * 60.0)) + 60
 	for _i in range(hold_frames):
 		await physics_frame
-		if int(storage.get_material_count(&"sutral")) == 3:
+		if bool(hauling.is_loaded()):
 			break
 	Input.action_release("interact")
 	await physics_frame
-	if int(storage.get_material_count(&"sutral")) != 3:
-		push_error("FAIL completed extraction did not grant 3 Sutral (got %d)" % storage.get_material_count(&"sutral"))
+	var load: Dictionary = hauling.get_load()
+	if not bool(hauling.is_loaded()) or load["material_id"] != &"sutral" or int(load["amount"]) != 3:
+		push_error("FAIL completed extraction did not put 3 Sutral in the towed bundle (got %s)" % [load])
+		quit(1)
+		return
+	if int(storage.get_material_count(&"sutral")) != 0:
+		push_error("FAIL extracted Material skipped the physical haul and went straight to Storage")
+		quit(1)
+		return
+	if not bool(hauling.deposit_at_storage()) or int(storage.get_material_count(&"sutral")) != 3:
+		push_error("FAIL depositing the bundle did not store 3 Sutral (got %d)" % storage.get_material_count(&"sutral"))
 		quit(1)
 		return
 	if terrain.get_deposit_state(sutral_world) != &"depleted":
@@ -200,11 +213,11 @@ func _run() -> void:
 	rav_node.begin_extraction()
 	for _i in range(hold_frames):
 		await physics_frame
-		if int(storage.get_material_count(&"ravelstone")) == 4:
+		if bool(hauling.is_loaded()):
 			break
 	Input.action_release("interact")
 	await physics_frame
-	if int(storage.get_material_count(&"ravelstone")) != 4 or terrain.get_deposit_state(rav_world) != &"depleted":
+	if not bool(hauling.deposit_at_storage()) or int(storage.get_material_count(&"ravelstone")) != 4 or terrain.get_deposit_state(rav_world) != &"depleted":
 		push_error("FAIL deposit could not be extracted after a cancelled attempt")
 		quit(1)
 		return
@@ -268,6 +281,7 @@ func _run() -> void:
 	Input.action_release("interact")
 	save_load.clear_save()
 	storage.reset_all()
+	hauling.reset_all()
 	interaction.queue_free()
 	root.remove_child(terrain)
 	terrain.queue_free()

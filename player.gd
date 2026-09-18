@@ -163,8 +163,12 @@ func _physics_process(delta: float) -> void:
 			_climb_axis_release_required = false
 		else:
 			climb_y = 0.0
-	if in_zone and climb_y != 0.0:
-		_climbing = true
+	if in_zone and climb_y != 0.0 and not _climbing:
+		# Grabbing a ladder is strenuous while hauling (Spec 13 / G1).
+		if _pay_strenuous_if_loaded():
+			_climbing = true
+		else:
+			climb_y = 0.0
 
 	_update_coyote_and_buffer(delta)
 	var jumped := _try_consume_jump(in_zone)
@@ -242,6 +246,9 @@ func _try_consume_jump(in_zone: bool) -> bool:
 	if _jump_buffer_timer <= 0.0:
 		return false
 	if not can_floor_jump and not can_ladder_jump:
+		return false
+	# A jump is strenuous while hauling (Spec 13 / G1); Exhausted refuses it.
+	if not _pay_strenuous_if_loaded():
 		return false
 
 	_jump_buffer_timer = 0.0
@@ -535,6 +542,30 @@ func _hauling_speed_multiplier() -> float:
 	if hauling == null or not hauling.has_method("get_movement_speed_multiplier"):
 		return 1.0
 	return float(hauling.get_movement_speed_multiplier())
+
+
+## Build Bible Spec 13 (G1, option A): while a bundle is attached, jumps
+## and ladder grabs are strenuous — they spend stamina. Unloaded, they
+## stay free, exactly as before. At zero usable stamina the action still
+## happens as an Overexertion (G21, option A) — Stamina/Fatigue own that
+## conversion; only being Exhausted refuses the action outright. Returns
+## whether the action may proceed. Ramps aren't a distinct traversal in
+## the prototype yet and sprinting doesn't exist, so neither is gated here.
+func _pay_strenuous_if_loaded() -> bool:
+	var hauling := get_tree().root.get_node_or_null("Hauling")
+	if hauling == null or not hauling.has_method("is_loaded") or not bool(hauling.is_loaded()):
+		return true
+	var stamina := get_tree().root.get_node_or_null("Stamina")
+	if stamina == null or not stamina.has_method("can_afford"):
+		return true
+	if bool(stamina.is_exhausted()):
+		return false
+	var cost := float(hauling.get_strenuous_action_cost())
+	if bool(stamina.can_afford(cost)):
+		stamina.spend(cost)
+	else:
+		stamina.overexert(cost)
+	return true
 
 
 ## Placeholder-art-first (2026-09-17): the real PixelLab idle sheets this
