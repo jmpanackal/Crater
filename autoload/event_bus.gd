@@ -43,6 +43,19 @@ signal terrain_dug(cell: Vector2i, direction: Vector2i, is_firmament: bool, is_m
 signal save_completed()
 signal load_completed()
 
+## Terrain (Build Bible Spec 12) exposed a deposit: digging opened a pocket
+## and the Material is now visible and interactable, but NOT yet the
+## player's (exposing and extracting are two distinct steps). Not emitted
+## when a save restores an already-exposed deposit — that's restoration,
+## not a new event.
+signal deposit_exposed(cell: Vector2i, material_id: StringName)
+
+## Terrain (Build Bible Spec 12) completed an extraction: the deposit is
+## now depleted (finite, never regenerates) and `amount` of the Material
+## has been handed to the player — through Hauling (Spec 13) once it
+## exists, straight into Storage (Spec 11) until then.
+signal material_extracted(material_id: StringName, amount: int, cell: Vector2i)
+
 ## Storage (Build Bible Spec 11) changed what the player holds. kind is
 ## Storage.KIND_MATERIAL or Storage.KIND_COMPONENT; new_count is the
 ## resulting total for that id (a Material's stored count, or how many

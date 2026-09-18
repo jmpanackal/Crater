@@ -64,8 +64,11 @@ func _run() -> void:
 		push_error("FAIL can_dig reported false inside the authored envelope")
 		quit(1)
 		return
-	if terrain.get_deposit_state(inside_cell_world) != &"intact":
-		push_error("FAIL get_deposit_state expected 'intact' before digging")
+	# Ordinary rock is "none" before AND after digging — most rock yields
+	# nothing (canon §5). The intact -> depleted transition belongs to real
+	# deposits and is Spec 12's test (tests/test_deposits.gd), not this one.
+	if terrain.get_deposit_state(inside_cell_world) != &"none":
+		push_error("FAIL get_deposit_state expected 'none' for ordinary rock before digging")
 		quit(1)
 		return
 	var inside_result: Dictionary = terrain.dig(inside_world, Vector2i.DOWN)
@@ -73,11 +76,11 @@ func _run() -> void:
 		push_error("FAIL dig() failed inside the authored envelope: %s" % inside_result)
 		quit(1)
 		return
-	if terrain.get_deposit_state(inside_cell_world) != &"depleted":
-		push_error("FAIL get_deposit_state did not transition to 'depleted' after digging")
+	if terrain.get_deposit_state(inside_cell_world) != &"none":
+		push_error("FAIL digging ordinary rock must not invent a deposit")
 		quit(1)
 		return
-	print("PASS digging within the authored envelope succeeds; deposit state goes intact -> depleted")
+	print("PASS digging within the authored envelope succeeds; ordinary rock stays 'none' (no deposit invented)")
 
 	# --- 3. A dig emits exactly one EventBus event, observable with no
 	# direct reference to Terrain. ---
