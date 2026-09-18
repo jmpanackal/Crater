@@ -71,6 +71,7 @@ func _run() -> void:
 	if community:
 		community.set_paused(true)
 	save_load.clear_save()
+	root.get_node("Homes").reset_all()
 	clock.reset_all()
 	clock.pause("test")
 	fact_log.clear_all()
@@ -248,13 +249,8 @@ func _run() -> void:
 	workspace.station_kind = &"workspace"
 	workspace.position = Vector2(30, 0)  # right beside Pell
 	root.add_child(workspace)
-	var homes_script := GDScript.new()
-	homes_script.source_code = "extends Node\nfunc get_residence_tier() -> StringName:\n\treturn &\"mid_reach\"\n"
-	homes_script.reload()
-	var homes := Node.new()
-	homes.name = "Homes"
-	homes.set_script(homes_script)
-	root.add_child(homes)
+	var homes: Node = root.get_node("Homes")  # Build Bible Spec 27's real owner
+	homes.grant_residence(&"mid_reach", "test: the Mid Reach residence")
 	body.global_position = workspace.position
 	for _i in range(4):
 		await physics_frame
@@ -280,7 +276,7 @@ func _run() -> void:
 	anchor.queue_free()
 	body.queue_free()
 	workspace.queue_free()
-	homes.queue_free()
+	homes.reset_all()
 	terrain.queue_free()
 	fact_log.clear_all()
 	trust.reset_all()

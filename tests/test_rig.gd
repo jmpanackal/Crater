@@ -5,9 +5,9 @@ extends SceneTree
 ## - What Gear COSTS to acquire (Tallies + District Output for Approved,
 ##   the diverted-output + Component + Material + Record recipe for grafts)
 ##   — Specs 23/28 own that and call add_owned_gear()/graft() afterwards.
-## - The residence tier itself — Spec 27 (Homes) owns it; this test stands
-##   in a stub "Homes" node to prove Rig reads it, and proves the fail-safe
-##   (no Homes = Lower home = grafting refused) without one.
+## - The residence tier itself — Spec 27 (Homes) owns it; this test uses
+##   the real Homes autoload (grant_residence) to prove Rig reads it, and
+##   the Lower default to prove grafting is refused before Mid Reach.
 ## - The refit UI — nothing here assumes a presentation; the station's
 ##   `opened` signal is the hook.
 ## - Terrain's quiet-dig and the player's dig-cost reads of Rig effects are
@@ -64,6 +64,7 @@ func _run() -> void:
 	if community:
 		community.set_paused(true)
 	save_load.clear_save()
+	root.get_node("Homes").reset_all()
 	rig.reset_all()
 	hauling.reset_all()
 	storage.reset_all()
@@ -250,13 +251,8 @@ func _run() -> void:
 	if bool(lower["success"]) or str(lower["reason"]) != "residence_tier_too_low" or rig.get_residence_tier() != &"lower":
 		_fail("graft before Mid Reach (no Homes = Lower home) was not refused cleanly: %s" % [lower])
 		return
-	var homes_script := GDScript.new()
-	homes_script.source_code = "extends Node\nfunc get_residence_tier() -> StringName:\n\treturn &\"mid_reach\"\n"
-	homes_script.reload()
-	var homes := Node.new()
-	homes.name = "Homes"
-	homes.set_script(homes_script)
-	root.add_child(homes)
+	var homes: Node = root.get_node("Homes")  # Build Bible Spec 27's real owner
+	homes.grant_residence(&"mid_reach", "test: the Mid Reach residence")
 	if rig.get_residence_tier() != &"mid_reach":
 		_fail("Rig did not read the residence tier from Homes")
 		return
@@ -396,7 +392,7 @@ func _run() -> void:
 	hauling.reset_all()
 	storage.reset_all()
 	stamina.reset_all()
-	homes.queue_free()
+	homes.reset_all()
 	home.queue_free()
 	workspace.queue_free()
 	_body.queue_free()

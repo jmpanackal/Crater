@@ -54,6 +54,13 @@ const FACT_FOUND_NOTHING := &"found_nothing"
 const FACT_DISTRICT_DISCREPANCY := &"district_discrepancy"
 
 const STAGE_NONE := &"none"
+const STAGE_DELEGATED := &"delegated"
+const FACT_INVESTIGATION_WARNING := &"investigation_warning"
+
+## Build Bible Spec 27: the player's residence as a search context. The
+## world half has no footprint here; Homes resolves it against the
+## workspace's concealment tier when search_requested fires for it.
+const RESIDENCE_CONTEXT := &"residence"
 
 const STAGE_FACTS: Array[StringName] = [FACT_SEARCH_REQUESTED, FACT_FOUND_EVIDENCE, FACT_FOUND_NOTHING]
 
@@ -93,6 +100,13 @@ func get_threshold_per_trust_point() -> float:
 func get_default_search_tier() -> StringName:
 	var tuning := _tuning()
 	return StringName(str(tuning.default_search_tier)) if tuning != null else &"basic"
+
+
+## Fraction of the threshold at which a context gets its one fair
+## warning before a search (canon §62: understandable warning first).
+func get_warning_ratio() -> float:
+	var tuning := _tuning()
+	return float(tuning.warning_ratio) if tuning != null else 0.6
 
 
 func get_found_evidence_trust_delta() -> float:
@@ -172,7 +186,9 @@ func _relevance(fact: Dictionary, context: StringName) -> float:
 				return _weight("weight_found_evidence", 3.0)
 			return 0.0
 		FACT_DISTRICT_DISCREPANCY:
-			if StringName(str(ctx.get("district_id", ""))) == context:
+			# Repeated unexplained district losses also point at the player's
+			# home (canon §62 lists them as a believable search trigger).
+			if StringName(str(ctx.get("district_id", ""))) == context or context == RESIDENCE_CONTEXT:
 				return _weight("weight_district_discrepancy", 2.0)
 			return 0.0
 	# Witness facts (Spec 17): scoped to the witnessing NPC and to the
@@ -218,8 +234,11 @@ func _on_fact_recorded(fact: Dictionary) -> void:
 		# Only facts newer than the context's last search count — a
 		# resolved search must be crossed freshly.
 		var score := _score(context, _last_request_index(context))
-		if score >= get_threshold(context):
-			trigger_investigation(context, "Suspicion crossed the threshold (%.1f / %.1f)" % [score, get_threshold(context)])
+		var threshold := get_threshold(context)
+		if score >= threshold:
+			trigger_investigation(context, "Suspicion crossed the threshold (%.1f / %.1f)" % [score, threshold])
+		elif score >= threshold * get_warning_ratio():
+			_warn(context, score / maxf(threshold, 0.001))
 
 
 ## The contexts a new fact could raise suspicion for.
@@ -229,6 +248,7 @@ func _contexts_of(fact: Dictionary) -> Array[StringName]:
 	var location := StringName(str(fact.get("location", "")))
 	if fact["type"] == FACT_DISTRICT_DISCREPANCY and ctx.has("district_id"):
 		out.append(StringName(str(ctx["district_id"])))
+		out.append(RESIDENCE_CONTEXT)
 	if ctx.has("npc_id") and ctx.has("sense"):
 		out.append(StringName(str(ctx["npc_id"])))
 	if location != &"" and not out.has(location):
@@ -237,6 +257,26 @@ func _contexts_of(fact: Dictionary) -> Array[StringName]:
 
 
 # --- Investigations ---------------------------------------------------------------------
+
+## One warning per context per "fresh" crossing: logged as a fact (so
+## it's on the record and re-derivable) and emitted for the world/UI to
+## surface — NPC dialogue, a Warden's look, a notice.
+func _warn(context: StringName, ratio: float) -> void:
+	var fact_log := get_tree().root.get_node_or_null("FactLog")
+	if fact_log == null:
+		return
+	var since := _last_request_index(context)
+	for fact: Dictionary in fact_log.get_by_type(FACT_INVESTIGATION_WARNING):
+		if int(fact["index"]) > since and StringName(str((fact["context"] as Dictionary).get("investigation_context", ""))) == context:
+			return  # already warned since the last search
+	_resolving = true
+	var witnesses: Array[String] = []
+	fact_log.record(FACT_INVESTIGATION_WARNING, fact_log.SUBJECT_PLAYER, _location_of(context), witnesses, {"investigation_context": str(context), "ratio": ratio}, _current_cycle())
+	_resolving = false
+	var bus := get_tree().root.get_node_or_null("EventBus")
+	if bus != null and bus.has_signal("investigation_warning"):
+		bus.investigation_warning.emit(context, ratio)
+
 
 ## The authored/story entry point — and what the auto-trigger calls.
 ## Always fires regardless of suspicion: logs search_requested, emits it
@@ -256,6 +296,11 @@ func trigger_investigation(context: StringName, reason: String) -> Dictionary:
 	var bus := get_tree().root.get_node_or_null("EventBus")
 	if bus != null and bus.has_signal("search_requested"):
 		bus.search_requested.emit(context, reason)
+	if context == RESIDENCE_CONTEXT:
+		# Homes (Spec 27) resolved it against the workspace's concealment
+		# on that signal and logged the resolution; nothing to search here.
+		_resolving = false
+		return {"context": context, "found": [], "stage": get_investigation_stage(context)}
 	var found := _resolve_world_search(context, tier)
 	var stage := FACT_FOUND_NOTHING
 	if found.is_empty():

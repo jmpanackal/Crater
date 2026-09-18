@@ -37,6 +37,7 @@ func _run() -> void:
 	if community:
 		community.set_paused(true)
 	save_load.clear_save()
+	root.get_node("Homes").reset_all()
 	web.reset_all()
 	storage.reset_all()
 	wallet.reset_all()
@@ -61,13 +62,8 @@ func _run() -> void:
 	web.reset_all()
 	discoveries.clear()  # the Component's real discovery event fired above; the pure check starts clean
 	fact_log.clear_all()
-	var homes_script := GDScript.new()
-	homes_script.source_code = "extends Node\nfunc get_residence_tier() -> StringName:\n\treturn &\"mid_reach\"\n"
-	homes_script.reload()
-	var homes := Node.new()
-	homes.name = "Homes"
-	homes.set_script(homes_script)
-	root.add_child(homes)
+	var homes: Node = root.get_node("Homes")  # Build Bible Spec 27's real owner
+	homes.grant_residence(&"mid_reach", "test: the Mid Reach residence")
 	var blank: Dictionary = web.get_state(Q)
 	if bool(blank["known"]) or bool(blank["understood"]) or bool(blank["available"]):
 		_fail("a tech with no discovery events should be nothing, regardless of affordability: %s" % [blank])
@@ -124,7 +120,7 @@ func _run() -> void:
 	if bool(web.is_available(Q)):
 		_fail("spending the Material should read unavailable again (no stale cache)")
 		return
-	homes.queue_free()
+	homes.reset_all()
 	await process_frame
 	storage.deposit_material(&"verdigris", 2)
 	if bool(web.is_available(Q)) or not (web.get_missing(Q) as Array).any(func(m: String) -> bool: return m.contains("residence")):

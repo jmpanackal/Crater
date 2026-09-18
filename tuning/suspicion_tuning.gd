@@ -30,3 +30,7 @@ extends Resource
 ## tying the incident to the player (the reason text is built from the
 ## resolved facts).
 @export var found_evidence_trust_delta: float = -10.0
+
+## Fraction of the auto-investigation threshold at which a context gets
+## one fair warning (canon §62) before any search.
+@export var warning_ratio: float = 0.6

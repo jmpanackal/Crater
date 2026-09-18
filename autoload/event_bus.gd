@@ -158,3 +158,18 @@ signal technology_discovered(tech_id: StringName, level: StringName)
 ## taken unrecorded and now rides on the player. Purely informational —
 ## Trust never moves from this; being seen is a witness fact.
 signal diversion_taken(district_id: StringName, amount: int)
+
+## Investigation (Build Bible Spec 27 fair warning): a context reached a
+## tuned fraction of its search threshold — the "someone is asking
+## questions" channel the world/UI should surface before any search.
+signal investigation_warning(context: StringName, ratio: float)
+
+## Homes (Build Bible Spec 27): the player moved into a residence tier.
+signal residence_changed(tier: StringName)
+
+## Homes (Build Bible Spec 27): a residence search found the concealed
+## workspace's contraband (units confiscated). Serious, not game over.
+signal workspace_discovered(units: int)
+
+## Story (Build Bible Spec 27/31): an authored event set a story flag.
+signal story_flag_set(flag_id: StringName)
