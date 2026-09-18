@@ -173,3 +173,11 @@ signal workspace_discovered(units: int)
 
 ## Story (Build Bible Spec 27/31): an authored event set a story flag.
 signal story_flag_set(flag_id: StringName)
+
+## ForbiddenBuilds (Build Bible Spec 28): a Forbidden design was built and
+## grafted at the workspace.
+signal forbidden_built(design_id: StringName)
+
+## ForbiddenBuilds (Build Bible Spec 28): an authority's examination
+## exposed a graft. Serious; Trust already moved once.
+signal graft_exposed(design_id: StringName)

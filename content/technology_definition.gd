@@ -47,5 +47,9 @@ extends Resource
 @export var requires_tallies: int = 0
 ## Minimum residence tier (Rig.RESIDENCE_*), "" = none.
 @export var requires_residence: StringName = &""
+## Build Bible Spec 28: diverted District Output the build consumes from
+## the concealed stockpile (district_id -> units) — canon §29's base cost
+## of every Forbidden item.
+@export var requires_diverted_output: Dictionary = {}
 ## Minimum Trust standing id, "" = none.
 @export var requires_trust: StringName = &""

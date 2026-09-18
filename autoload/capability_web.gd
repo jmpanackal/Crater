@@ -143,6 +143,32 @@ func get_kind(tech_id: StringName) -> StringName:
 	return StringName(str(def.get("kind"))) if def != null else &""
 
 
+## The authored build/order requirements, as data (Spec 28's build
+## consumes exactly these): {"materials": {id: n}, "components": [ids],
+## "diverted_output": {district: n}, "tallies": int, "residence", "trust"}.
+func get_requirements(tech_id: StringName) -> Dictionary:
+	var def: Resource = _defs.get(tech_id, null)
+	if def == null:
+		return {}
+	var materials: Dictionary = {}
+	for key: Variant in (def.get("requires_materials") as Dictionary).keys():
+		materials[StringName(str(key))] = int((def.get("requires_materials") as Dictionary)[key])
+	var components: Array = []
+	for c: Variant in (def.get("requires_components") as Array):
+		components.append(StringName(str(c)))
+	var diverted: Dictionary = {}
+	var raw_div: Variant = def.get("requires_diverted_output")
+	if typeof(raw_div) == TYPE_DICTIONARY:
+		for key: Variant in (raw_div as Dictionary).keys():
+			diverted[StringName(str(key))] = int((raw_div as Dictionary)[key])
+	return {
+		"materials": materials, "components": components, "diverted_output": diverted,
+		"tallies": int(def.get("requires_tallies")),
+		"residence": StringName(str(def.get("requires_residence"))),
+		"trust": StringName(str(def.get("requires_trust"))),
+	}
+
+
 ## All family tags on the technology (several at once is normal).
 func get_families(tech_id: StringName) -> Array[StringName]:
 	var out: Array[StringName] = []
@@ -287,6 +313,14 @@ func _missing_requirements(def: Resource, missing: Array[String]) -> void:
 	var tallies := int(def.get("requires_tallies"))
 	if tallies > 0 and (wallet == null or not bool(wallet.can_afford(tallies))):
 		missing.append("Tallies (%d)" % tallies)
+	# Build Bible Spec 28: diverted District Output stashed in the concealed
+	# workspace (Spec 26) is the base cost of every Forbidden item.
+	var diverted: Variant = def.get("requires_diverted_output")
+	if typeof(diverted) == TYPE_DICTIONARY:
+		for key: Variant in (diverted as Dictionary).keys():
+			var units := int((diverted as Dictionary)[key])
+			if units > 0 and (storage == null or not storage.has_method("get_concealed") or int(storage.get_concealed(StringName(str(key)))) < units):
+				missing.append("diverted %s output ×%d" % [str(key), units])
 	var residence := StringName(str(def.get("requires_residence")))
 	if residence != &"" and rig != null:
 		if int(rig.residence_tier_rank(rig.get_residence_tier())) < int(rig.residence_tier_rank(residence)):

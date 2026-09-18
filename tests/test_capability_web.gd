@@ -112,6 +112,12 @@ func _run() -> void:
 		_fail("missing Material should read unavailable with the Material named: %s" % [lacking])
 		return
 	storage.deposit_material(&"verdigris", 2)
+	# Build Bible Spec 28: a Forbidden design also needs its diverted
+	# District Output stashed in the concealed workspace (Spec 26).
+	if bool(web.is_available(Q)) or not (web.get_missing(Q) as Array).any(func(m: String) -> bool: return m.contains("diverted")):
+		_fail("without stashed diverted output the design should still be unavailable, naming it: %s" % [web.get_missing(Q)])
+		return
+	storage.deposit_concealed(&"wickwork", 3)
 	var have: Dictionary = web.get_state(Q)
 	if not bool(have["available"]) or not (have["missing"] as Array).is_empty() or discoveries.size() != 2:
 		_fail("acquiring the Material should make the next query available with no new event: %s" % [have])
@@ -123,6 +129,7 @@ func _run() -> void:
 	homes.reset_all()
 	await process_frame
 	storage.deposit_material(&"verdigris", 2)
+	storage.deposit_concealed(&"wickwork", 3)
 	if bool(web.is_available(Q)) or not (web.get_missing(Q) as Array).any(func(m: String) -> bool: return m.contains("residence")):
 		_fail("without the Mid Reach residence the graft design should be unavailable: %s" % [web.get_missing(Q)])
 		return

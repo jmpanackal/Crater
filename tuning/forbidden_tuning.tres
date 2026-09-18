@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/forbidden_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fabrication_cycles = 0
+conceal_graft_tallies = 12
+graft_exposed_trust_delta = -20.0

@@ -19,3 +19,6 @@ requires_materials = {
 }
 requires_components = Array[StringName]([&"firstfall_coupling"])
 requires_residence = &"mid_reach"
+requires_diverted_output = {
+"wickwork": 3
+}
