@@ -181,3 +181,11 @@ signal forbidden_built(design_id: StringName)
 ## ForbiddenBuilds (Build Bible Spec 28): an authority's examination
 ## exposed a graft. Serious; Trust already moved once.
 signal graft_exposed(design_id: StringName)
+
+## Projects (Build Bible Spec 29): a project's status or progress changed.
+signal project_changed(project_id: StringName, status: StringName)
+
+## Projects (Build Bible Spec 29): a project completed - its lasting
+## effect (Capacity, maintenance Demand, story flag) is now in place. The
+## world-facing change (a repaired lift, a new rope walk) keys off this.
+signal project_completed(project_id: StringName, district_id: StringName)

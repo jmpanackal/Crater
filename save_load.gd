@@ -54,6 +54,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Story",
 	"Homes",
 	"ForbiddenBuilds",
+	"Projects",
 	"Resources",
 	"Upgrades",
 	"Community",

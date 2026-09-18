@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/project_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+project_id = &"wickwork_second_rope_walk"
+display_name = "Second rope walk"
+description = "A lasting Wickwork improvement: a second rope walk along the bay wall, braced with Ravelstone. More binding work per cycle for good (canon §26 Capacity project). Placeholder Act 1 content."
+kind = &"capacity"
+district_id = &"wickwork"
+requires_tech = &"harness_reinforcement"
+requires_materials = {
+"ravelstone": 3,
+"sutral": 2
+}
+demand_while_building = 2.0
+capacity_gain = 2.0
+maintenance_demand = 0.0
+completion_flag = &"wickwork_second_rope_walk_built"
