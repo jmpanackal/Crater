@@ -45,6 +45,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Storage",
 	"Hauling",
 	"Rig",
+	"Trust",
 	"Resources",
 	"Upgrades",
 	"Community",

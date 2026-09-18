@@ -203,14 +203,20 @@ func _register_builtin_commands() -> void:
 	# (Community.trust, Resources) — real per Spec 03's own acceptance-test
 	# note that these commands "exist and work once the systems they target
 	# are built", and Trust/Materials already exist in some form today.
-	register_command("set_trust", "set_trust <value> — set Community.trust directly (0-100).", func(args: Array[String]) -> String:
+	# Targets Trust (Build Bible Spec 19), the canon owner — not the retired
+	# community.gd int. Even debug goes through submit_trust_event(): a
+	# reasoned event is the ONLY way Trust moves (Spec 19, option A), so
+	# the debug set shows up in the reasons list as what it is.
+	register_command("set_trust", "set_trust <value> — move Trust's internal value to <value> via a reasoned debug event.", func(args: Array[String]) -> String:
 		if args.is_empty():
-			return "Usage: set_trust <0-100>"
-		var community := get_tree().root.get_node_or_null("Community")
-		if community == null:
-			return "Community autoload not found."
-		community.set_trust(int(args[0]))
-		return "Trust set to %d" % community.get_trust()
+			return "Usage: set_trust <value>"
+		var trust := get_tree().root.get_node_or_null("Trust")
+		if trust == null:
+			return "Trust autoload not found."
+		var target := float(args[0])
+		var delta: float = target - float(trust.get_trust_value())
+		trust.submit_trust_event(&"debug", delta, "Debug console set Trust to %s" % args[0])
+		return "Trust set to %.1f — standing %s" % [float(trust.get_trust_value()), trust.get_standing_label()]
 	)
 
 	# Targets Storage (Build Bible Spec 11), the canon Materials owner — not

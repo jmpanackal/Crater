@@ -74,6 +74,12 @@ func _run() -> void:
 	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 
+	# Deterministic: an upward dig has a 12% chance to also find a Record,
+	# which spawns a SECOND float after the salvage one and made the
+	# "last float is salvage" check below fail intermittently.
+	var journal: Node = root.get_node_or_null("Journal")
+	if journal != null:
+		journal.force_find_on_dig = false
 	FeelFx.reset_debug()
 	if not terrain.destroy_cell(firmament_cell, Vector2i.UP):
 		push_error("FAIL Firmament dig")

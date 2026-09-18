@@ -97,7 +97,14 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 	var chance := 0.04
 	if dug_upward:
 		chance = 0.12
-	if randf() > chance:
+	# Test hook (same shape as Upgrades.force_theft_notice): null = roll,
+	# false = never find, true = always find. The unseeded roll below is
+	# what made tests that dig the Firmament intermittently see a Record
+	# float after the salvage float (12% per upward dig).
+	if force_find_on_dig != null:
+		if not bool(force_find_on_dig):
+			return StringName()
+	elif randf() > chance:
 		return StringName()
 
 	var pick: StringName = pool[randi() % pool.size()]
@@ -106,6 +113,10 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 			pick = RECORD_FIRMAMENT_NOTE
 	unlock_record(pick)
 	return pick
+
+
+## When non-null, try_find_on_dig() skips its random roll (tests).
+var force_find_on_dig: Variant = null
 
 
 func get_snapshot() -> Array:

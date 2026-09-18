@@ -99,3 +99,9 @@ signal ritual_checked(attended: bool, cycle: int)
 ## exists = false when the delta was reset. Purely informational — nothing
 ## is discovered by this event; discovery is a search (Evidence.resolve_search).
 signal evidence_changed(cell: Vector2i, sealed_tier: StringName, exists: bool)
+
+## Trust (Build Bible Spec 19): a reasoned Trust event was applied.
+## standing is the resulting qualitative state id (never a raw number —
+## that's what UI shows), delta the applied change, reason the required
+## human-readable explanation to surface (§17: reasons, never "+3 Trust").
+signal trust_changed(standing: StringName, delta: float, reason: String)

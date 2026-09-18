@@ -110,8 +110,9 @@ func _run() -> void:
 	# wired to the current Trust/Materials stand-ins. ---
 	var trust_result: String = console.execute("set_trust 42")
 	var community: Node = root.get_node_or_null("Community")
-	if community == null or community.get_trust() != 42 or not trust_result.contains("42"):
-		push_error("FAIL set_trust did not set Community.trust")
+	var trust_node: Node = root.get_node_or_null("Trust")
+	if trust_node == null or not is_equal_approx(float(trust_node.get_trust_value()), 42.0) or not trust_result.contains("42"):
+		push_error("FAIL set_trust did not move Trust (Build Bible Spec 19) to 42")
 		quit(1)
 		return
 	# spawn_material targets Storage (Build Bible Spec 11), the canon
