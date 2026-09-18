@@ -106,8 +106,10 @@ func get_stranded_seconds() -> float:
 
 
 func _player_in_hollow() -> bool:
-	var community := get_tree().root.get_node_or_null("Community")
-	return community != null and community.has_method("is_player_in_hollow") and bool(community.is_player_in_hollow())
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return false
+	return player.global_position.x >= HollowLayout.HOLLOW_LEFT and player.global_position.x <= HollowLayout.HOLLOW_RIGHT and player.global_position.y >= HollowLayout.VAULTWARD_Y and player.global_position.y <= HollowLayout.SEEP_Y
 
 
 # --- Severe fall (G22-B) ----------------------------------------------------------------

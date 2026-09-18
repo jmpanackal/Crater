@@ -13,7 +13,7 @@ extends Node
 ## earn/spend fails loudly (Spec 23's failure case, carrying Spec 19's
 ## discipline over: "Tallies should remain understandable").
 ##
-## The retired prototype wallet (resources.gd, Resources.TALLIES) still
+## The retired prototype wallet still
 ## pays the retired work-order loop and HUD until Spec 24 moves job
 ## settlement here; this system does not reach into it.
 ##

@@ -5,7 +5,6 @@
 [ext_resource type="Script" path="res://terrain.gd" id="3_terrain"]
 [ext_resource type="Script" path="res://salvage_hud.gd" id="4_salvage_hud"]
 [ext_resource type="Script" path="res://upgrade_hud.gd" id="5_upgrade_hud"]
-[ext_resource type="Script" path="res://hollow_zone.gd" id="6_hollow"]
 [ext_resource type="Script" path="res://hollow_npc.gd" id="8_npc"]
 [ext_resource type="Script" path="res://journal_hud.gd" id="9_journal"]
 [ext_resource type="Script" path="res://dialogue_panel.gd" id="10_dialogue"]
@@ -19,9 +18,6 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hollow_area"]
-size = Vector2(1400, 600)
 
 [node name="root" type="Node2D"]
 script = ExtResource("1_main")
@@ -46,15 +42,6 @@ color = Color(0.1, 0.155, 0.15, 1)
 
 [node name="HollowTerrain" type="TileMapLayer" parent="Hollow"]
 script = ExtResource("22_hollow_terrain")
-
-[node name="HollowZone" type="Area2D" parent="Hollow"]
-collision_layer = 0
-collision_mask = 1
-script = ExtResource("6_hollow")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/HollowZone"]
-position = Vector2(-488, 985)
-shape = SubResource("RectangleShape2D_hollow_area")
 
 [node name="LadderChamber" type="Area2D" parent="Hollow"]
 position = Vector2(-1124, 1056)
@@ -207,17 +194,17 @@ offset_right = 228.0
 offset_bottom = 28.0
 theme_override_font_sizes/font_size = 12
 text = "Materials: 0"
-tooltip_text = "Materials from digging. Turn them in at the Hollow [E] to queue District production."
+tooltip_text = "Materials from digging. Delivered to districts through Jobs."
 script = ExtResource("4_salvage_hud")
 
-[node name="HarvestLabel" type="Label" parent="UI"]
+[node name="CycleLabel" type="Label" parent="UI"]
 offset_left = 18.0
 offset_top = 30.0
 offset_right = 228.0
 offset_bottom = 46.0
 theme_override_font_sizes/font_size = 11
-text = "Harvest ?"
-tooltip_text = "Return for the communal gathering before the clock runs out."
+text = "Cycle ?"
+tooltip_text = "The Pulse-driven civic cycle: Rousing, Working, Gathering, Ritual."
 modulate = Color(0.88, 0.88, 0.84, 0.9)
 
 [node name="TrustLabel" type="Label" parent="UI"]
@@ -259,11 +246,11 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="ShortageRiskLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
+[node name="DistrictConditionLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "Shortage Risk ?"
-tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
+text = "District condition ?"
+tooltip_text = "How a district's Capacity/Demand/Reserves balance is holding up right now."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
 [node name="RequisitionExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
@@ -272,15 +259,7 @@ focus_mode = 0
 custom_minimum_size = Vector2(0, 22)
 theme_override_font_sizes/font_size = 11
 text = "Requisition  [Q]"
-tooltip_text = "Open, sanctioned upgrades — spend Tallies to help the districts."
-
-[node name="TheftExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
-layout_mode = 2
-focus_mode = 0
-custom_minimum_size = Vector2(0, 22)
-theme_override_font_sizes/font_size = 11
-text = "Steal  [U]"
-tooltip_text = "Forbidden upgrades — divert District production. Risks Trust if Shortage Risk is high."
+tooltip_text = "Order Approved Gear — spend Tallies and authorized District Output."
 
 [node name="RequisitionDimmer" type="ColorRect" parent="UI"]
 visible = false
@@ -327,14 +306,14 @@ modulate = Color(0.68, 0.82, 0.66, 0.95)
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Tallies ?"
-tooltip_text = "Personal work pay from public Material turn-ins."
+tooltip_text = "Personal work pay, earned through Jobs."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
 [node name="DistrictToggle" type="Button" parent="UI/RequisitionPanel/Margin/VBox"]
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
-text = "Districts ▸"
+text = "District production ▸"
 
 [node name="DistrictLabel" type="Label" parent="UI/RequisitionPanel/Margin/VBox"]
 visible = false
@@ -342,7 +321,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Districts…"
 autowrap_mode = 3
-tooltip_text = "District production and output."
+tooltip_text = "District Capacity, Demand, and Reserves."
 modulate = Color(0.68, 0.72, 0.7, 0.82)
 
 [node name="RequisitionList" type="VBoxContainer" parent="UI/RequisitionPanel/Margin/VBox"]
@@ -354,64 +333,6 @@ layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
 text = "Close  [Q / Esc]"
-
-[node name="TheftShopDimmer" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0.02, 0.04, 0.05, 0.55)
-
-[node name="TheftShopPanel" type="PanelContainer" parent="UI"]
-visible = false
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -210.0
-offset_top = -292.0
-offset_right = 210.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="Margin" type="MarginContainer" parent="UI/TheftShopPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
-
-[node name="VBox" type="VBoxContainer" parent="UI/TheftShopPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Title" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Steal from production"
-modulate = Color(0.86, 0.68, 0.48, 0.95)
-
-[node name="ShopShortageRisk" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "Shortage Risk ?"
-tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
-modulate = Color(0.62, 0.82, 0.78, 0.92)
-
-[node name="TheftList" type="VBoxContainer" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="CloseButton" type="Button" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 11
-text = "Close  [U / Esc]"
 
 [node name="NoticeLabel" type="Label" parent="UI"]
 visible = false
@@ -430,66 +351,6 @@ theme_override_font_sizes/font_size = 13
 text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="LieDimmer" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.02, 0.04, 0.05, 0.55)
-
-[node name="LiePromptPanel" type="PanelContainer" parent="UI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -120.0
-offset_right = 220.0
-offset_bottom = 120.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="LiePrompt" type="VBoxContainer" parent="UI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -100.0
-offset_right = 200.0
-offset_bottom = 100.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-
-[node name="LieLabel" type="Label" parent="UI/LiePrompt"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Harvest finished while you were away from the districts.
-People will ask where you were.
-
-Lie (Y) — dodge notice for now, risk worse later if exposed.
-Tell the truth (N) — −5 Trust now."
-autowrap_mode = 3
-
-[node name="YesButton" type="Button" parent="UI/LiePrompt"]
-layout_mode = 2
-focus_mode = 0
-text = "Lie about it (Y)"
-
-[node name="NoButton" type="Button" parent="UI/LiePrompt"]
-layout_mode = 2
-focus_mode = 0
-text = "Tell the truth (N)"
 
 [node name="JournalHud" type="CanvasLayer" parent="UI"]
 layer = 10
@@ -629,5 +490,5 @@ offset_right = 780.0
 offset_bottom = -8.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 11
-text = "A/D move · W/S lift or climb · R dig · Space jump · U shop · E talk · J journal · H help · Esc title"
+text = "A/D move · W/S lift or climb · R dig · Space jump · Q requisition · E talk/take · J journal · H help · Esc title"
 modulate = Color(0.75, 0.78, 0.74, 0.45)

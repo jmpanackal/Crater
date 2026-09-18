@@ -107,7 +107,7 @@ const LADDER_CISTERN_X := LADDER_CISTERN_OPEN_X + (LADDER_OPENING - LADDER_WIDTH
 const LADDER_FARMS_OPEN_X := LIFT_OPEN_X
 const LADDER_FARMS_X := LIFT_X
 
-## Presswater → lift service thresholds (Districts.PROTECTED_RESERVE / THIN).
+## Lift service follows the Cistern's canon condition ladder.
 const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
 ## --- Opening-route west wing (Bottom-West Dig Front) ---

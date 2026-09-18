@@ -84,7 +84,7 @@ signal rig_changed(change: StringName, id: StringName)
 ## CivicCycle (Build Bible Spec 15): a civic cycle just ended — fired
 ## exactly once per cycle, on the Clock's Ritual -> Rousing transition.
 ## `cycle` is the 0-based index of the cycle that ENDED. This is the
-## district-resolution moment (canon §24); Districts (Spec 22) hang the
+## district-resolution moment (canon §24); the District domain hangs the
 ## actual economics off it.
 signal cycle_resolved(cycle: int)
 

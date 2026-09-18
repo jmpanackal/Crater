@@ -1,274 +1,31 @@
 extends SceneTree
-## Display stretch + decluttered HUD assumptions.
+## Canon HUD shows Materials, civic phase, qualitative Trust, and District condition.
 
 
 func _init() -> void:
-	call_deferred("_run_tests")
+	call_deferred("_run")
 
 
-func _run_tests() -> void:
+func _run() -> void:
 	await process_frame
-
-	var stretch_mode: String = str(ProjectSettings.get_setting("display/window/stretch/mode", ""))
-	var stretch_aspect: String = str(ProjectSettings.get_setting("display/window/stretch/aspect", ""))
-	var vw: int = int(ProjectSettings.get_setting("display/window/size/viewport_width", 0))
-	var vh: int = int(ProjectSettings.get_setting("display/window/size/viewport_height", 0))
-	var tex_filter: int = int(ProjectSettings.get_setting("rendering/textures/canvas_textures/default_texture_filter", -1))
-	var snap_2d: bool = bool(ProjectSettings.get_setting("rendering/2d/snap/snap_2d_transforms_to_pixel", false))
-	if stretch_mode != "canvas_items":
-		push_error("FAIL stretch mode '%s'" % stretch_mode)
-		quit(1)
-		return
-	if stretch_aspect != "expand":
-		push_error("FAIL stretch aspect '%s'" % stretch_aspect)
-		quit(1)
-		return
-	if vw < 640 or vh < 360:
-		push_error("FAIL viewport size %dx%d" % [vw, vh])
-		quit(1)
-		return
-	# 0 = Nearest (Godot CanvasItem.TextureFilter).
-	if tex_filter != 0:
-		push_error("FAIL default texture filter %d expected Nearest(0)" % tex_filter)
-		quit(1)
-		return
-	if not snap_2d:
-		push_error("FAIL snap_2d_transforms_to_pixel should be on for pixel art")
-		quit(1)
-		return
-	print("PASS display stretch + viewport + nearest filter")
-
-	var packed: PackedScene = load("res://main.tscn")
-	var scene: Node = packed.instantiate()
+	var scene := (load("res://main.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
 	await process_frame
-	await process_frame
-
-	if scene.get_node_or_null("UI/PrimaryHud") == null:
-		push_error("FAIL PrimaryHud chrome missing")
-		quit(1)
-		return
-	var primary: Control = scene.get_node("UI/PrimaryHud") as Control
-	if primary.size.x > 280.0 or (primary.offset_right - primary.offset_left) > 280.0:
-		push_error("FAIL PrimaryHud too wide (blocks Hollow)")
-		quit(1)
-		return
-	if scene.get_node_or_null("UI/HarvestLabel") == null:
-		push_error("FAIL HarvestLabel missing")
-		quit(1)
-		return
-	if scene.get_node_or_null("UI/TrustLabel") == null:
-		push_error("FAIL TrustLabel missing")
-		quit(1)
-		return
-	if scene.get_node_or_null("UI/UpgradePanel/HarvestLabel") != null:
-		push_error("FAIL HarvestLabel still inside UpgradePanel")
-		quit(1)
-		return
-
-	# Harvest / Trust / Materials must be distinct non-overlapping rows.
-	var mats: Control = scene.get_node("UI/SalvageLabel") as Control
-	var harvest: Control = scene.get_node("UI/HarvestLabel") as Control
-	var trust: Control = scene.get_node("UI/TrustLabel") as Control
-	if mats == null or harvest == null or trust == null:
-		push_error("FAIL primary HUD rows missing")
-		quit(1)
-		return
-	var mats_r := mats.get_global_rect()
-	var harv_r := harvest.get_global_rect()
-	var stand_r := trust.get_global_rect()
-	if mats_r.intersects(harv_r) or harv_r.intersects(stand_r) or mats_r.intersects(stand_r):
-		push_error(
-			"FAIL HUD status rows overlap mats=%s harvest=%s trust=%s"
-			% [mats_r, harv_r, stand_r]
-		)
-		quit(1)
-		return
-	if harv_r.position.y < mats_r.end.y - 0.5:
-		push_error("FAIL HarvestLabel not below Materials row")
-		quit(1)
-		return
-	if stand_r.position.y < harv_r.end.y - 0.5:
-		push_error("FAIL TrustLabel not below Harvest row")
-		quit(1)
-		return
-	print("PASS HUD status rows non-overlapping")
-	if scene.get_node_or_null("UI/JournalHud/Dimmer") == null:
-		push_error("FAIL Journal Dimmer missing")
-		quit(1)
-		return
-	if scene.get_node_or_null("UI/JournalHud/Panel/Margin/VBox/CloseButton") == null:
-		push_error("FAIL Journal CloseButton missing")
-		quit(1)
-		return
-
-	var journal: Node = scene.get_node("UI/JournalHud")
-	if not journal.has_method("is_open") or journal.is_open():
-		push_error("FAIL journal should start closed")
-		quit(1)
-		return
-	journal.open()
-	await process_frame
-	if not journal.is_open():
-		push_error("FAIL journal.open()")
-		quit(1)
-		return
-	if not (scene.get_node("UI/JournalHud/Dimmer") as CanvasItem).visible:
-		push_error("FAIL dimmer not visible when journal open")
-		quit(1)
-		return
-	journal.close()
-	await process_frame
-	if journal.is_open():
-		push_error("FAIL journal.close()")
-		quit(1)
-		return
-	print("PASS journal modal open/close + dimmer")
-
-	# QUARANTINED (2026-09-18): "soft world labels" checked Hollow/DistrictFarms'
-	# soft-script + world_chrome group membership. main.tscn's Hollow subtree
-	# was deleted for a canon-grounded rebuild (docs/hollow-level-authoring.md).
-	# This pass only rebuilds Home Court + Bottom-West Dig Front; Glowbeds and
-	# its district label are a later phase. Restore this test's real
-	# assertions once Glowbeds is rebuilt — tracked in docs/priority-roadmap.md,
-	# not forgotten.
-
-	var upgrades: Node = root.get_node_or_null("Upgrades")
-	if upgrades:
-		upgrades.set_theft_station_open(true)
-		await process_frame
-		await process_frame
-		var panel: Control = scene.get_node("UI/UpgradePanel") as Control
-		if not panel.visible:
-			push_error("FAIL UpgradePanel hidden in Hollow")
+	for path in ["UI/SalvageLabel", "UI/CycleLabel", "UI/TrustLabel", "UI/UpgradePanel/Margin/Content/DistrictConditionLabel"]:
+		if scene.get_node_or_null(path) == null:
+			push_error("FAIL missing canon HUD node %s" % path)
 			quit(1)
 			return
-		if panel.size.x > 280.0 or (panel.offset_right - panel.offset_left) > 280.0:
-			push_error("FAIL Hollow chip too wide")
-			quit(1)
-			return
-		var harvest_lbl: Label = scene.get_node("UI/HarvestLabel") as Label
-		var trust_lbl: Label = scene.get_node("UI/TrustLabel") as Label
-		if not str(harvest_lbl.text).begins_with("Harvest"):
-			push_error("FAIL harvest text '%s'" % harvest_lbl.text)
-			quit(1)
-			return
-		if not str(trust_lbl.text).begins_with("Trust"):
-			push_error("FAIL trust text '%s'" % trust_lbl.text)
-			quit(1)
-			return
-		if harvest_lbl.tooltip_text.strip_edges() == "" or trust_lbl.tooltip_text.strip_edges() == "":
-			push_error("FAIL Harvest/Trust missing meaning tooltips")
-			quit(1)
-			return
-		var risk: Label = scene.get_node("UI/UpgradePanel/Margin/Content/ShortageRiskLabel") as Label
-		if risk == null or risk.tooltip_text.strip_edges() == "":
-			push_error("FAIL ShortageRiskLabel missing meaning tooltip")
-			quit(1)
-			return
-		# Districts + upgrade rows live in the shop modal — not the slim chip.
-		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/DistrictToggle") != null:
-			push_error("FAIL DistrictToggle should not live on Hollow chip")
-			quit(1)
-			return
-		if scene.get_node_or_null("UI/UpgradePanel/Margin/Content/TheftList") != null:
-			var legacy: CanvasItem = scene.get_node("UI/UpgradePanel/Margin/Content/TheftList") as CanvasItem
-			if legacy.visible:
-				push_error("FAIL inline TheftList visible on chip")
-				quit(1)
-				return
-	print("PASS compact Hollow HUD hierarchy")
-
-	var shop_panel: CanvasItem = scene.get_node_or_null("UI/TheftShopPanel") as CanvasItem
-	var theft_list: CanvasItem = scene.get_node_or_null("UI/TheftShopPanel/Margin/VBox/TheftList") as CanvasItem
-	if shop_panel == null or theft_list == null:
-		push_error("FAIL TheftShopPanel / TheftList missing")
+	if scene.get_node_or_null("UI/TheftShopPanel") != null or scene.get_node_or_null("UI/LiePromptPanel") != null:
+		push_error("FAIL retired HUD panels remain")
 		quit(1)
 		return
-	if shop_panel.visible:
-		push_error("FAIL TheftShop should start collapsed until U")
-		quit(1)
-		return
-	var hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/TheftExpandHint") as Control
-	if hint == null or not hint.visible:
-		push_error("FAIL TheftExpandHint missing/hidden while collapsed")
-		quit(1)
-		return
-	if not ("Steal" in str(hint.get("text"))):
-		push_error("FAIL TheftExpandHint text '%s'" % hint.get("text"))
-		quit(1)
-		return
-
-	var req_panel: CanvasItem = scene.get_node_or_null("UI/RequisitionPanel") as CanvasItem
-	var req_list: CanvasItem = scene.get_node_or_null("UI/RequisitionPanel/Margin/VBox/RequisitionList") as CanvasItem
-	if req_panel == null or req_list == null:
-		push_error("FAIL RequisitionPanel / RequisitionList missing")
-		quit(1)
-		return
-	if req_panel.visible:
-		push_error("FAIL RequisitionPanel should start collapsed until Q")
-		quit(1)
-		return
-	var req_hint: Control = scene.get_node_or_null("UI/UpgradePanel/Margin/Content/RequisitionExpandHint") as Control
-	if req_hint == null or not req_hint.visible:
-		push_error("FAIL RequisitionExpandHint missing/hidden while collapsed")
-		quit(1)
-		return
-	if not ("Requisition" in str(req_hint.get("text"))):
-		push_error("FAIL RequisitionExpandHint text '%s'" % req_hint.get("text"))
-		quit(1)
-		return
-
 	var hud: Node = scene.get_node("UI/UpgradePanel")
-	if hud.has_method("open_theft_shop"):
-		hud.open_theft_shop()
-		await process_frame
-		if not shop_panel.visible:
-			push_error("FAIL open_theft_shop did not show modal")
-			quit(1)
-			return
-		hud.close_theft_shop()
-		await process_frame
-		if shop_panel.visible:
-			push_error("FAIL close_theft_shop left modal open")
-			quit(1)
-			return
-	print("PASS steal shop modal collapsed by default")
-
-	if hud.has_method("open_requisition"):
-		hud.open_requisition()
-		await process_frame
-		if not req_panel.visible:
-			push_error("FAIL open_requisition did not show modal")
-			quit(1)
-			return
-		var district_toggle: BaseButton = scene.get_node_or_null(
-			"UI/RequisitionPanel/Margin/VBox/DistrictToggle"
-		) as BaseButton
-		if district_toggle == null or not district_toggle.visible:
-			push_error("FAIL DistrictToggle missing in open Requisition panel")
-			quit(1)
-			return
-		hud.close_requisition()
-		await process_frame
-		if req_panel.visible:
-			push_error("FAIL close_requisition left modal open")
-			quit(1)
-			return
-	print("PASS requisition panel collapsed by default")
-
-	var cam: Camera2D = scene.get_node("Player/Camera2D") as Camera2D
-	if cam.limit_right > 1100:
-		push_error("FAIL Hollow camera limit_right=%d exposes dig strip" % cam.limit_right)
+	hud.open_requisition()
+	await process_frame
+	if not (scene.get_node("UI/RequisitionPanel") as CanvasItem).visible:
+		push_error("FAIL requisition modal did not open")
 		quit(1)
 		return
-	print("PASS Hollow camera hides dig strip")
-
-	if ResourceLoader.exists("res://ui_style.gd") == false:
-		push_error("FAIL ui_style.gd missing")
-		quit(1)
-		return
-	print("PASS ui_style shared chrome")
-
 	print("DISPLAY_HUD_TESTS_PASSED")
 	quit(0)

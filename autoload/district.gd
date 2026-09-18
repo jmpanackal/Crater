@@ -1,12 +1,12 @@
 extends Node
-## Krater Districts: Capacity / Demand / District Reserves (autoload: District).
+## Krater district system: Capacity / Demand / District Reserves.
 ## Build Bible Spec 22 (docs/build-bible/specs/22-districts.md).
 ##
 ## The core district economy loop, canon §24–§26 exactly, thin slice:
 ## Wickwork with real contributor content, Glowbeds/Cistern the same
 ## machinery seeded with placeholder contributors. Named "District"
 ## (singular, as the dependency map and specs call it) because the retired
-## prototype economy already occupies "Districts" (districts.gd: named
+## prototype economy previously held named goods and a Harvest queue.
 ## goods, Harvest timer, Shortage Risk) — that legacy keeps running
 ## alongside until its consumers (work orders, HUD, upgrades) migrate in
 ## Specs 23/24/26; nothing here reaches into it.

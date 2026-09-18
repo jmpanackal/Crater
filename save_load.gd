@@ -4,10 +4,9 @@ extends Node
 ##
 ## Single rolling save slot (G10) — one file, no save-slot picker. Autosave
 ## triggers (sleep, civic phase transitions, quit) are wired by whatever
-## system owns that moment calling save_game() (Community's Harvest
-## completion today; the real Clock's phase_changed once Build Bible Spec 04
-## exists) — this autoload only orchestrates WHEN a save/load happens and
-## HOW it's written to disk, never a domain's internal state directly.
+## system owns that moment calling save_game() (Clock's phase_changed) —
+## this autoload only orchestrates WHEN a save/load happens and HOW it's
+## written to disk, never a domain's internal state directly.
 ##
 ## Ownership stays distributed (Spec 02, confirmed option B): every domain
 ## autoload implements its own save_state() -> Dictionary /
@@ -58,12 +57,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Rescue",
 	"Access",
 	"Firmament",
-	"Resources",
-	"Upgrades",
-	"Community",
-	"Districts",
 	"Journal",
-	"WorkOrders",
 ]
 
 ## Scene-tree nodes (not autoloads) that want to participate in save/load
@@ -205,12 +199,6 @@ func new_game() -> void:
 		var node: Node = nodes[domain_name]
 		if node.has_method("reset_all"):
 			node.reset_all()
-	# theft_station_open is live physical-position state (set by HollowZone
-	# from where the player actually is), not part of any domain's saved
-	# progress — reset explicitly since no reset_all() covers it.
-	var upgrades := get_tree().root.get_node_or_null("Upgrades")
-	if upgrades != null and upgrades.has_method("set_theft_station_open"):
-		upgrades.set_theft_station_open(false)
 
 
 ## Test helper: wipe the save file (and any leftover temp file from a

@@ -58,23 +58,12 @@ func unlock_record(record_id: StringName) -> bool:
 	return true
 
 
-## Soft social notice when a Record opens a forbidden theft option.
+## Records remain knowledge; any resulting capability is owned by its canon system.
 func _notify_knowledge_unlock(record_id: StringName) -> void:
 	var def := get_def(record_id)
-	var upgrade_id: StringName = StringName(str(def.get("unlocks_upgrade", "")))
-	if upgrade_id == StringName():
-		return
 	var hint := str(def.get("unlock_hint", ""))
-	var upgrades := get_tree().root.get_node_or_null("Upgrades")
-	var name := str(upgrade_id)
-	if upgrades and upgrades.has_method("get_display_name"):
-		name = str(upgrades.get_display_name(upgrade_id))
-	var text := "Knowledge unlocked: %s." % name
 	if hint != "":
-		text = "Knowledge unlocked: %s — %s" % [name, hint]
-	var community := get_tree().root.get_node_or_null("Community")
-	if community:
-		community.notice_message.emit(text)
+		print("Knowledge unlocked: %s" % hint)
 
 
 func get_unlocked_ids() -> Array[StringName]:
@@ -97,7 +86,7 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 	var chance := 0.04
 	if dug_upward:
 		chance = 0.12
-	# Test hook (same shape as Upgrades.force_theft_notice): null = roll,
+	# Test hook: null = roll,
 	# false = never find, true = always find. The unseeded roll below is
 	# what made tests that dig the Firmament intermittently see a Record
 	# float after the salvage float (12% per upward dig).

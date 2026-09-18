@@ -200,7 +200,7 @@ func _register_builtin_commands() -> void:
 	)
 
 	# Wired to the current pre-canon prototype's Trust/Materials stand-ins
-	# (Community.trust, Resources) — real per Spec 03's own acceptance-test
+	# Legacy state is never used by this command.
 	# note that these commands "exist and work once the systems they target
 	# are built", and Trust/Materials already exist in some form today.
 	# Targets Trust (Build Bible Spec 19), the canon owner — not the retired

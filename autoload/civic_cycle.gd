@@ -11,9 +11,9 @@ extends Node
 ##    emits EventBus.cycle_resolved(cycle) exactly once per cycle (canon
 ##    §24: "around the transition from Ritual into the next Rousing"; the
 ##    spec: part of the phase_changed event, not a separate timer). The
-##    actual economics hang off that event in Spec 22 (Districts) — this is
+##    actual economics hang off that event in Spec 22 — this is
 ##    the hook, deliberately with no economic logic in it. The retired
-##    Community "Harvest" timer still drives the retired districts.gd
+##    the old Harvest timer still drives the retired prototype
 ##    apply_harvest() on its own clock until Spec 22 replaces both; nothing
 ##    here calls it, so there is no double resolution.
 ##

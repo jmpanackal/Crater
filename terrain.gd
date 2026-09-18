@@ -357,8 +357,7 @@ func is_mouth_cell(cell: Vector2i) -> bool:
 
 
 ## Remove a tile if present. Returns true when something was destroyed.
-## Grants Materials (+ transitional Salvage) through Resources; yield from Upgrades.
-## Materials feed District production when turned in at the Hollow.
+## Rock removal exposes deposits; deposits, not ordinary digs, grant Materials.
 func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if not has_tile(cell):
 		return false
@@ -370,12 +369,6 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	var is_firmament := is_firmament_cell(cell)
 	var is_mouth := is_mouth_cell(cell)
 	var yield_amt := _salvage_yield_for_dig(cell)
-	var wallet := _resource_wallet()
-	if wallet:
-		if wallet.has_method("grant_dig_haul"):
-			wallet.grant_dig_haul(yield_amt)
-		else:
-			wallet.add(wallet.SALVAGE, yield_amt)
 	_apply_frontier_rules(cell, direction)
 	var world := to_global(map_to_local(cell))
 	FeelFx.spawn_dig_dust(self, world, direction, is_firmament, is_mouth)
@@ -385,15 +378,8 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 		FeelFx.spawn_record_float(self, world, "Record")
 	dig_completed.emit(cell, direction, found)
 	# Build Bible Spec 06's own confirmed design choice: digging is push,
-	# not pull. This EventBus event is ADDITIONAL to the direct
-	# Resources/Upgrades/Community/Journal calls above, not a replacement
-	# for them - those are pre-canon prototype stand-ins with their own
-	# future Build Bible specs (Materials #11, Rig/Gear #14, Trust #19,
-	# Capability Web #25), and rewiring their call sites to be pure
-	# EventBus listeners is each of THEIR migrations to do, not a side
-	# effect of implementing Terrain's own spec. This event exists for
-	# systems that don't have a direct call site at all yet - Perception
-	# (#17), Material extraction (#12), the Fact Log.
+	# not pull. Systems that care about digging observe this event without
+	# inheriting a retired wallet or social-penalty path.
 	# Build Bible Specs 17/18: whether a dig is restricted is THIS system's
 	# decision (the zone's authored flag, Firmament band as fallback), not
 	# Perception's or Evidence's. A restricted dig does two things at once
@@ -668,14 +654,8 @@ func _salvage_yield_for_dig(cell: Vector2i) -> int:
 
 
 func _base_salvage_yield() -> int:
-	if is_inside_tree():
-		var upgrades := get_tree().root.get_node_or_null("Upgrades")
-		if upgrades and upgrades.has_method("get_dig_salvage_yield"):
-			return int(upgrades.get_dig_salvage_yield())
-	var wallet := _resource_wallet()
-	if wallet:
-		return int(wallet.SALVAGE_PER_TILE)
-	return 1
+	var rig := get_tree().root.get_node_or_null("Rig") if is_inside_tree() else null
+	return 1 + int(round(float(rig.get_effect_sum(&"dig_yield_bonus")))) if rig else 1
 
 
 func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
@@ -683,19 +663,13 @@ func _apply_frontier_rules(cell: Vector2i, direction: Vector2i) -> void:
 	var dug_down := direction.y > 0 or is_mouth_cell(cell)
 
 	if dug_up and direction.y < 0:
-		var upgrades := get_tree().root.get_node_or_null("Upgrades") if is_inside_tree() else null
 		var quiet := 0
-		if upgrades and upgrades.has_method("get_quiet_dig_level"):
-			quiet = int(upgrades.get_quiet_dig_level())
-		# Build Bible Spec 14: quieting is a Gear effect now (Dampening Wrap,
-		# Quieting Coupler graft — Rig.EFFECT_QUIET_DIG), summed with the
-		# retired Upgrades level until that model is fully retired.
+		# Quieting is a Gear effect now (Dampening Wrap / Quieting Coupler).
 		var rig := get_tree().root.get_node_or_null("Rig") if is_inside_tree() else null
 		if rig and rig.has_method("get_effect_sum"):
 			quiet += int(round(float(rig.get_effect_sum(&"quiet_dig_level"))))
-		var community := get_tree().root.get_node_or_null("Community") if is_inside_tree() else null
-		if community and community.has_method("roll_upward_dig_risk"):
-			community.roll_upward_dig_risk(quiet)
+		if quiet > 0:
+			frontier_notice.emit("Your rig keeps the Firmament work quiet.")
 
 	if dug_down and is_mouth_cell(cell):
 		_pit_digs_since_warn += 1
@@ -716,13 +690,6 @@ func _try_record_drop(cell: Vector2i, direction: Vector2i) -> StringName:
 		var def: Dictionary = journal.get_def(found)
 		frontier_notice.emit("Record found: %s" % str(def.get("title", found)))
 	return found
-
-
-## Live Resources autoload instance (node name from project.godot).
-func _resource_wallet() -> Node:
-	if not is_inside_tree():
-		return null
-	return get_tree().root.get_node_or_null("Resources")
 
 
 ## Convert a world-space point to a map cell on this layer.

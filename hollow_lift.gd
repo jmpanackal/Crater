@@ -62,31 +62,24 @@ func service_speed_mult() -> float:
 	## healthy: 1.0 — thin: slow secondary — reserve: secondary parked (0)
 	if is_essential():
 		return 1.0
-	var districts := _districts()
-	if districts == null:
+	var district := _district()
+	if district == null:
 		return 1.0
-	var amount: int = int(districts.get_good_amount(districts.PRESSWATER))
-	var reserve: int = int(districts.PROTECTED_RESERVE)
-	if amount <= reserve:
+	var condition: StringName = district.get_condition(&"cistern")
+	if condition == &"critical":
 		return 0.0
-	if districts.has_method("is_production_thin") and districts.is_production_thin(districts.PRESSWATER):
-		return thin_speed_mult
-	if amount < int(districts.THIN_PRODUCTION_THRESHOLD):
+	if condition == &"shortage" or condition == &"strained":
 		return thin_speed_mult
 	return 1.0
 
 
-var _districts_cache: Node = null
+var _district_cache: Node = null
 
 
-func _districts() -> Node:
-	## Called every _physics_process tick via _refresh_service_state(); cache
-	## the autoload lookup instead of re-querying by string path every frame.
-	## Districts is a persistent root autoload, so a cached reference is safe
-	## for the life of the scene.
-	if _districts_cache == null:
-		_districts_cache = get_tree().root.get_node_or_null("Districts")
-	return _districts_cache
+func _district() -> Node:
+	if _district_cache == null:
+		_district_cache = get_tree().root.get_node_or_null("District")
+	return _district_cache
 
 
 func _refresh_service_state() -> void:

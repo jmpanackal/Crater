@@ -8,9 +8,6 @@ extends SceneTree
 ## - Group-specific context modifiers (Wardens vs. residents) — G16 shapes
 ##   the query for them; Act 1 uses only the global context, so
 ##   get_trust(&"wardens") reading the same value is the current truth.
-## - The retired community.gd Trust int and its HUD — still the legacy
-##   owner of retired penalties until their specs migrate; not asserted
-##   against here.
 
 
 func _init() -> void:
@@ -27,15 +24,10 @@ func _run() -> void:
 	var bus: Node = root.get_node_or_null("EventBus")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
 	var console: Node = root.get_node_or_null("DebugConsole")
-	var districts: Node = root.get_node_or_null("Districts")
-	var wallet: Node = root.get_node_or_null("Resources")
-	var community: Node = root.get_node_or_null("Community")
-	if trust == null or bus == null or save_load == null or console == null or districts == null or wallet == null:
-		_fail("missing autoloads (Trust / EventBus / SaveLoad / DebugConsole / Districts / Resources)")
+	var wallet: Node = root.get_node_or_null("Wallet")
+	if trust == null or bus == null or save_load == null or console == null or wallet == null:
+		_fail("missing canonical autoloads")
 		return
-	if community:
-		community.set_paused(true)
-		community.skip_lie_prompt = true
 	save_load.clear_save()
 	trust.reset_all()
 	var changes: Array = []
@@ -113,27 +105,13 @@ func _run() -> void:
 		return
 	print("PASS standing states follow the tuning ladder and the value clamps to the tuned range")
 
-	# --- 4. Ordinary job completion earns Tallies and never touches Trust
-	# (§17): drive the real legacy work-order delivery loop, which pays
-	# Tallies, and watch Trust. ---
+	# --- 4. Earning Tallies never touches Trust. ---
 	trust.reset_all()
 	changes.clear()
-	var wo: Node = root.get_node_or_null("WorkOrders")
-	if wo == null:
-		_fail("WorkOrders autoload missing")
-		return
-	if districts.has_method("set_paused"):
-		districts.set_paused(true)
-	wo.reset_all()
-	districts.reset_production()
 	wallet.reset_all()
-	wo.accept_offered()
-	wallet.set_amount(wallet.SPOREMEAL, 2)
-	wallet.set_amount(wallet.TALLIES, 0)
-	districts.queue_material(wallet.SPOREMEAL)
-	districts.queue_material(wallet.SPOREMEAL)
-	if int(wallet.get_amount(wallet.TALLIES)) <= 0:
-		_fail("the legacy delivery loop should have paid Tallies (got %d)" % int(wallet.get_amount(wallet.TALLIES)))
+	wallet.earn(2, "completed civic work")
+	if wallet.get_balance() != 2:
+		_fail("Wallet should hold earned Tallies")
 		return
 	if not changes.is_empty() or not (trust.get_trust_reasons() as Array).is_empty() or not is_equal_approx(float(trust.get_trust_value()), float(trust.get_default_trust())):
 		_fail("earning Tallies moved Trust: %s" % [changes])
@@ -179,7 +157,6 @@ func _run() -> void:
 
 	save_load.clear_save()
 	trust.reset_all()
-	wo.reset_all()
 	wallet.reset_all()
 	print("TRUST_TESTS_PASSED")
 	quit(0)
