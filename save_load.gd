@@ -40,6 +40,7 @@ const DOMAIN_AUTOLOAD_NAMES: Array[String] = [
 	"Clock",
 	"CivicCycle",
 	"Zones",
+	"Npcs",
 	"Stamina",
 	"Storage",
 	"Hauling",

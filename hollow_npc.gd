@@ -16,6 +16,9 @@ signal talk_requested(npc: Node2D, lines: PackedStringArray, choice_prompt: Stri
 
 const InteractableRelayScript := preload("res://interactable_relay.gd")
 
+## Build Bible Spec 16: which content/npcs/<npc_id>.tres schedule this body
+## follows. Empty = an unscheduled prop NPC that just stays where placed.
+@export var npc_id: StringName = &""
 @export var npc_name: String = "Neighbor"
 @export var district_id: StringName = &"farms"
 @export var body_color: Color = Color(0.85, 0.7, 0.45)
@@ -43,6 +46,42 @@ func _ready() -> void:
 	_wander_t = randf() * TAU
 	_build_visuals()
 	_player = get_tree().get_first_node_in_group("player") as Node2D
+	if npc_id != &"":
+		var npcs := get_tree().root.get_node_or_null("Npcs")
+		if npcs != null and npcs.has_method("register_agent"):
+			npcs.register_agent(npc_id, self)
+
+
+func _exit_tree() -> void:
+	if npc_id == &"":
+		return
+	var npcs := get_tree().root.get_node_or_null("Npcs")
+	if npcs != null and npcs.has_method("unregister_agent") and npcs.get_agent(npc_id) == self:
+		npcs.unregister_agent(npc_id)
+
+
+## Build Bible Spec 16: the schedule moved this body to a zone idle point.
+## Direct placement — traversal between zones is the navigation spike's.
+## Resets the wander origin too, since _process re-derives position.x
+## from it every frame.
+func relocate_to(world_pos: Vector2) -> void:
+	global_position = world_pos
+	_wander_origin = position
+
+
+## Build Bible Spec 16: present = this body's scheduled zone is loaded.
+## Absent bodies are invisible, not interactable, and don't idle-animate —
+## the person is somewhere else, not standing here unseen.
+func set_present(present: bool) -> void:
+	visible = present
+	set_process(present)
+	var relay := get_node_or_null("InteractableRelay") as Area2D
+	if relay != null:
+		relay.monitorable = present
+
+
+func is_present() -> bool:
+	return visible
 
 
 func _ensure_interactable_relay() -> void:
@@ -143,6 +182,15 @@ func _update_facing() -> void:
 
 ## Test helper — face sign after update (-1 left / +1 right).
 func debug_face_sign() -> float:
+	return _face_sign
+
+
+## Build Bible Spec 17: which way this body is looking (-1 left / +1
+## right), for Perception's facing-cone check. This prototype body leans
+## toward the player whenever one exists, so today "facing" is effectively
+## "toward the player"; a real animated NPC replaces this with its actual
+## heading without Perception changing.
+func get_facing_sign() -> float:
 	return _face_sign
 
 

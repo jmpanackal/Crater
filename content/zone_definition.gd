@@ -27,3 +27,11 @@ extends Resource
 ## is what Zones.validate_seams() checks (Spec 05: "a validated contract,
 ## not manual alignment").
 @export var seams: Array[Dictionary] = []
+
+## Build Bible Spec 17's coarse sound model: an enclosed/interior zone
+## (a bay cut into rock, a workshop, a basin) dampens hearing — its
+## effective hearing radius shrinks by the tuned multiplier. An open zone
+## (a deck across the Mouth) doesn't. Deliberately a single flag, not
+## obstruction geometry — canon §19: "not intended to become an acoustics
+## simulation."
+@export var enclosed: bool = false

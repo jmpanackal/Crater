@@ -30,11 +30,68 @@ const OPPOSITE_EDGE := {
 	"west": "east",
 }
 
+## Fired whenever a zone anchor registers or unregisters — Npcs (Spec 16)
+## re-places its bodies on this.
+signal loaded_zones_changed()
+
 var _zones: Dictionary = {}
+
+## Which zones are currently loaded (Spec 05's own state row), as
+## zone_id -> the zone_anchor.gd node that declared it in the live scene.
+## Live physical state: self-corrects as scenes enter/leave, never saved.
+var _loaded: Dictionary = {}
 
 
 func _ready() -> void:
 	reload_all()
+
+
+# --- Loaded zones + idle points (Build Bible Spec 16 uses these) ---------------------
+
+## Called by zone_anchor.gd. A zone not authored in content/zones/ is still
+## registered (the scene is the ground truth for what's physically here)
+## but warned about, since Spec 16 schedules can only name authored zones.
+func register_loaded_zone(zone_id: String, anchor: Node) -> void:
+	if zone_id == "" or anchor == null:
+		return
+	if not has_zone(zone_id):
+		push_warning("Zones: anchor '%s' registered for unauthored zone '%s'" % [anchor.name, zone_id])
+	_loaded[zone_id] = anchor
+	loaded_zones_changed.emit()
+
+
+func unregister_loaded_zone(zone_id: String, anchor: Node = null) -> void:
+	if not _loaded.has(zone_id):
+		return
+	if anchor != null and _loaded[zone_id] != anchor:
+		return
+	_loaded.erase(zone_id)
+	loaded_zones_changed.emit()
+
+
+func is_zone_loaded(zone_id: String) -> bool:
+	var anchor: Variant = _loaded.get(zone_id, null)
+	return anchor != null and is_instance_valid(anchor) and (anchor as Node).is_inside_tree()
+
+
+func get_loaded_zone_ids() -> Array[String]:
+	var out: Array[String] = []
+	for key: Variant in _loaded.keys():
+		if is_zone_loaded(str(key)):
+			out.append(str(key))
+	out.sort()
+	return out
+
+
+## The loaded zone's marked idle points (global), or [] if it isn't loaded.
+func get_idle_points(zone_id: String) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if not is_zone_loaded(zone_id):
+		return out
+	var anchor: Node = _loaded[zone_id]
+	if anchor.has_method("get_idle_points"):
+		return anchor.get_idle_points()
+	return out
 
 
 ## Re-scans res://content/zones/ and reloads every .tres file found. Safe
@@ -65,10 +122,13 @@ func reload_all() -> void:
 	dir.list_dir_end()
 
 
-func get_loaded_zone_ids() -> Array[String]:
+## Every zone authored in content/zones/ (definitions), whether or not it
+## is physically loaded right now — see get_loaded_zone_ids() for that.
+func get_authored_zone_ids() -> Array[String]:
 	var out: Array[String] = []
 	for key: Variant in _zones.keys():
 		out.append(str(key))
+	out.sort()
 	return out
 
 
@@ -89,6 +149,14 @@ func get_display_name(zone_id: String) -> String:
 		return zone_id
 	var name := str(zone.get("display_name"))
 	return name if name != "" else zone_id
+
+
+## Build Bible Spec 17's coarse enclosed/open flag. Unknown zone = open.
+func is_zone_enclosed(zone_id: String) -> bool:
+	var zone: Resource = _zones.get(zone_id, null)
+	if zone == null:
+		return false
+	return bool(zone.get("enclosed"))
 
 
 func get_neighbor_ids(zone_id: String) -> Array[String]:
@@ -148,10 +216,9 @@ func validate_seams() -> Array[String]:
 	return problems
 
 
-## Build Bible Spec 02 uniform SaveLoad contract. Empty today — every
-## authored zone loads together with no streaming (Spec 05, option A), so
-## there is no "which zones are currently loaded" runtime state to persist
-## yet. Ready to extend once real streaming exists.
+## Build Bible Spec 02 uniform SaveLoad contract. Empty — "which zones are
+## loaded" is live scene state (anchors register themselves as the scene
+## enters the tree), so it self-corrects on load rather than being saved.
 func save_state() -> Dictionary:
 	return {}
 

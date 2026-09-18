@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://hollow_decks.gd" id="18_hollow_decks"]
 [ext_resource type="Script" path="res://hollow_lift.gd" id="19_hollow_lift"]
 [ext_resource type="Script" path="res://ritual_ground.gd" id="20_ritual_ground"]
+[ext_resource type="Script" path="res://zone_anchor.gd" id="21_zone_anchor"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ritual_ground"]
 size = Vector2(176, 80)
@@ -352,11 +353,67 @@ script = ExtResource("20_ritual_ground")
 position = Vector2(536, 536)
 shape = SubResource("RectangleShape2D_ritual_ground")
 
+[node name="Zones" type="Node2D" parent="Hollow"]
+
+[node name="HomeCourt" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "home_court"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/HomeCourt"]
+position = Vector2(200, 864)
+
+[node name="Glowbeds" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "glowbeds"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Glowbeds"]
+position = Vector2(-320, 224)
+
+[node name="Idle2" type="Marker2D" parent="Hollow/Zones/Glowbeds"]
+position = Vector2(80, 224)
+
+[node name="Wickwork" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "wickwork"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Wickwork"]
+position = Vector2(-220, 576)
+
+[node name="Idle2" type="Marker2D" parent="Hollow/Zones/Wickwork"]
+position = Vector2(-40, 576)
+
+[node name="MidHeart" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "mid_heart"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidHeart"]
+position = Vector2(536, 576)
+
+[node name="Idle2" type="Marker2D" parent="Hollow/Zones/MidHeart"]
+position = Vector2(496, 576)
+
+[node name="Idle3" type="Marker2D" parent="Hollow/Zones/MidHeart"]
+position = Vector2(576, 576)
+
+[node name="Idle4" type="Marker2D" parent="Hollow/Zones/MidHeart"]
+position = Vector2(660, 576)
+
+[node name="Cistern" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "cistern"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Cistern"]
+position = Vector2(800, 1072)
+
+[node name="Idle2" type="Marker2D" parent="Hollow/Zones/Cistern"]
+position = Vector2(760, 1072)
+
 [node name="NPCs" type="Node2D" parent="Hollow"]
 
 [node name="Pell" type="Node2D" parent="Hollow/NPCs"]
 position = Vector2(-320, 224)
 script = ExtResource("8_npc")
+npc_id = &"pell"
 npc_name = "Pell"
 district_id = &"farms"
 body_color = Color(0.55, 0.72, 0.45, 1)
@@ -366,6 +423,7 @@ choice_prompt = "Help tend the beds for a spell?"
 [node name="Rook" type="Node2D" parent="Hollow/NPCs"]
 position = Vector2(-220, 576)
 script = ExtResource("8_npc")
+npc_id = &"rook"
 npc_name = "Rook"
 district_id = &"wickwork"
 body_color = Color(0.75, 0.55, 0.35, 1)
@@ -374,6 +432,7 @@ lines = PackedStringArray("Rope's taut. Lantern oil's thin.", "If the Wickwork s
 [node name="Sila" type="Node2D" parent="Hollow/NPCs"]
 position = Vector2(800, 1072)
 script = ExtResource("8_npc")
+npc_id = &"sila"
 npc_name = "Sila"
 district_id = &"cistern"
 body_color = Color(0.45, 0.65, 0.8, 1)
@@ -382,6 +441,7 @@ lines = PackedStringArray("Presswater's clean enough for the hoists.", "My uncle
 [node name="Joss" type="Node2D" parent="Hollow/NPCs"]
 position = Vector2(536, 576)
 script = ExtResource("8_npc")
+npc_id = &"joss"
 npc_name = "Joss"
 district_id = &"wickwork"
 body_color = Color(0.85, 0.7, 0.5, 1)
