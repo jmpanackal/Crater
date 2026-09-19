@@ -9,12 +9,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var community: Node = root.get_node_or_null("Community")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	if community:
-		community.set_paused(true)
-		if "skip_lie_prompt" in community:
-			community.skip_lie_prompt = true
 	if save_load:
 		save_load.clear_save()
 
@@ -194,11 +189,11 @@ func _run() -> void:
 			return
 	print("PASS orphan/retired dig_site_*.png sheets gone; placeholder tileset in use")
 
-	# Lie UX dimmer present; journal subtitle/count helpers.
-	if scene.get_node_or_null("UI/LieDimmer") == null:
-		push_error("FAIL LieDimmer missing")
-		quit(1)
-		return
+	# Journal subtitle/count helpers. The retired Harvest-miss lie dimmer
+	# (UI/LieDimmer) has no successor — the lie/truth prompt it dimmed for
+	# is gone outright (Build Bible Spec 15: Ritual-miss is contextual,
+	# never an automatic stat penalty; no prompt is rebuilt), so there is
+	# nothing left for a dimmer to gate and no node to assert on.
 	var journal_hud := scene.get_node_or_null("UI/JournalHud")
 	if journal_hud == null:
 		push_error("FAIL JournalHud missing")
@@ -208,7 +203,7 @@ func _run() -> void:
 		push_error("FAIL Journal subtitle missing")
 		quit(1)
 		return
-	print("PASS Harvest lie dimmer + Journal subtitle")
+	print("PASS Journal subtitle")
 
 	# QUARANTINED (2026-09-18): "Hollow FarHaze + PitShaftVeil depth polish"
 	# checked Hollow/FarHaze and Hollow/PitShaftVeil parallax dressing.

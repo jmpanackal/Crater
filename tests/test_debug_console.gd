@@ -60,29 +60,29 @@ func _run() -> void:
 
 	# --- 4. dump falls back to a domain's save_state() (Spec 02 contract)
 	# with no custom inspector registration required. ---
-	var wallet: Node = root.get_node_or_null("Resources")
+	var wallet: Node = root.get_node_or_null("Wallet")
 	if wallet == null:
-		push_error("FAIL Resources autoload missing")
+		push_error("FAIL Wallet autoload missing")
 		quit(1)
 		return
 	wallet.reset_all()
-	wallet.add(wallet.TALLIES, 7)
-	var dump_result: String = console.execute("dump Resources")
-	if not dump_result.contains("tallies"):
-		push_error("FAIL dump did not reflect Resources' save_state(): %s" % dump_result)
+	wallet.earn(7, "debug console test")
+	var dump_result: String = console.execute("dump Wallet")
+	if not dump_result.contains("balance") or not dump_result.contains("7"):
+		push_error("FAIL dump did not reflect Wallet's save_state(): %s" % dump_result)
 		quit(1)
 		return
 	print("PASS dump uses a domain's existing save_state() with no extra registration")
 
 	# --- 5. A registered custom inspector overrides the save_state()
 	# fallback. ---
-	console.register_inspector("Resources", func() -> Dictionary: return {"custom": true})
-	var custom_dump: String = console.execute("dump Resources")
+	console.register_inspector("Wallet", func() -> Dictionary: return {"custom": true})
+	var custom_dump: String = console.execute("dump Wallet")
 	if not custom_dump.contains("custom"):
 		push_error("FAIL registered inspector did not override save_state() fallback")
 		quit(1)
 		return
-	console.unregister_inspector("Resources")
+	console.unregister_inspector("Wallet")
 	print("PASS a registered custom inspector overrides the save_state() fallback")
 
 	# --- 6. facts command reads through to the real FactLog. ---
@@ -109,7 +109,6 @@ func _run() -> void:
 	# --- 7. set_trust and spawn_material — real, already-buildable commands
 	# wired to the current Trust/Materials stand-ins. ---
 	var trust_result: String = console.execute("set_trust 42")
-	var community: Node = root.get_node_or_null("Community")
 	var trust_node: Node = root.get_node_or_null("Trust")
 	if trust_node == null or not is_equal_approx(float(trust_node.get_trust_value()), 42.0) or not trust_result.contains("42"):
 		push_error("FAIL set_trust did not move Trust (Build Bible Spec 19) to 42")

@@ -17,6 +17,10 @@ extends SceneTree
 ## covers what's specifically new in Spec 02: schema versioning, atomic
 ## write, and FactLog now actually persisting through the real system
 ## rather than only its own isolated snapshot (test_core_infrastructure.gd).
+##
+## Wallet (Tallies) stands in for the domain-round-trip probe that used to
+## ride on the retired Resources wallet — same shape, current canon owner
+## (Build Bible Spec 23).
 
 
 func _init() -> void:
@@ -26,9 +30,9 @@ func _init() -> void:
 func _run() -> void:
 	var save_load: Node = root.get_node_or_null("SaveLoad")
 	var fact_log: Node = root.get_node_or_null("FactLog")
-	var wallet: Node = root.get_node_or_null("Resources")
+	var wallet: Node = root.get_node_or_null("Wallet")
 	if save_load == null or fact_log == null or wallet == null:
-		push_error("FAIL missing autoloads (SaveLoad / FactLog / Resources)")
+		push_error("FAIL missing autoloads (SaveLoad / FactLog / Wallet)")
 		quit(1)
 		return
 
@@ -40,7 +44,7 @@ func _run() -> void:
 	# SaveLoad system (not just FactLog's own isolated snapshot). ---
 	var no_witnesses: Array[String] = []
 	fact_log.record(&"theft_witnessed", "player", &"wickwork", no_witnesses, {}, 2)
-	wallet.add(wallet.TALLIES, 5)
+	wallet.earn(5, "test round-trip")
 	if not save_load.save_game():
 		push_error("FAIL save_game")
 		quit(1)
@@ -55,8 +59,8 @@ func _run() -> void:
 		push_error("FAIL FactLog did not round-trip through the real SaveLoad system")
 		quit(1)
 		return
-	if wallet.get_amount(wallet.TALLIES) != 5:
-		push_error("FAIL Resources did not round-trip alongside FactLog")
+	if wallet.get_balance() != 5:
+		push_error("FAIL Wallet did not round-trip alongside FactLog")
 		quit(1)
 		return
 	print("PASS FactLog round-trips through the real SaveLoad system alongside other domains")
@@ -71,8 +75,8 @@ func _run() -> void:
 
 	# --- 3. A save with a missing schema_version is rejected outright, per
 	# Spec 02's explicit "never silently loaded as-is" invariant. ---
-	var pre_reject_tallies: int = wallet.get_amount(wallet.TALLIES)
-	var no_version := {"domains": {"Resources": {"tallies": 999}}}
+	var pre_reject_balance: int = wallet.get_balance()
+	var no_version := {"domains": {"Wallet": {"balance": 999}}}
 	var path: String = save_load.SAVE_PATH
 	var f1 := FileAccess.open(path, FileAccess.WRITE)
 	f1.store_string(JSON.stringify(no_version))
@@ -81,7 +85,7 @@ func _run() -> void:
 		push_error("FAIL a save with no schema_version should be rejected")
 		quit(1)
 		return
-	if wallet.get_amount(wallet.TALLIES) != pre_reject_tallies:
+	if wallet.get_balance() != pre_reject_balance:
 		push_error("FAIL a rejected load must not mutate any domain's state")
 		quit(1)
 		return
@@ -89,7 +93,7 @@ func _run() -> void:
 
 	# --- 4. A save with a mismatched (wrong, but present) schema_version is
 	# also rejected outright. ---
-	var wrong_version := {"schema_version": 999, "domains": {"Resources": {"tallies": 999}}}
+	var wrong_version := {"schema_version": 999, "domains": {"Wallet": {"balance": 999}}}
 	var f2 := FileAccess.open(path, FileAccess.WRITE)
 	f2.store_string(JSON.stringify(wrong_version))
 	f2.close()
@@ -97,7 +101,7 @@ func _run() -> void:
 		push_error("FAIL a save with a mismatched schema_version should be rejected")
 		quit(1)
 		return
-	if wallet.get_amount(wallet.TALLIES) != pre_reject_tallies:
+	if wallet.get_balance() != pre_reject_balance:
 		push_error("FAIL a rejected mismatched-version load must not mutate any domain's state")
 		quit(1)
 		return
@@ -107,7 +111,7 @@ func _run() -> void:
 	# warning rather than failing the whole save/load (forward-compat with
 	# systems that land ahead of their own Spec's save wiring). ---
 	var known_domains: Array = save_load.DOMAIN_AUTOLOAD_NAMES
-	if not known_domains.has("FactLog") or not known_domains.has("Resources"):
+	if not known_domains.has("FactLog") or not known_domains.has("Wallet"):
 		push_error("FAIL DOMAIN_AUTOLOAD_NAMES missing expected core domains")
 		quit(1)
 		return

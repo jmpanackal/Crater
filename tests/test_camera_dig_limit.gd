@@ -20,9 +20,10 @@ func _run() -> void:
 		return
 
 	# Deep Hollow: dig columns must stay off-frame.
+	player.set_physics_process(false)
 	player.global_position = Vector2(520.0, HollowLayout.WICK_Y - 16.0)
 	player.velocity = Vector2.ZERO
-	await process_frame
+	await physics_frame
 	await process_frame
 	if float(cam.limit_right) > 1100.0:
 		push_error("FAIL Hollow limit_right=%s exposes dig strip" % cam.limit_right)
@@ -36,6 +37,7 @@ func _run() -> void:
 	var x := 880.0
 	while x <= 1160.0:
 		player.global_position.x = x
+		await physics_frame
 		await process_frame
 		var cur := float(cam.limit_right)
 		var jump := absf(cur - prev)
@@ -55,7 +57,7 @@ func _run() -> void:
 
 	# Fully past dig mouth: full dig framing allowed.
 	player.global_position.x = 1600.0
-	await process_frame
+	await physics_frame
 	await process_frame
 	if float(cam.limit_right) < 2000.0:
 		push_error("FAIL dig limit_right=%s still clamped" % cam.limit_right)
@@ -84,4 +86,6 @@ func _run() -> void:
 		print("PASS desired_limit_right curve")
 
 	print("CAMERA_DIG_LIMIT_TESTS_PASSED")
+	scene.queue_free()
+	await process_frame
 	quit(0)

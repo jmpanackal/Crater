@@ -13,6 +13,7 @@ const TILE_SIZE := 16
 const SOURCE_LEDGE := 0
 const SOURCE_BRIDGE := 1
 const SOURCE_STAIR := 2
+const SOURCE_ROCK := 3
 const ATLAS_TOP_MID := Vector2i(0, 0)
 const LEDGE_COLOR := Color(0.5, 0.4, 0.3, 0.95)
 const BRIDGE_COLOR := Color(0.42, 0.32, 0.24, 0.95)
@@ -33,6 +34,10 @@ func _paint_opening_route() -> void:
 		paint_floor(rect.x, rect.y, rect.z)
 	for stair in HollowLayout.opening_route_stair_rects():
 		paint_stairs(stair.x, stair.y, stair.z, stair.w)
+	var landing := HollowLayout.HOME_LANDING
+	paint_block(Rect2(landing.x, landing.z + TILE_SIZE, landing.y - landing.x, HollowLayout.LOWER_WORK_Y - landing.z), SOURCE_ROCK)
+	paint_block(Rect2(landing.y, HollowLayout.HOME_ROOF_Y, TILE_SIZE, HollowLayout.LOWER_WORK_Y - HollowLayout.HOME_ROOF_Y + TILE_SIZE), SOURCE_ROCK)
+	paint_floor(HollowLayout.HOME_COURT_LEFT, landing.y + TILE_SIZE, HollowLayout.HOME_ROOF_Y, SOURCE_ROCK)
 
 
 func _build_tileset() -> TileSet:
@@ -44,7 +49,13 @@ func _build_tileset() -> TileSet:
 	_add_placeholder_source(tileset, LEDGE_COLOR)
 	_add_placeholder_source(tileset, BRIDGE_COLOR)
 	_add_placeholder_source(tileset, STAIR_COLOR)
+	_add_placeholder_source(tileset, Color(0.22, 0.27, 0.25))
 	return tileset
+
+
+func paint_block(bounds: Rect2, source_id: int) -> void:
+	for row in range(int(bounds.position.y / TILE_SIZE), int(bounds.end.y / TILE_SIZE)):
+		paint_floor(bounds.position.x, bounds.end.x, row * TILE_SIZE, source_id)
 
 
 func _add_placeholder_source(tileset: TileSet, color: Color) -> void:

@@ -117,7 +117,7 @@ func _run() -> void:
 	var space := terrain.get_world_2d().direct_space_state
 	var home_y: float = HollowLayout.LOWER_WORK_Y
 	var hit := space.intersect_ray(
-		PhysicsRayQueryParameters2D.create(Vector2(120, home_y - 40), Vector2(120, home_y + 40))
+		PhysicsRayQueryParameters2D.create(Vector2(-16, home_y - 40), Vector2(-16, home_y + 40))
 	)
 	if hit.is_empty():
 		push_error("FAIL no physics collision under Home Court's painted floor")

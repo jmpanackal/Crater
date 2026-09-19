@@ -3,11 +3,17 @@ extends SceneTree
 ##
 ## Not covered here, and why:
 ## - Authored dialogue CONTENT (which NPC asks what, when) — thin slice;
-##   the legacy Harvest-miss lie prompt is the one real questioning moment
-##   wired through this contract, tested at the end.
+##   the Ritual alibi case below is the one real questioning moment wired
+##   through this contract against CivicCycle's real ritual_missed fact.
 ## - Predictive claims resolving against future state — out of scope by
 ##   the spec's own confirmed choice (option B).
 ## - Council/Steward examination of grafts — Spec 28.
+## - The retired Harvest-miss lie prompt (community.gd's
+##   trigger_harvest_now()/resolve_harvest_miss()/on_theft_noticed()) is
+##   gone outright (Build Bible Spec 15: Ritual-miss is "contextual, never
+##   an automatic stat penalty" — no lie/truth prompt is rebuilt). Its
+##   structural replacement is the Ritual alibi case: a real ritual_missed
+##   fact contradicts a claim, and an authored confrontation exposes it.
 
 
 func _init() -> void:
@@ -38,12 +44,9 @@ func _run() -> void:
 	var civic: Node = root.get_node_or_null("CivicCycle")
 	var console: Node = root.get_node_or_null("DebugConsole")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	var community: Node = root.get_node_or_null("Community")
-	if dialogue == null or fact_log == null or trust == null or investigation == null or evidence == null or bus == null or clock == null or civic == null or console == null or save_load == null or community == null:
+	if dialogue == null or fact_log == null or trust == null or investigation == null or evidence == null or bus == null or clock == null or civic == null or console == null or save_load == null:
 		_fail("missing autoloads")
 		return
-	community.set_paused(true)
-	community.skip_lie_prompt = true
 	save_load.clear_save()
 	clock.reset_all()
 	clock.pause("test")
@@ -157,34 +160,6 @@ func _run() -> void:
 		return
 	print("PASS a Ritual alibi is contradicted by the real ritual_missed fact and exposed by an authored confrontation")
 
-	# --- 5. The legacy Harvest-miss lie prompt is a real questioning
-	# moment: lying commits a claim; the legacy "your lie came apart"
-	# path exposes it through this contract. ---
-	fact_log.clear_all()
-	trust.reset_all()
-	community.reset_all()
-	community.skip_lie_prompt = false
-	community.set_paused(true)
-	console.execute("force_phase gathering")
-	console.execute("force_advance 1")  # a real missed Ritual this cycle
-	var alibi_cycle := int(clock.get_cycles_elapsed())  # the cycle the lie is told in
-	community.trigger_harvest_now()  # player away -> lie prompt
-	community.resolve_harvest_miss(true)
-	var legacy_claim_id := StringName("harvest_alibi_%d" % alibi_cycle)
-	if not bool(dialogue.has_claim(legacy_claim_id)) or not bool(dialogue.is_trust_relevant(legacy_claim_id)) or not bool(dialogue.is_contradicted(legacy_claim_id)):
-		_fail("lying at the Harvest prompt should commit a contradicted, trust-relevant claim (%s)" % legacy_claim_id)
-		return
-	if exposed_lie_count.call() != 0:
-		_fail("the lie was exposed before anything surfaced it")
-		return
-	community.on_theft_noticed()  # legacy: the earlier lie comes apart
-	if exposed_lie_count.call() != 1 or not bool(dialogue.is_exposed(legacy_claim_id)):
-		_fail("the legacy exposure path did not expose the claim exactly once (%d)" % exposed_lie_count.call())
-		return
-	print("PASS the legacy Harvest-miss lie is a real claim, exposed through the contract when it comes apart")
-
-	community.skip_lie_prompt = true
-	community.reset_all()
 	fact_log.clear_all()
 	trust.reset_all()
 	civic.reset_all()

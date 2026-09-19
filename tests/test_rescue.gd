@@ -33,12 +33,9 @@ func _run() -> void:
 	var fact_log: Node = root.get_node_or_null("FactLog")
 	var bus: Node = root.get_node_or_null("EventBus")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	var community: Node = root.get_node_or_null("Community")
-	var upgrades: Node = root.get_node_or_null("Upgrades")
-	if rescue == null or fatigue == null or stamina == null or hauling == null or clock == null or storage == null or journal == null or diversion == null or district == null or trust == null or fact_log == null or bus == null or save_load == null or community == null or upgrades == null:
+	if rescue == null or fatigue == null or stamina == null or hauling == null or clock == null or storage == null or journal == null or diversion == null or district == null or trust == null or fact_log == null or bus == null or save_load == null:
 		_fail("missing autoloads")
 		return
-	community.set_paused(true)
 	rescue.suspend_forced_rescue = true
 	save_load.clear_save()
 	clock.reset_all()
@@ -47,7 +44,6 @@ func _run() -> void:
 		n.reset_all()
 	journal.clear_all()
 	fact_log.clear_all()
-	upgrades.set_theft_station_open(false)  # legacy "player is in the Hollow" presence: false = out in the field
 	var trust_events: Array = []
 	bus.trust_changed.connect(func(_s: StringName, delta: float, _r: String) -> void: trust_events.append(delta))
 	var states: Array = []
@@ -86,10 +82,12 @@ func _run() -> void:
 	print("PASS a severe fall adds fatigue, caches the haul at safe ground, costs civic time, and touches no stored goods")
 
 	# --- 2. Failure states are derived: none -> strained -> exhausted ->
-	# stranded (exhausted outside the Hollow); the transitions are
-	# announced. ---
+	# stranded (exhausted outside the Hollow); Rescue reads Hollow presence
+	# from the player's real position (HollowLayout bounds), not a flag; the
+	# transitions are announced. ---
 	stamina.reset_all()
 	fatigue.recover_full()
+	player.global_position = HollowLayout.player_spawn_point()
 	await process_frame
 	if rescue.get_failure_state() != &"none":
 		_fail("fresh stamina should read no failure state (%s)" % rescue.get_failure_state())
@@ -99,15 +97,16 @@ func _run() -> void:
 		_fail("heavily blocked stamina should read strained (%s)" % rescue.get_failure_state())
 		return
 	stamina.release_block(stamina.SOURCE_HAULING)
+	player.global_position = Vector2(2000.0, 1000.0)  # well outside HollowLayout's bounds — out in the field
 	stamina.request_block(stamina.SOURCE_FATIGUE, float(stamina.get_max_stamina()))  # exhausted
 	if not bool(fatigue.is_exhausted()) or rescue.get_failure_state() != &"stranded":
 		_fail("exhausted outside the Hollow should read stranded (%s)" % rescue.get_failure_state())
 		return
-	upgrades.set_theft_station_open(true)
+	player.global_position = HollowLayout.player_spawn_point()  # inside the Hollow
 	if rescue.get_failure_state() != &"exhausted":
 		_fail("exhausted inside the Hollow should read exhausted, not stranded")
 		return
-	upgrades.set_theft_station_open(false)
+	player.global_position = Vector2(2000.0, 1000.0)
 	await process_frame
 	await process_frame
 	if not states.has(&"stranded"):

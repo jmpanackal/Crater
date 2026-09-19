@@ -1,6 +1,6 @@
 extends SceneTree
 ## Dig hit-stop Firmament shorter than Devil's Mouth; salvage/record floats; NPC face/bob;
-## harvest pulse; trust toast tone; dig approach threshold; title quiet.
+## civic-cycle countdown pulse; requisition toast tone; dig approach threshold; title quiet.
 
 const FeelAudio := preload("res://feel_audio.gd")
 const UpgradeHudScript := preload("res://upgrade_hud.gd")
@@ -11,24 +11,19 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var community: Node = root.get_node_or_null("Community")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	if community:
-		community.set_paused(true)
-		if "skip_lie_prompt" in community:
-			community.skip_lie_prompt = true
 	if save_load:
 		save_load.clear_save()
 	# clear_save() only deletes the file — SaveLoad's own autoload _ready()
 	# already deferred-loads whatever save existed on disk BEFORE this
 	# test's _run() gets to execute (both are call_deferred from _init/
 	# _ready, and autoloads enter the tree first), so a stale leftover save
-	# from an earlier test run can still leave Resources/Districts/etc.
+	# from an earlier test run can still leave Storage/District/etc.
 	# seeded with old values. Reset the ones this test actually depends on
 	# explicitly rather than assuming "no save file" implies "fresh state".
-	var wallet: Node = root.get_node_or_null("Resources")
-	if wallet and wallet.has_method("reset_all"):
-		wallet.reset_all()
+	var storage: Node = root.get_node_or_null("Storage")
+	if storage and storage.has_method("reset_all"):
+		storage.reset_all()
 
 	# --- Hit-stop Firmament shorter than Devil's Mouth ---
 	FeelFx.reset_debug()
@@ -45,24 +40,22 @@ func _run() -> void:
 		return
 	print("PASS dig hitstop Firmament shorter than Devil's Mouth")
 
-	# --- Notice toast tones ---
-	if UpgradeHudScript.notice_tone_for("Missed Harvest. People noticed you were gone.") != &"loss":
-		push_error("FAIL miss notice tone")
+	# --- Notice toast tones (canon Requisition notices — Build Bible Spec
+	# 23; the retired Harvest-miss/lie copy is gone, no "caution" tone is
+	# reachable through notice_tone_for() any more) ---
+	if UpgradeHudScript.notice_tone_for("Order refused — not enough Tallies.") != &"loss":
+		push_error("FAIL loss notice tone")
 		quit(1)
 		return
-	if UpgradeHudScript.notice_tone_for("You help in the Farms. (+1 Trust)") != &"gain":
+	if UpgradeHudScript.notice_tone_for("Order placed.") != &"gain":
 		push_error("FAIL gain notice tone")
 		quit(1)
 		return
-	if UpgradeHudScript.notice_tone_for("You lied about where you were. For now, it holds.") != &"caution":
-		push_error("FAIL caution notice tone")
-		quit(1)
-		return
-	if UpgradeHudScript.notice_tone_for("Theft complete. Shortage Risk held.") != &"neutral":
+	if UpgradeHudScript.notice_tone_for("Wickwork: Stable.") != &"neutral":
 		push_error("FAIL neutral notice tone")
 		quit(1)
 		return
-	print("PASS trust toast tone clarity")
+	print("PASS requisition toast tone clarity")
 
 	# --- Terrain dig: float + hitstop request ---
 	var terrain := TerrainLayer.new()
@@ -145,30 +138,35 @@ func _run() -> void:
 		return
 
 	var panel: Node = scene.get_node_or_null("UI/UpgradePanel")
-	var community_live: Node = root.get_node_or_null("Community")
-	if panel == null or community_live == null:
-		push_error("FAIL panel/community missing")
+	var clock_live: Node = root.get_node_or_null("Clock")
+	if panel == null or clock_live == null:
+		push_error("FAIL panel/clock missing")
 		quit(1)
 		return
-	community_live.set_harvest_timer(8.0)
+	# Force the civic-cycle countdown into its final-10-seconds urgency band
+	# (the harvest-timer pulse's real successor — see upgrade_hud.gd's
+	# _refresh_status()/is_cycle_urgent()) by driving seconds_in_phase far
+	# past the phase length; get_seconds_remaining_in_phase() clamps at 0.
+	clock_live.load_state({"phase": "rousing", "cycles_elapsed": 0, "seconds_in_phase": 999999.0})
 	await process_frame
 	await process_frame
-	if not panel.has_method("is_harvest_urgent") or not panel.is_harvest_urgent():
-		push_error("FAIL harvest urgency not active at 8s")
+	if not panel.has_method("is_cycle_urgent") or not panel.is_cycle_urgent():
+		push_error("FAIL civic-cycle urgency not active with no time left in phase")
 		quit(1)
 		return
-	var harvest_lbl: Label = scene.get_node("UI/HarvestLabel") as Label
-	if harvest_lbl == null or harvest_lbl.modulate.r < 0.9 or harvest_lbl.modulate.a < 0.5:
+	var cycle_lbl: Label = scene.get_node("UI/CycleLabel") as Label
+	if cycle_lbl == null or cycle_lbl.modulate.r < 0.9 or cycle_lbl.modulate.a < 0.5:
 		push_error(
-			"FAIL harvest pulse modulate flat %s"
-			% (harvest_lbl.modulate if harvest_lbl else Color())
+			"FAIL civic-cycle pulse modulate flat %s"
+			% (cycle_lbl.modulate if cycle_lbl else Color())
 		)
 		quit(1)
 		return
-	print("PASS harvest clock urgent pulse band")
+	print("PASS civic-cycle countdown urgent pulse band")
+	clock_live.reset_all()
 
 	if panel.has_method("_show_notice"):
-		panel._show_notice("Caught digging the Firmament — and your lie cracked. (−12 Trust)")
+		panel._show_notice("Order refused — not enough Tallies.")
 		if panel.debug_notice_tone() != &"loss":
 			push_error("FAIL notice tone after show")
 			quit(1)

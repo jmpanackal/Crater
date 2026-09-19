@@ -182,6 +182,7 @@ func request_rescue(forced: bool = false) -> Dictionary:
 		fatigue.set_fatigue(_tune("fatigue_after_rescue", 30.0))
 	if player != null:
 		player.global_position = HollowLayout.player_spawn_point()
+		player.reset_physics_interpolation()
 		if player is CharacterBody2D:
 			(player as CharacterBody2D).velocity = Vector2.ZERO
 	var clock := get_tree().root.get_node_or_null("Clock")

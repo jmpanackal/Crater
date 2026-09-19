@@ -224,15 +224,15 @@ func _run() -> void:
 	trust_events.clear()
 	clock.reset_all()
 	clock.pause("test")
-	var late: StringName = jobs.offer(&"open_the_gallery")  # before_gathering
+	var late: StringName = jobs.offer(&"open_the_gallery")  # multi_cycle, deadline_cycles=1
 	jobs.accept(late)
-	console.execute("force_phase working")
+	console.execute("force_advance 4")  # one full cycle — deadline_cycles not yet exceeded
 	if jobs.get_deadline_status(late) != &"open" or jobs.get_stage(late) != &"accepted":
 		_fail("deadline passed too early")
 		return
-	console.execute("force_phase gathering")
+	console.execute("force_advance 4")  # a second full cycle — deadline_cycles now exceeded
 	if jobs.get_stage(late) != &"settled" or jobs.get_job(late)["grade"] != &"broken_commitment" or trust_events.size() != 1:
-		_fail("a Duty missed before Gathering should settle as broken: %s %s" % [jobs.get_job(late), trust_events])
+		_fail("a Duty missed past its cycle deadline should settle as broken: %s %s" % [jobs.get_job(late), trust_events])
 		return
 	print("PASS a missed deadline settles an accepted Duty as a broken commitment")
 

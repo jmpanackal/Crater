@@ -88,6 +88,7 @@ func _ready() -> void:
 	_last_safe_pos = global_position
 	_has_safe_pos = true
 	_was_on_floor = is_on_floor()
+	reset_physics_interpolation()
 
 
 const InteractionScript := preload("res://interaction.gd")
@@ -385,6 +386,7 @@ func _soft_respawn_if_void() -> void:
 	_jump_buffer_timer = 0.0
 	velocity = Vector2.ZERO
 	global_position = dest
+	reset_physics_interpolation()
 
 
 ## Auto-land at shaft ends so we never exit the climb Area below the deck collider.

@@ -16,7 +16,7 @@ Living checklist for Act 1 structure, look, and feel. Not a feature backlog.
 | **No mipmaps on 2D pixel assets** | Imports already `mipmaps/generate=false`; keep it that way. |
 | **Lossless compress for tiles/sprites** | Imports use `compress/mode=0` (Lossless) — correct for pixel art. |
 | **Consistent tile / dig grid** | Dig cells = **64 px**. SpriteFusion sources often 32 px → nearest upscale into `dig_site_tiles.png`. Don’t mix 32/64 world scales casually. |
-| **Snap 2D transforms to pixel** | Enabled project-wide to reduce sub-pixel shimmer with smoothed cameras. |
+| **Smooth player rendering** | Transform snapping is disabled: independently rounding player and camera caused visible jitter. Nearest filtering remains enabled. Physics interpolation is enabled, with the main scene opting out and the Player branch opting in; camera follow uses physics ticks. Reset interpolation after spawn/teleport/rescue. |
 | **Stretch mode** | Current: `canvas_items` + `aspect=expand` @ 1152×648 — good for Eastward/Owlboy-ish detail + smooth camera (Hyper Light Drifter style). `viewport` + integer scale is the sharper “retro framebuffer” option if you later want chunkier UI pixels. |
 | **Readable silhouettes / palette** | Earthy Hollow, limited lantern warmth; Firmament quieter visually than Devil’s Mouth. See art-pipeline brief checklist. |
 | **Parallax / depth** | Prefer soft DepthBg + Mist + future layers over busy particle fog. Keep Firmament/Devil’s Mouth readable. |

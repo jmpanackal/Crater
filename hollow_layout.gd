@@ -121,7 +121,11 @@ const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 ## elevation. A prior pass got this wrong (a flat westward strip); see the
 ## blueprint's v4 correction. All breakpoints are TILE-aligned.
 const HOME_COURT_LEFT := -64.0
-const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
+const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 32.0, LOWER_WORK_Y, FLOOR_THICKNESS)
+const HOME_BACK_STAIR := Vector4(HOME_COURT_DECK.y, LOWER_WORK_Y, 160.0, LOWER_WORK_Y - MIN_BAND_GAP)
+const HOME_LANDING := Vector4(HOME_BACK_STAIR.z, 256.0, HOME_BACK_STAIR.w, FLOOR_THICKNESS)
+const HOME_ROOF_Y := HOME_LANDING.z - MIN_BAND_GAP
+const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 336.0, LOWER_WORK_Y + 16.0 - HOME_ROOF_Y)
 
 ## Lower Switchback: hollow-chunk-map.md describes this as "sloping down and
 ## back up around a carved support mass," but that's a landmark prop that
@@ -176,6 +180,7 @@ const OPENING_ROUTE_LEFT := GALLERY_LEFT ## westmost extent of the opening route
 static func opening_route_deck_rects() -> Array[Vector4]:
 	return [
 		HOME_COURT_DECK,
+		HOME_LANDING,
 		SWITCHBACK_FLOOR,
 		WEST_DISPATCH_YARD,
 		LOWER_LIFT_LANDING,
@@ -191,6 +196,7 @@ static func opening_route_deck_rects() -> Array[Vector4]:
 static func opening_route_stair_rects() -> Array[Vector4]:
 	return [
 		APPROACH_FLIGHT1,
+		HOME_BACK_STAIR,
 		APPROACH_FLIGHT2,
 		APPROACH_FLIGHT3,
 	]
@@ -340,7 +346,7 @@ static func floor_visual_lip_y(deck_top_y: float) -> float:
 
 static func player_spawn_point() -> Vector2:
 	## Feet on lower working terrace (CharacterBody2D origin ≈ body top-left).
-	return Vector2(120.0, LOWER_WORK_Y - 32.0)
+	return Vector2((HOME_COURT_DECK.x + HOME_COURT_DECK.y) * 0.5, LOWER_WORK_Y - 32.0)
 
 
 ## CharacterBody2D stand positions (feet on deck → position.y = deck_top - 32).

@@ -24,6 +24,7 @@ var _shake := 0.0
 func _ready() -> void:
 	add_to_group("player_camera")
 	enabled = true
+	process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	make_current()
 	position_smoothing_enabled = true
 	position_smoothing_speed = 5.5
@@ -37,7 +38,7 @@ func _ready() -> void:
 	limit_right = LIMIT_RIGHT_HOLLOW
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var body := get_parent() as CharacterBody2D
 	var want := Vector2.ZERO
 	if body != null:
