@@ -7,37 +7,37 @@ script = ExtResource("1")
 envelope_id = &"east"
 pockets = [{
 "amount": 3,
-"cell": Vector2i(70, 34),
+"cell": Vector2i(430, 170),
 "material_id": &"sutral",
 "note": "Damp fungal cavity just below the walk ledge - mid band."
 }, {
 "amount": 2,
-"cell": Vector2i(98, 40),
+"cell": Vector2i(490, 200),
 "material_id": &"sutral",
 "note": "Second growth pocket, drier, smaller."
 }, {
 "amount": 4,
-"cell": Vector2i(84, 44),
+"cell": Vector2i(420, 220),
 "material_id": &"ravelstone",
 "note": "Dense impact strata band running through the mid rock."
 }, {
 "amount": 3,
-"cell": Vector2i(112, 36),
+"cell": Vector2i(560, 180),
 "material_id": &"ravelstone",
 "note": "Same strata, thinner where it nears the east limit."
 }, {
 "amount": 2,
-"cell": Vector2i(76, 60),
+"cell": Vector2i(460, 300),
 "material_id": &"brinecrystal",
 "note": "Water/mineral pocket at a pressure seep - Devil's Mouth band."
 }, {
 "amount": 2,
-"cell": Vector2i(104, 68),
+"cell": Vector2i(520, 340),
 "material_id": &"verdigris",
 "note": "Buried ship-fracture zone; corroded conductive scrap in the rock."
 }, {
 "amount": 1,
-"cell": Vector2i(120, 84),
+"cell": Vector2i(600, 420),
 "material_id": &"hullbit",
 "note": "Deep, near a larger buried structure - the rarest of the slice."
 }]

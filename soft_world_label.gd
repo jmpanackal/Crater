@@ -1,7 +1,7 @@
 extends Label
 ## Soft world placard — diegetic signage (post, hanging board, paint), not HUD chrome.
 
-@export var show_radius: float = 140.0
+@export var show_radius: float = 700.0 ## World-scale pass (2026-09-19): x5
 @export var near_alpha: float = 0.92
 @export var far_alpha: float = 0.38
 ## hanging | painted | arch — avoids large flat translucent label rectangles.

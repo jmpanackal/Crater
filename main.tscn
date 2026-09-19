@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
@@ -19,6 +19,8 @@
 [ext_resource type="Script" path="res://job_delivery_point.gd" id="24_delivery"]
 [ext_resource type="Script" path="res://home_court_dressing.gd" id="25_home"]
 [ext_resource type="Script" path="res://hollow_macro_background.gd" id="26_macro"]
+[ext_resource type="Script" path="res://hollow_lift.gd" id="27_lift"]
+[ext_resource type="Script" path="res://hollow_minimap.gd" id="28_minimap"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -41,37 +43,64 @@ z_index = -1
 script = ExtResource("25_home")
 
 [node name="LadderChamber" type="Area2D" parent="Hollow"]
-position = Vector2(-1124, 1056)
+position = Vector2(-5668, 5280)
 collision_layer = 0
 collision_mask = 1
 monitorable = false
 script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 64)
+shaft_size = Vector2(40, 320)
 hint_text = "[W/S] climb"
-deck_open_x = -1136.0
+deck_open_x = -5680.0
 upper_land_side = 1
 
 [node name="LadderWorkerReturn" type="Area2D" parent="Hollow"]
-position = Vector2(-196, 576)
+position = Vector2(-1028, 2880)
 collision_layer = 0
 collision_mask = 1
 monitorable = false
 script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 288)
+shaft_size = Vector2(40, 1440)
 hint_text = "[W/S] climb"
-deck_open_x = -208.0
+deck_open_x = -1040.0
 upper_land_side = -1
 
-[node name="LadderMid" type="Area2D" parent="Hollow"]
-position = Vector2(-116, 576)
+[node name="LadderHomeToHeart" type="Area2D" parent="Hollow"]
+position = Vector2(1052, 2880)
 collision_layer = 0
 collision_mask = 1
 monitorable = false
 script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 144)
+shaft_size = Vector2(40, 800)
 hint_text = "[W/S] climb"
-deck_open_x = -128.0
-upper_land_side = -1
+deck_open_x = 1040.0
+upper_land_side = 1
+
+[node name="LadderEastStack" type="Area2D" parent="Hollow"]
+position = Vector2(6732, 400)
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("13_hollow_climb")
+shaft_size = Vector2(40, 4960)
+hint_text = "[W/S] climb"
+deck_open_x = 6720.0
+upper_land_side = 1
+
+[node name="FreightLift" type="AnimatableBody2D" parent="Hollow"]
+collision_layer = 1
+collision_mask = 0
+sync_to_physics = true
+script = ExtResource("27_lift")
+lift_id = &"freight"
+default_stop_index = 0
+
+[node name="LeftServiceLift" type="AnimatableBody2D" parent="Hollow"]
+collision_layer = 1
+collision_mask = 0
+sync_to_physics = true
+script = ExtResource("27_lift")
+lift_id = &"left_service"
+default_stop_index = 1
 
 [node name="Zones" type="Node2D" parent="Hollow"]
 
@@ -80,107 +109,163 @@ script = ExtResource("21_zone_anchor")
 zone_id = "home_court"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/HomeCourt"]
-position = Vector2(-16, 864)
+position = Vector2(-80, 4320)
 
 [node name="LowerSwitchback" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "lower_switchback"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerSwitchback"]
-position = Vector2(-112, 864)
+position = Vector2(-560, 4320)
 
 [node name="WestDispatchYard" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "west_dispatch_yard"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/WestDispatchYard"]
-position = Vector2(-264, 864)
+position = Vector2(-1320, 4320)
 
 [node name="WorkerReturnAscent" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "worker_return_ascent"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/WorkerReturnAscent"]
-position = Vector2(-304, 576)
+position = Vector2(-1520, 2880)
 
 [node name="Wickwork" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "wickwork"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/Wickwork"]
-position = Vector2(-432, 576)
+position = Vector2(-2160, 2880)
 
 [node name="MidAllotments" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "mid_allotments"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidAllotments"]
-position = Vector2(-200, 720)
+position = Vector2(-1000, 3600)
 
 [node name="MidHeart" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "mid_heart"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidHeart"]
-position = Vector2(536, 576)
+position = Vector2(3200, 2880)
 
 [node name="MidEastLanding" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "mid_east_landing"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastLanding"]
-position = Vector2(944, 576)
+position = Vector2(5840, 2880)
 
 [node name="MidEastApproach" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "mid_east_approach"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastApproach"]
-position = Vector2(1280, 576)
+position = Vector2(7680, 2880)
+
+[node name="MidEastDigFront" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "mid_east_dig_front"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastDigFront"]
+position = Vector2(10080, 2880)
+
+[node name="AshramWest" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "ashram_west"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/AshramWest"]
+position = Vector2(-1200, 400)
+
+[node name="AshramEast" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "ashram_east"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/AshramEast"]
+position = Vector2(6080, 400)
+
+[node name="Glowbeds" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "glowbeds"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Glowbeds"]
+position = Vector2(6080, 1120)
+
+[node name="GlowbedsHang" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "glowbeds_hang"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/GlowbedsHang"]
+position = Vector2(7280, 1840)
+
+[node name="LowerEastServices" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "lower_east_services"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerEastServices"]
+position = Vector2(6080, 4320)
+
+[node name="Cistern" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "cistern"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Cistern"]
+position = Vector2(8640, 5360)
+
+[node name="SeepThreshold" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "seep_threshold"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/SeepThreshold"]
+position = Vector2(5680, 6080)
 
 [node name="BottomWestApproach" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "bottom_west_approach"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/BottomWestApproach"]
-position = Vector2(-400, 896)
+position = Vector2(-2000, 4480)
 
 [node name="LowerLiftLanding" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "lower_lift_landing"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerLiftLanding"]
-position = Vector2(-448, 928)
+position = Vector2(-2240, 4640)
 
 [node name="BottomWestThreshold" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "bottom_west_threshold"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/BottomWestThreshold"]
-position = Vector2(-752, 1056)
+position = Vector2(-3760, 5280)
 
 [node name="FirstExpansionGallery" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "first_expansion_gallery"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/FirstExpansionGallery"]
-position = Vector2(-1000, 1056)
+position = Vector2(-5000, 5280)
 
 [node name="CollapsedSideChamber" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
 zone_id = "collapsed_side_chamber"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/CollapsedSideChamber"]
-position = Vector2(-1088, 1120)
+position = Vector2(-5440, 5600)
 
 [node name="NPCs" type="Node2D" parent="Hollow"]
 
 [node name="OpeningDutyDispatcher" type="Area2D" parent="Hollow"]
-position = Vector2(-264, 864)
+position = Vector2(-1320, 4320)
 script = ExtResource("23_dispatcher")
 
 [node name="OpeningDutyCollection" type="Area2D" parent="Hollow"]
-position = Vector2(-960, 1056)
+position = Vector2(-4800, 5280)
 script = ExtResource("24_delivery")
 district_id = &"wickwork"
 job_id = &"open_the_gallery"
@@ -206,29 +291,15 @@ mouse_filter = 2
 [node name="Approach" type="Node2D" parent="."]
 script = ExtResource("17_approach")
 
-[node name="ExitVoid" type="ColorRect" parent="Approach"]
-offset_left = 960.0
-offset_top = 400.0
-offset_right = 1024.0
-offset_bottom = 920.0
-color = Color(0.012, 0.03, 0.04, 1)
-
-[node name="ExitMist" type="ColorRect" parent="Approach"]
-offset_left = 960.0
-offset_top = 584.0
-offset_right = 1024.0
-offset_bottom = 784.0
-color = Color(0.05, 0.14, 0.16, 0.28)
-
 [node name="DigSiteLabel" type="Label" parent="."]
-offset_left = 1040.0
-offset_top = 8.0
-offset_right = 1400.0
-offset_bottom = 48.0
+offset_left = 5200.0
+offset_top = 40.0
+offset_right = 7000.0
+offset_bottom = 240.0
 theme_override_font_sizes/font_size = 15
 text = "Dig Site — Firmament ↑ quiet / side galleries →"
 script = ExtResource("11_soft_label")
-show_radius = 260.0
+show_radius = 1300.0
 far_alpha = 0.18
 
 [node name="Terrain" type="TileMapLayer" parent="."]
@@ -239,7 +310,7 @@ script = ExtResource("15_dig_dress")
 
 [node name="Player" type="CharacterBody2D" parent="."]
 physics_interpolation_mode = 1
-position = Vector2(-16, 832)
+position = Vector2(-80, 4288)
 collision_layer = 1
 collision_mask = 1
 script = ExtResource("2_player")
@@ -255,10 +326,10 @@ shape = SubResource("RectangleShape2D_player")
 [node name="Camera2D" type="Camera2D" parent="Player"]
 process_callback = 0
 position = Vector2(16, 16)
-limit_left = -1200
-limit_top = -320
-limit_right = 1728
-limit_bottom = 1300
+limit_left = -6000
+limit_top = -1600
+limit_right = 11840
+limit_bottom = 6500
 limit_enabled = true
 position_smoothing_enabled = true
 position_smoothing_speed = 5.5
@@ -574,6 +645,21 @@ focus_mode = 0
 size_flags_horizontal = 3
 text = "No"
 
+[node name="HollowMinimap" type="Control" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -278.0
+offset_top = -176.0
+offset_right = -10.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("28_minimap")
+
 [node name="Hints" type="Label" parent="UI"]
 anchors_preset = 2
 anchor_top = 1.0
@@ -584,5 +670,5 @@ offset_right = 780.0
 offset_bottom = -8.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 11
-text = "A/D move · W/S lift or climb · R dig · Space jump · Q requisition · E talk/take · J journal · H help · Esc title"
+text = "A/D move · W/S lift or climb · R dig · Space jump · Q requisition · E talk/take · J journal · M map · H help · Esc title"
 modulate = Color(0.75, 0.78, 0.74, 0.45)

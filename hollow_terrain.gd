@@ -41,8 +41,8 @@ func _paint_opening_route() -> void:
 	paint_floor(HollowLayout.HOME_COURT_LEFT, landing.y + TILE_SIZE, HollowLayout.HOME_ROOF_Y, SOURCE_ROCK)
 
 
-## Worker return / Wickwork / Mid Allotments / Mid Heart / Mid-East — new places,
-## not denser detailing of the Home→Dispatch corridor.
+## Worker return / Wickwork / Mid Allotments / Mid Heart / Mid-East / Dig Front /
+## Glowbeds / Lower-East / Cistern approach — new places, not corridor detailing.
 func _paint_playable_expansion() -> void:
 	_clear_landing_to_heart_passage()
 	for rect in HollowLayout.expansion_deck_rects():
@@ -52,15 +52,21 @@ func _paint_playable_expansion() -> void:
 		paint_stairs(stair.x, stair.y, stair.z, stair.w)
 
 
-## Open stair wells through Home Court's roof / east wall so the Mid Heart flight
-## is not ceiling-trapped. West spur climb uses columns west of the landing and
-## only needs the shared landing deck.
+## Open Home Court roof / east wall so the Mid Heart ladder + approach pads
+## connect onto the Mouth crossing without ceiling-trapping the climb.
 func _clear_landing_to_heart_passage() -> void:
-	var x0 := int(round(HollowLayout.LANDING_TO_HEART.x / TILE_SIZE))
-	var x1 := int(round(HollowLayout.HOME_LANDING.y / TILE_SIZE)) + 1
 	var y0 := int(round(HollowLayout.HEART_Y / TILE_SIZE))
 	var y1 := int(round(HollowLayout.HOME_LANDING.z / TILE_SIZE))
-	for x in range(x0, x1 + 1):
+	# Ladder shaft through landing roof.
+	var lx0 := int(round(HollowLayout.LADDER_HOME_HEART_OPEN_X / TILE_SIZE))
+	var lx1 := int(round((HollowLayout.LADDER_HOME_HEART_OPEN_X + HollowLayout.LADDER_OPENING) / TILE_SIZE))
+	for x in range(lx0, lx1):
+		for y in range(y0, y1):
+			erase_cell(Vector2i(x, y))
+	# Heart-height approach through the east wall onto Mouth west lip.
+	var ax0 := int(round(HollowLayout.HEART_APPROACH_WEST.x / TILE_SIZE))
+	var ax1 := int(round(HollowLayout.PIT_LEFT / TILE_SIZE)) + 1
+	for x in range(ax0, ax1):
 		for y in range(y0, y1):
 			erase_cell(Vector2i(x, y))
 
@@ -134,6 +140,8 @@ func paint_floor(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURC
 ## which left visible gaps in the staircase's silhouette (confirmed in-engine); a
 ## filled solid-block staircase (Terraria's own convention, cited in terrain.gd) has
 ## no such gap and reads as one continuous ascending mass.
+## Exception: inside Devil's Mouth (PIT_LEFT..PIT_RIGHT) only the walkable tread is
+## painted — solid fill-down would plug the open void with stair mass.
 ## Inclusive of BOTH x0 and x1 (unlike paint_floor's exclusive-x1 span convention):
 ## a flight's own endpoints are where it hands off to the flat floor at each end, and
 ## paint_floor already excludes ITS x1/includes its x0 at a shared boundary — a stair
@@ -150,12 +158,18 @@ func paint_stairs(x0_px: float, y0_px: float, x1_px: float, y1_px: float) -> voi
 		return
 	var dir := 1 if x1 > x0 else -1
 	var y_bottom := maxi(y0, y1)
+	var pit_l := int(round(HollowLayout.PIT_LEFT / float(TILE_SIZE)))
+	var pit_r := int(round(HollowLayout.PIT_RIGHT / float(TILE_SIZE)))
 	for i in range(span + 1):
 		var t := float(i) / float(span)
 		var x := x0 + i * dir
 		var y := int(round(lerpf(float(y0), float(y1), t)))
-		for fy in range(y, y_bottom + 1):
-			set_cell(Vector2i(x, fy), SOURCE_STAIR, ATLAS_TOP_MID)
+		var in_mouth := x >= pit_l and x < pit_r
+		if in_mouth:
+			set_cell(Vector2i(x, y), SOURCE_STAIR, ATLAS_TOP_MID)
+		else:
+			for fy in range(y, y_bottom + 1):
+				set_cell(Vector2i(x, fy), SOURCE_STAIR, ATLAS_TOP_MID)
 
 
 func painted_cell_count() -> int:

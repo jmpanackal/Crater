@@ -2,8 +2,11 @@
 extends Node2D
 
 const Layout := preload("res://hollow_layout.gd")
-const WORLD_BOUNDS := Rect2(-1280, -320, 3584, 1792)
-const MOUTH_BOUNDS := Rect2(Layout.PIT_LEFT, -128, Layout.PIT_RIGHT - Layout.PIT_LEFT, 1600)
+## Extended east so Mid-East Dig Front (to x=2368) fits with margin.
+## World-scale pass (2026-09-19): bounds and every district/transport literal
+## below are x5 their previous values — see hollow_layout.gd's header note.
+const WORLD_BOUNDS := Rect2(-6400, -1600, 20000, 8960)
+const MOUTH_BOUNDS := Rect2(Layout.PIT_LEFT, -640, Layout.PIT_RIGHT - Layout.PIT_LEFT, 8000)
 const GUIDE_COLOR := Color(0.57, 0.76, 0.72, 0.65)
 const FUTURE_COLOR := Color(0.77, 0.61, 0.38, 0.8)
 
@@ -22,30 +25,38 @@ var _guides_only := false
 
 
 static func district_guides() -> Array[Dictionary]:
+	var pit_l := Layout.PIT_LEFT
+	var pit_r := Layout.PIT_RIGHT
+	var mouth_w := pit_r - pit_l
 	return [
-		{"name": "Ashram Heights / west", "bounds": Rect2(-576, -128, 832, 208), "level": Layout.UPPER_RES_Y},
-		{"name": "Ashram Heights / east", "bounds": Rect2(736, -128, 416, 208), "level": Layout.UPPER_RES_Y},
-		{"name": "High-West Dig Front", "bounds": Rect2(-1136, 80, 560, 288), "level": Layout.FARMS_Y},
-		{"name": "Glowbeds", "bounds": Rect2(736, 80, 416, 288), "level": Layout.FARMS_Y},
-		{"name": "Wickwork", "bounds": Rect2(-576, 368, 800, 208), "level": Layout.WICK_Y},
-		{"name": "Mid Heart / moored rafts", "bounds": Rect2(288, 368, 448, 352), "level": Layout.HEART_Y},
-		{"name": "Mid allotments / homes", "bounds": Rect2(-576, 576, 800, 144), "level": Layout.MID_ALLOT_Y},
-		{"name": "Mid-East landing", "bounds": Rect2(736, 368, 416, 352), "level": Layout.HEART_Y},
-		{"name": "Mid-East approach", "bounds": Rect2(1152, 432, 256, 288), "level": Layout.HEART_Y},
-		{"name": "Mid-East Dig Front", "bounds": Rect2(1408, 432, 704, 288), "level": Layout.HEART_Y},
-		{"name": "Lower worker terraces", "bounds": Rect2(-368, 720, 624, 160), "level": Layout.LOWER_WORK_Y},
-		{"name": "Lower-East services", "bounds": Rect2(736, 720, 416, 208), "level": Layout.LOWER_WORK_Y},
-		{"name": "Bottom-West galleries", "bounds": Rect2(-1136, 928, 512, 208), "level": Layout.BOTTOM_WEST_Y},
-		{"name": "Cistern", "bounds": Rect2(736, 928, 416, 288), "level": Layout.CISTERN_Y},
-		{"name": "Seep / service threshold", "bounds": Rect2(736, 1216, 416, 128), "level": Layout.SEEP_Y},
+		{"name": "Ashram Heights / west", "bounds": Rect2(-2880, -640, 4160, 1040), "level": Layout.UPPER_RES_Y},
+		{"name": "Ashram Heights / east", "bounds": Rect2(pit_r, -640, 2080, 1040), "level": Layout.UPPER_RES_Y},
+		{"name": "High-West Dig Front", "bounds": Rect2(Layout.HIGH_WEST_DIG_LEFT, 400, Layout.HIGH_WEST_DIG_RIGHT - Layout.HIGH_WEST_DIG_LEFT, 1440), "level": Layout.FARMS_Y},
+		{"name": "Glowbeds", "bounds": Rect2(pit_r, 400, 2080, 1440), "level": Layout.FARMS_Y},
+		{"name": "Wickwork", "bounds": Rect2(-2880, 1840, 4000, 1040), "level": Layout.WICK_Y},
+		## Primary Mouth crossing — thin deck band spanning west lip → east lip (not a void fill).
+		{
+			"name": "Mid Heart / Mouth crossing",
+			"bounds": Rect2(pit_l, Layout.HEART_Y - 200.0, mouth_w, 400.0),
+			"level": Layout.HEART_Y,
+		},
+		{"name": "Mid allotments / homes", "bounds": Rect2(-2880, 2880, 4000, 720), "level": Layout.MID_ALLOT_Y},
+		{"name": "Mid-East landing", "bounds": Rect2(pit_r, 1840, 2080, 1760), "level": Layout.HEART_Y},
+		{"name": "Mid-East approach", "bounds": Rect2(Layout.MID_EAST_APPROACH.x, 2160, Layout.MID_EAST_APPROACH.y - Layout.MID_EAST_APPROACH.x, 1440), "level": Layout.HEART_Y},
+		{"name": "Mid-East Dig Front", "bounds": Rect2(Layout.MID_EAST_DIG_FRONT.x, 2160, Layout.MID_EAST_DIG_FRONT.y - Layout.MID_EAST_DIG_FRONT.x, 1440), "level": Layout.HEART_Y},
+		{"name": "Lower worker terraces", "bounds": Rect2(-1840, 3600, 3120, 800), "level": Layout.LOWER_WORK_Y},
+		{"name": "Lower-East services", "bounds": Rect2(pit_r, 3600, 2080, 1040), "level": Layout.LOWER_WORK_Y},
+		{"name": "Bottom-West galleries", "bounds": Rect2(-5680, 4640, 2560, 1040), "level": Layout.BOTTOM_WEST_Y},
+		{"name": "Cistern", "bounds": Rect2(pit_r, 4640, 4640, 1440), "level": Layout.CISTERN_Y},
+		{"name": "Seep / service threshold", "bounds": Rect2(pit_r, 6080, 2080, 640), "level": Layout.SEEP_Y},
 	]
 
 
 static func transport_guides() -> Array[Dictionary]:
 	return [
-		{"name": "West civic / Mid to High", "x": 240.0, "label_y": 120.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.WICK_Y]},
-		{"name": "East upper / guarded", "x": 1088.0, "label_y": 400.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.HEART_Y]},
-		{"name": "Cistern freight / Low to Mid", "x": 848.0, "label_y": 616.0, "stops": [Layout.HEART_Y, Layout.LOWER_WORK_Y, Layout.CISTERN_Y]},
+		{"name": "West civic / Mid to High", "x": 1200.0, "label_y": 600.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.WICK_Y]},
+		{"name": "East upper / Ashram to Cistern", "x": Layout.LADDER_EAST_OPEN_X, "label_y": 800.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.GLOW_SUB_Y, Layout.HEART_Y, Layout.CISTERN_Y]},
+		{"name": "Cistern freight / Low to Mid", "x": Layout.FREIGHT_LIFT_OPEN_X, "label_y": 3080.0, "stops": [Layout.HEART_Y, Layout.LOWER_WORK_Y, Layout.CISTERN_Y]},
 	]
 
 
@@ -73,14 +84,15 @@ func _sync_overlay() -> void:
 func _draw() -> void:
 	if not _guides_only:
 		draw_rect(WORLD_BOUNDS, Color(0.10, 0.155, 0.15))
-		draw_rect(MOUTH_BOUNDS, Color(0.025, 0.055, 0.065))
-		draw_rect(Rect2(WORLD_BOUNDS.position, Vector2(WORLD_BOUNDS.size.x, 192)), Color(0.18, 0.22, 0.21))
+		# Ink void — open shaft, not a solid filler block (docs: #091419).
+		draw_rect(MOUTH_BOUNDS, Color(0.035, 0.078, 0.098))
+		draw_rect(Rect2(WORLD_BOUNDS.position, Vector2(WORLD_BOUNDS.size.x, 960)), Color(0.18, 0.22, 0.21))
 		return
 	if not show_planning_guides or (not Engine.is_editor_hint() and not show_guides_in_game):
 		return
-	_label(Vector2(-1232, -264), "HOLLOW SCALE PLAN  |  GUIDES ONLY - NO COLLISION", 24, GUIDE_COLOR)
-	_label(Vector2(-1232, -232), "16 px tiles / 32 px player. Dashed extents and routes are provisional, not playable platforms.", 17, GUIDE_COLOR)
-	_label(Vector2(-560, -160), "FIRMAMENT / sustained upward excavation, locked at start", 19, GUIDE_COLOR)
+	_label(Vector2(-6160, -1320), "HOLLOW SCALE PLAN  |  GUIDES ONLY - NO COLLISION", 24, GUIDE_COLOR)
+	_label(Vector2(-6160, -1160), "16 px tiles / 32 px player. Dashed extents and routes are provisional, not playable platforms.", 17, GUIDE_COLOR)
+	_label(Vector2(-2800, -800), "FIRMAMENT / sustained upward excavation, locked at start", 19, GUIDE_COLOR)
 	draw_rect(WORLD_BOUNDS, GUIDE_COLOR, false, 2)
 	for district in district_guides():
 		var bounds: Rect2 = district.bounds
@@ -96,22 +108,34 @@ func _draw() -> void:
 		for level in stops:
 			draw_circle(Vector2(shaft_x, level), 6, FUTURE_COLOR, false, 2)
 		_label(Vector2(shaft_x + 10, transport.label_y), transport.name, 13, FUTURE_COLOR)
-	var return_route := PackedVector2Array([Vector2(-112, 864), Vector2(-304, 720), Vector2(-112, 576), Vector2(288, 576)])
+	var return_route := PackedVector2Array([
+		Vector2(-560, 4320),
+		Vector2(-1520, 3600),
+		Vector2(-560, 2880),
+		Vector2(Layout.PIT_LEFT, 2880),
+	])
 	for index in range(return_route.size() - 1):
 		draw_dashed_line(return_route[index], return_route[index + 1], FUTURE_COLOR, 2, 10)
-	_label(Vector2(-352, 696), "Worker return switchbacks / planned", 13, FUTURE_COLOR)
-	for reserve in [Rect2(-832, 368, 256, 208), Rect2(1152, 80, 256, 288), Rect2(1152, 928, 256, 288)]:
+	_label(Vector2(-1760, 3480), "Worker return switchbacks / planned", 13, FUTURE_COLOR)
+	for reserve in [
+		Rect2(-4160, 1840, 1280, 1040),
+		Rect2(Layout.MID_EAST_APPROACH.x, 400, 1280, 1440),
+		Rect2(Layout.MID_EAST_APPROACH.x, 4640, 1280, 1440),
+	]:
 		_outline(reserve, FUTURE_COLOR)
 		_label(reserve.position + Vector2(12, 48), "Growth reserve", 15, FUTURE_COLOR)
 		_label(reserve.position + Vector2(12, 68), "footprint to refine", 12, FUTURE_COLOR)
-	_label(Vector2(320, 880), "DEVIL'S MOUTH", 22, GUIDE_COLOR)
-	_label(Vector2(320, 912), "OPEN DEPTH / NO CROSS-SHAFT FLOOR", 12, GUIDE_COLOR)
-	_label(Vector2(-1232, 1200), "Solid opening-route tiles = currently playable", 17, GUIDE_COLOR)
-	_label(Vector2(-1232, 1232), "Home -> Dispatch -> Bottom-West -> return", 17, GUIDE_COLOR)
-	draw_rect(Rect2(-1232, 1280, 32, 32), GUIDE_COLOR, false, 2)
-	_label(Vector2(-1184, 1304), "32 px player reference", 17, GUIDE_COLOR)
-	draw_line(Vector2(-1232, 1360), Vector2(-976, 1360), GUIDE_COLOR, 2)
-	_label(Vector2(-1232, 1392), "256 px / 16 tiles", 17, GUIDE_COLOR)
+	_label(Vector2(Layout.HEART_MID_X - 80.0, 4400), "DEVIL'S MOUTH", 22, GUIDE_COLOR)
+	_label(Vector2(Layout.HEART_MID_X - 120.0, 4560), "OPEN VOID / MID HEART IS THE CROSSING", 12, GUIDE_COLOR)
+	_label(Vector2(-6160, 6000), "Solid opening-route tiles = currently playable", 17, GUIDE_COLOR)
+	_label(Vector2(-6160, 6160), "Home -> Dispatch -> Bottom-West -> return", 17, GUIDE_COLOR)
+	## Physical reference markers — deliberately NOT scaled: still the real
+	## 32px player body and the real 256px (16-tile) span, so they stay true
+	## after the world-scale pass. Only their anchor position moves.
+	draw_rect(Rect2(-6160, 6400, 32, 32), GUIDE_COLOR, false, 2)
+	_label(Vector2(-5920, 6520), "32 px player reference", 17, GUIDE_COLOR)
+	draw_line(Vector2(-6160, 6800), Vector2(-6160, 6800) + Vector2(256, 0), GUIDE_COLOR, 2)
+	_label(Vector2(-6160, 6960), "256 px / 16 tiles", 17, GUIDE_COLOR)
 
 
 func _outline(bounds: Rect2, color: Color) -> void:

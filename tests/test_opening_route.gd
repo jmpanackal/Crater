@@ -78,7 +78,7 @@ func _run() -> void:
 	# --- 4. The core spatial correction: Bottom-West sits BELOW Home Court, not
 	# beside it at the same elevation (the mistake a prior pass made). ---
 	var drop := HollowLayout.BOTTOM_WEST_Y - HollowLayout.LOWER_WORK_Y
-	if drop < 128.0:
+	if drop < 640.0:
 		push_error(
 			"FAIL Bottom-West Dig Front is not measurably below Home Court (drop=%s)" % drop
 		)
@@ -117,7 +117,7 @@ func _run() -> void:
 	var space := terrain.get_world_2d().direct_space_state
 	var home_y: float = HollowLayout.LOWER_WORK_Y
 	var hit := space.intersect_ray(
-		PhysicsRayQueryParameters2D.create(Vector2(-16, home_y - 40), Vector2(-16, home_y + 40))
+		PhysicsRayQueryParameters2D.create(Vector2(-80, home_y - 40), Vector2(-80, home_y + 40))
 	)
 	if hit.is_empty():
 		push_error("FAIL no physics collision under Home Court's painted floor")
@@ -165,7 +165,7 @@ func _run() -> void:
 	var scan_x1 := int(round(HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT / 16.0))
 	for tx in range(scan_x1, scan_x0):
 		var found := false
-		for ty in range(50, 70):
+		for ty in range(266, 334):
 			if terrain.get_cell_source_id(Vector2i(tx, ty)) != -1:
 				found = true
 				break

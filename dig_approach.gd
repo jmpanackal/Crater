@@ -215,7 +215,7 @@ func _build_entry() -> void:
 	label.position = Vector2(hx + 4.0, deck_y - 92.0)
 	label.add_theme_font_size_override("font_size", 12)
 	label.set_script(SoftWorldLabel)
-	label.set("show_radius", 180.0)
+	label.set("show_radius", 900.0)
 	label.set("far_alpha", 0.12)
 	label.set("near_alpha", 0.72)
 	label.modulate = Color(0.78, 0.72, 0.58, 0.7)

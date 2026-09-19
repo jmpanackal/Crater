@@ -1569,26 +1569,26 @@ func _add_warm_lights() -> void:
 	_point_light(root, "LightFarms", Vector2(-300, HollowLayout.FARMS_Y - 40), tex, 0.65, 2.3)
 	_point_light(root, "LightFarmsTerrace", Vector2(-40, HollowLayout.FARMS_Y - 40), tex, 0.55, 2.1)
 	_point_light(root, "LightWick", Vector2(-200, HollowLayout.WICK_Y - 40), tex, 0.85, 2.8)
-	_point_light(root, "LightBridge", Vector2(416, HollowLayout.WICK_Y - 36), tex, 0.7, 2.4)
-	_point_light(root, "LightWickRight", Vector2(700, HollowLayout.WICK_Y - 38), tex, 0.55, 2.3)
+	_point_light(root, "LightBridge", Vector2(HollowLayout.HEART_MID_X - 64.0, HollowLayout.WICK_Y - 36), tex, 0.7, 2.4)
+	_point_light(root, "LightWickRight", Vector2(HollowLayout.PIT_RIGHT - 80.0, HollowLayout.WICK_Y - 38), tex, 0.55, 2.3)
 	_point_light(
-		root, "LightCistern", Vector2(740, HollowLayout.CISTERN_Y - 40), tex, 0.55, 2.5, CISTERN_LIGHT
+		root, "LightCistern", Vector2(HollowLayout.PIT_RIGHT + 48.0, HollowLayout.CISTERN_Y - 40), tex, 0.55, 2.5, CISTERN_LIGHT
 	)
-	_point_light(root, "LightCisternSafety", Vector2(820, HollowLayout.CISTERN_Y - 36), tex, 0.35, 1.8, WARM)
-	_point_light(root, "LightPitCool", Vector2(416, HollowLayout.CISTERN_Y + 40), tex, 0.35, 3.2, COOL_PIT)
+	_point_light(root, "LightCisternSafety", Vector2(HollowLayout.FREIGHT_LIFT_X, HollowLayout.CISTERN_Y - 36), tex, 0.35, 1.8, WARM)
+	_point_light(root, "LightPitCool", Vector2(HollowLayout.HEART_MID_X - 64.0, HollowLayout.CISTERN_Y + 40), tex, 0.35, 3.2, COOL_PIT)
 	# Sparse deep lights in Devil's Mouth — scale cues, not bright fill.
-	_point_light(root, "LightDeepSparseA", Vector2(340, 480), tex, 0.12, 1.4, COOL_PIT)
-	_point_light(root, "LightDeepSparseB", Vector2(480, 560), tex, 0.1, 1.2, Color(0.4, 0.5, 0.55, 1.0))
-	_point_light(root, "LightDeepSparseC", Vector2(400, 620), tex, 0.08, 1.0, Color(0.35, 0.42, 0.48, 1.0))
+	_point_light(root, "LightDeepSparseA", Vector2(HollowLayout.HEART_MID_X - 160.0, 480), tex, 0.12, 1.4, COOL_PIT)
+	_point_light(root, "LightDeepSparseB", Vector2(HollowLayout.HEART_MID_X, 560), tex, 0.1, 1.2, Color(0.4, 0.5, 0.55, 1.0))
+	_point_light(root, "LightDeepSparseC", Vector2(HollowLayout.HEART_MID_X - 80.0, 620), tex, 0.08, 1.0, Color(0.35, 0.42, 0.48, 1.0))
 	_lamp_post(root, "LampPostFarms", Vector2(-304, HollowLayout.FARMS_Y - 22))
 	_lamp_post(root, "LampPostFarmsTerrace", Vector2(-44, HollowLayout.FARMS_Y - 22))
 	_lamp_post(root, "LampPostWick", Vector2(-204, HollowLayout.WICK_Y - 22))
-	_lamp_post(root, "LampPostWickRight", Vector2(696, HollowLayout.WICK_Y - 22))
-	_lamp_post(root, "LampPostCistern", Vector2(736, HollowLayout.CISTERN_Y - 22), CISTERN_LIGHT)
-	_lamp_post(root, "LampPostCisternSafety", Vector2(816, HollowLayout.CISTERN_Y - 22), WARM)
+	_lamp_post(root, "LampPostWickRight", Vector2(HollowLayout.PIT_RIGHT - 84.0, HollowLayout.WICK_Y - 22))
+	_lamp_post(root, "LampPostCistern", Vector2(HollowLayout.PIT_RIGHT, HollowLayout.CISTERN_Y - 22), CISTERN_LIGHT)
+	_lamp_post(root, "LampPostCisternSafety", Vector2(HollowLayout.FREIGHT_LIFT_X - 8.0, HollowLayout.CISTERN_Y - 22), WARM)
 	# Mid Heart civic lamp near tally booth / Joss.
-	_lamp_post(root, "LampPostMidHeart", Vector2(340, HollowLayout.WICK_Y - 22), WARM)
-	_point_light(root, "LightMidHeartBooth", Vector2(360, HollowLayout.WICK_Y - 36), tex, 0.75, 2.2)
+	_lamp_post(root, "LampPostMidHeart", Vector2(HollowLayout.PIT_LEFT + 52.0, HollowLayout.WICK_Y - 22), WARM)
+	_point_light(root, "LightMidHeartBooth", Vector2(HollowLayout.PIT_LEFT + 72.0, HollowLayout.WICK_Y - 36), tex, 0.75, 2.2)
 
 
 func _lamp_post(

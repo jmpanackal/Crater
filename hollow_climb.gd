@@ -9,8 +9,9 @@ const SHARED_CLIMB_HINT := "[W/S] climb"
 @export var hint_text: String = SHARED_CLIMB_HINT
 @export var rail_color: Color = Color(0.62, 0.42, 0.28, 1) # copper-wood
 @export var rung_color: Color = Color(0.78, 0.58, 0.38, 1)
-## Extra climb hitbox above the visual top so a standing player on the upper deck overlaps.
-@export var grab_margin_top: float = 40.0
+## Extra climb hitbox above the visual top. Keep at 0 so standing on solid deck
+## beside an open shaft does not keep the climb prompt; walk into the hole to grab.
+@export var grab_margin_top: float = 0.0
 ## Upper-deck floor gap this shaft climbs through (world X). Lower landing stays solid.
 @export var deck_open_x: float = 0.0
 @export var deck_open_width: float = 64.0

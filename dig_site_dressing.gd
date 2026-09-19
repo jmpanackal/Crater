@@ -1,10 +1,13 @@
 extends Node2D
-## Soft Firmament↑ / Devil’s Mouth↓ dressing around the dig columns — same tools, different read.
-## Firmament: quieter cool haze. Devil’s Mouth: heavier ink gloom. No new tileset required.
+## Soft Firmament↑ dressing around the dig columns — quiet cool haze, no new
+## tileset required. The downward dig direction used to carry its own
+## "Devil's Mouth" gloom/label here too, but that name belongs to the real
+## crater void in the Hollow (HollowLayout.PIT_LEFT..PIT_RIGHT) and reusing
+## it for this unrelated east dig site's downward frontier read as a stray,
+## unexplained artifact once the real crater was built out — removed
+## 2026-09-19.
 
 const FIRMAMENT_HAZE := Color(0.55, 0.72, 0.7, 0.07)
-const MOUTH_GLOOM := Color(0.04, 0.07, 0.09, 0.22)
-const MOUTH_LIP := Color(0.12, 0.2, 0.22, 0.18)
 
 
 func _ready() -> void:
@@ -40,27 +43,7 @@ func _build_dressing() -> void:
 	seal.z_index = 2
 	add_child(seal)
 
-	# Heavier gloom over Devil’s Mouth walls.
-	var mouth := ColorRect.new()
-	mouth.name = "MouthGloom"
-	mouth.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile)
-	mouth.size = Vector2(width, float(TerrainLayer.ENVELOPE_ROWS - TerrainLayer.MOUTH_Y_MIN) * tile)
-	mouth.color = MOUTH_GLOOM
-	mouth.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	mouth.z_index = 2
-	add_child(mouth)
-
-	var lip := ColorRect.new()
-	lip.name = "MouthLipMist"
-	lip.position = Vector2(x0, float(TerrainLayer.MOUTH_Y_MIN) * tile - 24.0)
-	lip.size = Vector2(width, 36.0)
-	lip.color = MOUTH_LIP
-	lip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lip.z_index = 2
-	add_child(lip)
-
 	_soft_label("FirmamentMark", "Firmament ↑ — quiet work", Vector2(x0 + 24.0, 12.0), Color(0.75, 0.85, 0.82, 0.55))
-	_soft_label("DevilsMouthMark", "Devil’s Mouth ↓ — walls groan", Vector2(x0 + 24.0, float(TerrainLayer.MOUTH_Y_MIN) * tile + 8.0), Color(0.7, 0.62, 0.5, 0.6))
 
 
 func _soft_label(node_name: String, text: String, pos: Vector2, color: Color) -> void:
@@ -72,12 +55,3 @@ func _soft_label(node_name: String, text: String, pos: Vector2, color: Color) ->
 	label.modulate = color
 	label.z_index = 3
 	add_child(label)
-
-
-## Test helper — Firmament haze must be quieter (lower alpha) than Devil’s Mouth gloom.
-func firmament_quieter_than_mouth() -> bool:
-	var firmament := get_node_or_null("FirmamentHaze") as ColorRect
-	var mouth := get_node_or_null("MouthGloom") as ColorRect
-	if firmament == null or mouth == null:
-		return false
-	return firmament.color.a < mouth.color.a

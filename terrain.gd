@@ -29,14 +29,16 @@ const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 ## that needs the total (dig_site_dressing.gd's mouth overlay height was
 ## a hardcoded "16" that silently went stale across two earlier scale
 ## passes before this constant existed; don't repeat that).
-const ENVELOPE_ROWS := 92
+## World-scale pass (2026-09-19): row counts x5 — TILE_SIZE stays 16, so this
+## is 5x more rows covering 5x the world-px depth, same proportional split.
+const ENVELOPE_ROWS := 460
 ## Cells with y <= this are Firmament rock (secret upward frontier).
-## 29 rows (0..28), same ~31% share of ENVELOPE_ROWS as the original split.
-const FIRMAMENT_Y_MAX := 28
+## 141 rows (0..140), same ~31% share of ENVELOPE_ROWS as the original split.
+const FIRMAMENT_Y_MAX := 140
 ## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
-## Mid band is FIRMAMENT_Y_MAX+1 .. MOUTH_Y_MIN-1 (23 rows); Mouth is
-## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 (40 rows) — same ~25%/~44% split as before.
-const MOUTH_Y_MIN := 52
+## Mid band is FIRMAMENT_Y_MAX+1 .. MOUTH_Y_MIN-1 (119 rows); Mouth is
+## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 (200 rows) — same ~26%/~43% split as before.
+const MOUTH_Y_MIN := 260
 
 ## Build Bible Spec 12 (Deposits + Extraction). Deposits are authored data
 ## (content/deposits/*.tres, filtered to this envelope's id) placed inside
@@ -68,6 +70,7 @@ func _ready() -> void:
 	tile_set = _build_tileset()
 	_build_deposit_overlay()
 	_fill_ground()
+	_carve_hollow_civic_overlaps()
 	# Build Bible Spec 02's save contract only auto-discovers autoloads by
 	# root-relative name; Terrain has to live inside the play scene's
 	# hierarchy to render/collide correctly, so it registers itself with
@@ -91,6 +94,11 @@ func _exit_tree() -> void:
 		console.unregister_command("extract_all")
 
 
+## Dig Front rock — warm grey-brown, never teal/aqua filler.
+## The old Color(0.25, 0.4, 0.42) read as a solid aqua wall in civic/Mouth views.
+const DIG_ROCK_COLOR := Color(0.36, 0.30, 0.26)
+
+
 ## Builds the flat-color placeholder tileset. The real SpriteFusion art at
 ## res://sprites/dig_site_tiles.png is sized for the old 64px grid — slicing
 ## it at the new 16px TILE_SIZE would mis-crop every real tile into 16
@@ -105,7 +113,7 @@ func _build_tileset() -> TileSet:
 func _build_fallback_tileset() -> TileSet:
 	_atlas_coords = [PLACEHOLDER_ATLAS]
 	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
-	image.fill(Color(0.25, 0.4, 0.42))
+	image.fill(DIG_ROCK_COLOR)
 	var texture := ImageTexture.create_from_image(image)
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
@@ -132,11 +140,15 @@ func _build_fallback_tileset() -> TileSet:
 
 
 ## Dig columns start past the Hollow exit ledge (world x = cell * TILE_SIZE).
-## Hollow is pit-centered terraces ending at ~1024; dig must not bleed into home.
-## Re-derived for TILE_SIZE=16 to cover the same world-x span as the old
-## 64px values (16..32, i.e. world 1024..2048): 1024/16 = 64, 2048/16 = 128.
-const DIG_START_X := 64 # world 1024 — after Hollow exit ledge
-const DIG_END_X := 128 # exclusive; 64 columns of Firmament/Devil’s Mouth
+## Dig lives OUTSIDE the Hollow civic void / Devil's Mouth — east Dig Front and
+## High-West Dig Front flanks, never aqua fill inside the Mouth.
+## Re-derived for TILE_SIZE=16 against HollowLayout.EXIT_RIGHT / Dig Front tip.
+## World-scale pass (2026-09-19): x5 against the rescaled HollowLayout values.
+const DIG_START_X := 400 ## world 6400 — after Hollow exit ledge (EXIT_RIGHT)
+const DIG_END_X := 800 ## exclusive; covers Mid-East Dig Front out to ~x=11840
+## High-West Dig Front (destructible outside Mouth) — world x -5680..-2880.
+const WEST_DIG_START_X := -355 ## world -5680
+const WEST_DIG_END_X := -180 ## exclusive; world -2880
 
 
 func _fill_ground() -> void:
@@ -153,6 +165,158 @@ func _fill_ground() -> void:
 		# Mid band + Devil’s Mouth walls — downward public-ish danger.
 		for y in range(FIRMAMENT_Y_MAX + 1, ENVELOPE_ROWS):
 			_place_random(Vector2i(x, y))
+	_fill_west_dig_front()
+
+
+## High-West Dig Front — brown dig mass west of the Hollow civic void.
+## Keeps Firmament band + diggable mid rock; never enters Devil's Mouth.
+func _fill_west_dig_front() -> void:
+	if _atlas_coords.is_empty():
+		return
+	for x in range(WEST_DIG_START_X, WEST_DIG_END_X):
+		for y in range(0, FIRMAMENT_Y_MAX + 1):
+			_place_random(Vector2i(x, y))
+		# Diggable mid / upper High-West mass (not true-void depth fill).
+		for y in range(FIRMAMENT_Y_MAX + 1, MOUTH_Y_MIN):
+			_place_random(Vector2i(x, y))
+
+
+## Hollow Mid-East / Ashram / Glowbeds / Cistern decks and LadderEastStack sit
+## inside the dig envelope (world x >= DIG_START_X * TILE). Solid-filling that
+## envelope buried those floors under teal dig rock and sealed the walk into the
+## east passenger shaft. Carve walk air + shaft openings so HollowTerrain owns
+## the civic approach.
+##
+## Civic band (DIG_START → civic_east_end): also clear inter-deck air so teal
+## dig rock does not read as aqua filler blocks between terraces. Dig Front
+## (past civic tip) keeps excavation mass; only corridor + shaft air is carved.
+func _carve_hollow_civic_overlaps() -> void:
+	var dig_x0_px := float(DIG_START_X) * float(TILE_SIZE)
+	var dig_x1_px := float(DIG_END_X) * float(TILE_SIZE)
+	var civic_end_px := HollowLayout.civic_east_end()
+	## Standing clearance above a deck top (player body + jump headroom).
+	var walk_clear_px := 96.0
+	## Thin diggable face kept above each civic corridor (not a void-filling slab).
+	var dig_face_px := float(TILE_SIZE) * 2.0
+	for rect in HollowLayout.expansion_deck_rects():
+		var x0_px: float = maxf(rect.x, dig_x0_px)
+		var x1_px: float = minf(rect.y, dig_x1_px)
+		if x1_px <= x0_px:
+			continue
+		_clear_dig_rect(x0_px, x1_px, rect.z - walk_clear_px, rect.z)
+	# Civic east wall: open the whole inhabited air column. Teal dig fill between
+	# Ashram / Glowbeds / Hang / Mid-East / Lower / Cistern read as aqua blocks
+	# east of LadderEastStack — clear them, then restore a thin diggable face
+	# above each corridor so Dig Front gameplay still has rock to chip.
+	var civic_x1 := minf(civic_end_px, dig_x1_px)
+	if civic_x1 > dig_x0_px:
+		_clear_dig_rect(
+			dig_x0_px,
+			civic_x1,
+			HollowLayout.UPPER_RES_Y - walk_clear_px,
+			HollowLayout.CISTERN_Y
+		)
+		for rect in HollowLayout.expansion_deck_rects():
+			var x0_px: float = maxf(rect.x, dig_x0_px)
+			var x1_px: float = minf(rect.y, civic_x1)
+			if x1_px <= x0_px:
+				continue
+			# Face sits just above walk clear: [deck - walk_clear - face, deck - walk_clear).
+			var face_y1 := rect.z - walk_clear_px
+			var face_y0 := face_y1 - dig_face_px
+			_restore_dig_rect(x0_px, x1_px, face_y0, face_y1)
+	# Full vertical east passenger shaft (Ashram → Cistern), including floor rows.
+	_clear_dig_rect(
+		HollowLayout.LADDER_EAST_OPEN_X,
+		HollowLayout.ladder_east_open_end(),
+		HollowLayout.UPPER_RES_Y - walk_clear_px,
+		HollowLayout.CISTERN_Y
+	)
+	# Freight cage sits west of dig-start today; clear defensively if it drifts east.
+	var freight_x0 := HollowLayout.FREIGHT_LIFT_X
+	var freight_x1 := freight_x0 + HollowLayout.LIFT_WIDTH
+	if freight_x1 > dig_x0_px and freight_x0 < dig_x1_px:
+		_clear_dig_rect(
+			maxf(freight_x0, dig_x0_px),
+			minf(freight_x1, dig_x1_px),
+			HollowLayout.HEART_Y - walk_clear_px,
+			HollowLayout.CISTERN_Y
+		)
+	# Dig Front: empty the sky-wall above the walk so Mid Heart / Mouth views
+	# don't show a solid mass. Keep a thin diggable face + rock below for digs.
+	var dig_front := HollowLayout.MID_EAST_DIG_FRONT
+	var df_x0 := maxf(dig_front.x, dig_x0_px)
+	var df_x1 := minf(dig_front.y, dig_x1_px)
+	if df_x1 > df_x0:
+		_clear_dig_rect(
+			df_x0,
+			df_x1,
+			HollowLayout.UPPER_RES_Y - walk_clear_px,
+			dig_front.z
+		)
+		var df_face_y1 := dig_front.z - walk_clear_px
+		var df_face_y0 := df_face_y1 - dig_face_px
+		_restore_dig_rect(df_x0, df_x1, df_face_y0, df_face_y1)
+		# Firmament diggable band (upward frontier) — rock only where digs belong.
+		_restore_dig_rect(
+			df_x0,
+			df_x1,
+			0.0,
+			float(FIRMAMENT_Y_MAX + 1) * float(TILE_SIZE)
+		)
+
+
+func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> void:
+	## Clears [x0,x1) × [y0,y1] in world pixels. y1 is an inclusive deck-top
+	## surface (matches HollowLayout floor convention / paint_floor's round).
+	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px)
+	for cell in cells:
+		erase_cell(cell)
+		if _deposit_overlay != null:
+			_deposit_overlay.erase_cell(cell)
+		if _deposits.has(cell):
+			_deposits.erase(cell)
+		if _deposit_nodes.has(cell):
+			var node: Node = _deposit_nodes[cell]
+			_deposit_nodes.erase(cell)
+			if node != null and is_instance_valid(node):
+				node.queue_free()
+
+
+func _restore_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> void:
+	## Re-places dig rock in [x0,x1) × [y0,y1) after a civic air carve — thin
+	## diggable faces only, never Mouth/inter-deck void fillers.
+	if _atlas_coords.is_empty():
+		return
+	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, false)
+	for cell in cells:
+		if not is_within_dig_envelope(cell):
+			continue
+		_place_random(cell)
+
+
+func _dig_rect_cells(
+	x0_px: float,
+	x1_px: float,
+	y0_px: float,
+	y1_px: float,
+	y1_inclusive_deck := true
+) -> Array[Vector2i]:
+	var x0 := clampi(int(floor(x0_px / float(TILE_SIZE))), DIG_START_X, DIG_END_X - 1)
+	var x1 := clampi(int(ceil(x1_px / float(TILE_SIZE))), DIG_START_X, DIG_END_X)
+	var y0 := clampi(int(floor(y0_px / float(TILE_SIZE))), 0, ENVELOPE_ROWS - 1)
+	var y1: int
+	if y1_inclusive_deck:
+		y1 = clampi(int(round(y1_px / float(TILE_SIZE))) + 1, 0, ENVELOPE_ROWS)
+	else:
+		y1 = clampi(int(ceil(y1_px / float(TILE_SIZE))), 0, ENVELOPE_ROWS)
+	var cells: Array[Vector2i] = []
+	if x1 <= x0 or y1 <= y0:
+		return cells
+	for x in range(x0, x1):
+		for y in range(y0, y1):
+			cells.append(Vector2i(x, y))
+	return cells
 
 
 func _place_random(cell: Vector2i) -> void:
@@ -173,7 +337,14 @@ func has_tile(cell: Vector2i) -> bool:
 ## stop, regardless of whether a real Zone (Spec 05, not authored yet)
 ## eventually replaces this rectangle with real chunk-authored bounds.
 func is_within_dig_envelope(cell: Vector2i) -> bool:
-	return cell.x >= DIG_START_X and cell.x < DIG_END_X and cell.y >= 0 and cell.y < ENVELOPE_ROWS
+	if cell.y < 0 or cell.y >= ENVELOPE_ROWS:
+		return false
+	if cell.x >= DIG_START_X and cell.x < DIG_END_X:
+		return true
+	# High-West Dig Front — diggable Firmament + mid band only (not Mouth depth).
+	if cell.x >= WEST_DIG_START_X and cell.x < WEST_DIG_END_X and cell.y < MOUTH_Y_MIN:
+		return true
+	return false
 
 
 ## can_dig(position) from the spec's contract surface, in world space to

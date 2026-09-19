@@ -6,8 +6,8 @@
 script = ExtResource("1")
 zone_id = &"east_firmament"
 display_name = "Firmament (east face)"
-world_origin = Vector2(1024, 0)
+world_origin = Vector2(8320, 0)
 seams = []
 enclosed = true
-world_rect = Rect2(1024, 0, 1024, 464)
+world_rect = Rect2(7680, -320, 5120, 480)
 restricted = true

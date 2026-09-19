@@ -15,6 +15,9 @@ func _run() -> void:
 	var terrain: TileMapLayer = HollowTerrainScript.new()
 	root.add_child(terrain)
 	await process_frame
+	# _ready paints the full Hollow greybox; this smoke test needs a blank map.
+	for cell in terrain.get_used_cells():
+		terrain.erase_cell(cell)
 
 	terrain.paint_floor(0.0, 64.0, 96.0)
 	terrain.paint_stairs(64.0, 96.0, 128.0, 112.0)

@@ -21,22 +21,22 @@ func _run() -> void:
 		return
 
 	var mid_east_end := HollowLayout.civic_east_end()
-	var mid_east_framed := mid_east_end + 576.0
+	var mid_east_framed := mid_east_end + 2880.0
 
 	# West of Mid Heart: dig framing must stay locked at the Hollow clamp.
 	player.set_physics_process(false)
-	player.global_position = Vector2(200.0, HollowLayout.WICK_Y - 16.0)
+	player.global_position = Vector2(1000.0, HollowLayout.WICK_Y - 80.0)
 	player.velocity = Vector2.ZERO
 	await physics_frame
 	await process_frame
-	if float(cam.limit_right) >= 2000.0:
+	if float(cam.limit_right) >= 10000.0:
 		push_error("FAIL west Hollow limit_right=%s unlocks full dig strip" % cam.limit_right)
 		quit(1)
 		return
-	if absf(float(cam.limit_right) - 1024.0) > 1.0:
+	if absf(float(cam.limit_right) - float(cam.LIMIT_RIGHT_HOLLOW)) > 1.0:
 		push_error(
-			"FAIL west Hollow limit_right=%s should stay at Hollow clamp 1024"
-			% cam.limit_right
+			"FAIL west Hollow limit_right=%s should stay at Hollow clamp %s"
+			% [cam.limit_right, cam.LIMIT_RIGHT_HOLLOW]
 		)
 		quit(1)
 		return
@@ -44,10 +44,10 @@ func _run() -> void:
 
 	# Crossing Devil's Mouth / Mid Heart: limit_right must ease continuously.
 	# A short Heart-East blend (~100px) jerks the clamped camera (~90px/step).
-	var mouth_prev := float(cam.desired_limit_right(HollowLayout.HEART_WEST.x - 20.0))
+	var mouth_prev := float(cam.desired_limit_right(HollowLayout.HEART_WEST.x - 100.0))
 	var mouth_max_jump := 0.0
-	var mouth_x := HollowLayout.HEART_WEST.x - 20.0
-	while mouth_x <= HollowLayout.PIT_RIGHT + 20.0:
+	var mouth_x := HollowLayout.HEART_WEST.x - 100.0
+	while mouth_x <= HollowLayout.PIT_RIGHT + 100.0:
 		var mouth_cur := float(cam.desired_limit_right(mouth_x))
 		var mouth_jump := absf(mouth_cur - mouth_prev)
 		if mouth_jump > mouth_max_jump:
@@ -59,7 +59,7 @@ func _run() -> void:
 			)
 			quit(1)
 			return
-		if mouth_cur >= 2000.0:
+		if mouth_cur > mid_east_framed + 1.0:
 			push_error("FAIL Mouth x=%s unlocks full dig framing" % mouth_x)
 			quit(1)
 			return
@@ -67,9 +67,9 @@ func _run() -> void:
 		mouth_x += 10.0
 	print("PASS Mouth / Mid Heart limit eases without jerk (max step=%s)" % mouth_max_jump)
 
-	# Mid-East Landing + Approach (to x=1408) is still Hollow civic framing: camera must
+	# Mid-East Landing + Approach is still Hollow civic framing: camera must
 	# cover the walk with viewport pad, and must NOT fully unlock dig yet.
-	for mid_x in [800.0, 944.0, 1280.0]:
+	for mid_x in [HollowLayout.PIT_RIGHT + 80.0, HollowLayout.MID_EAST_APPROACH.x + 64.0]:
 		player.global_position.x = mid_x
 		await physics_frame
 		await process_frame
@@ -81,7 +81,7 @@ func _run() -> void:
 			)
 			quit(1)
 			return
-		if mid_limit >= 2000.0:
+		if mid_limit > mid_east_framed + 1.0:
 			push_error(
 				"FAIL Mid-East x=%s still unlocks full dig framing (limit_right=%s)"
 				% [mid_x, mid_limit]
@@ -94,7 +94,7 @@ func _run() -> void:
 	var prev := float(cam.limit_right)
 	var max_step_jump := 0.0
 	var x := mid_east_end
-	while x <= mid_east_end + 280.0:
+	while x <= mid_east_end + 1400.0:
 		player.global_position.x = x
 		await physics_frame
 		await process_frame
@@ -115,10 +115,10 @@ func _run() -> void:
 	print("PASS dig limit expands without snap (max step=%s)" % max_step_jump)
 
 	# Fully past dig mouth: full dig framing allowed.
-	player.global_position.x = 1600.0
+	player.global_position.x = HollowLayout.civic_east_end() + 1400.0
 	await physics_frame
 	await process_frame
-	if float(cam.limit_right) < 2000.0:
+	if float(cam.limit_right) < float(cam.LIMIT_RIGHT_DIG) - 320.0:
 		push_error("FAIL dig limit_right=%s still clamped" % cam.limit_right)
 		quit(1)
 		return
@@ -126,23 +126,23 @@ func _run() -> void:
 
 	# Pure curve helper (if present): endpoints + continuity across Mid-East→dig.
 	if cam.has_method("desired_limit_right"):
-		var deep: float = float(cam.desired_limit_right(400.0))
-		var dig: float = float(cam.desired_limit_right(1600.0))
-		if deep > mid_east_end or dig < 2000.0:
+		var deep: float = float(cam.desired_limit_right(2000.0))
+		var dig: float = float(cam.desired_limit_right(HollowLayout.civic_east_end() + 1400.0))
+		if deep > mid_east_end or dig < float(cam.LIMIT_RIGHT_DIG) - 320.0:
 			push_error("FAIL desired_limit_right endpoints deep=%s dig=%s" % [deep, dig])
 			quit(1)
 			return
-		var mid_east_curve: float = float(cam.desired_limit_right(1280.0))
-		if mid_east_curve < mid_east_framed - 1.0 or mid_east_curve >= 2000.0:
+		var mid_east_curve: float = float(cam.desired_limit_right(HollowLayout.MID_EAST_APPROACH.x + 64.0))
+		if mid_east_curve < mid_east_framed - 1.0 or mid_east_curve > mid_east_framed + 1.0:
 			push_error(
-				"FAIL desired_limit_right Mid-East=%s (need [%s, 2000))"
+				"FAIL desired_limit_right Mid-East=%s (need ~%s civic frame)"
 				% [mid_east_curve, mid_east_framed]
 			)
 			quit(1)
 			return
-		var p := float(cam.desired_limit_right(mid_east_end - 20.0))
+		var p := float(cam.desired_limit_right(mid_east_end - 100.0))
 		var sx := mid_east_end - 10.0
-		while sx <= mid_east_end + 260.0:
+		while sx <= mid_east_end + 1300.0:
 			var c := float(cam.desired_limit_right(sx))
 			if absf(c - p) > 160.0:
 				push_error("FAIL desired_limit_right discontinuity at %s" % sx)

@@ -7,6 +7,13 @@ blockout with schematic domestic dressing, not final art or a completed city.
 The reference image's void/lift is not copied: the written opening-route contract
 requires an enclosed home and no lower-west civic lift.
 
+**World-scale pass (2026-09-19):** every world position/span below is x5 its
+original value (see `docs/hollow-macro-blockout.md`'s world-scale pass note);
+mechanism sizes tied to the player's fixed 32px body (tile size, riser
+height, floor thickness) are unchanged. Home Court's west seam is now at
+x=-320, floor y=4320, spawn (-80,4288); the east wall at x=1280..1360, west
+of the Mouth boundary x=1440.
+
 ## Geometry and access
 
 - `main.tscn`: `Hollow/HollowTerrain` paints the floors, stairs, roof and east wall.
@@ -21,6 +28,7 @@ requires an enclosed home and no lower-west civic lift.
 - The east wall occupies x=256..272, west of the Mouth boundary x=288.
   This extends the previous home blockout east by 112px; it does not move the
   west seam or neighboring districts. Zone bounds now include both elevations.
+  Devil's Mouth now runs x=288..992 (widened 2026-09-19 to match the scale plan).
 - Solid support beneath the landing is rock, not an inaccessible room. The
   roof is a structural boundary, not an advertised route. There are no fake
   doors or ladders implying access to unfinished regions.
@@ -49,11 +57,14 @@ one player-height above its floor.
 
 ## Neighbor greybox (playable expansion — new districts)
 
-From Home Court's upper landing, stairs climb into Mid Heart and Mid-East.
+From Home Court's upper landing, `LadderHomeToHeart` climbs onto Mid Heart and Mid-East.
 A Heart-height west spur sits above Switchback, reached by a local ladder so the
 flat opening corridor stays clear. West of that spur is a Wickwork terrace;
-below it, Mid Allotments drop to y=720 via `LadderMid`. East of Mid-East Landing,
-Mid-East Approach continues the civic walk to x=1408. See
+below it, Mid Allotments drop to y=720 via the same Worker Return shaft (floor
+gap at the ladder X). East of Mid-East Landing,
+Mid-East Approach continues the civic walk to x=1664; Dig Front extends to x=2368.
+The shared east ladder climbs Ashram → Glowbeds → Hang → Mid → Lower → Cistern;
+FreightLift bridges Mid / Lower / Cistern east of the Mouth. See
 `docs/hollow-macro-blockout.md` and `tests/test_playable_expansion.gd`.
 
 ## Still outside this pass

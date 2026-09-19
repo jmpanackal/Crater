@@ -63,8 +63,8 @@ func _run() -> void:
 	root.add_child(terrain)
 	await process_frame
 	terrain.clear()
-	var firmament_cell := Vector2i(18, 2)
-	var mouth_cell := Vector2i(18, 60)
+	var firmament_cell := Vector2i(18, 10) ## World-scale pass (2026-09-19): row bands x5
+	var mouth_cell := Vector2i(18, 300)
 	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 
@@ -102,15 +102,18 @@ func _run() -> void:
 		push_error("FAIL DigDressing missing")
 		quit(1)
 		return
-	if not dressing.has_method("firmament_quieter_than_mouth") or not dressing.firmament_quieter_than_mouth():
-		push_error("FAIL Firmament haze not quieter than Devil's Mouth gloom")
+	if dressing.get_node_or_null("FirmamentHaze") == null:
+		push_error("FAIL Firmament dressing rect missing")
 		quit(1)
 		return
-	if dressing.get_node_or_null("FirmamentHaze") == null or dressing.get_node_or_null("MouthGloom") == null:
-		push_error("FAIL Firmament/Devil's Mouth dressing rects missing")
+	# The downward dig direction used to carry its own "Devil's Mouth" gloom/
+	# label here too, reusing the name of the real crater void elsewhere in
+	# the Hollow — removed 2026-09-19 as a confusing stray artifact.
+	if dressing.get_node_or_null("MouthGloom") != null or dressing.get_node_or_null("DevilsMouthMark") != null:
+		push_error("FAIL stale Devil's Mouth dig-site dressing should be gone")
 		quit(1)
 		return
-	print("PASS Firmament↑ / Devil's Mouth↓ dig-site dressing")
+	print("PASS Firmament↑ dig-site dressing; no stray Devil's Mouth artifact")
 
 	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
 	FeelFx.reset_debug()

@@ -6,16 +6,16 @@
 script = ExtResource("1")
 zone_id = &"first_expansion_gallery"
 display_name = "First Expansion Gallery"
-world_origin = Vector2(-1000, 1056)
+world_origin = Vector2(-5000, 5280)
 seams = [{
 "edge": "east",
 "neighbor": "bottom_west_threshold",
-"position": -880.0
+"position": -4400
 }, {
 "edge": "south",
 "neighbor": "collapsed_side_chamber",
-"position": 1056.0
+"position": 5280
 }]
 enclosed = true
-world_rect = Rect2(-1136, 960, 256, 192)
+world_rect = Rect2(-5680, 4800, 1280, 960)
 restricted = false

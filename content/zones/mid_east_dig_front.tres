@@ -4,18 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"mid_heart"
-display_name = "Mid Heart"
-world_origin = Vector2(3200, 2880)
+zone_id = &"mid_east_dig_front"
+display_name = "Mid-East Dig Front"
+world_origin = Vector2(10080, 2880)
 seams = [{
 "edge": "west",
-"neighbor": "home_court",
-"position": 1280
-}, {
-"edge": "east",
-"neighbor": "mid_east_landing",
-"position": 4960
+"neighbor": "mid_east_approach",
+"position": 8320
 }]
 enclosed = false
-world_rect = Rect2(1280, 2720, 3680, 320)
+world_rect = Rect2(8320, 2720, 3520, 320)
 restricted = false

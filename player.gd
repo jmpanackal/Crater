@@ -13,7 +13,8 @@ const BODY_HEIGHT := 32.0
 ## Idle sheets are 64×64 (2× PixelLab); scale to match the 32×32 collider so feet sit on deck.
 const SPRITE_SCALE := 0.5
 ## Snap onto a landing if within this many px when climb ends.
-const CLIMB_LAND_SNAP_PX := 48.0
+## World-scale pass (2026-09-19): x5, tracking the now-5x-taller ladder shafts.
+const CLIMB_LAND_SNAP_PX := 240.0
 
 ## Fairness windows (see docs/game-feel-best-practices.md).
 const COYOTE_TIME := 0.10
@@ -24,10 +25,11 @@ const FRICTION := 1800.0
 const AIR_ACCEL := 1000.0
 const AIR_FRICTION := 400.0
 ## Soft respawn if we drop past Hollow/dig void (below seep band).
-## Below this the player has fallen past the deepest deck (SEEP_Y=1216) into the
-## Mouth and gets soft-respawned. Keeps the same ~112px margin under Seep it
-## always had; must move if SEEP_Y does.
-const VOID_FALL_Y := 1328.0
+## Below this the player has fallen past the deepest deck (SEEP_Y=6080) into the
+## Mouth and gets soft-respawned. Keeps the same ~560px margin under Seep it
+## always had (world-scale pass 2026-09-19: x5 of the old ~112px); must move
+## if SEEP_Y does.
+const VOID_FALL_Y := 6640.0
 
 ## QOL step-up: walking into a ledge exactly one dig/floor tile higher than
 ## the current stand auto-climbs it instead of requiring a jump (a one-tile
@@ -386,7 +388,7 @@ func _try_step_up(move_x: float) -> void:
 func _remember_safe_ground() -> void:
 	if _climbing or not is_on_floor():
 		return
-	if global_position.y >= VOID_FALL_Y - 40.0:
+	if global_position.y >= VOID_FALL_Y - 200.0:
 		return
 	_last_safe_pos = global_position
 	_has_safe_pos = true

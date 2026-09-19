@@ -62,8 +62,8 @@ func _run() -> void:
 	root.add_child(terrain)
 	await process_frame
 	terrain.clear()
-	var firmament_cell := Vector2i(18, 2)
-	var mouth_cell := Vector2i(18, 60)
+	var firmament_cell := Vector2i(18, 10) ## World-scale pass (2026-09-19): row bands x5
+	var mouth_cell := Vector2i(18, 300)
 	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 

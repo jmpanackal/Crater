@@ -23,8 +23,23 @@ func _run() -> void:
 	for child in scene.get_node("Hollow").get_children():
 		if child.get_script() != null and str(child.get_script().resource_path).ends_with("hollow_climb.gd"):
 			ladders.append(child)
-	if ladders.size() < 2:
-		push_error("FAIL expected at least Chamber + WorkerReturn ladders, got %s" % ladders.size())
+	if ladders.size() != 4:
+		push_error(
+			"FAIL expected Chamber + WorkerReturn + HomeToHeart + EastStack, got %s"
+			% ladders.size()
+		)
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/LadderMid") != null:
+		push_error("FAIL LadderMid must not sit beside Worker Return")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/LadderHomeToHeart") == null:
+		push_error("FAIL LadderHomeToHeart missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/LadderEastStack") == null:
+		push_error("FAIL LadderEastStack missing")
 		quit(1)
 		return
 
@@ -117,18 +132,18 @@ func _run() -> void:
 			)
 			quit(1)
 			return
-		# Top may extend slightly above the rails for upper-deck foot overlap.
-		var top_slack := 48.0
-		if hit.position.y > visual.position.y + 1.0:
+		# Hitbox must not reach onto solid deck above the rails — standing beside an
+		# open shaft should not keep the climb prompt while walking the landing.
+		if hit.position.y < visual.position.y - 1.0:
 			push_error(
-				"FAIL ladder %s hitbox starts below visual top (hit_y=%s visual_y=%s)"
+				"FAIL ladder %s hitbox extends above visual (hit_y=%s visual_y=%s)"
 				% [ladder.name, hit.position.y, visual.position.y]
 			)
 			quit(1)
 			return
-		if hit.position.y < visual.position.y - top_slack:
+		if hit.position.y > visual.position.y + 1.0:
 			push_error(
-				"FAIL ladder %s hitbox extends too far above visual (hit_y=%s visual_y=%s)"
+				"FAIL ladder %s hitbox starts below visual top (hit_y=%s visual_y=%s)"
 				% [ladder.name, hit.position.y, visual.position.y]
 			)
 			quit(1)
@@ -143,6 +158,72 @@ func _run() -> void:
 			quit(1)
 			return
 	print("PASS ladder climb hitboxes match visual rails")
+
+	# Standing on solid Heart deck west of the shaft must not keep the climb prompt.
+	player.exit_climb_zone(worker)
+	player._climbing = false
+	player.collision_mask = player.WORLD_COLLISION_MASK
+	player.global_position = Vector2(
+		HollowLayout.LADDER_RETURN_OPEN_X - player.BODY_HEIGHT - 4.0,
+		HollowLayout.HEART_Y - player.BODY_HEIGHT
+	)
+	player.velocity = Vector2.ZERO
+	for _i in range(12):
+		await physics_frame
+	if player.is_in_climb_zone():
+		push_error("FAIL climb zone overlaps solid deck west of Worker Return opening")
+		quit(1)
+		return
+	var top_hint: CanvasItem = worker.get_node_or_null("ClimbHint") as CanvasItem
+	if top_hint != null and top_hint.visible:
+		push_error("FAIL climb prompt shows while walking the deck above a closed lip")
+		quit(1)
+		return
+	print("PASS deck beside open shaft does not keep climb prompt")
+
+	# East stack: standing on Mid-East Landing west of the shaft must not keep the prompt.
+	var east_ladder: Area2D = scene.get_node_or_null("Hollow/LadderEastStack") as Area2D
+	player.exit_climb_zone(east_ladder)
+	player._climbing = false
+	player.collision_mask = player.WORLD_COLLISION_MASK
+	player.global_position = Vector2(
+		HollowLayout.LADDER_EAST_OPEN_X - player.BODY_HEIGHT - 4.0,
+		HollowLayout.HEART_Y - player.BODY_HEIGHT
+	)
+	player.velocity = Vector2.ZERO
+	for _i in range(12):
+		await physics_frame
+	if player.is_in_climb_zone():
+		push_error("FAIL climb zone overlaps solid Mid-East deck west of east shaft")
+		quit(1)
+		return
+	print("PASS Mid-East deck beside east shaft does not keep climb prompt")
+
+	# Standing in the east shaft opening at Mid-East must enter the climb zone
+	# (dig rock must not occupy the shaft cells).
+	player.global_position = Vector2(
+		HollowLayout.LADDER_EAST_X,
+		HollowLayout.HEART_Y - player.BODY_HEIGHT
+	)
+	player.velocity = Vector2.ZERO
+	player.enter_climb_zone(east_ladder)
+	for _i in range(8):
+		await physics_frame
+	if not player.is_in_climb_zone():
+		push_error("FAIL Mid-East shaft opening does not register LadderEastStack climb zone")
+		quit(1)
+		return
+	var dig: TileMapLayer = scene.get_node_or_null("Terrain") as TileMapLayer
+	if dig != null:
+		var shaft_air := Vector2i(
+			int(round((HollowLayout.LADDER_EAST_OPEN_X + 16.0) / 16.0)),
+			int(round((HollowLayout.HEART_Y - 32.0) / 16.0))
+		)
+		if dig.get_cell_source_id(shaft_air) != -1:
+			push_error("FAIL dig rock still occupies LadderEastStack air at Mid-East")
+			quit(1)
+			return
+	print("PASS Mid-East shaft opening reaches LadderEastStack (dig carved)")
 
 	print("LADDER_INTERACTION_TESTS_PASSED")
 	scene.queue_free()

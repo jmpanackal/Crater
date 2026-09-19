@@ -3,20 +3,25 @@ extends Camera2D
 ## Keeps Firmament/Mouth vertical climbs readable without snappy lock-on.
 ## Hollow clamps limit_right so dig-tile columns never peek into Wick framing.
 ## Mid-East Approach keeps civic framing; dig unlock starts after its east tip.
+## Mid-East Dig Front (past civic tip) uses the dig-limit blend — no hard snap.
 
 const LOOK_AHEAD_X := 44.0
 const LOOK_AHEAD_Y := 34.0
 const LOOK_LERP := 5.2
 const SHAKE_DECAY := 10.0
 
-## Dig columns begin at TerrainLayer.DIG_START_X * TILE (1024). Hide west of Mid-East.
-const LIMIT_RIGHT_HOLLOW := 1024
-const LIMIT_RIGHT_DIG := 2200
-## Half-viewport pad past Mid-East Approach's east tip so the player stays framed at x=1408.
+## World-scale pass (2026-09-19): x5, tracking hollow_layout.gd's EXIT_RIGHT /
+## MID_EAST_DIG_FRONT — see that file's header note.
+## Dig columns begin at TerrainLayer.DIG_START_X * TILE (6400). Hide west of Mid-East.
+const LIMIT_RIGHT_HOLLOW := 6400
+## Dig Front begins past this; camera unlocks dig framing after it.
+## Dig tip framing pad grows with Mid-East Dig Front (~x=11840).
+const LIMIT_RIGHT_DIG := 14720
+## Half-viewport pad past Mid-East Approach's east tip so the player stays framed.
 ## Dig unlock waits until the player walks past the civic approach into Dig Front.
-const MID_EAST_FRAME_PAD := 576.0
+const MID_EAST_FRAME_PAD := 2880.0
 ## Dig unlock span past Mid-East Approach into Mid-East Dig Front.
-const DIG_LIMIT_BLEND_SPAN := 256.0
+const DIG_LIMIT_BLEND_SPAN := 1280.0
 
 var _look := Vector2.ZERO
 var _shake := 0.0

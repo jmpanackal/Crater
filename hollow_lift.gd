@@ -206,7 +206,7 @@ func _build_hint() -> void:
 	_hint.position = Vector2(-4.0, -58.0)
 	_hint.add_theme_font_size_override("font_size", 11)
 	_hint.set_script(SoftWorldLabel)
-	_hint.set("show_radius", 120.0)
+	_hint.set("show_radius", 600.0)
 	_hint.set("far_alpha", 0.05)
 	_hint.set("near_alpha", 0.8)
 	_hint.modulate = Color(0.85, 0.78, 0.6, 0.75)

@@ -4,14 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"mid_allotments"
-display_name = "Mid Allotments"
-world_origin = Vector2(-1000, 3600)
+zone_id = &"seep_threshold"
+display_name = "Seep / Service Threshold"
+world_origin = Vector2(5680, 6080)
 seams = [{
 "edge": "north",
-"neighbor": "worker_return_ascent",
-"position": 3600
+"neighbor": "cistern",
+"position": 6080
 }]
-enclosed = false
-world_rect = Rect2(-1680, 3440, 1360, 320)
+enclosed = true
+world_rect = Rect2(4960, 5920, 2080, 320)
 restricted = false
