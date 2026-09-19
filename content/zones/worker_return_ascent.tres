@@ -4,18 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"home_court"
-display_name = "Home Court"
-world_origin = Vector2(-16, 864)
+zone_id = &"worker_return_ascent"
+display_name = "Worker Return Ascent"
+world_origin = Vector2(-304, 576)
 seams = [{
-"edge": "west",
+"edge": "south",
 "neighbor": "lower_switchback",
-"position": -64.0
-}, {
-"edge": "east",
-"neighbor": "mid_heart",
-"position": 256.0
+"position": 864.0
 }]
-enclosed = true
-world_rect = Rect2(-64, 608, 336, 272)
+enclosed = false
+world_rect = Rect2(-336, 544, 272, 64)
 restricted = false

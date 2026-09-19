@@ -47,9 +47,20 @@ collision_mask = 1
 monitorable = false
 script = ExtResource("13_hollow_climb")
 shaft_size = Vector2(40, 64)
-hint_text = "[W/S] climb down"
+hint_text = "[W/S] climb"
 deck_open_x = -1136.0
 upper_land_side = 1
+
+[node name="LadderWorkerReturn" type="Area2D" parent="Hollow"]
+position = Vector2(-196, 576)
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("13_hollow_climb")
+shaft_size = Vector2(40, 288)
+hint_text = "[W/S] climb"
+deck_open_x = -208.0
+upper_land_side = -1
 
 [node name="Zones" type="Node2D" parent="Hollow"]
 
@@ -73,6 +84,27 @@ zone_id = "west_dispatch_yard"
 
 [node name="Idle1" type="Marker2D" parent="Hollow/Zones/WestDispatchYard"]
 position = Vector2(-264, 864)
+
+[node name="WorkerReturnAscent" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "worker_return_ascent"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/WorkerReturnAscent"]
+position = Vector2(-304, 576)
+
+[node name="MidHeart" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "mid_heart"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidHeart"]
+position = Vector2(536, 576)
+
+[node name="MidEastLanding" type="Node2D" parent="Hollow/Zones"]
+script = ExtResource("21_zone_anchor")
+zone_id = "mid_east_landing"
+
+[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastLanding"]
+position = Vector2(944, 576)
 
 [node name="BottomWestApproach" type="Node2D" parent="Hollow/Zones"]
 script = ExtResource("21_zone_anchor")
@@ -193,7 +225,7 @@ process_callback = 0
 position = Vector2(16, 16)
 limit_left = -1200
 limit_top = -320
-limit_right = 1024
+limit_right = 1728
 limit_bottom = 1300
 limit_enabled = true
 position_smoothing_enabled = true

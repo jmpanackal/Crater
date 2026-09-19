@@ -79,3 +79,22 @@ Follow-up fixed-mode checks at 1280x720 / 60 FPS and 3840x2160 / 144 FPS
 also recorded 0/0 reversals with no missing frames. The full headless runner
 reported 55/55 successful exits (50 active files, 5 existing quarantined skips).
 Zoom and gameplay movement/collision tuning are unchanged.
+
+## Playable expansion landed (2026-09-18 correction)
+
+Greybox collision now grows the map footprint with **new places**, not denser
+detailing of the Home → Switchback → Dispatch corridor:
+
+- **Opening corridor (simplified):** Lower Switchback and West Dispatch are flat
+  lower-work floors again (pre-expansion silhouette). The rejected support-mass
+  dip/tunnel, foreman podium, and cart bay are gone.
+- **Landing → Mid Heart flight:** stairs from Home Court's upper landing
+  (x≈192, y=736) up through a cut roof/east-wall passage into Mid Heart decks.
+- **Worker Return west spur:** Heart-height floors at y=576 (x=-336..-64) above
+  the flat corridor, reached by `LadderWorkerReturn` from Switchback (x≈-208).
+- **Mid Heart decks:** walkable Heart rafts across the Mouth at y=576.
+- **Mid-East Landing:** flat walkable floor from the Mouth's east edge (x=736)
+  out to x=1152 at Mid Heart height.
+
+Covered by `tests/test_playable_expansion.gd` and the Home Court navigation
+walk. Gallery digging and final art remain out of scope.

@@ -127,17 +127,29 @@ const HOME_LANDING := Vector4(HOME_BACK_STAIR.z, 256.0, HOME_BACK_STAIR.w, FLOOR
 const HOME_ROOF_Y := HOME_LANDING.z - MIN_BAND_GAP
 const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 336.0, LOWER_WORK_Y + 16.0 - HOME_ROOF_Y)
 
-## Lower Switchback: hollow-chunk-map.md describes this as "sloping down and
-## back up around a carved support mass," but that's a landmark prop that
-## doesn't exist yet in this greybox pass — an elevation dip with nothing
-## visually justifying it just reads as broken terrain (confirmed in-engine),
-## per docs/hollow-level-authoring.md's "don't break up flat terrain without a
-## reason." Flat for now; the dip is the art/dressing pass's job once the
-## support-mass prop exists to hang it on, not a shape invented ahead of it.
-const SWITCHBACK_FLOOR := Vector4(-160.0, HOME_COURT_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+## Lower Switchback: flat corridor at lower-work height. Chunk art may later
+## hang a carved support-mass prop here; inventing a dip/tunnel without that
+## mass just densifies the opening route (rejected 2026-09-18).
+const SWITCHBACK_LEFT := -160.0
+const SWITCHBACK_FLOOR := Vector4(SWITCHBACK_LEFT, HOME_COURT_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
 
+## West Dispatch Yard: continuous flat apron into Bottom-West Approach.
 const WEST_DISPATCH_LEFT := -368.0
-const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, -160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
+const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+
+## --- Playable expansion off the opening corridor (not corridor detailing) ---
+## East: stairs from Home landing into Mid Heart / Mid-East.
+## West: Heart-height spur above the flat corridor, reached by a short local climb
+## (a second stair through Home's back-stair columns would ceiling-trap that climb).
+const LANDING_TO_HEART := Vector4(192.0, HOME_LANDING.z, 352.0, HEART_Y)
+const LADDER_RETURN_OPEN_X := -208.0
+const LADDER_RETURN_X := LADDER_RETURN_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
+const LADDER_RETURN_SHAFT_H := LOWER_WORK_Y - HEART_Y
+const WORKER_SPUR_WEST := Vector4(-336.0, LADDER_RETURN_OPEN_X, HEART_Y, FLOOR_THICKNESS)
+const WORKER_SPUR_EAST := Vector4(LADDER_RETURN_OPEN_X + LADDER_OPENING, -128.0, HEART_Y, FLOOR_THICKNESS)
+const WORKER_ALLOT_LANDING := Vector4(-336.0, -272.0, HEART_Y, FLOOR_THICKNESS)
+## Mid-East landing: first walkable floor east of the Mouth at Mid Heart height.
+const MID_EAST_LANDING := Vector4(PIT_RIGHT, 1152.0, HEART_Y, FLOOR_THICKNESS)
 
 ## Bottom-West Approach — the real descent: 3 shallow flights + 2 landings,
 ## dropping a full band (LOWER_WORK_Y -> BOTTOM_WEST_Y), same drop scale as
@@ -199,6 +211,24 @@ static func opening_route_stair_rects() -> Array[Vector4]:
 		HOME_BACK_STAIR,
 		APPROACH_FLIGHT2,
 		APPROACH_FLIGHT3,
+	]
+
+
+## New playable districts off the opening corridor (worker return + Mid Heart + Mid-East).
+static func expansion_deck_rects() -> Array[Vector4]:
+	var decks: Array[Vector4] = [
+		WORKER_SPUR_WEST,
+		WORKER_SPUR_EAST,
+		WORKER_ALLOT_LANDING,
+		MID_EAST_LANDING,
+	]
+	decks.append_array(heart_deck_rects())
+	return decks
+
+
+static func expansion_stair_rects() -> Array[Vector4]:
+	return [
+		LANDING_TO_HEART,
 	]
 
 

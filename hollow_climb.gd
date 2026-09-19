@@ -3,16 +3,14 @@ extends Area2D
 ## Player hangs/climbs with W/S while overlapping; Space jumps off.
 ## Position is the upper deck top; shaft_size.y reaches the lower deck top.
 
+const SHARED_CLIMB_HINT := "[W/S] climb"
+
 @export var shaft_size: Vector2 = Vector2(40, 192)
-@export var hint_text: String = "[W/S] climb"
+@export var hint_text: String = SHARED_CLIMB_HINT
 @export var rail_color: Color = Color(0.62, 0.42, 0.28, 1) # copper-wood
 @export var rung_color: Color = Color(0.78, 0.58, 0.38, 1)
 ## Extra climb hitbox above the visual top so a standing player on the upper deck overlaps.
 @export var grab_margin_top: float = 40.0
-## Inset climb hitbox from visual rails so the core zone matches the copper ladder.
-@export var grab_inset: float = 4.0
-## Extra grab reach onto upper-deck lips beside the rails (not into Devil's Mouth).
-@export var grab_reach: float = 20.0
 ## Upper-deck floor gap this shaft climbs through (world X). Lower landing stays solid.
 @export var deck_open_x: float = 0.0
 @export var deck_open_width: float = 64.0
@@ -20,6 +18,7 @@ extends Area2D
 @export var upper_land_side: int = 0
 
 var _hint: Label
+var _hint_player: Node2D
 
 
 func deck_top_y() -> float:
@@ -35,6 +34,23 @@ func upper_opening() -> Vector2:
 	return Vector2(deck_open_x, deck_open_x + deck_open_width)
 
 
+## Drawn ladder bounds in local space (rails / backboard).
+func visual_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, shaft_size)
+
+
+## Climb Area collision bounds in local space (matches visual X; may extend above).
+func climb_hit_rect() -> Rect2:
+	var col := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if col == null:
+		return Rect2()
+	var shape := col.shape as RectangleShape2D
+	if shape == null:
+		return Rect2()
+	var half := shape.size * 0.5
+	return Rect2(col.position - half, shape.size)
+
+
 func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 1
@@ -42,8 +58,11 @@ func _ready() -> void:
 	monitorable = false
 	# Above FloorVisual (z=1) so short shafts stay fully readable in openings.
 	z_index = 3
+	# One shared climb affordance across every Hollow ladder.
+	hint_text = SHARED_CLIMB_HINT
 	_ensure_collision()
 	_build_visuals()
+	set_physics_process(true)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
@@ -59,22 +78,12 @@ func _ensure_collision() -> void:
 		shape = RectangleShape2D.new()
 	else:
 		shape = shape.duplicate() as RectangleShape2D
-	# Visual ladder starts at (0,0); hitbox extends upward so deck-top feet still overlap.
-	# Core width matches rails; grab_reach extends onto upper-deck lips beside the opening.
-	var hit_w := maxf(24.0, shaft_size.x - grab_inset * 2.0)
-	var hit_center_x := shaft_size.x * 0.5
-	if upper_land_side < 0:
-		hit_w += grab_reach
-		hit_center_x -= grab_reach * 0.5
-	elif upper_land_side > 0:
-		hit_w += grab_reach
-		hit_center_x += grab_reach * 0.5
-	else:
-		hit_w += grab_reach * 2.0
+	# Match the drawn rails in X; only extend upward so upper-deck feet still overlap.
+	var hit_w := shaft_size.x
 	var hit_h := shaft_size.y + grab_margin_top
 	shape.size = Vector2(hit_w, hit_h)
 	col.shape = shape
-	col.position = Vector2(hit_center_x, hit_h * 0.5 - grab_margin_top)
+	col.position = Vector2(hit_w * 0.5, hit_h * 0.5 - grab_margin_top)
 
 
 func _build_visuals() -> void:
@@ -137,12 +146,18 @@ func _build_visuals() -> void:
 		rung.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(rung)
 
+	# Plain Label (not SoftWorldLabel): climb prompts are interaction chrome,
+	# not diegetic placards — and SoftWorldLabel's distance fade hid tall-shaft
+	# hints when the player stood at the lower landing.
 	_hint = Label.new()
 	_hint.name = "ClimbHint"
-	_hint.text = hint_text
+	_hint.text = SHARED_CLIMB_HINT
 	_hint.position = Vector2(-18, -18)
 	_hint.add_theme_font_size_override("font_size", 11)
+	_hint.add_theme_color_override("font_outline_color", Color(0.04, 0.06, 0.07, 0.92))
+	_hint.add_theme_constant_override("outline_size", 3)
 	_hint.modulate = Color(0.95, 0.85, 0.55, 0.9)
+	_hint.z_index = 4
 	_hint.visible = false
 	add_child(_hint)
 
@@ -157,15 +172,37 @@ func _rail_grain(rail: ColorRect, grain: Color) -> void:
 	rail.add_child(strip)
 
 
+func _physics_process(_delta: float) -> void:
+	_sync_hint_to_player()
+
+
+func _sync_hint_to_player() -> void:
+	if _hint == null or not _hint.visible or _hint_player == null:
+		return
+	if not is_instance_valid(_hint_player):
+		_hint_player = null
+		return
+	# Keep the prompt beside the climber so tall shafts stay readable at either end.
+	var local_y := _hint_player.global_position.y - global_position.y
+	local_y = clampf(local_y, -12.0, shaft_size.y - 8.0)
+	_hint.position = Vector2(-18.0, local_y - 18.0)
+
+
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player") and body.has_method("enter_climb_zone"):
 		body.enter_climb_zone(self)
+		_hint_player = body
 		if _hint:
+			_hint.text = SHARED_CLIMB_HINT
 			_hint.visible = true
+			_sync_hint_to_player()
 
 
 func _on_body_exited(body: Node2D) -> void:
 	if body.is_in_group("player") and body.has_method("exit_climb_zone"):
 		body.exit_climb_zone(self)
+		if _hint_player == body:
+			_hint_player = null
 		if _hint:
 			_hint.visible = false
+			_hint.position = Vector2(-18.0, -18.0)

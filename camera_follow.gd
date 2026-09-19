@@ -2,20 +2,21 @@ extends Camera2D
 ## Soft Hollow follow — look-ahead, drag deadzone, light shake.
 ## Keeps Firmament/Mouth vertical climbs readable without snappy lock-on.
 ## Hollow clamps limit_right so dig-tile columns never peek into Wick framing.
+## Mid-East Landing keeps civic framing; dig unlock starts after its east tip.
 
 const LOOK_AHEAD_X := 44.0
 const LOOK_AHEAD_Y := 34.0
 const LOOK_LERP := 5.2
 const SHAKE_DECAY := 10.0
 
-## Dig columns begin at TerrainLayer.DIG_START_X * TILE (1024). Hide until exit approach.
+## Dig columns begin at TerrainLayer.DIG_START_X * TILE (1024). Hide west of Mid-East.
 const LIMIT_RIGHT_HOLLOW := 1024
 const LIMIT_RIGHT_DIG := 2200
-## Blend dig framing open across the civic-excavation approach (not a hard unlock snap).
-## Starts on the right mid terrace so Mid Heart / left Wick stay dig-free.
-const DIG_LIMIT_BLEND_START_X := 880.0
-## Fully open once past HollowLayout.EXIT_RIGHT into dig columns.
-const DIG_LIMIT_BLEND_END_X := 1120.0
+## Half-viewport pad past Mid-East's east tip so the player can stay framed at x=1152.
+## Dig unlock still waits until the player walks past Mid-East Landing.
+const MID_EAST_FRAME_PAD := 576.0
+## Dig unlock span past Mid-East Landing into Mid-East Dig Front.
+const DIG_LIMIT_BLEND_SPAN := 256.0
 
 var _look := Vector2.ZERO
 var _shake := 0.0
@@ -57,15 +58,34 @@ func _physics_process(delta: float) -> void:
 	offset = _look + jitter
 
 
-## Ideal right clamp for a player x — continuous across the dig approach.
+## Ideal right clamp for a player x — Mid-East civic first, then dig unlock.
 func desired_limit_right(player_x: float) -> float:
-	var span := DIG_LIMIT_BLEND_END_X - DIG_LIMIT_BLEND_START_X
+	var mid_east_start := HollowLayout.PIT_RIGHT
+	var mid_east_end := HollowLayout.MID_EAST_LANDING.y
+	var hollow := float(LIMIT_RIGHT_HOLLOW)
+	var mid_east_framed := mid_east_end + MID_EAST_FRAME_PAD
+	var dig := float(LIMIT_RIGHT_DIG)
+	# Ease across the full Mid Heart / Mouth crossing — a short Heart-East blend
+	# expands limit_right too fast and jerks the clamped camera mid-Mouth.
+	var approach_start := HollowLayout.HEART_WEST.x
+	if player_x < approach_start:
+		return hollow
+	if player_x < mid_east_start:
+		var approach_span := mid_east_start - approach_start
+		var at := 0.0 if approach_span <= 0.0 else clampf((player_x - approach_start) / approach_span, 0.0, 1.0)
+		at = at * at * (3.0 - 2.0 * at)
+		return lerpf(hollow, mid_east_framed, at)
+	# On Mid-East Landing: frame the civic east walk without unlocking dig.
+	if player_x <= mid_east_end:
+		return mid_east_framed
+	# Past Mid-East: blend dig framing open across the approach.
+	var blend_end := mid_east_end + DIG_LIMIT_BLEND_SPAN
+	var span := blend_end - mid_east_end
 	if span <= 0.0:
-		return float(LIMIT_RIGHT_HOLLOW if player_x < DIG_LIMIT_BLEND_END_X else LIMIT_RIGHT_DIG)
-	var t := clampf((player_x - DIG_LIMIT_BLEND_START_X) / span, 0.0, 1.0)
-	# Smoothstep so the unlock eases in/out instead of linear popping.
+		return dig
+	var t := clampf((player_x - mid_east_end) / span, 0.0, 1.0)
 	t = t * t * (3.0 - 2.0 * t)
-	return lerpf(float(LIMIT_RIGHT_HOLLOW), float(LIMIT_RIGHT_DIG), t)
+	return lerpf(mid_east_framed, dig, t)
 
 
 func _update_dig_limit(player_x: float) -> void:

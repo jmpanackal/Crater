@@ -324,15 +324,15 @@ func _add_opening_route_dressing() -> void:
 
 	# Room-boundary doorways so the corridor reads as distinct spaces.
 	_room_entrance(root, "SwitchbackDoor", HollowLayout.HOME_COURT_LEFT, HollowLayout.LOWER_WORK_Y, WOOD)
-	_room_entrance(root, "DispatchDoor", HollowLayout.LOWER_SWITCHBACK_LEFT, HollowLayout.LOWER_WORK_Y, WARM)
+	_room_entrance(root, "DispatchDoor", HollowLayout.SWITCHBACK_LEFT, HollowLayout.LOWER_WORK_Y, WARM)
 	_room_entrance(root, "ApproachDoor", HollowLayout.WEST_DISPATCH_LEFT, HollowLayout.LOWER_WORK_Y, WOOD_DARK)
-	_room_entrance(root, "ThresholdDoor", HollowLayout.BOTTOM_WEST_APPROACH_LEFT, HollowLayout.LOWER_WORK_Y, WARM)
-	_room_entrance(root, "GalleryDoor", HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT, HollowLayout.LOWER_WORK_Y, COPPER)
+	_room_entrance(root, "ThresholdDoor", HollowLayout.BOTTOM_WEST_THRESHOLD.y, HollowLayout.BOTTOM_WEST_Y, WARM)
+	_room_entrance(root, "GalleryDoor", HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT, HollowLayout.BOTTOM_WEST_Y, COPPER)
 
-	# Step cues at the elevation changes.
-	_step_riser(root, "SwitchbackDipStep", -320.0, HollowLayout.LOWER_SWITCHBACK_DIP_Y)
-	_step_riser(root, "ApproachDipStep", -1000.0, HollowLayout.APPROACH_DIP_Y)
-	_step_riser(root, "GalleryDipStep", -1560.0, HollowLayout.GALLERY_DIP_Y)
+	# Step cues at real elevation changes (not decorative corridor dips).
+	_step_riser(root, "WorkerReturnStep", 208.0, HollowLayout.HOME_LANDING.z)
+	_step_riser(root, "ApproachDipStep", -496.0, HollowLayout.APPROACH_LANDING1_Y)
+	_step_riser(root, "GalleryDipStep", -960.0, HollowLayout.BOTTOM_WEST_Y)
 
 	# Sealed far-west rock wall so the Gallery reads as bounded, not endless.
 	_band(

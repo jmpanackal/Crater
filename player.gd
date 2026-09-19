@@ -61,6 +61,7 @@ var _climb_ladders: Array[Node] = []
 var _climbing := false
 ## After auto-landing at a deck end, ignore held W/S until released (avoids re-grab).
 var _climb_axis_release_required := false
+var _suppress_air_auto_grab := false
 
 var _coyote_timer := 0.0
 var _jump_buffer_timer := 0.0
@@ -137,15 +138,31 @@ func debug_force_land_feel(impact: float = 1.0) -> void:
 
 
 func enter_climb_zone(ladder: Node = null) -> void:
-	_climb_zones += 1
-	if ladder != null and not _climb_ladders.has(ladder):
+	var was_in_zone := not _climb_ladders.is_empty()
+	if ladder != null:
+		if _climb_ladders.has(ladder):
+			return
 		_climb_ladders.append(ladder)
+	_climb_zones = _climb_ladders.size()
+	_suppress_air_auto_grab = false
+	if was_in_zone or _climbing:
+		return
+	# Already-held W/S (dig-aim) never sticky-mounts on zone enter.
+	if _read_climb_axis() != 0.0:
+		_climb_axis_release_required = true
+		_suppress_air_auto_grab = true
+		return
+	# Airborne near the upper lip with no climb key: auto-grab so walking into an
+	# opening never free-falls past. Mid-shaft descent stays free until W/S.
+	if _can_air_auto_grab() and _pay_strenuous_if_loaded():
+		_climbing = true
+		collision_mask = 0
 
 
 func exit_climb_zone(ladder: Node = null) -> void:
 	if ladder != null:
 		_climb_ladders.erase(ladder)
-	_climb_zones = maxi(0, _climb_zones - 1)
+	_climb_zones = _climb_ladders.size()
 	if _climb_zones == 0:
 		# Keep `ladder` for snap — array is empty after erase when it was the last zone.
 		_stop_climbing(true, ladder)
@@ -154,7 +171,7 @@ func exit_climb_zone(ladder: Node = null) -> void:
 
 
 func is_in_climb_zone() -> bool:
-	return _climb_zones > 0
+	return not _climb_ladders.is_empty()
 
 
 func is_climbing() -> bool:
@@ -178,12 +195,19 @@ func _physics_process(delta: float) -> void:
 			_climb_axis_release_required = false
 		else:
 			climb_y = 0.0
-	if in_zone and climb_y != 0.0 and not _climbing:
-		# Grabbing a ladder is strenuous while hauling (Spec 13 / G1).
-		if _pay_strenuous_if_loaded():
+	if in_zone and not _climbing:
+		if climb_y != 0.0:
+			# Floor mounts need a fresh W/S press so held dig-aim does not sticky-grab.
+			# Airborne key mounts remain allowed while falling through a shaft.
+			var floor_mount := is_on_floor() and _climb_axis_just_pressed()
+			var air_mount := not is_on_floor()
+			if (floor_mount or air_mount) and _pay_strenuous_if_loaded():
+				_climbing = true
+			else:
+				climb_y = 0.0
+		elif not _suppress_air_auto_grab and _can_air_auto_grab() and _pay_strenuous_if_loaded():
 			_climbing = true
-		else:
-			climb_y = 0.0
+			collision_mask = 0
 
 	_update_coyote_and_buffer(delta)
 	var jumped := _try_consume_jump(in_zone)
@@ -273,6 +297,7 @@ func _try_consume_jump(in_zone: bool) -> bool:
 	collision_mask = WORLD_COLLISION_MASK
 	_climbing = false
 	_climb_axis_release_required = false
+	_suppress_air_auto_grab = true
 	velocity.y = JUMP_VELOCITY
 	_feel_scale = Vector2(0.88, 1.14) # stretch — sprite only
 	return true
@@ -464,6 +489,25 @@ func _snap_to_nearest_deck_if_close(ladder: Node = null) -> void:
 		if onto_upper:
 			_snap_beside_upper_opening(ladder)
 		velocity.y = 0.0
+
+
+
+func _climb_axis_just_pressed() -> bool:
+	return (
+		Input.is_action_just_pressed("ui_up")
+		or Input.is_action_just_pressed("ui_down")
+	)
+
+
+## Catch free-falls past an upper ladder lip only — not mid-shaft gallery drops.
+func _can_air_auto_grab() -> bool:
+	if is_on_floor() and velocity.y <= 20.0:
+		return false
+	var ladder := _active_ladder()
+	if ladder == null or not ladder.has_method("deck_top_y"):
+		return not is_on_floor() or velocity.y > 20.0
+	var stand_top := float(ladder.deck_top_y()) - BODY_HEIGHT
+	return global_position.y <= stand_top + 24.0
 
 
 func _read_climb_axis() -> float:

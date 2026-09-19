@@ -24,6 +24,7 @@ func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_NEAREST
 	tile_set = _build_tileset()
 	_paint_opening_route()
+	_paint_playable_expansion()
 
 
 ## Home Court -> Bottom-West Dig Front cluster. See HollowLayout's "Opening-route
@@ -38,6 +39,30 @@ func _paint_opening_route() -> void:
 	paint_block(Rect2(landing.x, landing.z + TILE_SIZE, landing.y - landing.x, HollowLayout.LOWER_WORK_Y - landing.z), SOURCE_ROCK)
 	paint_block(Rect2(landing.y, HollowLayout.HOME_ROOF_Y, TILE_SIZE, HollowLayout.LOWER_WORK_Y - HollowLayout.HOME_ROOF_Y + TILE_SIZE), SOURCE_ROCK)
 	paint_floor(HollowLayout.HOME_COURT_LEFT, landing.y + TILE_SIZE, HollowLayout.HOME_ROOF_Y, SOURCE_ROCK)
+
+
+## Worker return switchbacks into Mid Heart, plus Mid-East landing — new places,
+## not denser detailing of the Home→Dispatch corridor.
+func _paint_playable_expansion() -> void:
+	_clear_landing_to_heart_passage()
+	for rect in HollowLayout.expansion_deck_rects():
+		var source := SOURCE_BRIDGE if rect.w <= HollowLayout.BRIDGE_THICKNESS + 0.5 else SOURCE_LEDGE
+		paint_floor(rect.x, rect.y, rect.z, source)
+	for stair in HollowLayout.expansion_stair_rects():
+		paint_stairs(stair.x, stair.y, stair.z, stair.w)
+
+
+## Open stair wells through Home Court's roof / east wall so the Mid Heart flight
+## is not ceiling-trapped. West spur climb uses columns west of the landing and
+## only needs the shared landing deck.
+func _clear_landing_to_heart_passage() -> void:
+	var x0 := int(round(HollowLayout.LANDING_TO_HEART.x / TILE_SIZE))
+	var x1 := int(round(HollowLayout.HOME_LANDING.y / TILE_SIZE)) + 1
+	var y0 := int(round(HollowLayout.HEART_Y / TILE_SIZE))
+	var y1 := int(round(HollowLayout.HOME_LANDING.z / TILE_SIZE))
+	for x in range(x0, x1 + 1):
+		for y in range(y0, y1):
+			erase_cell(Vector2i(x, y))
 
 
 func _build_tileset() -> TileSet:

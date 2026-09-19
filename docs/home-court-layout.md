@@ -34,22 +34,28 @@ requires an enclosed home and no lower-west civic lift.
 ## Verification
 
 `tests/test_home_court_navigation.gd` drives the actual player in `main.tscn`
-using movement input: spawn to upper landing, down to court, west through
-Switchback and Dispatch to Gallery, into the optional Side Chamber, climb
-back out, return home and ascend again. It checks arrival, groundedness and
-reciprocal zone seams, without test-side position resets or jump input.
+using movement input: spawn to upper landing, across the Worker Return overpass
+into Mid Heart and Mid-East, back home, then west through the flat Switchback
+and Dispatch to Gallery, into the optional Side Chamber, climb back out, return
+home and ascend again. It checks arrival, groundedness and reciprocal zone
+seams, without test-side position resets or jump input.
 
 The optional chamber's existing ladder needs its real opening x=-1136 and
 right-hand landing configured; otherwise it cannot dismount onto Gallery.
 This small correction is included because the reachability test exposed it.
-The existing Dispatch marker is moved out of Home Court to the documented
-West Dispatch Yard at (-264,864). The Gallery collection marker is grounded
-at (-960,1056), rather than floating one player-height above its floor.
+The existing Dispatch marker sits on the flat West Dispatch Yard apron.
+The Gallery collection marker is grounded at (-960,1056), rather than floating
+one player-height above its floor.
+
+## Neighbor greybox (playable expansion — new districts)
+
+From Home Court's upper landing, stairs climb into Mid Heart and Mid-East.
+A Heart-height west spur sits above Switchback, reached by a local ladder so the
+flat opening corridor stays clear. See `docs/hollow-macro-blockout.md` and
+`tests/test_playable_expansion.gd`.
 
 ## Still outside this pass
 
-Lower Switchback's support-mass loop, Dispatch's authored yard, the return
-ascent to Mid Heart, production districts, furniture mechanics and final art
-remain unbuilt. Existing placeholder regions are not certified as finished.
-Home's west seam remains level; its specified shallow approach will be shaped
-with Lower Switchback rather than moving that neighbor's terrain in this pass.
+Production districts, furniture mechanics and final art remain unbuilt. Existing
+placeholder regions are not certified as finished. Gallery digging and full
+atlas framing stay out of scope.

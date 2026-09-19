@@ -29,6 +29,11 @@ func _run() -> void:
 			push_error("FAIL background does not cover the existing opening route")
 			quit(1)
 			return
+	for deck in HollowLayout.expansion_deck_rects():
+		if not Macro.WORLD_BOUNDS.has_point(Vector2(deck.x, deck.z)) or not Macro.WORLD_BOUNDS.has_point(Vector2(deck.y, deck.z)):
+			push_error("FAIL background does not cover playable expansion decks")
+			quit(1)
+			return
 	var lifts := Macro.transport_guides()
 	if lifts.size() != 3 or lifts[0].stops.back() != HollowLayout.WICK_Y or lifts[1].stops.back() != HollowLayout.HEART_Y or lifts[2].stops.front() != HollowLayout.HEART_Y:
 		push_error("FAIL the three distinct canonical transport spans drifted")
