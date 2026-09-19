@@ -148,8 +148,14 @@ const LADDER_RETURN_SHAFT_H := LOWER_WORK_Y - HEART_Y
 const WORKER_SPUR_WEST := Vector4(-336.0, LADDER_RETURN_OPEN_X, HEART_Y, FLOOR_THICKNESS)
 const WORKER_SPUR_EAST := Vector4(LADDER_RETURN_OPEN_X + LADDER_OPENING, -128.0, HEART_Y, FLOOR_THICKNESS)
 const WORKER_ALLOT_LANDING := Vector4(-336.0, -272.0, HEART_Y, FLOOR_THICKNESS)
+## Wickwork entry terrace — new district west of Worker Return (same Mid/Wick height).
+const WICK_TERRACE := Vector4(-528.0, -336.0, WICK_Y, FLOOR_THICKNESS)
+## Mid allotments street under the west spur, reached by LadderMid (west of Home Court).
+const MID_ALLOT_STREET := Vector4(-336.0, HOME_COURT_LEFT, MID_ALLOT_Y, FLOOR_THICKNESS)
 ## Mid-East landing: first walkable floor east of the Mouth at Mid Heart height.
 const MID_EAST_LANDING := Vector4(PIT_RIGHT, 1152.0, HEART_Y, FLOOR_THICKNESS)
+## Mid-East Approach — continues past the landing toward Mid-East Dig Front.
+const MID_EAST_APPROACH := Vector4(MID_EAST_LANDING.y, 1408.0, HEART_Y, FLOOR_THICKNESS)
 
 ## Bottom-West Approach — the real descent: 3 shallow flights + 2 landings,
 ## dropping a full band (LOWER_WORK_Y -> BOTTOM_WEST_Y), same drop scale as
@@ -214,16 +220,24 @@ static func opening_route_stair_rects() -> Array[Vector4]:
 	]
 
 
-## New playable districts off the opening corridor (worker return + Mid Heart + Mid-East).
+## New playable districts off the opening corridor (worker return + Mid Heart + Mid-East + Wick/allotments).
 static func expansion_deck_rects() -> Array[Vector4]:
 	var decks: Array[Vector4] = [
 		WORKER_SPUR_WEST,
 		WORKER_SPUR_EAST,
 		WORKER_ALLOT_LANDING,
+		WICK_TERRACE,
+		MID_ALLOT_STREET,
 		MID_EAST_LANDING,
+		MID_EAST_APPROACH,
 	]
 	decks.append_array(heart_deck_rects())
 	return decks
+
+
+## East tip of the continuous Mid-East civic walk (landing + approach).
+static func civic_east_end() -> float:
+	return MID_EAST_APPROACH.y
 
 
 static func expansion_stair_rects() -> Array[Vector4]:

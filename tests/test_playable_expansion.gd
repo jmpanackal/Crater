@@ -1,6 +1,6 @@
 extends SceneTree
-## Playable expansion off the opening corridor: Worker Return Ascent, Mid Heart
-## decks, and Mid-East Landing. Asserts new walkable places — not Switchback dips.
+## Playable expansion off the opening corridor: Worker Return, Wickwork terrace,
+## Mid Allotments, Mid Heart decks, Mid-East Landing + Approach.
 
 
 func _init() -> void:
@@ -38,7 +38,7 @@ func _run() -> void:
 			push_error("FAIL expansion deck %s is not painted" % [rect])
 			quit(1)
 			return
-	print("PASS worker return / Mid Heart / Mid-East decks are painted")
+	print("PASS worker return / Wickwork / allotments / Mid Heart / Mid-East decks are painted")
 
 	for stair in HollowLayout.expansion_stair_rects():
 		var sx0 := int(round(stair.x / tile))
@@ -68,12 +68,24 @@ func _run() -> void:
 		push_error("FAIL worker_return_ascent does not cover the west spur")
 		quit(1)
 		return
+	if zones.get_zone_at(Vector2(-432, HollowLayout.WICK_Y)) != "wickwork":
+		push_error("FAIL wickwork does not cover the west terrace")
+		quit(1)
+		return
+	if zones.get_zone_at(Vector2(-200, HollowLayout.MID_ALLOT_Y)) != "mid_allotments":
+		push_error("FAIL mid_allotments does not cover the allotment street")
+		quit(1)
+		return
 	if zones.get_zone_at(Vector2(536, HollowLayout.HEART_Y)) != "mid_heart":
 		push_error("FAIL mid_heart does not cover the Heart decks")
 		quit(1)
 		return
 	if zones.get_zone_at(Vector2(944, HollowLayout.HEART_Y)) != "mid_east_landing":
 		push_error("FAIL mid_east_landing does not cover the east landing")
+		quit(1)
+		return
+	if zones.get_zone_at(Vector2(1280, HollowLayout.HEART_Y)) != "mid_east_approach":
+		push_error("FAIL mid_east_approach does not cover the east approach")
 		quit(1)
 		return
 	var problems: Array = zones.validate_seams()
@@ -85,12 +97,24 @@ func _run() -> void:
 		push_error("FAIL WorkerReturnAscent zone anchor missing from main.tscn")
 		quit(1)
 		return
+	if not scene.has_node("Hollow/Zones/Wickwork") or not scene.has_node("Hollow/Zones/MidAllotments"):
+		push_error("FAIL Wickwork / MidAllotments zone anchors missing from main.tscn")
+		quit(1)
+		return
 	if not scene.has_node("Hollow/Zones/MidHeart") or not scene.has_node("Hollow/Zones/MidEastLanding"):
 		push_error("FAIL Mid Heart / Mid-East zone anchors missing from main.tscn")
 		quit(1)
 		return
+	if not scene.has_node("Hollow/Zones/MidEastApproach"):
+		push_error("FAIL MidEastApproach zone anchor missing from main.tscn")
+		quit(1)
+		return
 	if not scene.has_node("Hollow/LadderWorkerReturn"):
 		push_error("FAIL LadderWorkerReturn missing from main.tscn")
+		quit(1)
+		return
+	if not scene.has_node("Hollow/LadderMid"):
+		push_error("FAIL LadderMid missing from main.tscn")
 		quit(1)
 		return
 	var ladder: Area2D = scene.get_node("Hollow/LadderWorkerReturn") as Area2D
@@ -103,6 +127,23 @@ func _run() -> void:
 		quit(1)
 		return
 	print("PASS worker return ladder spans Switchback to the west spur")
+
+	var mid_ladder: Area2D = scene.get_node("Hollow/LadderMid") as Area2D
+	if absf(mid_ladder.deck_top_y() - HollowLayout.WICK_Y) > 1.0:
+		push_error("FAIL Mid ladder top is not at Wick/Heart height")
+		quit(1)
+		return
+	if absf(mid_ladder.deck_bottom_y() - HollowLayout.MID_ALLOT_Y) > 1.0:
+		push_error("FAIL Mid ladder bottom is not at Mid Allotment height")
+		quit(1)
+		return
+	print("PASS Mid ladder spans Worker Return to Mid Allotments")
+
+	if absf(HollowLayout.civic_east_end() - HollowLayout.MID_EAST_APPROACH.y) > 0.5:
+		push_error("FAIL civic_east_end must track Mid-East Approach tip")
+		quit(1)
+		return
+	print("PASS civic east tip tracks Mid-East Approach")
 
 	print("PLAYABLE_EXPANSION_TESTS_PASSED")
 	scene.queue_free()

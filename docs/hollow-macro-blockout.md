@@ -92,9 +92,14 @@ detailing of the Home → Switchback → Dispatch corridor:
   (x≈192, y=736) up through a cut roof/east-wall passage into Mid Heart decks.
 - **Worker Return west spur:** Heart-height floors at y=576 (x=-336..-64) above
   the flat corridor, reached by `LadderWorkerReturn` from Switchback (x≈-208).
+- **Wickwork terrace:** flat Mid/Wick floor west of Worker Return (x=-528..-336).
+- **Mid Allotments:** street at y=720 under the west spur (x=-336..-64), reached
+  by `LadderMid` from the spur (x≈-128).
 - **Mid Heart decks:** walkable Heart rafts across the Mouth at y=576.
 - **Mid-East Landing:** flat walkable floor from the Mouth's east edge (x=736)
   out to x=1152 at Mid Heart height.
+- **Mid-East Approach:** continues the civic east walk from x=1152 to x=1408;
+  camera keeps civic framing through the approach tip before Dig Front unlock.
 
 Covered by `tests/test_playable_expansion.gd` and the Home Court navigation
 walk. Gallery digging and final art remain out of scope.

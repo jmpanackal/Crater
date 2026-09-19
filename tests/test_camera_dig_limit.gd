@@ -20,7 +20,7 @@ func _run() -> void:
 		quit(1)
 		return
 
-	var mid_east_end := HollowLayout.MID_EAST_LANDING.y
+	var mid_east_end := HollowLayout.civic_east_end()
 	var mid_east_framed := mid_east_end + 576.0
 
 	# West of Mid Heart: dig framing must stay locked at the Hollow clamp.
@@ -67,16 +67,16 @@ func _run() -> void:
 		mouth_x += 10.0
 	print("PASS Mouth / Mid Heart limit eases without jerk (max step=%s)" % mouth_max_jump)
 
-	# Mid-East Landing (to x=1152) is still Hollow civic framing: camera must
-	# cover the landing with viewport pad, and must NOT fully unlock dig yet.
-	for mid_x in [800.0, 944.0, 1100.0]:
+	# Mid-East Landing + Approach (to x=1408) is still Hollow civic framing: camera must
+	# cover the walk with viewport pad, and must NOT fully unlock dig yet.
+	for mid_x in [800.0, 944.0, 1280.0]:
 		player.global_position.x = mid_x
 		await physics_frame
 		await process_frame
 		var mid_limit := float(cam.limit_right)
 		if mid_limit < mid_east_framed - 1.0:
 			push_error(
-				"FAIL Mid-East x=%s limit_right=%s cannot frame landing (need ~%s)"
+				"FAIL Mid-East x=%s limit_right=%s cannot frame civic walk (need ~%s)"
 				% [mid_x, mid_limit, mid_east_framed]
 			)
 			quit(1)
@@ -88,9 +88,9 @@ func _run() -> void:
 			)
 			quit(1)
 			return
-	print("PASS Mid-East Landing frames without dig unlock")
+	print("PASS Mid-East Landing/Approach frames without dig unlock")
 
-	# Past Mid-East into dig approach: limit_right expands continuously (no snap).
+	# Past Mid-East Approach into dig front: limit_right expands continuously (no snap).
 	var prev := float(cam.limit_right)
 	var max_step_jump := 0.0
 	var x := mid_east_end
@@ -132,7 +132,7 @@ func _run() -> void:
 			push_error("FAIL desired_limit_right endpoints deep=%s dig=%s" % [deep, dig])
 			quit(1)
 			return
-		var mid_east_curve: float = float(cam.desired_limit_right(1100.0))
+		var mid_east_curve: float = float(cam.desired_limit_right(1280.0))
 		if mid_east_curve < mid_east_framed - 1.0 or mid_east_curve >= 2000.0:
 			push_error(
 				"FAIL desired_limit_right Mid-East=%s (need [%s, 2000))"

@@ -11,6 +11,10 @@ seams = [{
 "edge": "west",
 "neighbor": "mid_heart",
 "position": 736.0
+}, {
+"edge": "east",
+"neighbor": "mid_east_approach",
+"position": 1152.0
 }]
 enclosed = false
 world_rect = Rect2(736, 544, 416, 64)

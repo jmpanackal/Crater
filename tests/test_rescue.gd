@@ -154,7 +154,7 @@ func _run() -> void:
 	trust_events.clear()
 	hauling.reset_all()
 	stamina.request_block(stamina.SOURCE_FATIGUE, float(stamina.get_max_stamina()))
-	player.global_position = Vector2(1100, 1000)  # east_dig_site: sanctioned
+	player.global_position = Vector2(1500, 1000)  # east_dig_site: sanctioned
 	var civic: Dictionary = rescue.request_rescue(true)
 	if bool(civic["restricted"]) or int(civic["contraband_units"]) != 0 or not trust_events.is_empty() or (fact_log.get_by_type(&"rescued_from_restricted_area") as Array).size() != 0:
 		_fail("rescue from civic work should carry no Trust consequence: %s %s" % [civic, trust_events])
@@ -167,7 +167,7 @@ func _run() -> void:
 	# --- 5. The grace period: stranded long enough forces the rescue. ---
 	fact_log.clear_all()
 	stamina.request_block(stamina.SOURCE_FATIGUE, float(stamina.get_max_stamina()))
-	player.global_position = Vector2(1100, 1000)
+	player.global_position = Vector2(1500, 1000)
 	rescue.suspend_forced_rescue = false
 	var grace: float = float(rescue.get_stranded_grace_seconds())
 	# Drive the timer with controlled deltas (headless frames are far faster

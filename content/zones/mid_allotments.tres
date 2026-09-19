@@ -4,14 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"wickwork"
-display_name = "Wickwork"
-world_origin = Vector2(-432, 576)
+zone_id = &"mid_allotments"
+display_name = "Mid Allotments"
+world_origin = Vector2(-200, 720)
 seams = [{
-"edge": "east",
+"edge": "north",
 "neighbor": "worker_return_ascent",
-"position": -336.0
+"position": 720.0
 }]
 enclosed = false
-world_rect = Rect2(-528, 544, 192, 64)
+world_rect = Rect2(-336, 688, 272, 64)
 restricted = false

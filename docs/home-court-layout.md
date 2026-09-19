@@ -51,8 +51,10 @@ one player-height above its floor.
 
 From Home Court's upper landing, stairs climb into Mid Heart and Mid-East.
 A Heart-height west spur sits above Switchback, reached by a local ladder so the
-flat opening corridor stays clear. See `docs/hollow-macro-blockout.md` and
-`tests/test_playable_expansion.gd`.
+flat opening corridor stays clear. West of that spur is a Wickwork terrace;
+below it, Mid Allotments drop to y=720 via `LadderMid`. East of Mid-East Landing,
+Mid-East Approach continues the civic walk to x=1408. See
+`docs/hollow-macro-blockout.md` and `tests/test_playable_expansion.gd`.
 
 ## Still outside this pass
 

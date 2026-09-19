@@ -41,7 +41,7 @@ func _paint_opening_route() -> void:
 	paint_floor(HollowLayout.HOME_COURT_LEFT, landing.y + TILE_SIZE, HollowLayout.HOME_ROOF_Y, SOURCE_ROCK)
 
 
-## Worker return switchbacks into Mid Heart, plus Mid-East landing — new places,
+## Worker return / Wickwork / Mid Allotments / Mid Heart / Mid-East — new places,
 ## not denser detailing of the Home→Dispatch corridor.
 func _paint_playable_expansion() -> void:
 	_clear_landing_to_heart_passage()

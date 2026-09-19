@@ -43,8 +43,8 @@ func _run() -> void:
 	if str(zones.get_zone_at(Vector2(1100, 100))) != "east_firmament" or not bool(zones.is_restricted_at(Vector2(1100, 100))):
 		_fail("east_firmament footprint/restricted flag not authored (%s)" % zones.get_zone_at(Vector2(1100, 100)))
 		return
-	if str(zones.get_zone_at(Vector2(1100, 1000))) != "east_dig_site" or bool(zones.is_restricted_at(Vector2(1100, 1000))):
-		_fail("east_dig_site should be sanctioned (%s)" % zones.get_zone_at(Vector2(1100, 1000)))
+	if str(zones.get_zone_at(Vector2(1500, 1000))) != "east_dig_site" or bool(zones.is_restricted_at(Vector2(1500, 1000))):
+		_fail("east_dig_site should be sanctioned (%s)" % zones.get_zone_at(Vector2(1500, 1000)))
 		return
 	if str(zones.get_zone_at(Vector2(0, 0))) != "" or bool(zones.is_restricted_at(Vector2(0, 0))):
 		_fail("unmapped space should belong to no zone")

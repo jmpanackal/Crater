@@ -6,8 +6,8 @@
 script = ExtResource("1")
 zone_id = &"east_dig_site"
 display_name = "East dig site"
-world_origin = Vector2(1024, 464)
+world_origin = Vector2(1408, 464)
 seams = []
 enclosed = true
-world_rect = Rect2(1024, 464, 1024, 1008)
+world_rect = Rect2(1408, 464, 640, 1008)
 restricted = false
