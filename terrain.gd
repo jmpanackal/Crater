@@ -31,13 +31,13 @@ const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 ## passes before this constant existed; don't repeat that).
 ## World-scale pass (2026-09-19): row counts x5 — TILE_SIZE stays 16, so this
 ## is 5x more rows covering 5x the world-px depth, same proportional split.
-const ENVELOPE_ROWS := 460
+const ENVELOPE_ROWS := 480
 ## Cells with y <= this are Firmament rock (secret upward frontier).
 ## 141 rows (0..140), same ~31% share of ENVELOPE_ROWS as the original split.
 const FIRMAMENT_Y_MAX := 140
 ## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
 ## Mid band is FIRMAMENT_Y_MAX+1 .. MOUTH_Y_MIN-1 (119 rows); Mouth is
-## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 (200 rows) — same ~26%/~43% split as before.
+## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 — same proportional split as before.
 const MOUTH_Y_MIN := 260
 
 ## Build Bible Spec 12 (Deposits + Extraction). Deposits are authored data
@@ -169,16 +169,44 @@ func _fill_ground() -> void:
 
 
 ## High-West Dig Front — brown dig mass west of the Hollow civic void.
-## Keeps Firmament band + diggable mid rock; never enters Devil's Mouth.
+## Extends through Bottom-West Dig Front elevation so both dig fronts open
+## into destructible rock; never enters Devil's Mouth.
 func _fill_west_dig_front() -> void:
 	if _atlas_coords.is_empty():
 		return
+	var y_max := int(HollowLayout.BOTTOM_WEST_LOWER_Y / float(TILE_SIZE)) + 8
+	y_max = mini(y_max, ENVELOPE_ROWS)
 	for x in range(WEST_DIG_START_X, WEST_DIG_END_X):
 		for y in range(0, FIRMAMENT_Y_MAX + 1):
 			_place_random(Vector2i(x, y))
-		# Diggable mid / upper High-West mass (not true-void depth fill).
-		for y in range(FIRMAMENT_Y_MAX + 1, MOUTH_Y_MIN):
+		for y in range(FIRMAMENT_Y_MAX + 1, y_max):
 			_place_random(Vector2i(x, y))
+	_carve_west_dig_front_overlaps()
+
+
+## Clear walk air above High-West / Bottom-West dig-front decks so HollowTerrain
+## owns the corridor; keep a thin diggable face above each walk clear.
+func _carve_west_dig_front_overlaps() -> void:
+	var dig_x0_px := float(WEST_DIG_START_X) * float(TILE_SIZE)
+	var dig_x1_px := float(WEST_DIG_END_X) * float(TILE_SIZE)
+	var walk_clear_px := 96.0
+	var dig_face_px := float(TILE_SIZE) * 2.0
+	for rect in HollowLayout.west_stack_deck_rects():
+		var x0_px: float = maxf(rect.x, dig_x0_px)
+		var x1_px: float = minf(rect.y, dig_x1_px)
+		if x1_px <= x0_px:
+			continue
+		_clear_dig_rect(x0_px, x1_px, rect.z - walk_clear_px, rect.z)
+		var face_y1 := rect.z - walk_clear_px
+		var face_y0 := face_y1 - dig_face_px
+		_restore_dig_rect(x0_px, x1_px, face_y0, face_y1)
+	# West ladder shaft through dig-front elevations (High-West / Bottom-West).
+	_clear_dig_rect(
+		HollowLayout.LADDER_WEST_OPEN_X,
+		HollowLayout.ladder_west_open_end(),
+		HollowLayout.WEST_ASHRAM_UPPER_Y - walk_clear_px,
+		HollowLayout.BOTTOM_WEST_LOWER_Y
+	)
 
 
 ## Hollow Mid-East / Ashram / Glowbeds / Cistern decks and LadderEastStack sit
@@ -341,8 +369,9 @@ func is_within_dig_envelope(cell: Vector2i) -> bool:
 		return false
 	if cell.x >= DIG_START_X and cell.x < DIG_END_X:
 		return true
-	# High-West Dig Front — diggable Firmament + mid band only (not Mouth depth).
-	if cell.x >= WEST_DIG_START_X and cell.x < WEST_DIG_END_X and cell.y < MOUTH_Y_MIN:
+	# West dig flank — Firmament through Bottom-West Dig Front (not Mouth).
+	var west_y_max := int(HollowLayout.BOTTOM_WEST_LOWER_Y / float(TILE_SIZE)) + 8
+	if cell.x >= WEST_DIG_START_X and cell.x < WEST_DIG_END_X and cell.y < west_y_max:
 		return true
 	return false
 

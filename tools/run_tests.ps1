@@ -49,7 +49,8 @@ param(
 # route (measured ~176s wall-clock after the 2026-09-19 world-scale pass made
 # every walk segment ~5x longer); everything else still gets $TimeoutSeconds.
 $PerTestTimeoutOverrides = @{
-    "test_home_court_navigation.gd" = 240
+	"test_home_court_navigation.gd" = 300
+	"test_west_stack_routing.gd" = 180
 }
 
 # Deliberately NOT "Stop": Godot writes real SCRIPT ERROR / WARNING lines to

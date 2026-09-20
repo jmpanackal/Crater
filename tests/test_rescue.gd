@@ -62,7 +62,7 @@ func _run() -> void:
 	hauling.attach(&"sutral", 2)
 	var phase_before: StringName = clock.get_phase()
 	var fatigue_before: float = float(fatigue.get_current())
-	var safe := Vector2(120.0, HollowLayout.LOWER_WORK_Y - 32.0)
+	var safe := Vector2(120.0, HollowLayout.WEST_LW_UPPER_Y - 32.0)
 	var record: Dictionary = rescue.report_severe_fall(Vector2(500, 2000), safe)
 	if float(fatigue.get_current()) <= fatigue_before or float(record["fatigue_added"]) <= 0.0:
 		_fail("a severe fall should add fatigue: %s" % [record])

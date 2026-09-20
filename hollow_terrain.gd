@@ -27,48 +27,43 @@ func _ready() -> void:
 	_paint_playable_expansion()
 
 
-## Home Court -> Bottom-West Dig Front cluster. See HollowLayout's "Opening-route
-## west wing" section for the numbers and docs/hollow-level-authoring.md for why
-## this is a compact, vertically-arranged cluster and not a flat strip.
+## Home Court named pads on Lower Worker + Bottom-West dig-front pads.
 func _paint_opening_route() -> void:
 	for rect in HollowLayout.opening_route_deck_rects():
 		paint_floor(rect.x, rect.y, rect.z)
 	for stair in HollowLayout.opening_route_stair_rects():
 		paint_stairs(stair.x, stair.y, stair.z, stair.w)
-	var landing := HollowLayout.HOME_LANDING
-	paint_block(Rect2(landing.x, landing.z + TILE_SIZE, landing.y - landing.x, HollowLayout.LOWER_WORK_Y - landing.z), SOURCE_ROCK)
-	paint_block(Rect2(landing.y, HollowLayout.HOME_ROOF_Y, TILE_SIZE, HollowLayout.LOWER_WORK_Y - HollowLayout.HOME_ROOF_Y + TILE_SIZE), SOURCE_ROCK)
-	paint_floor(HollowLayout.HOME_COURT_LEFT, landing.y + TILE_SIZE, HollowLayout.HOME_ROOF_Y, SOURCE_ROCK)
+	# No solid rock fill between west decks — that buried Home Court air in
+	# collision (raycasts started inside the mass and the player fell through).
+	# HomeCourtDressing draws plaster as visuals only.
 
 
-## Worker return / Wickwork / Mid Allotments / Mid Heart / Mid-East / Dig Front /
-## Glowbeds / Lower-East / Cistern approach — new places, not corridor detailing.
+## Uniform west stack + Mid Heart + east stack.
 func _paint_playable_expansion() -> void:
-	_clear_landing_to_heart_passage()
 	for rect in HollowLayout.expansion_deck_rects():
 		var source := SOURCE_BRIDGE if rect.w <= HollowLayout.BRIDGE_THICKNESS + 0.5 else SOURCE_LEDGE
 		paint_floor(rect.x, rect.y, rect.z, source)
 	for stair in HollowLayout.expansion_stair_rects():
 		paint_stairs(stair.x, stair.y, stair.z, stair.w)
+	# West ladder + left-lift + heart-hoist shafts: erase any residual floor in openings.
+	_clear_shaft_openings()
 
 
-## Open Home Court roof / east wall so the Mid Heart ladder + approach pads
-## connect onto the Mouth crossing without ceiling-trapping the climb.
-func _clear_landing_to_heart_passage() -> void:
-	var y0 := int(round(HollowLayout.HEART_Y / TILE_SIZE))
-	var y1 := int(round(HollowLayout.HOME_LANDING.z / TILE_SIZE))
-	# Ladder shaft through landing roof.
-	var lx0 := int(round(HollowLayout.LADDER_HOME_HEART_OPEN_X / TILE_SIZE))
-	var lx1 := int(round((HollowLayout.LADDER_HOME_HEART_OPEN_X + HollowLayout.LADDER_OPENING) / TILE_SIZE))
-	for x in range(lx0, lx1):
-		for y in range(y0, y1):
-			erase_cell(Vector2i(x, y))
-	# Heart-height approach through the east wall onto Mouth west lip.
-	var ax0 := int(round(HollowLayout.HEART_APPROACH_WEST.x / TILE_SIZE))
-	var ax1 := int(round(HollowLayout.PIT_LEFT / TILE_SIZE)) + 1
-	for x in range(ax0, ax1):
-		for y in range(y0, y1):
-			erase_cell(Vector2i(x, y))
+func _clear_shaft_openings() -> void:
+	## West ladder pierces every stack deck.
+	var ladder := Vector2(HollowLayout.LADDER_WEST_OPEN_X, HollowLayout.ladder_west_open_end())
+	for level_y in HollowLayout.west_stack_level_ys():
+		var row := int(round(level_y / float(TILE_SIZE)))
+		var x0 := int(round(ladder.x / float(TILE_SIZE)))
+		var x1 := int(round(ladder.y / float(TILE_SIZE)))
+		for x in range(x0, x1):
+			erase_cell(Vector2i(x, row))
+		# Left civic lift: Ashram ↔ Wick only.
+		if level_y >= HollowLayout.WEST_ASHRAM_UPPER_Y - 0.5 and level_y <= HollowLayout.WICK_Y + 0.5:
+			var lx0 := int(round(HollowLayout.LEFT_LIFT_OPEN_X / float(TILE_SIZE)))
+			var lx1 := int(round(HollowLayout.left_lift_open_end() / float(TILE_SIZE)))
+			for x in range(lx0, lx1):
+				erase_cell(Vector2i(x, row))
 
 
 func _build_tileset() -> TileSet:

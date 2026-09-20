@@ -6,7 +6,7 @@
 script = ExtResource("1")
 zone_id = &"bottom_west_approach"
 display_name = "Bottom-West Approach"
-world_origin = Vector2(-2000, 4480)
+world_origin = Vector2(-2000, 6080)
 seams = [{
 "edge": "east",
 "neighbor": "west_dispatch_yard",
@@ -17,5 +17,5 @@ seams = [{
 "position": -2160
 }]
 enclosed = true
-world_rect = Rect2(-2160, 3840, 320, 960)
+world_rect = Rect2(-2160, 5760, 320, 640)
 restricted = false

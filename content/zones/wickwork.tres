@@ -9,13 +9,17 @@ display_name = "Wickwork"
 world_origin = Vector2(-2160, 2880)
 seams = [{
 "edge": "east",
-"neighbor": "worker_return_ascent",
-"position": -1680
+"neighbor": "mid_heart",
+"position": 1440
+}, {
+"edge": "south",
+"neighbor": "mid_allotments",
+"position": 3520
 }, {
 "edge": "north",
 "neighbor": "ashram_west",
 "position": 2880
 }]
 enclosed = false
-world_rect = Rect2(-2640, 2720, 960, 320)
+world_rect = Rect2(-2880, 2720, 4320, 960)
 restricted = false

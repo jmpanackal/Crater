@@ -29,7 +29,7 @@ func _run() -> void:
 			push_error("FAIL resizing the window changes the original zoom")
 			quit(1)
 			return
-	player.position = Vector2(-320, HollowLayout.LOWER_WORK_Y - 32)
+	player.position = Vector2(-320, HollowLayout.WEST_LW_UPPER_Y - 32)
 	player.reset_physics_interpolation()
 	for frame in range(45):
 		await physics_frame

@@ -37,14 +37,23 @@ func _run() -> void:
 			quit(1)
 			return
 	var lifts := Macro.transport_guides()
-	if (
-		lifts.size() != 3
-		or lifts[0].stops.back() != HollowLayout.WICK_Y
-		or lifts[1].stops.front() != HollowLayout.UPPER_RES_Y
-		or lifts[1].stops.back() != HollowLayout.CISTERN_Y
-		or lifts[2].stops.front() != HollowLayout.HEART_Y
-	):
-		push_error("FAIL the three distinct canonical transport spans drifted")
+	if lifts.size() < 3:
+		push_error("FAIL expected west stack + civic + east transports, got %s" % lifts.size())
+		quit(1)
+		return
+	var has_west_stack := false
+	var has_east := false
+	var has_freight := false
+	for lift in lifts:
+		var stops: Array = lift.stops
+		if stops.has(HollowLayout.WEST_ASHRAM_UPPER_Y) and stops.has(HollowLayout.BOTTOM_WEST_LOWER_Y):
+			has_west_stack = true
+		if stops.has(HollowLayout.UPPER_RES_Y) and stops.has(HollowLayout.CISTERN_Y):
+			has_east = true
+		if stops.has(HollowLayout.HEART_Y) and stops.has(HollowLayout.CISTERN_Y):
+			has_freight = true
+	if not has_west_stack or not has_east or not has_freight:
+		push_error("FAIL canonical transport spans drifted (west_stack=%s east=%s freight=%s)" % [has_west_stack, has_east, has_freight])
 		quit(1)
 		return
 	var overlay := background.get_node_or_null("PlanningGuides")

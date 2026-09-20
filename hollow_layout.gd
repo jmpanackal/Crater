@@ -46,17 +46,40 @@ const VAULTWARD_Y := 0.0
 const UPPER_RES_Y := 400.0
 const FARMS_Y := 1120.0 ## Glowbeds main gallery (alias kept)
 const GLOW_SUB_Y := 1840.0 ## Glowbeds hang / fiber racks
-## Mid band: Wickwork, Mid Heart, allotments.
+## Mid band: Wickwork / Mid Heart (west stack Wickwork upper locks here).
 const WICK_Y := 2880.0
 const HEART_Y := 2880.0 ## Mid Heart civic cluster base
-const MID_ALLOT_Y := 3600.0 ## mid allotment / residential street
-## Lower band: working terraces, Cistern, seep galleries.
-const LOWER_WORK_Y := 4320.0 ## crowded worker terraces — Act 1 spawn band
+## East Lower-East services (west Home Court uses WEST_LW_* below).
+const LOWER_WORK_Y := 4320.0
 const CISTERN_Y := 5360.0
 const SEEP_Y := 6080.0 ## lower seep / service gallery threshold
 
+## --- Uniform west stack (2026-09-19 lock) ---
+## 6 sections × 2 levels, every consecutive deck top spaced WEST_LEVEL_GAP.
+## Anchored so Wickwork upper == HEART_Y (Mid Heart west exchange). Firmament
+## sits above Ashram; unreachable void sits below Bottom-West lower.
+## Dig mass is left of WEST_HOLLOW_LEFT; High-West + Bottom-West decks extend
+## into that envelope as dig-front openings.
+const WEST_LEVEL_GAP := MIN_BAND_GAP
+const WEST_HOLLOW_LEFT := -2880.0
+const WEST_HOLLOW_RIGHT := PIT_LEFT
+const WEST_ASHRAM_UPPER_Y := WICK_Y - 4.0 * WEST_LEVEL_GAP ## 320
+const WEST_ASHRAM_LOWER_Y := WICK_Y - 3.0 * WEST_LEVEL_GAP ## 960
+const WEST_HIGH_UPPER_Y := WICK_Y - 2.0 * WEST_LEVEL_GAP ## 1600
+const WEST_HIGH_LOWER_Y := WICK_Y - 1.0 * WEST_LEVEL_GAP ## 2240
+const WICK_LOWER_Y := WICK_Y + WEST_LEVEL_GAP ## 3520
+const MID_ALLOT_UPPER_Y := WICK_Y + 2.0 * WEST_LEVEL_GAP ## 4160
+const MID_ALLOT_LOWER_Y := WICK_Y + 3.0 * WEST_LEVEL_GAP ## 4800
+const WEST_LW_UPPER_Y := WICK_Y + 4.0 * WEST_LEVEL_GAP ## 5440 — Home Court / Act 1 spawn
+const WEST_LW_LOWER_Y := WICK_Y + 5.0 * WEST_LEVEL_GAP ## 6080
+const BOTTOM_WEST_UPPER_Y := WICK_Y + 6.0 * WEST_LEVEL_GAP ## 6720
+const BOTTOM_WEST_LOWER_Y := WICK_Y + 7.0 * WEST_LEVEL_GAP ## 7360
+## Legacy aliases used by zones / ambiance / older tests.
+const MID_ALLOT_Y := MID_ALLOT_UPPER_Y
+const BOTTOM_WEST_Y := BOTTOM_WEST_UPPER_Y
+
 ## Left cliff carved rooms (negative X into rock).
-const HOLLOW_LEFT := -2880.0
+const HOLLOW_LEFT := WEST_HOLLOW_LEFT
 const FARMS_GALLERY_END := -960.0
 const WICK_BAY_END := -800.0
 
@@ -110,9 +133,20 @@ const LIFT_LIP_MID := Vector4(PIT_LEFT, PIT_LEFT + 800.0, WICK_Y, FLOOR_THICKNES
 ## Local maintenance ladders only (not the primary vertical spine).
 const LADDER_OPENING := 64.0
 const LADDER_WIDTH := 40.0
-## Short residence climb (upper residences ↔ Glowbeds).
-const LADDER_UPPER_OPEN_X := -1040.0
-const LADDER_UPPER_X := LADDER_UPPER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
+## Uniform west stack shaft — one climb for all 6 section transitions.
+const LADDER_WEST_OPEN_X := -1040.0
+const LADDER_WEST_X := LADDER_WEST_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
+const LADDER_WEST_SHAFT_H := BOTTOM_WEST_LOWER_Y - WEST_ASHRAM_UPPER_Y
+## Legacy aliases → west stack shaft (older tests / ambiance).
+const LADDER_RETURN_OPEN_X := LADDER_WEST_OPEN_X
+const LADDER_RETURN_X := LADDER_WEST_X
+const LADDER_RETURN_SHAFT_H := LADDER_WEST_SHAFT_H
+const LADDER_HOME_HEART_OPEN_X := LADDER_WEST_OPEN_X
+const LADDER_HOME_HEART_X := LADDER_WEST_X
+const LADDER_HOME_HEART_SHAFT_H := LADDER_WEST_SHAFT_H
+## Short residence climb (upper residences ↔ Glowbeds) — legacy east-adjacent.
+const LADDER_UPPER_OPEN_X := LADDER_WEST_OPEN_X
+const LADDER_UPPER_X := LADDER_WEST_X
 ## Short right-terrace Cistern emergency climb (beside freight shaft).
 const LADDER_CISTERN_OPEN_X := 5200.0
 const LADDER_CISTERN_X := LADDER_CISTERN_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
@@ -123,139 +157,137 @@ const LADDER_FARMS_X := LIFT_X
 ## Lift service follows the Cistern's canon condition ladder.
 const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
-## --- Opening-route west wing (Bottom-West Dig Front) ---
-## Per hollow-chunk-map.md / mechanics-canon.md §52 and the confirmed spatial
-## blueprint (docs/hollow-level-authoring.md): Home Court -> Lower Switchback
-## -> West Dispatch Yard -> Bottom-West Approach (a real 3-flight descent) ->
-## Lower Lift Landing (a mid-descent landing + shortcut) -> Bottom-West
-## Threshold -> First Expansion Gallery (+ Collapsed Side Chamber branch).
-## Bottom-West Dig Front sits MEASURABLY BELOW Home Court (mirroring Cistern
-## sitting below Glowbeds on the east wall) — not beside it at the same
-## elevation. A prior pass got this wrong (a flat westward strip); see the
-## blueprint's v4 correction. All breakpoints are TILE-aligned.
+## --- Home Court on Lower Worker Terraces (uniform west stack) ---
+## Opening route keeps named west→east zones on the LW upper deck; vertical
+## travel to Bottom-West / Mid Heart is LadderWestStack, not stair flights.
 const HOME_COURT_LEFT := -320.0
-const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, LOWER_WORK_Y, FLOOR_THICKNESS)
-const HOME_BACK_STAIR := Vector4(HOME_COURT_DECK.y, LOWER_WORK_Y, 800.0, LOWER_WORK_Y - MIN_BAND_GAP)
-const HOME_LANDING := Vector4(HOME_BACK_STAIR.z, 1280.0, HOME_BACK_STAIR.w, FLOOR_THICKNESS)
-const HOME_ROOF_Y := HOME_LANDING.z - MIN_BAND_GAP
-const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 1680.0, LOWER_WORK_Y + 80.0 - HOME_ROOF_Y)
+const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+## Flat "stair" stub so HomeCourtDressing still draws a rail without a real flight.
+const HOME_BACK_STAIR := Vector4(HOME_COURT_DECK.y, WEST_LW_UPPER_Y, 800.0, WEST_LW_UPPER_Y)
+const HOME_LANDING := Vector4(800.0, 1280.0, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+const HOME_ROOF_Y := WEST_LW_UPPER_Y - WEST_LEVEL_GAP
+const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 1680.0, WEST_LW_UPPER_Y + 80.0 - HOME_ROOF_Y)
 
-## Lower Switchback: flat corridor at lower-work height. Chunk art may later
-## hang a carved support-mass prop here; inventing a dip/tunnel without that
-## mass just densifies the opening route (rejected 2026-09-18).
 const SWITCHBACK_LEFT := -800.0
-const SWITCHBACK_FLOOR := Vector4(SWITCHBACK_LEFT, HOME_COURT_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
-
-## West Dispatch Yard: continuous flat apron into Bottom-West Approach.
+const SWITCHBACK_FLOOR := Vector4(SWITCHBACK_LEFT, HOME_COURT_LEFT, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
 const WEST_DISPATCH_LEFT := -1840.0
-const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, LOWER_WORK_Y, FLOOR_THICKNESS)
+const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
 
-## --- Playable expansion off the opening corridor (not corridor detailing) ---
-## East: ladder from Home landing onto Mid Heart approach / Mouth crossing.
-## West: Heart-height spur above the flat corridor, reached by a short local climb
-## (a second stair through Home's back-stair columns would ceiling-trap that climb).
-## Home landing -> Mid Heart: local ladder (stairs cannot climb under the Mouth deck).
-const LADDER_HOME_HEART_OPEN_X := 1040.0
-const LADDER_HOME_HEART_X := LADDER_HOME_HEART_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-const LADDER_HOME_HEART_SHAFT_H := HOME_LANDING.z - HEART_Y
-## Heart-height approach pads flanking the ladder, then onto Mouth west lip.
-const HEART_APPROACH_WEST := Vector4(800.0, LADDER_HOME_HEART_OPEN_X, HEART_Y, FLOOR_THICKNESS)
-const HEART_APPROACH_EAST := Vector4(LADDER_HOME_HEART_OPEN_X + LADDER_OPENING, PIT_LEFT, HEART_Y, FLOOR_THICKNESS)
-const LADDER_RETURN_OPEN_X := -1040.0
-const LADDER_RETURN_X := LADDER_RETURN_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-const LADDER_RETURN_SHAFT_H := LOWER_WORK_Y - HEART_Y
-const WORKER_SPUR_WEST := Vector4(-1680.0, LADDER_RETURN_OPEN_X, HEART_Y, FLOOR_THICKNESS)
-const WORKER_SPUR_EAST := Vector4(LADDER_RETURN_OPEN_X + LADDER_OPENING, HOME_COURT_LEFT, HEART_Y, FLOOR_THICKNESS)
-const WORKER_ALLOT_LANDING := Vector4(-1680.0, -1360.0, HEART_Y, FLOOR_THICKNESS)
-## Wickwork entry terrace — new district west of Worker Return (same Mid/Wick height).
-const WICK_TERRACE := Vector4(-2640.0, -1680.0, WICK_Y, FLOOR_THICKNESS)
-## Mid allotments street under the west spur - gap matches LADDER_RETURN opening.
-const MID_ALLOT_WEST := Vector4(-1680.0, LADDER_RETURN_OPEN_X, MID_ALLOT_Y, FLOOR_THICKNESS)
-const MID_ALLOT_EAST := Vector4(LADDER_RETURN_OPEN_X + LADDER_OPENING, HOME_COURT_LEFT, MID_ALLOT_Y, FLOOR_THICKNESS)
+## Dig envelope west of the civic hollow (High-West + Bottom-West openings).
+const HIGH_WEST_DIG_LEFT := -5680.0
+const HIGH_WEST_DIG_RIGHT := WEST_HOLLOW_LEFT
+const GALLERY_LEFT := HIGH_WEST_DIG_LEFT
+const LADDER_CHAMBER_OPEN_X := GALLERY_LEFT
+const LADDER_CHAMBER_X := LADDER_CHAMBER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
+const CHAMBER_ALCOVE_Y := BOTTOM_WEST_LOWER_Y
+const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -5200.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
+const BOTTOM_WEST_THRESHOLD_LEFT := -4400.0
+const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, WEST_HOLLOW_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+const LOWER_LIFT_LANDING := Vector4(-2320.0, -2160.0, WEST_LW_LOWER_Y, FLOOR_THICKNESS)
+const APPROACH_LANDING1_Y := WEST_LW_LOWER_Y
+const APPROACH_LANDING2_Y := BOTTOM_WEST_UPPER_Y
+const APPROACH_LANDING2 := Vector4(-2800.0, -2640.0, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+const GALLERY_FLOOR := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+## Compatibility alias for minimap / older call sites (Wickwork west span).
+const WICK_TERRACE := Vector4(WEST_HOLLOW_LEFT, -1680.0, WICK_Y, FLOOR_THICKNESS)
+
 ## East vertical stack (one ladder): Ashram ↔ Glowbeds ↔ Hang ↔ Mid-East ↔ Lower-East ↔ Cistern.
-## Opening sits at the Landing→Approach seam so the civic walk west of the shaft stays solid.
 const LADDER_EAST_OPEN_X := 6720.0
 const LADDER_EAST_X := LADDER_EAST_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
 const LADDER_EAST_SHAFT_H := CISTERN_Y - UPPER_RES_Y
-## Mid-East landing: first walkable floor east of the Mouth at Mid Heart height.
-## Freight shaft gaps match the cage width so a Mid-parked FreightLift keeps the civic walk.
 const MID_EAST_LANDING_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, HEART_Y, FLOOR_THICKNESS)
 const MID_EAST_LANDING_EAST := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, LADDER_EAST_OPEN_X, HEART_Y, FLOOR_THICKNESS)
-## Mid-East Approach — continues past the shared east shaft toward Mid-East Dig Front.
 const MID_EAST_APPROACH := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 8320.0, HEART_Y, FLOOR_THICKNESS)
-## Mid-East Dig Front — excavation terrace past the civic approach tip (destructible outside Mouth).
 const MID_EAST_DIG_FRONT := Vector4(MID_EAST_APPROACH.y, 11840.0, HEART_Y, FLOOR_THICKNESS)
-## High-West Dig Front — destructible rock reserve west of the Hollow civic void (not in Mouth).
-const HIGH_WEST_DIG_LEFT := -5680.0
-const HIGH_WEST_DIG_RIGHT := -2880.0
-## Ashram Heights west terrace — top of the west civic (Left Service) lift
-## shaft. Built 2026-09-19; the lift's other two stops (Glowbeds/Wickwork
-## west terraces at FARMS_Y/GLOW_SUB_Y) stay unbuilt for now, so it only
-## stops at this deck and WICK_Y until those terraces exist.
-const ASHRAM_WEST_WEST := Vector4(-2080.0, LEFT_LIFT_OPEN_X, UPPER_RES_Y, FLOOR_THICKNESS)
-const ASHRAM_WEST_EAST := Vector4(LEFT_LIFT_OPEN_X + LIFT_OPENING, 640.0, UPPER_RES_Y, FLOOR_THICKNESS)
-## Ashram Heights east terrace — top of the shared east passenger shaft.
 const ASHRAM_EAST_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, UPPER_RES_Y, FLOOR_THICKNESS)
 const ASHRAM_EAST_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, UPPER_RES_Y, FLOOR_THICKNESS)
-## Glowbeds east terrace (upper) — gap matches LADDER_EAST opening.
 const GLOWBEDS_EAST_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, FARMS_Y, FLOOR_THICKNESS)
 const GLOWBEDS_EAST_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, FARMS_Y, FLOOR_THICKNESS)
-## Glowbeds hang / fiber racks — mid-shaft deck on the same east opening.
 const GLOW_HANG_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, GLOW_SUB_Y, FLOOR_THICKNESS)
 const GLOW_HANG_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, GLOW_SUB_Y, FLOOR_THICKNESS)
-## Lower-East services under Mid-East — east ladder + freight openings.
 const LOWER_EAST_WEST_A := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, LOWER_WORK_Y, FLOOR_THICKNESS)
 const LOWER_EAST_WEST_B := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, LADDER_EAST_OPEN_X, LOWER_WORK_Y, FLOOR_THICKNESS)
 const LOWER_EAST_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, LOWER_WORK_Y, FLOOR_THICKNESS)
-## Cistern approach lip (solid under east shaft) + chamber past the approach lip.
 const CISTERN_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, CISTERN_Y, FLOOR_THICKNESS)
 const CISTERN_APPROACH := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, 7680.0, CISTERN_Y, FLOOR_THICKNESS)
 const CISTERN_CHAMBER := Vector4(7680.0, 9600.0, CISTERN_Y, FLOOR_THICKNESS)
-## Seep / service threshold — sideways gallery threshold past Cistern (not a
-## Mouth descent); the freight lift's next stop down. Built 2026-09-19.
 const SEEP_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, SEEP_Y, FLOOR_THICKNESS)
 const SEEP_APPROACH := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, 7040.0, SEEP_Y, FLOOR_THICKNESS)
 
-## Bottom-West Approach — the real descent: 3 shallow flights + 2 landings,
-## dropping a full band (LOWER_WORK_Y -> BOTTOM_WEST_Y), same drop scale as
-## LOWER_WORK_Y -> CISTERN_Y (1040px) elsewhere in the stack.
-const BOTTOM_WEST_Y := LOWER_WORK_Y + 960.0
-const APPROACH_LANDING1_Y := LOWER_WORK_Y + 320.0
-const APPROACH_LANDING2_Y := LOWER_WORK_Y + 640.0
-const APPROACH_FLIGHT1 := Vector4(WEST_DISPATCH_LEFT, LOWER_WORK_Y, -2160.0, APPROACH_LANDING1_Y)
-## Lower Lift Landing — the named reconnection point from mechanics-canon.md
-## §52. Growth-reserved (docs/hollow-level-authoring.md Rule 5): this is where
-## the real West Civic Lift's lower stop connects once Wickwork is rebuilt: not
-## built as a functioning hollow_lift.gd instance this pass, since a single-
-## stop lift with no upper destination would be a half-finished mechanic.
-const LOWER_LIFT_LANDING := Vector4(-2320.0, -2160.0, APPROACH_LANDING1_Y, FLOOR_THICKNESS)
-const APPROACH_FLIGHT2 := Vector4(-2320.0, APPROACH_LANDING1_Y, -2640.0, APPROACH_LANDING2_Y)
-const APPROACH_LANDING2 := Vector4(-2800.0, -2640.0, APPROACH_LANDING2_Y, FLOOR_THICKNESS)
-const APPROACH_FLIGHT3 := Vector4(-2800.0, APPROACH_LANDING2_Y, -3120.0, BOTTOM_WEST_Y)
 
-const BOTTOM_WEST_THRESHOLD_LEFT := -4400.0
-const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -3120.0, BOTTOM_WEST_Y, FLOOR_THICKNESS)
-
-## First Expansion Gallery = the Bottom-West dig site's entry chamber (blueprint's
-## "Bottom-West Dig Front"). Collapsed Side Chamber branches off its west wall via
-## a short local climb (not a walkway — "crawl/step/short climb" per
-## hollow-chunk-map.md), same Area2D pattern as other local Hollow climbs.
-## The ladder opening sits right at GALLERY_LEFT, so the Gallery's main floor
-## needs no separate west sliver.
-const GALLERY_LEFT := -5680.0
-const LADDER_CHAMBER_OPEN_X := GALLERY_LEFT
-const LADDER_CHAMBER_X := LADDER_CHAMBER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-const CHAMBER_ALCOVE_Y := BOTTOM_WEST_Y + 320.0
-const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -5200.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
-const GALLERY_FLOOR := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_Y, FLOOR_THICKNESS)
-
-const OPENING_ROUTE_LEFT := GALLERY_LEFT ## westmost extent of the opening route
-
-
-## Flat decks only (stairs are separate calls) — used by hollow_terrain.gd to
-## paint matching visual + collision tiles together (single source of truth).
-static func opening_route_deck_rects() -> Array[Vector4]:
+## Ordered west deck tops (Ashram upper → Bottom-West lower).
+static func west_stack_level_ys() -> Array[float]:
 	return [
+		WEST_ASHRAM_UPPER_Y,
+		WEST_ASHRAM_LOWER_Y,
+		WEST_HIGH_UPPER_Y,
+		WEST_HIGH_LOWER_Y,
+		WICK_Y,
+		WICK_LOWER_Y,
+		MID_ALLOT_UPPER_Y,
+		MID_ALLOT_LOWER_Y,
+		WEST_LW_UPPER_Y,
+		WEST_LW_LOWER_Y,
+		BOTTOM_WEST_UPPER_Y,
+		BOTTOM_WEST_LOWER_Y,
+	]
+
+
+## Split a west span around openings that pierce this deck.
+static func _west_gapped_spans(x0: float, x1: float, y: float) -> Array[Vector4]:
+	var openings: Array[Vector2] = [
+		Vector2(LADDER_WEST_OPEN_X, LADDER_WEST_OPEN_X + LADDER_OPENING),
+	]
+	# Left civic lift travels Ashram ↔ Wick — gap every deck in that range.
+	# Heart hoist is layout-reserved but not instanced in main.tscn yet, so do
+	# not punch an unbridged hole through Wickwork / Home Court.
+	if y >= WEST_ASHRAM_UPPER_Y - 0.5 and y <= WICK_Y + 0.5:
+		openings.append(Vector2(LEFT_LIFT_OPEN_X, LEFT_LIFT_OPEN_X + LIFT_OPENING))
+	var spans: Array[Vector2] = [Vector2(x0, x1)]
+	for opening in openings:
+		var next_spans: Array[Vector2] = []
+		for span in spans:
+			if opening.y <= span.x or opening.x >= span.y:
+				next_spans.append(span)
+				continue
+			if opening.x > span.x:
+				next_spans.append(Vector2(span.x, opening.x))
+			if opening.y < span.y:
+				next_spans.append(Vector2(opening.y, span.y))
+		spans = next_spans
+	var rects: Array[Vector4] = []
+	for span in spans:
+		if span.y - span.x >= float(TILE):
+			rects.append(Vector4(span.x, span.y, y, FLOOR_THICKNESS))
+	return rects
+
+
+## Full west stack decks (hollow civic + dig-front extensions).
+static func west_stack_deck_rects() -> Array[Vector4]:
+	var rects: Array[Vector4] = []
+	# Civic hollow only (Ashram / Wick / Mid Allot / Lower Worker).
+	for y in [
+		WEST_ASHRAM_UPPER_Y,
+		WEST_ASHRAM_LOWER_Y,
+		WICK_Y,
+		WICK_LOWER_Y,
+		MID_ALLOT_UPPER_Y,
+		MID_ALLOT_LOWER_Y,
+		WEST_LW_UPPER_Y,
+		WEST_LW_LOWER_Y,
+	]:
+		rects.append_array(_west_gapped_spans(WEST_HOLLOW_LEFT, WEST_HOLLOW_RIGHT, y))
+	# Dig fronts: full dig envelope → Mouth lip (openings into diggable rock).
+	for y in [WEST_HIGH_UPPER_Y, WEST_HIGH_LOWER_Y, BOTTOM_WEST_UPPER_Y, BOTTOM_WEST_LOWER_Y]:
+		rects.append_array(_west_gapped_spans(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, y))
+	# Collapsed side chamber alcove off Bottom-West lower.
+	rects.append(CHAMBER_ALCOVE)
+	return rects
+
+
+## Opening-route named pads (subset of west stack; no stair flights).
+static func opening_route_deck_rects() -> Array[Vector4]:
+	var rects: Array[Vector4] = [
 		HOME_COURT_DECK,
 		HOME_LANDING,
 		SWITCHBACK_FLOOR,
@@ -266,30 +298,22 @@ static func opening_route_deck_rects() -> Array[Vector4]:
 		GALLERY_FLOOR,
 		CHAMBER_ALCOVE,
 	]
+	# Ensure dig-front / LW lower presence even if named pads miss a sample.
+	rects.append_array(_west_gapped_spans(WEST_HOLLOW_LEFT, WEST_HOLLOW_RIGHT, WEST_LW_LOWER_Y))
+	rects.append_array(_west_gapped_spans(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, BOTTOM_WEST_LOWER_Y))
+	return rects
 
 
-## Stair flights: (x0, y0, x1, y1) — same Vector4 shape as decks, consumed by
-## hollow_terrain.gd's paint_stairs(x0, y0, x1, y1).
+## Uniform west stack uses LadderWestStack — no stair flights.
 static func opening_route_stair_rects() -> Array[Vector4]:
-	return [
-		APPROACH_FLIGHT1,
-		HOME_BACK_STAIR,
-		APPROACH_FLIGHT2,
-		APPROACH_FLIGHT3,
-	]
+	return []
 
 
-## New playable districts off the opening corridor (worker return + Mid Heart + Mid-East + Wick/allotments).
+## East stack + Mid Heart + west stack decks.
 static func expansion_deck_rects() -> Array[Vector4]:
-	var decks: Array[Vector4] = [
-		HEART_APPROACH_WEST,
-		HEART_APPROACH_EAST,
-		WORKER_SPUR_WEST,
-		WORKER_SPUR_EAST,
-		WORKER_ALLOT_LANDING,
-		WICK_TERRACE,
-		MID_ALLOT_WEST,
-		MID_ALLOT_EAST,
+	var decks: Array[Vector4] = []
+	decks.append_array(west_stack_deck_rects())
+	decks.append_array([
 		MID_EAST_LANDING_WEST,
 		MID_EAST_LANDING_EAST,
 		MID_EAST_APPROACH,
@@ -308,9 +332,7 @@ static func expansion_deck_rects() -> Array[Vector4]:
 		CISTERN_CHAMBER,
 		SEEP_WEST,
 		SEEP_APPROACH,
-		ASHRAM_WEST_WEST,
-		ASHRAM_WEST_EAST,
-	]
+	])
 	decks.append_array(heart_deck_rects())
 	return decks
 
@@ -331,6 +353,10 @@ static func expansion_stair_rects() -> Array[Vector4]:
 
 static func ladder_chamber_open_end() -> float:
 	return LADDER_CHAMBER_OPEN_X + LADDER_OPENING
+
+
+static func ladder_west_open_end() -> float:
+	return LADDER_WEST_OPEN_X + LADDER_OPENING
 
 
 static func lift_open_end() -> float:
@@ -354,7 +380,7 @@ static func ladder_cistern_open_end() -> float:
 
 
 static func ladder_upper_open_end() -> float:
-	return LADDER_UPPER_OPEN_X + LADDER_OPENING
+	return ladder_west_open_end()
 
 
 static func ladder_upper_shaft_height() -> float:
@@ -366,7 +392,7 @@ static func ladder_cistern_shaft_height() -> float:
 
 
 static func ladder_return_open_end() -> float:
-	return LADDER_RETURN_OPEN_X + LADDER_OPENING
+	return ladder_west_open_end()
 
 
 static func lift_stop_ys() -> Array[float]:
@@ -375,16 +401,13 @@ static func lift_stop_ys() -> Array[float]:
 
 
 static func heart_hoist_stop_ys() -> Array[float]:
-	return [FARMS_Y, WICK_Y, LOWER_WORK_Y]
+	## West hollow decks at the Heart hoist column (Ashram / Wick / Home Court).
+	return [WEST_ASHRAM_UPPER_Y, WICK_Y, WEST_LW_UPPER_Y]
 
 
 static func left_service_stop_ys() -> Array[float]:
-	## FARMS_Y/GLOW_SUB_Y (west Glowbeds/Wickwork-hang terraces) stay off this
-	## list until those decks are actually built — canon has Glowbeds on the
-	## east wall (see docs/hollow-level-authoring.md's mismatch history); a
-	## west equivalent isn't confirmed, so the lift doesn't stop somewhere
-	## with no floor. Ashram Heights west (built 2026-09-19) ↔ Wickwork only.
-	return [UPPER_RES_Y, WICK_Y]
+	## West civic lift: Ashram Heights ↔ Wickwork (Mid Heart band).
+	return [WEST_ASHRAM_UPPER_Y, WICK_Y]
 
 
 static func freight_lift_stop_ys() -> Array[float]:
@@ -460,16 +483,12 @@ static func mid_heart_spans_mouth() -> bool:
 
 ## Ordered walkable deck tops used for clearance checks (top → bottom).
 static func walkable_band_ys() -> Array[float]:
-	return [
-		UPPER_RES_Y,
-		FARMS_Y,
-		GLOW_SUB_Y,
-		WICK_Y,
-		MID_ALLOT_Y,
-		LOWER_WORK_Y,
-		CISTERN_Y,
-		SEEP_Y,
-	]
+	var ys: Array[float] = west_stack_level_ys()
+	for y in [UPPER_RES_Y, FARMS_Y, GLOW_SUB_Y, LOWER_WORK_Y, CISTERN_Y, SEEP_Y]:
+		if not ys.has(y):
+			ys.append(y)
+	ys.sort()
+	return ys
 
 
 static func band_gap(upper_y: float, lower_y: float) -> float:
@@ -492,8 +511,8 @@ static func floor_visual_lip_y(deck_top_y: float) -> float:
 
 
 static func player_spawn_point() -> Vector2:
-	## Feet on lower working terrace (CharacterBody2D origin ≈ body top-left).
-	return Vector2((HOME_COURT_DECK.x + HOME_COURT_DECK.y) * 0.5, LOWER_WORK_Y - 32.0)
+	## Feet on Lower Worker Terraces / Home Court (CharacterBody2D origin ≈ body top-left).
+	return Vector2((HOME_COURT_DECK.x + HOME_COURT_DECK.y) * 0.5, WEST_LW_UPPER_Y - 32.0)
 
 
 ## CharacterBody2D stand positions (feet on deck → position.y = deck_top - 32).
@@ -504,12 +523,11 @@ static func safe_stand_points() -> Array[Vector2]:
 		Vector2(PIT_RIGHT + 240.0, FARMS_Y - body), ## Glowbeds east terrace (west of east shaft)
 		Vector2(LADDER_EAST_OPEN_X + 480.0, GLOW_SUB_Y - body), ## Glowbeds hang (east of east shaft)
 		Vector2(PIT_RIGHT + 240.0, UPPER_RES_Y - body), ## Ashram east (west of east shaft)
-		Vector2(-1600.0, FARMS_Y - body), ## Glowbeds gallery (legacy west reserve)
-		Vector2(-1400.0, GLOW_SUB_Y - body), ## Glowbeds hang (legacy west reserve)
-		Vector2(200.0, UPPER_RES_Y - body), ## upper residence street
+		Vector2(-1600.0, WEST_ASHRAM_UPPER_Y - body), ## Ashram west
+		Vector2(-1600.0, WEST_HIGH_UPPER_Y - body), ## High-West Dig Front
 		Vector2(-200.0, WICK_Y - body), ## Wickwork street
 		Vector2(-1500.0, WICK_Y - body), ## Wick bay
-		Vector2(-1280.0, MID_ALLOT_Y - body), ## mid allotment street (west of shared shaft)
+		Vector2(-1280.0, MID_ALLOT_Y - body), ## mid allotment street
 		Vector2(HEART_MID_X, HEART_Y - body), ## Mid Heart center
 		Vector2(PIT_LEFT + 160.0, HEART_Y - body), ## Mid Heart west lip
 		Vector2(PIT_RIGHT + 400.0, HEART_Y - body), ## Mid-East Landing
@@ -518,7 +536,8 @@ static func safe_stand_points() -> Array[Vector2]:
 		Vector2(PIT_RIGHT + 240.0, LOWER_WORK_Y - body), ## Lower-East services
 		Vector2(PIT_RIGHT + 240.0, CISTERN_Y - body), ## Cistern approach
 		Vector2((CISTERN_CHAMBER.x + CISTERN_CHAMBER.y) * 0.5, CISTERN_Y - body), ## Cistern chamber
-		Vector2(1000.0, LOWER_WORK_Y - body), ## Lower west lip (not a Mouth crossing)
+		Vector2(1000.0, WEST_LW_UPPER_Y - body), ## Lower west lip (not a Mouth crossing)
+		Vector2(-4000.0, BOTTOM_WEST_UPPER_Y - body), ## Bottom-West Dig Front
 		Vector2(PIT_RIGHT + 400.0, SEEP_Y - body), ## seep gallery approach
 	]
 

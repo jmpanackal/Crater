@@ -70,14 +70,14 @@ static func orientation_markers() -> Array[Dictionary]:
 			"name": "Dispatch",
 			"pos": Vector2(
 				(HollowLayout.WEST_DISPATCH_YARD.x + HollowLayout.WEST_DISPATCH_YARD.y) * 0.5,
-				HollowLayout.LOWER_WORK_Y - 28.0
+				HollowLayout.WEST_LW_UPPER_Y - 28.0
 			),
 		},
 		{
 			"name": "Mouth",
 			"pos": Vector2(
 				(HollowLayout.PIT_LEFT + HollowLayout.PIT_RIGHT) * 0.5,
-				HollowLayout.LOWER_WORK_Y + 96.0
+				HollowLayout.WEST_LW_UPPER_Y + 96.0
 			),
 		},
 		{
@@ -86,10 +86,7 @@ static func orientation_markers() -> Array[Dictionary]:
 		},
 		{
 			"name": "Wickwork",
-			"pos": Vector2(
-				(HollowLayout.WICK_TERRACE.x + HollowLayout.WICK_TERRACE.y) * 0.5,
-				HollowLayout.WICK_Y - 16.0
-			),
+			"pos": Vector2(-2000.0, HollowLayout.WICK_Y - 16.0),
 		},
 		{
 			"name": "Dig Front",
@@ -102,7 +99,7 @@ static func orientation_markers() -> Array[Dictionary]:
 			"name": "West Dig",
 			"pos": Vector2(
 				(HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.HIGH_WEST_DIG_RIGHT) * 0.5,
-				HollowLayout.FARMS_Y - 16.0
+				HollowLayout.WEST_HIGH_UPPER_Y - 16.0
 			),
 		},
 		{

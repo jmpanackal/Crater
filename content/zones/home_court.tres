@@ -6,16 +6,12 @@
 script = ExtResource("1")
 zone_id = &"home_court"
 display_name = "Home Court"
-world_origin = Vector2(-80, 4320)
+world_origin = Vector2(-80, 5440)
 seams = [{
 "edge": "west",
 "neighbor": "lower_switchback",
 "position": -320
-}, {
-"edge": "east",
-"neighbor": "mid_heart",
-"position": 1280
 }]
 enclosed = true
-world_rect = Rect2(-320, 3040, 1680, 1360)
+world_rect = Rect2(-320, 5120, 1600, 640)
 restricted = false
