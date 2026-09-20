@@ -206,6 +206,57 @@ func _run() -> void:
 	print("PASS minimap Mouth void + Mid Heart spans as primary bridge")
 	print("PASS minimap scale fills panel; labels stay off Mouth overlaps")
 
+	# Landmark labels must be centered in their section bounds (not right-aligned
+	# to a floating point marker that clips box edges).
+	if not minimap.has_method("orientation_label_rect"):
+		push_error("FAIL minimap missing orientation_label_rect for section centering")
+		quit(1)
+		return
+	for entry in markers:
+		var marker_name := str(entry.get("name", ""))
+		if not entry.has("bounds"):
+			push_error("FAIL orientation marker '%s' must expose section bounds" % marker_name)
+			quit(1)
+			return
+		var section: Rect2 = entry.bounds
+		if section.size.x <= 0.0 or section.size.y <= 0.0:
+			push_error("FAIL orientation marker '%s' has empty section bounds" % marker_name)
+			quit(1)
+			return
+		var label_rect: Rect2 = minimap.call("orientation_label_rect", entry)
+		var section_map_a: Vector2 = minimap.call("world_to_map", section.position)
+		var section_map_b: Vector2 = minimap.call("world_to_map", section.end)
+		var section_map := Rect2(
+			Vector2(minf(section_map_a.x, section_map_b.x), minf(section_map_a.y, section_map_b.y)),
+			Vector2(absf(section_map_b.x - section_map_a.x), absf(section_map_b.y - section_map_a.y))
+		)
+		if section_map.size.x < 4.0 or section_map.size.y < 4.0:
+			continue
+		var label_c := label_rect.get_center()
+		var section_c := section_map.get_center()
+		if absf(label_c.x - section_c.x) > 2.0:
+			push_error(
+				"FAIL '%s' label not horizontally centered in section (label=%s section=%s)"
+				% [marker_name, label_c, section_c]
+			)
+			quit(1)
+			return
+		if absf(label_c.y - section_c.y) > 2.0:
+			push_error(
+				"FAIL '%s' label not vertically centered in section (label=%s section=%s)"
+				% [marker_name, label_c, section_c]
+			)
+			quit(1)
+			return
+		if not section_map.grow(1.0).has_point(label_c):
+			push_error(
+				"FAIL '%s' label center escapes section bounds (label=%s section=%s)"
+				% [marker_name, label_c, section_map]
+			)
+			quit(1)
+			return
+	print("PASS minimap section labels are centered in their bounds")
+
 	minimap.call("toggle")
 	await process_frame
 	if (minimap as CanvasItem).visible:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
@@ -8,7 +8,6 @@
 [ext_resource type="Script" path="res://hollow_npc.gd" id="8_npc"]
 [ext_resource type="Script" path="res://journal_hud.gd" id="9_journal"]
 [ext_resource type="Script" path="res://dialogue_panel.gd" id="10_dialogue"]
-[ext_resource type="Script" path="res://soft_world_label.gd" id="11_soft_label"]
 [ext_resource type="Script" path="res://hollow_climb.gd" id="13_hollow_climb"]
 [ext_resource type="Script" path="res://dig_site_dressing.gd" id="15_dig_dress"]
 [ext_resource type="Script" path="res://dig_approach.gd" id="17_approach"]
@@ -19,7 +18,6 @@
 [ext_resource type="Script" path="res://job_delivery_point.gd" id="24_delivery"]
 [ext_resource type="Script" path="res://home_court_dressing.gd" id="25_home"]
 [ext_resource type="Script" path="res://hollow_macro_background.gd" id="26_macro"]
-[ext_resource type="Script" path="res://hollow_lift.gd" id="27_lift"]
 [ext_resource type="Script" path="res://hollow_minimap.gd" id="28_minimap"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
@@ -42,17 +40,6 @@ script = ExtResource("22_hollow_terrain")
 z_index = -1
 script = ExtResource("25_home")
 
-[node name="LadderChamber" type="Area2D" parent="Hollow"]
-position = Vector2(-5668, 6720)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 640)
-hint_text = "[W/S] climb"
-deck_open_x = -5680.0
-upper_land_side = 1
-
 [node name="LadderWestStack" type="Area2D" parent="Hollow"]
 position = Vector2(-1028, 320)
 collision_layer = 0
@@ -74,22 +61,6 @@ shaft_size = Vector2(40, 4960)
 hint_text = "[W/S] climb"
 deck_open_x = 6720.0
 upper_land_side = 1
-
-[node name="FreightLift" type="AnimatableBody2D" parent="Hollow"]
-collision_layer = 1
-collision_mask = 0
-sync_to_physics = true
-script = ExtResource("27_lift")
-lift_id = &"freight"
-default_stop_index = 0
-
-[node name="LeftServiceLift" type="AnimatableBody2D" parent="Hollow"]
-collision_layer = 1
-collision_mask = 0
-sync_to_physics = true
-script = ExtResource("27_lift")
-lift_id = &"left_service"
-default_stop_index = 1
 
 [node name="Zones" type="Node2D" parent="Hollow"]
 
@@ -280,17 +251,6 @@ mouse_filter = 2
 [node name="Approach" type="Node2D" parent="."]
 script = ExtResource("17_approach")
 
-[node name="DigSiteLabel" type="Label" parent="."]
-offset_left = 5200.0
-offset_top = 40.0
-offset_right = 7000.0
-offset_bottom = 240.0
-theme_override_font_sizes/font_size = 15
-text = "Dig Site — Firmament ↑ quiet / side galleries →"
-script = ExtResource("11_soft_label")
-show_radius = 1300.0
-far_alpha = 0.18
-
 [node name="Terrain" type="TileMapLayer" parent="."]
 script = ExtResource("3_terrain")
 
@@ -315,10 +275,10 @@ shape = SubResource("RectangleShape2D_player")
 [node name="Camera2D" type="Camera2D" parent="Player"]
 process_callback = 0
 position = Vector2(16, 16)
-limit_left = -6000
-limit_top = -1600
+limit_left = -6352
+limit_top = -392
 limit_right = 11840
-limit_bottom = 6500
+limit_bottom = 7752
 limit_enabled = true
 position_smoothing_enabled = true
 position_smoothing_speed = 5.5

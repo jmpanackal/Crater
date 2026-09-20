@@ -152,6 +152,111 @@ func _run() -> void:
 			sx += 10.0
 		print("PASS desired_limit_right curve")
 
+	# Edge padding: limits must allow camera center on BW lower / Ashram upper.
+	# Godot clamps center to [limit+half_view, limit-half_view]; stale limit_bottom
+	# (6500) sat above BOTTOM_WEST_LOWER_Y (7360) and pinned the player to the
+	# bottom of the frame.
+	if cam.has_method("_apply_play_edge_limits"):
+		cam._apply_play_edge_limits()
+	var pad := Vector2(cam.EDGE_PAD_X, cam.EDGE_PAD_Y)
+	if cam.has_method("edge_pad"):
+		pad = cam.edge_pad()
+	var slack := float(cam.STAND_CENTER_SLACK)
+
+	var need_left := HollowLayout.HIGH_WEST_DIG_LEFT - pad.x - slack
+	var need_top := HollowLayout.VAULTWARD_Y - pad.y - slack
+	var need_bottom := HollowLayout.BOTTOM_WEST_LOWER_Y + pad.y + slack
+	if float(cam.limit_left) > need_left + 1.0:
+		push_error(
+			"FAIL limit_left=%s too tight for west dig lip (need <= %s)"
+			% [cam.limit_left, need_left]
+		)
+		quit(1)
+		return
+	if float(cam.limit_top) > need_top + 1.0:
+		push_error(
+			"FAIL limit_top=%s too tight for Vaultward/Ashram (need <= %s)"
+			% [cam.limit_top, need_top]
+		)
+		quit(1)
+		return
+	if float(cam.limit_bottom) < need_bottom - 1.0:
+		push_error(
+			"FAIL limit_bottom=%s too tight for Bottom-West lower (need >= %s)"
+			% [cam.limit_bottom, need_bottom]
+		)
+		quit(1)
+		return
+	print(
+		"PASS edge limits pad past stands (L=%s T=%s B=%s pad=%s)"
+		% [cam.limit_left, cam.limit_top, cam.limit_bottom, pad]
+	)
+
+	# Disable drag/smoothing so screen center can settle on the camera node.
+	cam.drag_horizontal_enabled = false
+	cam.drag_vertical_enabled = false
+	cam.position_smoothing_enabled = false
+	cam.offset = Vector2.ZERO
+
+	var ladder_x := HollowLayout.LADDER_WEST_OPEN_X + HollowLayout.LADDER_OPENING * 0.5
+	var body_h := float(player.BODY_HEIGHT)
+
+	# Bottom-West Dig lower: camera screen center must match camera global (no clamp).
+	player.global_position = Vector2(
+		ladder_x,
+		HollowLayout.BOTTOM_WEST_LOWER_Y - body_h
+	)
+	player.velocity = Vector2.ZERO
+	await physics_frame
+	await process_frame
+	await physics_frame
+	await process_frame
+	var bw_target := cam.global_position
+	var bw_center := cam.get_screen_center_position()
+	if bw_center.distance_to(bw_target) > 8.0:
+		push_error(
+			"FAIL BW lower camera off-center: screen=%s cam=%s player=%s limits T/B=%s/%s"
+			% [bw_center, bw_target, player.global_position, cam.limit_top, cam.limit_bottom]
+		)
+		quit(1)
+		return
+	print("PASS Bottom-West lower keeps camera centered (delta=%s)" % bw_center.distance_to(bw_target))
+
+	# Ashram upper: same centering check at the top of the west stack.
+	player.global_position = Vector2(
+		ladder_x,
+		HollowLayout.WEST_ASHRAM_UPPER_Y - body_h
+	)
+	player.velocity = Vector2.ZERO
+	await physics_frame
+	await process_frame
+	await physics_frame
+	await process_frame
+	var ash_target := cam.global_position
+	var ash_center := cam.get_screen_center_position()
+	if ash_center.distance_to(ash_target) > 8.0:
+		push_error(
+			"FAIL Ashram upper camera off-center: screen=%s cam=%s player=%s limits T/B=%s/%s"
+			% [ash_center, ash_target, player.global_position, cam.limit_top, cam.limit_bottom]
+		)
+		quit(1)
+		return
+	print("PASS Ashram upper keeps camera centered (delta=%s)" % ash_center.distance_to(ash_target))
+
+	# Mid-East civic framing must still hold after edge-limit refresh (no dig yank).
+	player.global_position = Vector2(HollowLayout.MID_EAST_APPROACH.x + 64.0, HollowLayout.HEART_Y - body_h)
+	player.velocity = Vector2.ZERO
+	await physics_frame
+	await process_frame
+	if absf(float(cam.limit_right) - mid_east_framed) > 1.0:
+		push_error(
+			"FAIL Mid-East limit_right=%s drifted after edge pad (need ~%s)"
+			% [cam.limit_right, mid_east_framed]
+		)
+		quit(1)
+		return
+	print("PASS Mid-East civic limit_right intact after edge padding")
+
 	print("CAMERA_DIG_LIMIT_TESTS_PASSED")
 	scene.queue_free()
 	await process_frame

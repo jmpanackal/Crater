@@ -311,36 +311,13 @@ func _add_terrace_punctuation() -> void:
 
 
 func _add_opening_route_dressing() -> void:
-	## Greybox-tier room-read cues for the west wing (Home Court -> ... ->
-	## First Expansion Gallery + Collapsed Side Chamber). Phase 0 already
-	## locked "greybox is fine" — this is entrances/steps/rock backing, not a
-	## prop pass. Real art comes later per priority-roadmap.md's Phase 3.
+	## Greybox base — no doorway props / chamber leftovers on the west decks.
 	if get_node_or_null("OpeningRouteDressing") != null:
 		return
 	var root := Node2D.new()
 	root.name = "OpeningRouteDressing"
 	root.z_index = 1
 	add_child(root)
-
-	# Room-boundary doorways so the corridor reads as distinct spaces.
-	_room_entrance(root, "SwitchbackDoor", HollowLayout.HOME_COURT_LEFT, HollowLayout.WEST_LW_UPPER_Y, WOOD)
-	_room_entrance(root, "DispatchDoor", HollowLayout.SWITCHBACK_LEFT, HollowLayout.WEST_LW_UPPER_Y, WARM)
-	_room_entrance(root, "ApproachDoor", HollowLayout.WEST_DISPATCH_LEFT, HollowLayout.WEST_LW_UPPER_Y, WOOD_DARK)
-	_room_entrance(root, "ThresholdDoor", HollowLayout.BOTTOM_WEST_THRESHOLD.y, HollowLayout.BOTTOM_WEST_Y, WARM)
-	_room_entrance(root, "GalleryDoor", HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT, HollowLayout.BOTTOM_WEST_Y, COPPER)
-
-	# Step cues at real elevation changes (not decorative corridor dips).
-	_step_riser(root, "WorkerReturnStep", 208.0, HollowLayout.HOME_LANDING.z)
-	_step_riser(root, "ApproachDipStep", -496.0, HollowLayout.WEST_LW_LOWER_Y)
-	_step_riser(root, "GalleryDipStep", -960.0, HollowLayout.BOTTOM_WEST_Y)
-
-	# Sealed far-west rock wall so the Gallery reads as bounded, not endless.
-	_band(
-		"GalleryFarWall",
-		Rect2(HollowLayout.GALLERY_LEFT - 12.0, HollowLayout.WEST_LW_UPPER_Y - 96.0, 12.0, 160.0),
-		ROCK
-	)
-	_room_entrance(root, "ChamberDoor", HollowLayout.LADDER_CHAMBER_X, HollowLayout.CHAMBER_ALCOVE_Y, ROCK)
 
 
 func _visual_ramp(parent: Node, ramp_name: String, x: float, deck_y: float, width: float) -> void:

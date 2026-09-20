@@ -133,8 +133,12 @@ func _run() -> void:
 	for child in scene.get_node("Hollow").get_children():
 		if child.get_script() != null and str(child.get_script().resource_path).ends_with("hollow_climb.gd"):
 			climb_count += 1
-	if climb_count != 3:
-		push_error("FAIL expected Chamber + WestStack + EastStack, got %s climb zones" % climb_count)
+	if climb_count != 2:
+		push_error("FAIL expected WestStack + EastStack, got %s climb zones" % climb_count)
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/LadderChamber") != null:
+		push_error("FAIL LadderChamber leftover must be removed")
 		quit(1)
 		return
 	var ladder: Area2D = scene.get_node("Hollow/LadderWestStack") as Area2D

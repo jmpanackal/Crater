@@ -23,9 +23,9 @@ func _run() -> void:
 	for child in scene.get_node("Hollow").get_children():
 		if child.get_script() != null and str(child.get_script().resource_path).ends_with("hollow_climb.gd"):
 			ladders.append(child)
-	if ladders.size() != 3:
+	if ladders.size() != 2:
 		push_error(
-			"FAIL expected Chamber + WestStack + EastStack, got %s"
+			"FAIL expected WestStack + EastStack only, got %s"
 			% ladders.size()
 		)
 		quit(1)
@@ -40,6 +40,10 @@ func _run() -> void:
 		return
 	if scene.get_node_or_null("Hollow/LadderEastStack") == null:
 		push_error("FAIL LadderEastStack missing")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/LadderChamber") != null:
+		push_error("FAIL LadderChamber leftover must be removed")
 		quit(1)
 		return
 	if scene.get_node_or_null("Hollow/LadderWorkerReturn") != null:
@@ -70,9 +74,8 @@ func _run() -> void:
 	print("PASS all Hollow ladders share the same climb hint")
 
 	var west: Area2D = scene.get_node_or_null("Hollow/LadderWestStack") as Area2D
-	var chamber: Area2D = scene.get_node_or_null("Hollow/LadderChamber") as Area2D
-	if west == null or chamber == null:
-		push_error("FAIL LadderWestStack / LadderChamber missing")
+	if west == null:
+		push_error("FAIL LadderWestStack missing")
 		quit(1)
 		return
 

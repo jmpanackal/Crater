@@ -4,6 +4,8 @@ extends Camera2D
 ## Hollow clamps limit_right so dig-tile columns never peek into Wick framing.
 ## Mid-East Approach keeps civic framing; dig unlock starts after its east tip.
 ## Mid-East Dig Front (past civic tip) uses the dig-limit blend — no hard snap.
+## Static L/T/B limits pad ≥ half-viewport past stand extents so edge decks
+## (Ashram top, Bottom-West lower, west dig lip) stay center-framed.
 
 const LOOK_AHEAD_X := 44.0
 const LOOK_AHEAD_Y := 34.0
@@ -22,6 +24,14 @@ const LIMIT_RIGHT_DIG := 14720
 const MID_EAST_FRAME_PAD := 2880.0
 ## Dig unlock span past Mid-East Approach into Mid-East Dig Front.
 const DIG_LIMIT_BLEND_SPAN := 1280.0
+
+## Design play framing (tools / movement stability). Edge limits use at least
+## half of this; live viewport half wins when the window is larger.
+const DESIGN_VIEWPORT := Vector2(1280.0, 720.0)
+const EDGE_PAD_X := DESIGN_VIEWPORT.x * 0.5 ## 640
+const EDGE_PAD_Y := DESIGN_VIEWPORT.y * 0.5 ## 360
+## Camera sits near body center (~16px below player origin on a 32px body).
+const STAND_CENTER_SLACK := 32.0
 
 var _look := Vector2.ZERO
 var _shake := 0.0
@@ -42,6 +52,10 @@ func _ready() -> void:
 	drag_top_margin = 0.18
 	drag_bottom_margin = 0.24
 	limit_right = LIMIT_RIGHT_HOLLOW
+	_apply_play_edge_limits()
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_apply_play_edge_limits):
+		vp.size_changed.connect(_apply_play_edge_limits)
 
 
 func _physics_process(delta: float) -> void:
@@ -61,6 +75,28 @@ func _physics_process(delta: float) -> void:
 	if _shake > 0.01:
 		jitter = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _shake
 	offset = _look + jitter
+
+
+## Half-viewport (design or live) pad past stand extents — does not touch limit_right.
+func edge_pad() -> Vector2:
+	var pad := Vector2(EDGE_PAD_X, EDGE_PAD_Y)
+	var vp := get_viewport()
+	if vp == null:
+		return pad
+	var screen := vp.get_visible_rect().size
+	var zx := zoom.x if zoom.x > 0.001 else 1.0
+	var zy := zoom.y if zoom.y > 0.001 else 1.0
+	return Vector2(maxf(pad.x, screen.x * 0.5 / zx), maxf(pad.y, screen.y * 0.5 / zy))
+
+
+func _apply_play_edge_limits() -> void:
+	var pad := edge_pad()
+	# Godot clamps camera *center* to [limit + half_view, limit - half_view].
+	# Pad past stand extents so the center can still sit on the player.
+	# Top uses Vaultward (highest civic band); Ashram is below and stays covered.
+	limit_left = int(floor(HollowLayout.HIGH_WEST_DIG_LEFT - pad.x - STAND_CENTER_SLACK))
+	limit_top = int(floor(HollowLayout.VAULTWARD_Y - pad.y - STAND_CENTER_SLACK))
+	limit_bottom = int(ceil(HollowLayout.BOTTOM_WEST_LOWER_Y + pad.y + STAND_CENTER_SLACK))
 
 
 ## Ideal right clamp for a player x — Mid-East civic first, then dig unlock.

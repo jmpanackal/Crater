@@ -119,10 +119,10 @@ func _run() -> void:
 		quit(1)
 		return
 	if not approach.entry_reads_as_threshold():
-		push_error("FAIL dig site entry threshold pieces")
+		push_error("FAIL dig site entry still has leftover props/labels")
 		quit(1)
 		return
-	print("PASS dig site entry threshold")
+	print("PASS dig site entry threshold clean")
 
 	# QUARANTINED (2026-09-18): "NPC face toward player + bob parts" drove
 	# Hollow/NPCs/Pell to prove facing + bob-part presence. main.tscn's

@@ -73,9 +73,12 @@ func _run() -> void:
 		push_error("FAIL LadderWestStack bottom must be Bottom-West lower")
 		quit(1)
 		return
-	# Floor gaps on every west level through the shaft (no sit-on-deck prompts).
+	# Floor gaps on every west level through the shaft (no sit-on-deck prompts),
+	# except Bottom-West lower — solid landing under the shaft end.
 	var open_x0 := HollowLayout.LADDER_WEST_OPEN_X
 	for level_y in levels:
+		if absf(level_y - HollowLayout.BOTTOM_WEST_LOWER_Y) < 0.5:
+			continue
 		var row := int(round(level_y / tile))
 		for x_px in [open_x0 + 16.0, open_x0 + 48.0]:
 			var col := int(round(x_px / tile))
@@ -134,6 +137,65 @@ func _run() -> void:
 		return
 	print("PASS dig mass left of hollow; High-West + Bottom-West fronts open")
 
+	# Bottom-West Dig Front: both platforms span dig envelope (only LadderWestStack gaps).
+	var bw_upper := HollowLayout.BOTTOM_WEST_UPPER_Y
+	var bw_lower := HollowLayout.BOTTOM_WEST_LOWER_Y
+	var dig_mid_x := int(round((HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.WEST_HOLLOW_LEFT) * 0.5 / tile))
+	var hollow_mid_x := int(round((HollowLayout.WEST_HOLLOW_LEFT + HollowLayout.WEST_HOLLOW_RIGHT) * 0.5 / tile))
+	for y_px in [bw_upper, bw_lower]:
+		var row := int(round(y_px / tile))
+		for sample_x in [dig_mid_x, hollow_mid_x]:
+			if terrain.get_cell_source_id(Vector2i(sample_x, row)) == -1:
+				push_error("FAIL Bottom-West platform y=%s missing at col=%s" % [y_px, sample_x])
+				quit(1)
+				return
+	# Landable at ladder X: upper stays gapped (climb-through); lower must be solid under shaft.
+	var shaft_col := int(round((HollowLayout.LADDER_WEST_OPEN_X + 32.0) / tile))
+	var land_left_col := int(round((HollowLayout.LADDER_WEST_OPEN_X - 16.0) / tile))
+	var land_right_col := int(round((HollowLayout.ladder_west_open_end() + 16.0) / tile))
+	var bw_upper_row := int(round(bw_upper / tile))
+	var bw_lower_row := int(round(bw_lower / tile))
+	if terrain.get_cell_source_id(Vector2i(shaft_col, bw_upper_row)) != -1:
+		push_error("FAIL Bottom-West upper must keep west shaft open at ladder X")
+		quit(1)
+		return
+	if terrain.get_cell_source_id(Vector2i(land_left_col, bw_upper_row)) == -1:
+		push_error("FAIL Bottom-West upper missing landable tile left of ladder at y=%s" % bw_upper)
+		quit(1)
+		return
+	if terrain.get_cell_source_id(Vector2i(land_right_col, bw_upper_row)) == -1:
+		push_error("FAIL Bottom-West upper missing landable tile right of ladder at y=%s" % bw_upper)
+		quit(1)
+		return
+	if terrain.get_cell_source_id(Vector2i(shaft_col, bw_lower_row)) == -1:
+		push_error("FAIL Bottom-West lower must be solid under LadderWestStack at y=%s" % bw_lower)
+		quit(1)
+		return
+	# Void soft-respawn must sit below the deepest west deck — otherwise climb/fall
+	# into Bottom-West dies before feet can touch the painted floors.
+	var player_proto: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
+	var void_y := float(player_proto.VOID_FALL_Y)
+	var stand_on_bw_lower := bw_lower - float(player_proto.BODY_HEIGHT)
+	if void_y <= stand_on_bw_lower + 8.0:
+		push_error(
+			"FAIL VOID_FALL_Y=%s kills standing on Bottom-West lower (stand_y=%s)"
+			% [void_y, stand_on_bw_lower]
+		)
+		quit(1)
+		return
+	# Freight / left-lift holes must stay sealed on Mid Heart east walk.
+	var freight_col := int(round(5560.0 / tile))
+	var heart_row := int(round(HollowLayout.HEART_Y / tile))
+	if terrain.get_cell_source_id(Vector2i(freight_col, heart_row)) == -1:
+		push_error("FAIL Mid-East freight lift gap must be sealed")
+		quit(1)
+		return
+	if scene.get_node_or_null("Hollow/FreightLift") != null or scene.get_node_or_null("Hollow/LeftServiceLift") != null:
+		push_error("FAIL secondary lifts must be stripped for clean base")
+		quit(1)
+		return
+	print("PASS Bottom-West Dig Front upper=%s lower=%s; freight gap sealed" % [bw_upper, bw_lower])
+
 	# Spawn still on Lower Worker Terraces (Home Court).
 	var spawn := HollowLayout.player_spawn_point()
 	if absf(spawn.y + 32.0 - HollowLayout.WEST_LW_UPPER_Y) > 1.0:
@@ -150,6 +212,55 @@ func _run() -> void:
 		quit(1)
 		return
 	print("PASS Act 1 spawn rests on Lower Worker / Home Court")
+
+	# Climb Home Court → Bottom-West lower on the west shaft (the play path from screenshots).
+	player.global_position = Vector2(
+		HollowLayout.LADDER_WEST_X,
+		HollowLayout.WEST_LW_UPPER_Y - player.BODY_HEIGHT
+	)
+	player.velocity = Vector2.ZERO
+	player.enter_climb_zone(west_ladder)
+	Input.action_press("ui_down")
+	var reached_bw_lower := false
+	for _i in range(6000):
+		await physics_frame
+		if (
+			player.is_on_floor()
+			and not player.is_climbing()
+			and absf(player.global_position.y - (bw_lower - player.BODY_HEIGHT)) < 8.0
+		):
+			reached_bw_lower = true
+			break
+	Input.action_release("ui_down")
+	if not reached_bw_lower:
+		push_error(
+			"FAIL could not climb west stack Home→Bottom-West lower (pos=%s void=%s)"
+			% [player.global_position, player.VOID_FALL_Y]
+		)
+		quit(1)
+		return
+	print("PASS west stack climb Home→Bottom-West lower")
+
+	# Step onto Bottom-West upper beside the shaft and stay there (no void kill).
+	player.global_position = Vector2(
+		HollowLayout.ladder_west_open_end() + 8.0,
+		bw_upper - player.BODY_HEIGHT
+	)
+	player.velocity = Vector2.ZERO
+	for _i in range(20):
+		await physics_frame
+	if absf(player.global_position.y - (bw_upper - player.BODY_HEIGHT)) > 8.0:
+		push_error(
+			"FAIL could not stand on Bottom-West upper beside ladder (pos=%s)"
+			% player.global_position
+		)
+		quit(1)
+		return
+	if not player.is_on_floor():
+		push_error("FAIL Bottom-West upper stand is not on floor (pos=%s)" % player.global_position)
+		quit(1)
+		return
+	print("PASS stand on Bottom-West upper + lower decks at ladder X")
 
 	# Climb bottom → Ashram top on the west shaft.
 	player.global_position = Vector2(

@@ -111,24 +111,34 @@ func _run() -> void:
 	print("PASS Home Court floor has real physics collision")
 
 	var ladder_chamber: Area2D = scene.get_node_or_null("Hollow/LadderChamber") as Area2D
-	if ladder_chamber == null or not ladder_chamber.has_method("deck_bottom_y"):
-		push_error("FAIL LadderChamber missing")
+	if ladder_chamber != null:
+		push_error("FAIL LadderChamber leftover must be removed from clean west dig fronts")
 		quit(1)
 		return
-	if absf(ladder_chamber.deck_bottom_y() - HollowLayout.CHAMBER_ALCOVE_Y) > 1.0:
-		push_error(
-			"FAIL LadderChamber bottom Y=%s expected alcove=%s"
-			% [ladder_chamber.deck_bottom_y(), HollowLayout.CHAMBER_ALCOVE_Y]
-		)
-		quit(1)
-		return
-	print("PASS Collapsed Side Chamber ladder reaches its claimed elevation")
+	print("PASS no collapsed-chamber ladder leftover")
 
 	if not scene.has_node("Hollow/LadderWestStack"):
 		push_error("FAIL LadderWestStack missing for Home↔Bottom-West descent")
 		quit(1)
 		return
 	print("PASS west stack ladder provides the Bottom-West descent")
+
+	# Bottom-West Dig Front: both uniform platforms span the dig envelope.
+	var bw_upper_row := int(round(HollowLayout.BOTTOM_WEST_UPPER_Y / float(tile_size)))
+	var bw_lower_row := int(round(HollowLayout.BOTTOM_WEST_LOWER_Y / float(tile_size)))
+	var dig_sample := int(round((HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.WEST_HOLLOW_LEFT) * 0.5 / float(tile_size)))
+	if terrain.get_cell_source_id(Vector2i(dig_sample, bw_upper_row)) == -1:
+		push_error("FAIL Bottom-West Dig Front upper missing at y=%s" % HollowLayout.BOTTOM_WEST_UPPER_Y)
+		quit(1)
+		return
+	if terrain.get_cell_source_id(Vector2i(dig_sample, bw_lower_row)) == -1:
+		push_error("FAIL Bottom-West Dig Front lower missing at y=%s" % HollowLayout.BOTTOM_WEST_LOWER_Y)
+		quit(1)
+		return
+	print(
+		"PASS Bottom-West Dig Front upper=%s lower=%s both painted full-width"
+		% [HollowLayout.BOTTOM_WEST_UPPER_Y, HollowLayout.BOTTOM_WEST_LOWER_Y]
+	)
 
 	print("OPENING_ROUTE_TESTS_PASSED")
 	quit(0)

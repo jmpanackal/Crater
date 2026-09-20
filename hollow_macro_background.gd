@@ -48,7 +48,7 @@ static func district_guides() -> Array[Dictionary]:
 		{"name": "Mid-East Dig Front", "bounds": Rect2(Layout.MID_EAST_DIG_FRONT.x, 2160, Layout.MID_EAST_DIG_FRONT.y - Layout.MID_EAST_DIG_FRONT.x, 1440), "level": Layout.HEART_Y},
 		{"name": "Lower worker terraces", "bounds": Rect2(wh_l, Layout.WEST_LW_UPPER_Y - 160.0, wh_w, band_h), "level": Layout.WEST_LW_UPPER_Y},
 		{"name": "Lower-East services", "bounds": Rect2(pit_r, 3600, 2080, 1040), "level": Layout.LOWER_WORK_Y},
-		{"name": "Bottom-West Dig Front", "bounds": Rect2(Layout.HIGH_WEST_DIG_LEFT, Layout.BOTTOM_WEST_UPPER_Y - 160.0, Layout.HIGH_WEST_DIG_RIGHT - Layout.HIGH_WEST_DIG_LEFT + wh_w, band_h), "level": Layout.BOTTOM_WEST_Y},
+		{"name": "Bottom-West Dig Front", "bounds": Rect2(Layout.HIGH_WEST_DIG_LEFT, Layout.BOTTOM_WEST_UPPER_Y - 160.0, Layout.HIGH_WEST_DIG_RIGHT - Layout.HIGH_WEST_DIG_LEFT + wh_w, band_h), "level": Layout.BOTTOM_WEST_UPPER_Y},
 		{"name": "Cistern", "bounds": Rect2(pit_r, 4640, 4640, 1440), "level": Layout.CISTERN_Y},
 		{"name": "Seep / service threshold", "bounds": Rect2(pit_r, 6080, 2080, 640), "level": Layout.SEEP_Y},
 	]
@@ -57,9 +57,7 @@ static func district_guides() -> Array[Dictionary]:
 static func transport_guides() -> Array[Dictionary]:
 	return [
 		{"name": "West stack ladder", "x": Layout.LADDER_WEST_OPEN_X, "label_y": 600.0, "stops": Layout.west_stack_level_ys()},
-		{"name": "West civic / Ashram to Wick", "x": Layout.LEFT_LIFT_OPEN_X, "label_y": 800.0, "stops": [Layout.WEST_ASHRAM_UPPER_Y, Layout.WICK_Y]},
 		{"name": "East upper / Ashram to Cistern", "x": Layout.LADDER_EAST_OPEN_X, "label_y": 800.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.GLOW_SUB_Y, Layout.HEART_Y, Layout.CISTERN_Y]},
-		{"name": "Cistern freight / Low to Mid", "x": Layout.FREIGHT_LIFT_OPEN_X, "label_y": 3080.0, "stops": [Layout.HEART_Y, Layout.LOWER_WORK_Y, Layout.CISTERN_Y]},
 	]
 
 

@@ -50,20 +50,17 @@ func _paint_playable_expansion() -> void:
 
 
 func _clear_shaft_openings() -> void:
-	## West ladder pierces every stack deck.
+	## West ladder pierces every stack deck except Bottom-West lower (solid landing).
+	## Secondary lift shafts are sealed.
 	var ladder := Vector2(HollowLayout.LADDER_WEST_OPEN_X, HollowLayout.ladder_west_open_end())
 	for level_y in HollowLayout.west_stack_level_ys():
+		if absf(level_y - HollowLayout.BOTTOM_WEST_LOWER_Y) < 0.5:
+			continue
 		var row := int(round(level_y / float(TILE_SIZE)))
 		var x0 := int(round(ladder.x / float(TILE_SIZE)))
 		var x1 := int(round(ladder.y / float(TILE_SIZE)))
 		for x in range(x0, x1):
 			erase_cell(Vector2i(x, row))
-		# Left civic lift: Ashram ↔ Wick only.
-		if level_y >= HollowLayout.WEST_ASHRAM_UPPER_Y - 0.5 and level_y <= HollowLayout.WICK_Y + 0.5:
-			var lx0 := int(round(HollowLayout.LEFT_LIFT_OPEN_X / float(TILE_SIZE)))
-			var lx1 := int(round(HollowLayout.left_lift_open_end() / float(TILE_SIZE)))
-			for x in range(lx0, lx1):
-				erase_cell(Vector2i(x, row))
 
 
 func _build_tileset() -> TileSet:

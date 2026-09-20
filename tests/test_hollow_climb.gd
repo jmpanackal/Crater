@@ -14,7 +14,6 @@ func _run() -> void:
 
 	var player: CharacterBody2D = scene.get_node_or_null("Player") as CharacterBody2D
 	var ladder: Area2D = scene.get_node_or_null("Hollow/LadderWestStack") as Area2D
-	var chamber: Area2D = scene.get_node_or_null("Hollow/LadderChamber") as Area2D
 	if player == null or ladder == null:
 		push_error("FAIL Player / LadderWestStack missing")
 		quit(1)
@@ -24,8 +23,8 @@ func _run() -> void:
 		push_error("FAIL West stack hint missing W/S climb prompt")
 		quit(1)
 		return
-	if chamber != null and str(chamber.get("hint_text")).to_lower().find("w/s") < 0:
-		push_error("FAIL Chamber ladder hint missing W/S climb prompt")
+	if scene.get_node_or_null("Hollow/LadderChamber") != null:
+		push_error("FAIL LadderChamber leftover must be removed")
 		quit(1)
 		return
 	if int(ladder.get("upper_land_side")) >= 0:

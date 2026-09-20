@@ -177,17 +177,18 @@ const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, WEST_LW
 const HIGH_WEST_DIG_LEFT := -5680.0
 const HIGH_WEST_DIG_RIGHT := WEST_HOLLOW_LEFT
 const GALLERY_LEFT := HIGH_WEST_DIG_LEFT
+## Legacy chamber ladder / alcove removed — Bottom-West dig fronts are full-width decks.
 const LADDER_CHAMBER_OPEN_X := GALLERY_LEFT
 const LADDER_CHAMBER_X := LADDER_CHAMBER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
 const CHAMBER_ALCOVE_Y := BOTTOM_WEST_LOWER_Y
-const CHAMBER_ALCOVE := Vector4(GALLERY_LEFT, -5200.0, CHAMBER_ALCOVE_Y, FLOOR_THICKNESS)
 const BOTTOM_WEST_THRESHOLD_LEFT := -4400.0
 const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, WEST_HOLLOW_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
 const LOWER_LIFT_LANDING := Vector4(-2320.0, -2160.0, WEST_LW_LOWER_Y, FLOOR_THICKNESS)
 const APPROACH_LANDING1_Y := WEST_LW_LOWER_Y
 const APPROACH_LANDING2_Y := BOTTOM_WEST_UPPER_Y
 const APPROACH_LANDING2 := Vector4(-2800.0, -2640.0, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
-const GALLERY_FLOOR := Vector4(LADDER_CHAMBER_OPEN_X + LADDER_OPENING, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+## Full dig-front span on Bottom-West upper (no chamber-shaft notch).
+const GALLERY_FLOOR := Vector4(HIGH_WEST_DIG_LEFT, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
 ## Compatibility alias for minimap / older call sites (Wickwork west span).
 const WICK_TERRACE := Vector4(WEST_HOLLOW_LEFT, -1680.0, WICK_Y, FLOOR_THICKNESS)
 
@@ -195,8 +196,11 @@ const WICK_TERRACE := Vector4(WEST_HOLLOW_LEFT, -1680.0, WICK_Y, FLOOR_THICKNESS
 const LADDER_EAST_OPEN_X := 6720.0
 const LADDER_EAST_X := LADDER_EAST_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
 const LADDER_EAST_SHAFT_H := CISTERN_Y - UPPER_RES_Y
-const MID_EAST_LANDING_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, HEART_Y, FLOOR_THICKNESS)
-const MID_EAST_LANDING_EAST := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, LADDER_EAST_OPEN_X, HEART_Y, FLOOR_THICKNESS)
+## Continuous east decks — freight lift shaft gaps sealed (lifts stripped for clean base).
+const MID_EAST_LANDING := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, HEART_Y, FLOOR_THICKNESS)
+## Legacy aliases (pre-freight-gap merge).
+const MID_EAST_LANDING_WEST := MID_EAST_LANDING
+const MID_EAST_LANDING_EAST := MID_EAST_LANDING
 const MID_EAST_APPROACH := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 8320.0, HEART_Y, FLOOR_THICKNESS)
 const MID_EAST_DIG_FRONT := Vector4(MID_EAST_APPROACH.y, 11840.0, HEART_Y, FLOOR_THICKNESS)
 const ASHRAM_EAST_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, UPPER_RES_Y, FLOOR_THICKNESS)
@@ -205,14 +209,15 @@ const GLOWBEDS_EAST_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, FARMS_Y, FLOO
 const GLOWBEDS_EAST_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, FARMS_Y, FLOOR_THICKNESS)
 const GLOW_HANG_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, GLOW_SUB_Y, FLOOR_THICKNESS)
 const GLOW_HANG_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, GLOW_SUB_Y, FLOOR_THICKNESS)
-const LOWER_EAST_WEST_A := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, LOWER_WORK_Y, FLOOR_THICKNESS)
-const LOWER_EAST_WEST_B := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, LADDER_EAST_OPEN_X, LOWER_WORK_Y, FLOOR_THICKNESS)
+const LOWER_EAST_WEST := Vector4(PIT_RIGHT, LADDER_EAST_OPEN_X, LOWER_WORK_Y, FLOOR_THICKNESS)
+const LOWER_EAST_WEST_A := LOWER_EAST_WEST
+const LOWER_EAST_WEST_B := LOWER_EAST_WEST
 const LOWER_EAST_EAST := Vector4(LADDER_EAST_OPEN_X + LADDER_OPENING, 7680.0, LOWER_WORK_Y, FLOOR_THICKNESS)
-const CISTERN_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, CISTERN_Y, FLOOR_THICKNESS)
-const CISTERN_APPROACH := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, 7680.0, CISTERN_Y, FLOOR_THICKNESS)
+const CISTERN_WEST := Vector4(PIT_RIGHT, 7680.0, CISTERN_Y, FLOOR_THICKNESS)
+const CISTERN_APPROACH := CISTERN_WEST
 const CISTERN_CHAMBER := Vector4(7680.0, 9600.0, CISTERN_Y, FLOOR_THICKNESS)
-const SEEP_WEST := Vector4(PIT_RIGHT, FREIGHT_LIFT_X, SEEP_Y, FLOOR_THICKNESS)
-const SEEP_APPROACH := Vector4(FREIGHT_LIFT_X + LIFT_WIDTH, 7040.0, SEEP_Y, FLOOR_THICKNESS)
+const SEEP_WEST := Vector4(PIT_RIGHT, 7040.0, SEEP_Y, FLOOR_THICKNESS)
+const SEEP_APPROACH := SEEP_WEST
 
 
 ## Ordered west deck tops (Ashram upper → Bottom-West lower).
@@ -234,15 +239,11 @@ static func west_stack_level_ys() -> Array[float]:
 
 
 ## Split a west span around openings that pierce this deck.
-static func _west_gapped_spans(x0: float, x1: float, y: float) -> Array[Vector4]:
+static func _west_gapped_spans(x0: float, x1: float, _y: float) -> Array[Vector4]:
 	var openings: Array[Vector2] = [
 		Vector2(LADDER_WEST_OPEN_X, LADDER_WEST_OPEN_X + LADDER_OPENING),
 	]
-	# Left civic lift travels Ashram ↔ Wick — gap every deck in that range.
-	# Heart hoist is layout-reserved but not instanced in main.tscn yet, so do
-	# not punch an unbridged hole through Wickwork / Home Court.
-	if y >= WEST_ASHRAM_UPPER_Y - 0.5 and y <= WICK_Y + 0.5:
-		openings.append(Vector2(LEFT_LIFT_OPEN_X, LEFT_LIFT_OPEN_X + LIFT_OPENING))
+	# Left civic / Heart hoist shafts are not instanced — do not punch holes.
 	var spans: Array[Vector2] = [Vector2(x0, x1)]
 	for opening in openings:
 		var next_spans: Array[Vector2] = []
@@ -258,7 +259,7 @@ static func _west_gapped_spans(x0: float, x1: float, y: float) -> Array[Vector4]
 	var rects: Array[Vector4] = []
 	for span in spans:
 		if span.y - span.x >= float(TILE):
-			rects.append(Vector4(span.x, span.y, y, FLOOR_THICKNESS))
+			rects.append(Vector4(span.x, span.y, _y, FLOOR_THICKNESS))
 	return rects
 
 
@@ -278,10 +279,11 @@ static func west_stack_deck_rects() -> Array[Vector4]:
 	]:
 		rects.append_array(_west_gapped_spans(WEST_HOLLOW_LEFT, WEST_HOLLOW_RIGHT, y))
 	# Dig fronts: full dig envelope → Mouth lip (openings into diggable rock).
-	for y in [WEST_HIGH_UPPER_Y, WEST_HIGH_LOWER_Y, BOTTOM_WEST_UPPER_Y, BOTTOM_WEST_LOWER_Y]:
+	# Bottom-West lower is the west shaft landing — solid under LadderWestStack
+	# (matches east Cistern solid under LadderEastStack).
+	for y in [WEST_HIGH_UPPER_Y, WEST_HIGH_LOWER_Y, BOTTOM_WEST_UPPER_Y]:
 		rects.append_array(_west_gapped_spans(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, y))
-	# Collapsed side chamber alcove off Bottom-West lower.
-	rects.append(CHAMBER_ALCOVE)
+	rects.append(Vector4(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, BOTTOM_WEST_LOWER_Y, FLOOR_THICKNESS))
 	return rects
 
 
@@ -296,11 +298,11 @@ static func opening_route_deck_rects() -> Array[Vector4]:
 		APPROACH_LANDING2,
 		BOTTOM_WEST_THRESHOLD,
 		GALLERY_FLOOR,
-		CHAMBER_ALCOVE,
 	]
 	# Ensure dig-front / LW lower presence even if named pads miss a sample.
 	rects.append_array(_west_gapped_spans(WEST_HOLLOW_LEFT, WEST_HOLLOW_RIGHT, WEST_LW_LOWER_Y))
-	rects.append_array(_west_gapped_spans(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, BOTTOM_WEST_LOWER_Y))
+	# Solid Bottom-West lower (no shaft gap) — west stack landing deck.
+	rects.append(Vector4(HIGH_WEST_DIG_LEFT, WEST_HOLLOW_RIGHT, BOTTOM_WEST_LOWER_Y, FLOOR_THICKNESS))
 	return rects
 
 
@@ -314,8 +316,7 @@ static func expansion_deck_rects() -> Array[Vector4]:
 	var decks: Array[Vector4] = []
 	decks.append_array(west_stack_deck_rects())
 	decks.append_array([
-		MID_EAST_LANDING_WEST,
-		MID_EAST_LANDING_EAST,
+		MID_EAST_LANDING,
 		MID_EAST_APPROACH,
 		MID_EAST_DIG_FRONT,
 		ASHRAM_EAST_WEST,
@@ -324,14 +325,11 @@ static func expansion_deck_rects() -> Array[Vector4]:
 		GLOWBEDS_EAST_EAST,
 		GLOW_HANG_WEST,
 		GLOW_HANG_EAST,
-		LOWER_EAST_WEST_A,
-		LOWER_EAST_WEST_B,
+		LOWER_EAST_WEST,
 		LOWER_EAST_EAST,
 		CISTERN_WEST,
-		CISTERN_APPROACH,
 		CISTERN_CHAMBER,
 		SEEP_WEST,
-		SEEP_APPROACH,
 	])
 	decks.append_array(heart_deck_rects())
 	return decks

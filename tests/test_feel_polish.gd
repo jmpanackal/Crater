@@ -224,13 +224,17 @@ func _run() -> void:
 		return
 	print("PASS help text mentions climb")
 
-	# Dig approach threshold + hitstop helpers (smoke).
+	# Dig approach is a clean greybox threshold (no prop / label leftovers).
 	var approach: Node = scene.get_node_or_null("Approach")
 	if approach == null or not approach.has_method("entry_reads_as_threshold") or not approach.entry_reads_as_threshold():
-		push_error("FAIL dig approach threshold")
+		push_error("FAIL dig approach threshold not clean")
 		quit(1)
 		return
-	print("PASS dig approach threshold")
+	if scene.get_node_or_null("DigSiteLabel") != null:
+		push_error("FAIL DigSiteLabel leftover must be removed")
+		quit(1)
+		return
+	print("PASS dig approach clean (no Side galleries props/labels)")
 
 	FeelFx.reset_debug()
 	var firmament_h := FeelFx.dig_hitstop_ms(true, false)

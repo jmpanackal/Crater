@@ -63,53 +63,105 @@ func map_content_fill_ratio() -> float:
 
 
 static func orientation_markers() -> Array[Dictionary]:
-	## Sparse placards for greybox orientation — kept off the Mouth void band.
-	return [
-		{"name": "Home Court", "pos": HollowLayout.player_spawn_point() + Vector2(-24.0, -8.0)},
+	## Sparse placards for greybox orientation — each carries the section
+	## bounds the label must be centered in (matches Macro district footprints
+	## so labels sit in the boxes the player sees, not tiny named pads).
+	var band := HollowLayout.WEST_LEVEL_GAP
+	var wh_l := HollowLayout.WEST_HOLLOW_LEFT
+	var wh_w := HollowLayout.WEST_HOLLOW_RIGHT - HollowLayout.WEST_HOLLOW_LEFT
+	var mouth_w := HollowLayout.PIT_RIGHT - HollowLayout.PIT_LEFT
+	var west_dig_w := (
+		HollowLayout.HIGH_WEST_DIG_RIGHT - HollowLayout.HIGH_WEST_DIG_LEFT + wh_w
+	)
+	## Lower-worker band: Dispatch owns the west half, Home Court the east half
+	## (same vertical section the minimap outlines as Lower worker terraces).
+	var lw_y := HollowLayout.WEST_LW_UPPER_Y - 160.0
+	var lw_h := band * 2.0
+	var lw_mid_x := wh_l + wh_w * 0.5
+	var markers: Array[Dictionary] = [
+		{
+			"name": "Home Court",
+			"bounds": Rect2(lw_mid_x, lw_y, wh_w * 0.5, lw_h),
+		},
 		{
 			"name": "Dispatch",
-			"pos": Vector2(
-				(HollowLayout.WEST_DISPATCH_YARD.x + HollowLayout.WEST_DISPATCH_YARD.y) * 0.5,
-				HollowLayout.WEST_LW_UPPER_Y - 28.0
-			),
+			"bounds": Rect2(wh_l, lw_y, wh_w * 0.5, lw_h),
 		},
 		{
 			"name": "Mouth",
-			"pos": Vector2(
-				(HollowLayout.PIT_LEFT + HollowLayout.PIT_RIGHT) * 0.5,
-				HollowLayout.WEST_LW_UPPER_Y + 96.0
+			"bounds": Rect2(
+				HollowLayout.PIT_LEFT,
+				HollowLayout.WEST_LW_UPPER_Y - band * 0.25,
+				mouth_w,
+				band * 0.75
 			),
 		},
 		{
 			"name": "Mid Heart",
-			"pos": Vector2(HollowLayout.HEART_MID_X, HollowLayout.HEART_Y - 28.0),
+			"bounds": Rect2(
+				HollowLayout.PIT_LEFT,
+				HollowLayout.HEART_Y - 200.0,
+				mouth_w,
+				400.0
+			),
 		},
 		{
 			"name": "Wickwork",
-			"pos": Vector2(-2000.0, HollowLayout.WICK_Y - 16.0),
+			"bounds": Rect2(wh_l, HollowLayout.WICK_Y - 160.0, wh_w, band * 2.0),
 		},
 		{
 			"name": "Dig Front",
-			"pos": Vector2(
-				(HollowLayout.MID_EAST_DIG_FRONT.x + HollowLayout.MID_EAST_DIG_FRONT.y) * 0.5,
-				HollowLayout.HEART_Y - 16.0
+			"bounds": Rect2(
+				HollowLayout.MID_EAST_DIG_FRONT.x,
+				2160.0,
+				HollowLayout.MID_EAST_DIG_FRONT.y - HollowLayout.MID_EAST_DIG_FRONT.x,
+				1440.0
 			),
 		},
 		{
 			"name": "West Dig",
-			"pos": Vector2(
-				(HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.HIGH_WEST_DIG_RIGHT) * 0.5,
-				HollowLayout.WEST_HIGH_UPPER_Y - 16.0
+			"bounds": Rect2(
+				HollowLayout.HIGH_WEST_DIG_LEFT,
+				HollowLayout.WEST_HIGH_UPPER_Y - 160.0,
+				west_dig_w,
+				band * 2.0
 			),
 		},
 		{
 			"name": "Cistern",
-			"pos": Vector2(
-				(HollowLayout.CISTERN_CHAMBER.x + HollowLayout.CISTERN_CHAMBER.y) * 0.5,
-				HollowLayout.CISTERN_Y - 16.0
+			"bounds": Rect2(
+				HollowLayout.PIT_RIGHT,
+				4640.0,
+				4640.0,
+				1440.0
 			),
 		},
 	]
+	for marker in markers:
+		var b: Rect2 = marker.bounds
+		marker["pos"] = b.get_center()
+	return markers
+
+
+## Map-space rect where an orientation label is drawn (centered in section bounds).
+func orientation_label_rect(marker: Dictionary) -> Rect2:
+	var font := ThemeDB.fallback_font
+	var text := str(marker.get("name", ""))
+	var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE)
+	var bounds: Rect2 = marker.get("bounds", Rect2())
+	if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
+		var at: Vector2 = world_to_map(marker.get("pos", Vector2.ZERO))
+		return Rect2(at, text_size)
+	var a := world_to_map(bounds.position)
+	var b := world_to_map(bounds.end)
+	var section := Rect2(
+		Vector2(minf(a.x, b.x), minf(a.y, b.y)),
+		Vector2(absf(b.x - a.x), absf(b.y - a.y))
+	)
+	## True center — do not clamp into the section. Some footprints (Home /
+	## Dispatch halves) are narrower than the glyph on the map; pinning would
+	## right-shift the label and recreate the floating/edge-clipped look.
+	return Rect2(section.get_center() - text_size * 0.5, text_size)
 
 
 func world_to_map(world: Vector2) -> Vector2:
@@ -290,28 +342,39 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var placed_labels: Array[Rect2] = []
 	for marker in orientation_markers():
+		var bounds: Rect2 = marker.get("bounds", Rect2())
 		var at: Vector2 = world_to_map(marker.pos)
-		if not area.has_point(at):
+		if bounds.size.x > 0.0 and bounds.size.y > 0.0:
+			var ba := world_to_map(bounds.position)
+			var bb := world_to_map(bounds.end)
+			var section := Rect2(
+				Vector2(minf(ba.x, bb.x), minf(ba.y, bb.y)),
+				Vector2(absf(bb.x - ba.x), absf(bb.y - ba.y))
+			)
+			if not section.intersects(area):
+				continue
+			at = section.get_center()
+		elif not area.has_point(at):
 			continue
 		draw_circle(at, 1.5, Color(0.62, 0.82, 0.78, 0.85))
 		var text := str(marker.name)
 		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE)
-		## Default label sits above-right of its dot; flip to end left of the
-		## dot when it would otherwise run off the panel's right edge.
-		var label_x := at.x + 3.0
-		if label_x + text_size.x > area.end.x:
-			label_x = at.x - 3.0 - text_size.x
-		label_x = clampf(label_x, area.position.x, area.end.x - text_size.x)
-		var label_top := at.y - 2.0 - text_size.y
-		var label_rect := Rect2(label_x, label_top, text_size.x, text_size.y)
-		## Nearby markers (e.g. Home Court / Dispatch) fall within a couple of
-		## pixels of each other at this scale — stack labels downward instead
-		## of letting their text overlap into an unreadable blob.
+		var label_rect := orientation_label_rect(marker)
+		## Nearby markers can still collide at this scale — nudge down but keep
+		## the label's horizontal center locked to the section.
+		var section_cx := label_rect.get_center().x
 		var guard := 0
 		while guard < 8 and _overlaps_any(label_rect, placed_labels):
 			label_rect.position.y += text_size.y + 1.0
 			guard += 1
 		label_rect.position.y = clampf(label_rect.position.y, area.position.y, area.end.y - label_rect.size.y)
+		## Panel clamp may shift X; restore section-centered X afterward when
+		## the glyph still fits inside the panel.
+		var desired_x := section_cx - label_rect.size.x * 0.5
+		if desired_x >= area.position.x and desired_x + label_rect.size.x <= area.end.x:
+			label_rect.position.x = desired_x
+		else:
+			label_rect.position.x = clampf(desired_x, area.position.x, area.end.x - label_rect.size.x)
 		placed_labels.append(label_rect)
 		draw_string(
 			font,
