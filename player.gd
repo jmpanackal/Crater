@@ -213,6 +213,9 @@ func _physics_process(delta: float) -> void:
 			collision_mask = 0
 
 	_update_coyote_and_buffer(delta)
+	_tick_drop_through(delta)
+	if _down_just_pressed() and is_on_floor() and not _climbing and not in_zone:
+		_try_drop_through()
 	var jumped := _try_consume_jump(in_zone)
 
 	if _climbing and not jumped:
@@ -269,6 +272,49 @@ func _physics_process(delta: float) -> void:
 		var interaction := get_interaction()
 		if interaction != null:
 			interaction.try_interact(self)
+
+
+## Down on a one-way deck steps through it, but only onto something solid close beneath
+## (a stair tread, a lower deck within DROP_PROBE) — never into open air or the Mouth.
+const DROP_PROBE := 112.0
+const DROP_TIME := 0.25
+const DECK_GROUP := &"hollow_decks"
+var _drop_timer := 0.0
+var _prev_down_key := false
+
+
+func _down_just_pressed() -> bool:
+	var key := Input.is_physical_key_pressed(KEY_S)
+	var edge := key and not _prev_down_key
+	_prev_down_key = key
+	return edge or Input.is_action_just_pressed("ui_down")
+
+
+func _set_decks_enabled(enabled: bool) -> void:
+	for layer in get_tree().get_nodes_in_group(DECK_GROUP):
+		(layer as TileMapLayer).collision_enabled = enabled
+
+
+func _try_drop_through() -> void:
+	var layers := get_tree().get_nodes_in_group(DECK_GROUP)
+	if layers.is_empty():
+		return
+	var terrain: Node = layers[0].get_parent()
+	var feet := Vector2(global_position.x + BODY_HEIGHT * 0.5, global_position.y + BODY_HEIGHT)
+	if not terrain.has_method("has_support_below") or not terrain.has_support_below(feet, BODY_HEIGHT * 0.5 - 2.0, DROP_PROBE):
+		return
+	_set_decks_enabled(false)
+	_drop_timer = DROP_TIME
+	global_position.y += 2.0
+	velocity.y = maxf(velocity.y, 60.0)
+
+
+func _tick_drop_through(delta: float) -> void:
+	if _drop_timer <= 0.0:
+		return
+	_drop_timer -= delta
+	if _drop_timer <= 0.0:
+		_set_decks_enabled(true)
 
 
 func _update_coyote_and_buffer(delta: float) -> void:

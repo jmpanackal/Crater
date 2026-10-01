@@ -6,8 +6,16 @@
 script = ExtResource("1")
 zone_id = &"mid_heart"
 display_name = "Mid Heart"
-world_origin = Vector2(3200, 2880)
+world_origin = Vector2(3200, 2560)
 seams = [{
+"edge": "south",
+"neighbor": "wickwork",
+"position": 3520
+}, {
+"edge": "south",
+"neighbor": "mid_east_service",
+"position": 3520
+}, {
 "edge": "west",
 "neighbor": "wickwork",
 "position": 1440
@@ -17,5 +25,5 @@ seams = [{
 "position": 4960
 }]
 enclosed = false
-world_rect = Rect2(1440, 2720, 3520, 320)
+world_rect = Rect2(1440, 2080, 3520, 1280)
 restricted = false

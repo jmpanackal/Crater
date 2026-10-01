@@ -20,6 +20,7 @@ Durable lessons for Act 1 production with Cursor agents, Godot MCP, and PixelLab
 | **USER vs AI decision tags** | Log design choices with provenance so agents don’t quote their own suggestions as your intent. Prefer updating [`game-decisions.md`](game-decisions.md) / story inbox with clear USER locks. |
 | **Editable sources over opaque blobs** | Prefer locked refs + PixelLab briefs + sprites you can re-gen/edit over one-shot meshes you can’t fix. Env-first, one reusable settler/tileset. |
 | **Polish out “AI-ness” up close** | Hollow must *live*: doors that go somewhere, NPCs that stand on floors, districts that read as planned — not trailer-distance only. |
+| **Maps are data + a linter** | Layout lives in `hollow_layout.gd`; `tests/test_hollow_map_lint.gd` fails on stubs, orphans, buried decks, off-grid levels. Follow [`hollow-map-spec.md`](hollow-map-spec.md) section 5 — never hand-place geometry. |
 | **UI late** | Mechanics and readable copy first; fancy HUD chrome after the loop is real. |
 
 ---

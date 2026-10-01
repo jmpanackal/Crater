@@ -1,3 +1,5 @@
+> **Superseded for coordinates (2026-10-01):** see [`hollow-map-spec.md`](hollow-map-spec.md). The east stack was re-gridded to consecutive 640px levels and the west dig flank carve was fixed; numbers below are history.
+
 # Hollow macro planning pass — 2026-09-18
 
 User direction: establish the whole map's scale, district positions and basic

@@ -8,14 +8,14 @@ zone_id = &"first_expansion_gallery"
 display_name = "First Expansion Gallery"
 world_origin = Vector2(-5000, 6720)
 seams = [{
-"edge": "east",
-"neighbor": "bottom_west_threshold",
-"position": -4400
-}, {
 "edge": "south",
 "neighbor": "collapsed_side_chamber",
-"position": 6720
+"position": 7360
+}, {
+"edge": "east",
+"neighbor": "bottom_west_threshold",
+"position": -4640
 }]
 enclosed = true
-world_rect = Rect2(-5680, 6400, 1280, 640)
+world_rect = Rect2(-5760, 6240, 1120, 640)
 restricted = false

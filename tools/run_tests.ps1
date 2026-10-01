@@ -50,7 +50,8 @@ param(
 # every walk segment ~5x longer); everything else still gets $TimeoutSeconds.
 $PerTestTimeoutOverrides = @{
 	"test_home_court_navigation.gd" = 300
-	"test_west_stack_routing.gd" = 180
+	"test_hollow_traversal.gd" = 600
+	"test_hollow_map_lint.gd" = 120
 }
 
 # Deliberately NOT "Stop": Godot writes real SCRIPT ERROR / WARNING lines to

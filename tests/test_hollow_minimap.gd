@@ -73,11 +73,40 @@ func _run() -> void:
 	var names: PackedStringArray = PackedStringArray()
 	for entry in markers:
 		names.append(str(entry.get("name", "")))
-	for required in ["Home Court", "Dispatch", "Mouth", "Dig Front", "West Dig", "Cistern", "Mid Heart", "Wickwork"]:
+	for required in [
+		"Mouth",
+		"Home Court",
+		"Ashram",
+		"Ashram East",
+		"High-West Dig",
+		"Glowbeds",
+		"Wickwork",
+		"Mid Heart",
+		"Allotments",
+		"Dig Front",
+		"Lower-East",
+		"Bottom-West",
+		"Cistern",
+		"Seep",
+	]:
 		if not required in names:
 			push_error("FAIL missing orientation marker: %s" % required)
 			quit(1)
 			return
+	# Every labelled marker (except the Mouth) sits exactly on a zone footprint.
+	for entry in markers:
+		if str(entry.get("name", "")) == "Mouth":
+			continue
+		var on_footprint := false
+		for district in Macro.district_guides():
+			if entry.get("bounds", Rect2()) == district.bounds:
+				on_footprint = true
+				break
+		if not on_footprint:
+			push_error("FAIL orientation marker '%s' is not on a zone footprint" % entry.get("name", ""))
+			quit(1)
+			return
+	print("PASS every minimap district section is named")
 
 	# Mouth must read as open void on the minimap — not an opaque black plug.
 	if not minimap.has_method("mouth_void_color") or not minimap.has_method("district_draw_bounds"):
@@ -183,12 +212,26 @@ func _run() -> void:
 	for entry in markers:
 		var marker_name := str(entry.get("name", ""))
 		var pos: Vector2 = entry.pos
-		if marker_name in ["Home Court", "Dispatch", "Wickwork", "West Dig"]:
+		if marker_name in [
+			"Home Court",
+			"Wickwork",
+			"Ashram",
+			"High-West Dig",
+			"Allotments",
+			"Bottom-West",
+		]:
 			if pos.x >= HollowLayout.PIT_LEFT:
 				push_error("FAIL %s label must stay west of Mouth (x=%s)" % [marker_name, pos.x])
 				quit(1)
 				return
-		if marker_name in ["Dig Front", "Cistern"]:
+		if marker_name in [
+			"Dig Front",
+			"Cistern",
+			"Glowbeds",
+			"Ashram East",
+			"Lower-East",
+			"Seep",
+		]:
 			if pos.x < HollowLayout.PIT_RIGHT:
 				push_error("FAIL %s label sits in Mouth at x=%s" % [marker_name, pos.x])
 				quit(1)

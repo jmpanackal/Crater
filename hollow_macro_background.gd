@@ -2,10 +2,8 @@
 extends Node2D
 
 const Layout := preload("res://hollow_layout.gd")
-## Extended east so Mid-East Dig Front (to x=2368) fits with margin.
-## World-scale pass (2026-09-19): bounds and every district/transport literal
-## below are x5 their previous values — see hollow_layout.gd's header note.
-const WORLD_BOUNDS := Rect2(-6400, -1600, 20000, 10000)
+## Symmetric about the Mouth centre (x=3200): west flank edge -6400, east flank edge 12800.
+const WORLD_BOUNDS := Rect2(-6400, -1600, 19200, 10000)
 const MOUTH_BOUNDS := Rect2(Layout.PIT_LEFT, -640, Layout.PIT_RIGHT - Layout.PIT_LEFT, 9000)
 const GUIDE_COLOR := Color(0.57, 0.76, 0.72, 0.65)
 const FUTURE_COLOR := Color(0.77, 0.61, 0.38, 0.8)
@@ -24,41 +22,26 @@ var _guides_only := false
 		_sync_overlay()
 
 
+## Named places, straight from the map data (HollowMap.zones). One guide per zone.
 static func district_guides() -> Array[Dictionary]:
-	var pit_l := Layout.PIT_LEFT
-	var pit_r := Layout.PIT_RIGHT
-	var mouth_w := pit_r - pit_l
-	var wh_l := Layout.WEST_HOLLOW_LEFT
-	var wh_w := Layout.WEST_HOLLOW_RIGHT - Layout.WEST_HOLLOW_LEFT
-	var band_h := Layout.WEST_LEVEL_GAP * 2.0
-	return [
-		{"name": "Ashram Heights / west", "bounds": Rect2(wh_l, Layout.WEST_ASHRAM_UPPER_Y - 160.0, wh_w, band_h), "level": Layout.WEST_ASHRAM_UPPER_Y},
-		{"name": "Ashram Heights / east", "bounds": Rect2(pit_r, -640, 2080, 1040), "level": Layout.UPPER_RES_Y},
-		{"name": "High-West Dig Front", "bounds": Rect2(Layout.HIGH_WEST_DIG_LEFT, Layout.WEST_HIGH_UPPER_Y - 160.0, Layout.HIGH_WEST_DIG_RIGHT - Layout.HIGH_WEST_DIG_LEFT + wh_w, band_h), "level": Layout.WEST_HIGH_UPPER_Y},
-		{"name": "Glowbeds", "bounds": Rect2(pit_r, 400, 2080, 1440), "level": Layout.FARMS_Y},
-		{"name": "Wickwork", "bounds": Rect2(wh_l, Layout.WICK_Y - 160.0, wh_w, band_h), "level": Layout.WICK_Y},
-		{
-			"name": "Mid Heart / Mouth crossing",
-			"bounds": Rect2(pit_l, Layout.HEART_Y - 200.0, mouth_w, 400.0),
-			"level": Layout.HEART_Y,
-		},
-		{"name": "Mid allotments / homes", "bounds": Rect2(wh_l, Layout.MID_ALLOT_UPPER_Y - 160.0, wh_w, band_h), "level": Layout.MID_ALLOT_Y},
-		{"name": "Mid-East landing", "bounds": Rect2(pit_r, 1840, 2080, 1760), "level": Layout.HEART_Y},
-		{"name": "Mid-East approach", "bounds": Rect2(Layout.MID_EAST_APPROACH.x, 2160, Layout.MID_EAST_APPROACH.y - Layout.MID_EAST_APPROACH.x, 1440), "level": Layout.HEART_Y},
-		{"name": "Mid-East Dig Front", "bounds": Rect2(Layout.MID_EAST_DIG_FRONT.x, 2160, Layout.MID_EAST_DIG_FRONT.y - Layout.MID_EAST_DIG_FRONT.x, 1440), "level": Layout.HEART_Y},
-		{"name": "Lower worker terraces", "bounds": Rect2(wh_l, Layout.WEST_LW_UPPER_Y - 160.0, wh_w, band_h), "level": Layout.WEST_LW_UPPER_Y},
-		{"name": "Lower-East services", "bounds": Rect2(pit_r, 3600, 2080, 1040), "level": Layout.LOWER_WORK_Y},
-		{"name": "Bottom-West Dig Front", "bounds": Rect2(Layout.HIGH_WEST_DIG_LEFT, Layout.BOTTOM_WEST_UPPER_Y - 160.0, Layout.HIGH_WEST_DIG_RIGHT - Layout.HIGH_WEST_DIG_LEFT + wh_w, band_h), "level": Layout.BOTTOM_WEST_UPPER_Y},
-		{"name": "Cistern", "bounds": Rect2(pit_r, 4640, 4640, 1440), "level": Layout.CISTERN_Y},
-		{"name": "Seep / service threshold", "bounds": Rect2(pit_r, 6080, 2080, 640), "level": Layout.SEEP_Y},
-	]
+	var out: Array[Dictionary] = []
+	for z in HollowMap.zones():
+		if z.get("volume", false):
+			continue
+		var anchor: Vector2 = z["anchor"]
+		out.append({"id": z["id"], "name": z["display"], "bounds": z["rect"], "level": anchor.y})
+	return out
 
 
+## Lifts and ladders, as vertical guides: {"name", "x", "label_y", "stops"}.
 static func transport_guides() -> Array[Dictionary]:
-	return [
-		{"name": "West stack ladder", "x": Layout.LADDER_WEST_OPEN_X, "label_y": 600.0, "stops": Layout.west_stack_level_ys()},
-		{"name": "East upper / Ashram to Cistern", "x": Layout.LADDER_EAST_OPEN_X, "label_y": 800.0, "stops": [Layout.UPPER_RES_Y, Layout.FARMS_Y, Layout.GLOW_SUB_Y, Layout.HEART_Y, Layout.CISTERN_Y]},
-	]
+	var out: Array[Dictionary] = []
+	for lf in HollowMap.lifts():
+		var stops: Array = lf["stops"]
+		out.append({"name": "Presswater lift: %s" % str(lf["id"]), "x": float(lf["open_x"]), "label_y": float(stops[0]) - 40.0, "stops": stops})
+	for l in HollowMap.ladders():
+		out.append({"name": str(l["id"]), "x": float(l["open_x"]), "label_y": float(l["top_y"]) - 20.0, "stops": [l["top_y"], l["bottom_y"]], "ladder": true})
+	return out
 
 
 func _ready() -> void:
@@ -109,27 +92,19 @@ func _draw() -> void:
 		for level in stops:
 			draw_circle(Vector2(shaft_x, level), 6, FUTURE_COLOR, false, 2)
 		_label(Vector2(shaft_x + 10, transport.label_y), transport.name, 13, FUTURE_COLOR)
-	var return_route := PackedVector2Array([
-		Vector2(-560, Layout.WEST_LW_UPPER_Y),
-		Vector2(-1520, Layout.MID_ALLOT_Y),
-		Vector2(-560, Layout.WICK_Y),
-		Vector2(Layout.PIT_LEFT, Layout.WICK_Y),
-	])
-	for index in range(return_route.size() - 1):
-		draw_dashed_line(return_route[index], return_route[index + 1], FUTURE_COLOR, 2, 10)
-	_label(Vector2(-1760, Layout.MID_ALLOT_Y - 80.0), "West stack ladder / Mid Heart", 13, FUTURE_COLOR)
-	for reserve in [
-		Rect2(-4160, 1840, 1280, 1040),
-		Rect2(Layout.MID_EAST_APPROACH.x, 400, 1280, 1440),
-		Rect2(Layout.MID_EAST_APPROACH.x, 4640, 1280, 1440),
-	]:
-		_outline(reserve, FUTURE_COLOR)
-		_label(reserve.position + Vector2(12, 48), "Growth reserve", 15, FUTURE_COLOR)
-		_label(reserve.position + Vector2(12, 68), "footprint to refine", 12, FUTURE_COLOR)
+	for stair in HollowMap.stairs():
+		draw_line(Vector2(stair["foot_x"], stair["foot_y"]), Vector2(stair["top_x"], stair["top_y"]), FUTURE_COLOR, 2)
+	for reserve in HollowMap.reserves():
+		var rect: Rect2 = reserve["rect"]
+		_outline(rect, FUTURE_COLOR)
+		_label(rect.position + Vector2(12, 48), "Growth reserve", 15, FUTURE_COLOR)
+		_label(rect.position + Vector2(12, 68), str(reserve["district"]), 12, FUTURE_COLOR)
+	for gate in HollowMap.gates():
+		var run := HollowMap.run_by_id(gate["run"])
+		if not run.is_empty():
+			draw_line(Vector2(gate["x"], float(run["y"]) - 128.0), Vector2(gate["x"], run["y"]), Color(1.0, 0.35, 0.3, 0.9), 3)
 	_label(Vector2(Layout.HEART_MID_X - 80.0, 4400), "DEVIL'S MOUTH", 22, GUIDE_COLOR)
-	_label(Vector2(Layout.HEART_MID_X - 120.0, 4560), "OPEN VOID / MID HEART IS THE CROSSING", 12, GUIDE_COLOR)
-	_label(Vector2(-6160, 6000), "Solid opening-route tiles = currently playable", 17, GUIDE_COLOR)
-	_label(Vector2(-6160, 6160), "Home -> Dispatch -> Bottom-West -> return", 17, GUIDE_COLOR)
+	_label(Vector2(Layout.HEART_MID_X - 120.0, 4560), "OPEN VOID / MID HEART IS THE ONLY CROSSING", 12, GUIDE_COLOR)
 	## Physical reference markers — deliberately NOT scaled: still the real
 	## 32px player body and the real 256px (16-tile) span, so they stay true
 	## after the world-scale pass. Only their anchor position moves.

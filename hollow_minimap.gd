@@ -3,19 +3,32 @@ extends Control
 ## Drawn overview from MacroBackground extents + district guides; no second camera.
 
 const Macro := preload("res://hollow_macro_background.gd")
-const UiStyleRef := preload("res://ui_style.gd")
 const TOGGLE_ACTION := "toggle_minimap"
 
-const MAP_SIZE := Vector2(268, 156)
-const PAD := 6.0
+const MAP_SIZE := Vector2(440, 204)
+const PAD := 8.0
+## Strip above the map for the current place name.
+const HEADER_H := 16.0
 const LABEL_SIZE := 9
-## Tight pad around inhabited districts — not the full Macro WORLD_BOUNDS margins.
-## World-scale pass (2026-09-19): x5 — this is world-space padding, unlike
-## MAP_SIZE/PAD/LABEL_SIZE below which stay fixed screen-space UI sizing.
-const CONTENT_PAD := Vector2(240.0, 160.0)
+## World-space padding around the inhabited map.
+const CONTENT_PAD := Vector2(200.0, 120.0)
+
+const PANEL_BG := Color(0.04, 0.06, 0.07, 0.9)
+const PANEL_BORDER := Color(0.62, 0.42, 0.28, 0.7)
+const ROCK_FILL := Color(0.17, 0.14, 0.12, 0.95)
+const ZONE_LINE := Color(0.3, 0.42, 0.42, 0.35)
+const ZONE_HELD := Color(0.62, 0.36, 0.3, 0.45)
+const DECK_COLOR := Color(0.88, 0.64, 0.38, 0.95)
+const HEART_COLOR := Color(1.0, 0.8, 0.45, 1.0)
+const STAIR_COLOR := Color(0.95, 0.5, 0.22, 0.9)
+const LADDER_COLOR := Color(0.5, 0.82, 0.72, 0.9)
+const LIFT_COLOR := Color(0.38, 0.66, 1.0, 0.95)
+const GATE_CLOSED := Color(1.0, 0.32, 0.28, 0.95)
+const GATE_OPEN := Color(0.45, 0.75, 0.5, 0.6)
+const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.85)
 
 var _player: Node2D
-var _style: StyleBoxFlat
+var _panel: StyleBoxFlat
 
 
 func _ready() -> void:
@@ -23,8 +36,14 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = MAP_SIZE
 	size = MAP_SIZE
-	_style = UiStyleRef.quiet_panel_style()
-	modulate = Color(1.0, 1.0, 1.0, 0.78)
+	_panel = StyleBoxFlat.new()
+	_panel.bg_color = PANEL_BG
+	_panel.border_color = PANEL_BORDER
+	_panel.set_border_width_all(1)
+	_panel.set_corner_radius_all(4)
+	_panel.shadow_color = Color(0, 0, 0, 0.35)
+	_panel.shadow_size = 3
+	modulate = Color(1.0, 1.0, 1.0, 0.94)
 	visible = true
 	set_process(true)
 	_resolve_player()
@@ -62,81 +81,36 @@ func map_content_fill_ratio() -> float:
 	return (fitted.size.x * fitted.size.y) / (area.size.x * area.size.y)
 
 
+## Zones that get a name on the panel (the rest draw as quiet outlines). Short panel names.
+const PANEL_LABELS := {
+	&"ashram_west": "Ashram",
+	&"high_west_front": "High-West Dig",
+	&"wickwork": "Wickwork",
+	&"mid_allotments": "Allotments",
+	&"home_court": "Home Court",
+	&"bottom_west_threshold": "Bottom-West",
+	&"mid_heart": "Mid Heart",
+	&"ashram_east": "Ashram East",
+	&"glowbeds": "Glowbeds",
+	&"mid_east_dig_front": "Dig Front",
+	&"lower_east_services": "Lower-East",
+	&"cistern": "Cistern",
+	&"seep_threshold": "Seep",
+}
+
+
 static func orientation_markers() -> Array[Dictionary]:
-	## Sparse placards for greybox orientation — each carries the section
-	## bounds the label must be centered in (matches Macro district footprints
-	## so labels sit in the boxes the player sees, not tiny named pads).
-	var band := HollowLayout.WEST_LEVEL_GAP
-	var wh_l := HollowLayout.WEST_HOLLOW_LEFT
-	var wh_w := HollowLayout.WEST_HOLLOW_RIGHT - HollowLayout.WEST_HOLLOW_LEFT
+	## One centered label per labelled zone footprint, plus the Mouth.
 	var mouth_w := HollowLayout.PIT_RIGHT - HollowLayout.PIT_LEFT
-	var west_dig_w := (
-		HollowLayout.HIGH_WEST_DIG_RIGHT - HollowLayout.HIGH_WEST_DIG_LEFT + wh_w
-	)
-	## Lower-worker band: Dispatch owns the west half, Home Court the east half
-	## (same vertical section the minimap outlines as Lower worker terraces).
-	var lw_y := HollowLayout.WEST_LW_UPPER_Y - 160.0
-	var lw_h := band * 2.0
-	var lw_mid_x := wh_l + wh_w * 0.5
 	var markers: Array[Dictionary] = [
 		{
-			"name": "Home Court",
-			"bounds": Rect2(lw_mid_x, lw_y, wh_w * 0.5, lw_h),
-		},
-		{
-			"name": "Dispatch",
-			"bounds": Rect2(wh_l, lw_y, wh_w * 0.5, lw_h),
-		},
-		{
 			"name": "Mouth",
-			"bounds": Rect2(
-				HollowLayout.PIT_LEFT,
-				HollowLayout.WEST_LW_UPPER_Y - band * 0.25,
-				mouth_w,
-				band * 0.75
-			),
-		},
-		{
-			"name": "Mid Heart",
-			"bounds": Rect2(
-				HollowLayout.PIT_LEFT,
-				HollowLayout.HEART_Y - 200.0,
-				mouth_w,
-				400.0
-			),
-		},
-		{
-			"name": "Wickwork",
-			"bounds": Rect2(wh_l, HollowLayout.WICK_Y - 160.0, wh_w, band * 2.0),
-		},
-		{
-			"name": "Dig Front",
-			"bounds": Rect2(
-				HollowLayout.MID_EAST_DIG_FRONT.x,
-				2160.0,
-				HollowLayout.MID_EAST_DIG_FRONT.y - HollowLayout.MID_EAST_DIG_FRONT.x,
-				1440.0
-			),
-		},
-		{
-			"name": "West Dig",
-			"bounds": Rect2(
-				HollowLayout.HIGH_WEST_DIG_LEFT,
-				HollowLayout.WEST_HIGH_UPPER_Y - 160.0,
-				west_dig_w,
-				band * 2.0
-			),
-		},
-		{
-			"name": "Cistern",
-			"bounds": Rect2(
-				HollowLayout.PIT_RIGHT,
-				4640.0,
-				4640.0,
-				1440.0
-			),
+			"bounds": Rect2(HollowLayout.PIT_LEFT, HollowMap.lvl(7.0), mouth_w, HollowMap.LEVEL_GAP),
 		},
 	]
+	for district in Macro.district_guides():
+		if PANEL_LABELS.has(district.id):
+			markers.append({"name": PANEL_LABELS[district.id], "bounds": district.bounds})
 	for marker in markers:
 		var b: Rect2 = marker.bounds
 		marker["pos"] = b.get_center()
@@ -272,7 +246,7 @@ func _content_rect() -> Rect2:
 	var s := size
 	if s.x < 1.0 or s.y < 1.0:
 		s = custom_minimum_size
-	return Rect2(Vector2(PAD, PAD), s - Vector2(PAD * 2.0, PAD * 2.0))
+	return Rect2(Vector2(PAD, PAD + HEADER_H), s - Vector2(PAD * 2.0, PAD * 2.0 + HEADER_H))
 
 
 func _overlaps_any(candidate: Rect2, existing: Array[Rect2]) -> bool:
@@ -294,108 +268,144 @@ func _fitted_map_rect() -> Rect2:
 	return Rect2(origin, used)
 
 
+func _rect_to_map(r: Rect2) -> Rect2:
+	var a := world_to_map(r.position)
+	var b := world_to_map(r.end)
+	return Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)), Vector2(absf(b.x - a.x), absf(b.y - a.y)))
+
+
+func _line(a: Vector2, b: Vector2, color: Color, width: float, area: Rect2) -> void:
+	var ma := world_to_map(a)
+	var mb := world_to_map(b)
+	if not area.grow(2.0).has_point(ma) and not area.grow(2.0).has_point(mb):
+		return
+	draw_line(ma, mb, color, width, true)
+
+
+func _current_zone_name() -> String:
+	if _player == null or not is_instance_valid(_player):
+		return ""
+	var zones := get_tree().root.get_node_or_null("Zones")
+	if zones == null:
+		return ""
+	var zone_id := str(zones.get_zone_at(_player.global_position))
+	return str(zones.get_display_name(zone_id)) if zone_id != "" else ""
+
+
 func _draw() -> void:
 	var s := size
 	if s.x < 1.0 or s.y < 1.0:
 		s = custom_minimum_size
-	if _style:
-		draw_style_box(_style, Rect2(Vector2.ZERO, s))
+	draw_style_box(_panel, Rect2(Vector2.ZERO, s))
 	var area := _content_rect()
-	draw_rect(area, Color(0.06, 0.09, 0.1, 0.92))
-	# Mouth void — translucent band (open shaft), not an opaque plug / aqua stack.
-	var mouth_a := world_to_map(Macro.MOUTH_BOUNDS.position)
-	var mouth_b := world_to_map(Macro.MOUTH_BOUNDS.end)
-	var mouth := Rect2(
-		Vector2(minf(mouth_a.x, mouth_b.x), minf(mouth_a.y, mouth_b.y)),
-		Vector2(absf(mouth_b.x - mouth_a.x), absf(mouth_b.y - mouth_a.y))
-	)
-	draw_rect(mouth.intersection(area), mouth_void_color())
-	# Soft lip lines so the void edges stay readable without filling the shaft.
-	var lip := Color(0.45, 0.58, 0.55, 0.35)
+	var font := ThemeDB.fallback_font
+	var bounds := map_world_bounds()
+	draw_rect(area, Color(0.055, 0.075, 0.085, 1.0))
+
+	# Rock flanks: the two dig walls, so the two halves read as equals.
+	var rock_h := HollowLayout.BOTTOM_WEST_LOWER_Y + 480.0
+	for flank in [
+		Rect2(HollowLayout.HIGH_WEST_DIG_LEFT - 320.0, 0.0, HollowLayout.WEST_HOLLOW_LEFT - HollowLayout.HIGH_WEST_DIG_LEFT + 320.0, rock_h),
+		Rect2(HollowLayout.EAST_CIVIC_RIGHT, 0.0, HollowLayout.EAST_FLANK_RIGHT - HollowLayout.EAST_CIVIC_RIGHT + 320.0, rock_h),
+	]:
+		draw_rect(_rect_to_map(flank).intersection(area), ROCK_FILL)
+
+	# The Mouth: open void between the lips, never a plug.
+	var mouth := _rect_to_map(Macro.MOUTH_BOUNDS).intersection(area)
+	draw_rect(mouth, Color(0.01, 0.02, 0.03, 0.85))
+	var lip := Color(0.5, 0.62, 0.6, 0.4)
 	draw_line(Vector2(mouth.position.x, mouth.position.y), Vector2(mouth.position.x, mouth.end.y), lip, 1.0)
 	draw_line(Vector2(mouth.end.x, mouth.position.y), Vector2(mouth.end.x, mouth.end.y), lip, 1.0)
-	## Outline only — never solid aqua district fills on the minimap.
-	## Landmark districts (named on the panel) draw brighter; the rest recede
-	## to a quiet backdrop so the labeled footprints stay the clear signal.
-	var district_color := Color(0.28, 0.52, 0.5, 0.55)
-	var backdrop_color := Color(0.28, 0.52, 0.5, 0.28)
-	var mid_heart_color := Color(0.72, 0.62, 0.42, 0.85)
-	var dig_color := Color(0.55, 0.42, 0.32, 0.7)
+
+	# Level rows: faint, the player's row brighter.
+	var player_row := -1
+	if _player != null and is_instance_valid(_player):
+		player_row = int(roundf((_player.global_position.y + 32.0 - HollowMap.LEVEL_ORIGIN) / HollowMap.LEVEL_GAP))
+	for k in range(12):
+		var gy := HollowMap.lvl(float(k))
+		var on_row := k == player_row
+		_line(Vector2(bounds.position.x, gy), Vector2(bounds.end.x, gy), Color(0.4, 0.55, 0.55, 0.28 if on_row else 0.08), 1.0, area)
+
+	# Zones: outlines only; places held out at the start read warm, never solid fills.
+	var held_zones := _held_zone_ids()
 	for district in Macro.district_guides():
-		var bounds: Rect2 = district_draw_bounds(district.bounds)
-		if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
+		var drawn := district_draw_bounds(district.bounds)
+		if drawn.size.x <= 0.0 or drawn.size.y <= 0.0:
 			continue
-		var a := world_to_map(bounds.position)
-		var b := world_to_map(bounds.end)
-		var r := Rect2(
-			Vector2(minf(a.x, b.x), minf(a.y, b.y)),
-			Vector2(absf(b.x - a.x), absf(b.y - a.y))
-		)
-		var name := str(district.name)
-		var is_mid_heart := name.begins_with("Mid Heart")
-		var is_dig := name.contains("Dig Front")
-		var is_landmark := is_mid_heart or is_dig or name.begins_with("Wickwork") or name.begins_with("Cistern")
-		var outline := mid_heart_color if is_mid_heart else (dig_color if is_dig else (district_color if is_landmark else backdrop_color))
-		var width := 2.0 if is_mid_heart or is_dig else 1.0
-		draw_rect(r.intersection(area), outline, false, width)
-	var label_color := Color(0.72, 0.78, 0.76, 0.72)
-	var font := ThemeDB.fallback_font
-	var placed_labels: Array[Rect2] = []
+		var r := _rect_to_map(drawn).intersection(area)
+		draw_rect(r, ZONE_HELD if held_zones.has(district.id) else ZONE_LINE, false, 1.0)
+
+	# The map itself: decks, stairs, ladders, lifts, gates.
+	for piece in HollowMap.deck_pieces():
+		var heart: bool = HollowMap.run_by_id(piece["run"])["zone"] == &"mid_heart"
+		_line(Vector2(piece["x0"], piece["y"]), Vector2(piece["x1"], piece["y"]), HEART_COLOR if heart else DECK_COLOR, 2.0 if heart else 1.6, area)
+	for stair in HollowMap.stairs():
+		_line(Vector2(stair["foot_x"], stair["foot_y"]), Vector2(stair["top_x"], stair["top_y"]), STAIR_COLOR, 1.4, area)
+	for ladder in HollowMap.ladders():
+		var lx: float = float(ladder["open_x"]) + 32.0
+		_line(Vector2(lx, ladder["top_y"]), Vector2(lx, ladder["bottom_y"]), LADDER_COLOR, 1.2, area)
+	for lift in HollowMap.lifts():
+		var stops: Array = lift["stops"]
+		var cx: float = float(lift["open_x"]) + 32.0
+		_line(Vector2(cx, stops[0]), Vector2(cx, stops[stops.size() - 1]), LIFT_COLOR, 2.4, area)
+		for stop_y in stops:
+			var sp := world_to_map(Vector2(cx, stop_y))
+			if area.has_point(sp):
+				draw_circle(sp, 1.8, LIFT_COLOR)
+	var access := get_tree().root.get_node_or_null("Access")
+	for gate in HollowMap.gates():
+		var run := HollowMap.run_by_id(gate["run"])
+		if run.is_empty():
+			continue
+		var open: bool = access != null and bool(access.is_open(gate["id"]))
+		var gp := world_to_map(Vector2(gate["x"], run["y"]))
+		if area.has_point(gp):
+			draw_line(gp + Vector2(0, -4), gp + Vector2(0, 1), GATE_OPEN if open else GATE_CLOSED, 2.0)
+
+	# Labels: soft shadow, nudged apart, centred on their zone footprint.
+	var placed: Array[Rect2] = []
 	for marker in orientation_markers():
-		var bounds: Rect2 = marker.get("bounds", Rect2())
-		var at: Vector2 = world_to_map(marker.pos)
-		if bounds.size.x > 0.0 and bounds.size.y > 0.0:
-			var ba := world_to_map(bounds.position)
-			var bb := world_to_map(bounds.end)
-			var section := Rect2(
-				Vector2(minf(ba.x, bb.x), minf(ba.y, bb.y)),
-				Vector2(absf(bb.x - ba.x), absf(bb.y - ba.y))
-			)
-			if not section.intersects(area):
-				continue
-			at = section.get_center()
-		elif not area.has_point(at):
-			continue
-		draw_circle(at, 1.5, Color(0.62, 0.82, 0.78, 0.85))
-		var text := str(marker.name)
-		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE)
 		var label_rect := orientation_label_rect(marker)
-		## Nearby markers can still collide at this scale — nudge down but keep
-		## the label's horizontal center locked to the section.
-		var section_cx := label_rect.get_center().x
+		if not area.intersects(label_rect):
+			continue
 		var guard := 0
-		while guard < 8 and _overlaps_any(label_rect, placed_labels):
-			label_rect.position.y += text_size.y + 1.0
+		while guard < 6 and _overlaps_any(label_rect, placed):
+			label_rect.position.y += label_rect.size.y + 1.0
 			guard += 1
+		var centre_x := label_rect.get_center().x
+		label_rect.position.x = clampf(centre_x - label_rect.size.x * 0.5, area.position.x + 1.0, area.end.x - label_rect.size.x - 1.0)
 		label_rect.position.y = clampf(label_rect.position.y, area.position.y, area.end.y - label_rect.size.y)
-		## Panel clamp may shift X; restore section-centered X afterward when
-		## the glyph still fits inside the panel.
-		var desired_x := section_cx - label_rect.size.x * 0.5
-		if desired_x >= area.position.x and desired_x + label_rect.size.x <= area.end.x:
-			label_rect.position.x = desired_x
-		else:
-			label_rect.position.x = clampf(desired_x, area.position.x, area.end.x - label_rect.size.x)
-		placed_labels.append(label_rect)
-		draw_string(
-			font,
-			Vector2(label_rect.position.x, label_rect.position.y + text_size.y),
-			text,
-			HORIZONTAL_ALIGNMENT_LEFT,
-			-1,
-			LABEL_SIZE,
-			label_color
-		)
+		placed.append(label_rect)
+		var at := Vector2(label_rect.position.x, label_rect.position.y + label_rect.size.y - 2.0)
+		draw_rect(label_rect.grow_individual(2.0, 0.0, 2.0, 0.0), Color(0.03, 0.045, 0.05, 0.62))
+		draw_string(font, at + Vector2(1, 1), str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0, 0, 0, 0.75))
+		draw_string(font, at, str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, LABEL_COLOR)
+
+	# What the camera sees, then the player.
+	var cam := get_viewport().get_camera_2d()
+	if cam != null:
+		var view_size := get_viewport().get_visible_rect().size / cam.zoom
+		var view := Rect2(cam.get_screen_center_position() - view_size * 0.5, view_size)
+		draw_rect(_rect_to_map(view).intersection(area), Color(0.95, 0.9, 0.7, 0.55), false, 1.0)
 	if _player and is_instance_valid(_player):
-		var p := world_to_map(_player.global_position)
-		if area.grow(2.0).has_point(p):
-			draw_circle(p, 3.0, Color(0.95, 0.82, 0.55, 0.95))
-			draw_circle(p, 1.5, Color(0.98, 0.95, 0.85, 1.0))
-	draw_string(
-		ThemeDB.fallback_font,
-		Vector2(PAD + 2, s.y - 3),
-		"M minimap",
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1,
-		8,
-		Color(0.55, 0.6, 0.58, 0.45)
-	)
+		var p := world_to_map(_player.global_position + Vector2(16.0, 16.0))
+		if area.grow(3.0).has_point(p):
+			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.006)
+			draw_circle(p, 5.0 + pulse * 2.0, Color(1.0, 0.85, 0.5, 0.22 * (1.0 - pulse * 0.5)))
+			draw_circle(p, 2.6, Color(1.0, 0.92, 0.7, 1.0))
+			draw_arc(p, 3.6, 0.0, TAU, 14, Color(0.08, 0.06, 0.04, 0.9), 1.0, true)
+
+	# Header: where you are; hint on the right.
+	var zone_name := _current_zone_name()
+	draw_string(font, Vector2(PAD, PAD + 9.0), zone_name if zone_name != "" else "Hollow", HORIZONTAL_ALIGNMENT_LEFT, s.x - PAD * 2.0 - 60.0, 11, Color(0.93, 0.83, 0.62, 0.95))
+	draw_string(font, Vector2(s.x - PAD - 54.0, PAD + 9.0), "M  hide", HORIZONTAL_ALIGNMENT_RIGHT, 54.0, 8, Color(0.55, 0.6, 0.58, 0.6))
+
+
+## Zones held out at the start (the far side of every start-closed gate), for tinting.
+func _held_zone_ids() -> Dictionary:
+	var out := {}
+	for point in HollowMap.held_points():
+		for z in HollowMap.zones():
+			if not z.get("volume", false) and (z["rect"] as Rect2).has_point(point + Vector2(0.0, -32.0)):
+				out[z["id"]] = true
+	return out

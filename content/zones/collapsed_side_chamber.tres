@@ -10,8 +10,12 @@ world_origin = Vector2(-5440, 7360)
 seams = [{
 "edge": "north",
 "neighbor": "first_expansion_gallery",
-"position": 6720
+"position": 7360
+}, {
+"edge": "east",
+"neighbor": "bottom_west_deep",
+"position": -4480
 }]
 enclosed = true
-world_rect = Rect2(-5680, 7040, 480, 640)
+world_rect = Rect2(-5760, 6880, 1280, 640)
 restricted = false

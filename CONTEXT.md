@@ -8,6 +8,7 @@ Read this before making changes. For the full pitch and open decisions, see:
 - [`docs/story.md`](docs/story.md) — Act 1 fiction canon + story idea inbox (not design locks)
 - [`docs/game-feel-best-practices.md`](docs/game-feel-best-practices.md) — living juice / feel notes (Act 1 tone)
 - [`docs/art-direction.md`](docs/art-direction.md) — locked visual bible (camera, refs steal/don’t-steal, Hollow composition, palette)
+- [`docs/hollow-map-spec.md`](docs/hollow-map-spec.md) — **authoritative Hollow layout** (levels, spans, connectors, lint rules, protocol for changing the map). Beats any coordinate in the older Hollow docs.
 - [`docs/hollow-build-brief.md`](docs/hollow-build-brief.md) — Cursor-ready first Hollow environment pass (layout, assets, acceptance checks)
 - [`docs/art-pipeline.md`](docs/art-pipeline.md) — when/how to use PixelLab MCP for Act 1 pixel assets
 - [`docs/godot-best-practices.md`](docs/godot-best-practices.md) — Godot 4 / pixel structure checklist for this repo

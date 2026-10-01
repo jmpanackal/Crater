@@ -8,14 +8,14 @@ zone_id = &"west_dispatch_yard"
 display_name = "West Dispatch Yard"
 world_origin = Vector2(-1320, 5440)
 seams = [{
+"edge": "south",
+"neighbor": "bottom_west_approach",
+"position": 6080
+}, {
 "edge": "east",
 "neighbor": "lower_switchback",
 "position": -800
-}, {
-"edge": "west",
-"neighbor": "bottom_west_approach",
-"position": -1840
 }]
 enclosed = true
-world_rect = Rect2(-1840, 5120, 1040, 640)
+world_rect = Rect2(-1600, 4960, 800, 640)
 restricted = false

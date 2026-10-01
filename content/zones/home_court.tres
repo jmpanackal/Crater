@@ -11,7 +11,11 @@ seams = [{
 "edge": "west",
 "neighbor": "lower_switchback",
 "position": -320
+}, {
+"edge": "east",
+"neighbor": "worker_return_ascent",
+"position": 160
 }]
 enclosed = true
-world_rect = Rect2(-320, 5120, 1600, 640)
+world_rect = Rect2(-320, 4960, 480, 640)
 restricted = false

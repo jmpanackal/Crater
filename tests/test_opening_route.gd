@@ -1,7 +1,7 @@
 extends SceneTree
-## Build Bible Spec 05 — opening-route zones on the uniform west stack.
-## Home Court → Switchback → Dispatch sit on Lower Worker; Bottom-West Dig Front
-## sits below via LadderWestStack (no stair flights).
+## Build Bible Spec 05 — opening-route zones. Home Court -> Switchback -> Dispatch sit on
+## Lower Worker (L8); the Bottom-West Approach and Dig Front sit below via the S_BW1 / S_BW2
+## stairs (a real descent, no ladder shaft).
 
 
 const OPENING_ROUTE_ZONE_IDS: Array[String] = [
@@ -38,17 +38,17 @@ func _run() -> void:
 			quit(1)
 			return
 		if not zones.is_zone_loaded(zone_id):
-			push_error("FAIL opening-route zone '%s' has no zone_anchor in main.tscn" % zone_id)
+			push_error("FAIL opening-route zone '%s' has no zone anchor (HollowStructures builds them)" % zone_id)
 			quit(1)
 			return
-	print("PASS all 8 opening-route zones authored and loaded")
+	print("PASS all %d opening-route zones authored and loaded" % OPENING_ROUTE_ZONE_IDS.size())
 
 	var problems: Array = zones.validate_seams()
 	if not problems.is_empty():
-		push_error("FAIL opening-route seams invalid: %s" % [problems])
+		push_error("FAIL seams invalid: %s" % [problems])
 		quit(1)
 		return
-	print("PASS opening-route seams are reciprocal (Zones.validate_seams())")
+	print("PASS every zone seam is reciprocal (Zones.validate_seams())")
 
 	var visited: Array[String] = ["home_court"]
 	var frontier: Array[String] = ["home_court"]
@@ -67,9 +67,7 @@ func _run() -> void:
 
 	var drop := HollowLayout.BOTTOM_WEST_Y - HollowLayout.WEST_LW_UPPER_Y
 	if drop < HollowLayout.MIN_BAND_GAP - 0.5:
-		push_error(
-			"FAIL Bottom-West Dig Front is not measurably below Home Court (drop=%s)" % drop
-		)
+		push_error("FAIL Bottom-West Dig Front is not measurably below Home Court (drop=%s)" % drop)
 		quit(1)
 		return
 	print("PASS Bottom-West Dig Front sits %spx below Home Court (a real descent)" % drop)
@@ -82,27 +80,27 @@ func _run() -> void:
 	var tile_size := 16
 	for rect in HollowLayout.opening_route_deck_rects():
 		var mid_x := int(round((rect.x + rect.y) * 0.5 / tile_size))
-		var open0 := int(round(HollowLayout.LADDER_WEST_OPEN_X / float(tile_size)))
-		var open1 := int(round(HollowLayout.ladder_west_open_end() / float(tile_size)))
-		if mid_x >= open0 and mid_x < open1:
-			mid_x = open1 + 2
 		var y := int(round(rect.z / tile_size))
-		if terrain.get_cell_source_id(Vector2i(mid_x, y)) == -1:
+		if terrain.cell_source(Vector2i(mid_x, y)) == -1:
 			push_error("FAIL deck rect %s has no painted tile at its midpoint" % [rect])
 			quit(1)
 			return
 	print("PASS every opening-route deck is painted (collision + visual, same tile)")
 
-	if not HollowLayout.opening_route_stair_rects().is_empty():
-		push_error("FAIL uniform west stack must not use opening-route stair flights")
+	if HollowLayout.opening_route_stair_rects().size() != 3:
+		push_error("FAIL the opening route is the Worker Stair plus the two Bottom-West descents (3 stairs)")
 		quit(1)
 		return
-	print("PASS opening route uses LadderWestStack (no stair flights)")
+	for removed in ["Hollow/LadderChamber", "Hollow/LadderWestStack"]:
+		if scene.get_node_or_null(removed) != null:
+			push_error("FAIL old ladder %s must stay removed" % removed)
+			quit(1)
+			return
+	print("PASS the opening route uses stairs; no leftover ladder shaft")
 
 	var space := terrain.get_world_2d().direct_space_state
-	var home_y: float = HollowLayout.WEST_LW_UPPER_Y
 	var hit := space.intersect_ray(
-		PhysicsRayQueryParameters2D.create(Vector2(-80, home_y - 40), Vector2(-80, home_y + 40))
+		PhysicsRayQueryParameters2D.create(Vector2(-80, HollowLayout.WEST_LW_UPPER_Y - 40), Vector2(-80, HollowLayout.WEST_LW_UPPER_Y + 40))
 	)
 	if hit.is_empty():
 		push_error("FAIL no physics collision under Home Court's painted floor")
@@ -110,35 +108,19 @@ func _run() -> void:
 		return
 	print("PASS Home Court floor has real physics collision")
 
-	var ladder_chamber: Area2D = scene.get_node_or_null("Hollow/LadderChamber") as Area2D
-	if ladder_chamber != null:
-		push_error("FAIL LadderChamber leftover must be removed from clean west dig fronts")
+	# Bottom-West Dig Front: both galleries are painted and open into diggable rock.
+	var dig_sample := int(round((HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.BOTTOM_WEST_THRESHOLD_LEFT) * 0.5 / float(tile_size)))
+	for level_y in [HollowLayout.BOTTOM_WEST_UPPER_Y, HollowLayout.BOTTOM_WEST_LOWER_Y]:
+		if terrain.cell_source(Vector2i(dig_sample, int(round(level_y / float(tile_size))))) == -1:
+			push_error("FAIL Bottom-West gallery at y=%s missing" % level_y)
+			quit(1)
+			return
+	var dig: TileMapLayer = scene.get_node("Terrain") as TileMapLayer
+	if not dig.can_dig(Vector2(HollowLayout.HIGH_WEST_DIG_LEFT + 200.0, HollowLayout.BOTTOM_WEST_UPPER_Y - 160.0)):
+		push_error("FAIL Bottom-West gallery must have diggable rock above it")
 		quit(1)
 		return
-	print("PASS no collapsed-chamber ladder leftover")
-
-	if not scene.has_node("Hollow/LadderWestStack"):
-		push_error("FAIL LadderWestStack missing for Home↔Bottom-West descent")
-		quit(1)
-		return
-	print("PASS west stack ladder provides the Bottom-West descent")
-
-	# Bottom-West Dig Front: both uniform platforms span the dig envelope.
-	var bw_upper_row := int(round(HollowLayout.BOTTOM_WEST_UPPER_Y / float(tile_size)))
-	var bw_lower_row := int(round(HollowLayout.BOTTOM_WEST_LOWER_Y / float(tile_size)))
-	var dig_sample := int(round((HollowLayout.HIGH_WEST_DIG_LEFT + HollowLayout.WEST_HOLLOW_LEFT) * 0.5 / float(tile_size)))
-	if terrain.get_cell_source_id(Vector2i(dig_sample, bw_upper_row)) == -1:
-		push_error("FAIL Bottom-West Dig Front upper missing at y=%s" % HollowLayout.BOTTOM_WEST_UPPER_Y)
-		quit(1)
-		return
-	if terrain.get_cell_source_id(Vector2i(dig_sample, bw_lower_row)) == -1:
-		push_error("FAIL Bottom-West Dig Front lower missing at y=%s" % HollowLayout.BOTTOM_WEST_LOWER_Y)
-		quit(1)
-		return
-	print(
-		"PASS Bottom-West Dig Front upper=%s lower=%s both painted full-width"
-		% [HollowLayout.BOTTOM_WEST_UPPER_Y, HollowLayout.BOTTOM_WEST_LOWER_Y]
-	)
+	print("PASS Bottom-West galleries painted with diggable rock around them")
 
 	print("OPENING_ROUTE_TESTS_PASSED")
 	quit(0)

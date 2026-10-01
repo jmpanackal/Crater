@@ -6,16 +6,16 @@
 script = ExtResource("1")
 zone_id = &"bottom_west_threshold"
 display_name = "Bottom-West Threshold"
-world_origin = Vector2(-3760, 6720)
+world_origin = Vector2(-4400, 6720)
 seams = [{
-"edge": "east",
+"edge": "north",
 "neighbor": "lower_lift_landing",
-"position": -2880
+"position": 6720
 }, {
 "edge": "west",
 "neighbor": "first_expansion_gallery",
-"position": -4400
+"position": -4640
 }]
 enclosed = true
-world_rect = Rect2(-4400, 6400, 1520, 640)
+world_rect = Rect2(-4640, 6240, 1200, 640)
 restricted = false

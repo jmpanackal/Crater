@@ -5,17 +5,17 @@
 [resource]
 script = ExtResource("1")
 zone_id = &"worker_return_ascent"
-display_name = "Worker Return Ascent"
-world_origin = Vector2(-1520, 4160)
+display_name = "Worker Stair Hall"
+world_origin = Vector2(400, 5440)
 seams = [{
-"edge": "south",
-"neighbor": "lower_switchback",
-"position": 5440
-}, {
 "edge": "north",
 "neighbor": "mid_allotments",
-"position": 4800
+"position": 5440
+}, {
+"edge": "west",
+"neighbor": "home_court",
+"position": 160
 }]
 enclosed = false
-world_rect = Rect2(-2880, 4800, 4320, 640)
+world_rect = Rect2(160, 4960, 1280, 640)
 restricted = false

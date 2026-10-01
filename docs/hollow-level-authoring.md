@@ -6,7 +6,9 @@ the missing piece between the design docs (`hollow-build-brief.md`, `mechanics-c
 the world, it governs how the world gets built so collision and visuals can't drift
 apart and rooms don't get invented ad hoc.
 
-**Spatial reference:** [Hollow Cross-Section Blueprint](https://claude.ai/artifact/Dq15YdDjhfe4B6e1hsvv7U)
+**Authoritative layout:** [`hollow-map-spec.md`](hollow-map-spec.md) (levels, spans, connectors, lint rules, agent protocol). The external blueprint below was never reachable from the repo and is now background only.
+
+**Spatial reference (background):** [Hollow Cross-Section Blueprint](https://claude.ai/artifact/Dq15YdDjhfe4B6e1hsvv7U)
 is the confirmed, to-scale macro layout — read it before laying out any new region.
 Update it (and this doc) if a later design decision changes the macro shape; don't let
 the in-engine scene and the blueprint silently diverge from each other.
@@ -36,6 +38,11 @@ their position must be derived from the same tile-span values used to paint the 
 under them — never an independent hand-tuned offset. This is a review convention, not
 an enforced abstraction: when adding ambiance for a room, pass in the same x0/x1/y the
 terrain call used.
+
+> **Update 2026-10-01:** map decks now live on a child `TileMapLayer` ("Decks") as **one-way**
+> platforms, still painted from the same data and still collision+visual in one tile; walls,
+> treads and wedges stay solid on the parent layer. Down (S) steps through a deck onto a stair
+> or deck within 112 px. See `hollow-map-spec.md`.
 
 ## Rule 2 — Elevation changes are stepped tiles, not floating ramp polygons
 
@@ -105,3 +112,7 @@ two in a single "reserved" marker.
 Every region gets one noticeable, unique feature so players read location from the
 world, not a minimap. Confirmed by outside research as the right call for this genre,
 not just an in-house preference — keep it.
+
+## Rule 7 — The map is linted
+
+`HollowMapLint` (run by `tests/test_hollow_map_lint.gd`) checks the layout as a graph: level grid, floor gaps, dead-end stubs, ladder landings, reachability with a way back, the single Mouth crossing, zone anchors on decks, and headroom above every deck in the real scene. A deliberate oddity goes in `HollowLayout.intentional_exceptions()` with a reason; otherwise fix the map. See [`hollow-map-spec.md`](hollow-map-spec.md) section 5 for the protocol.

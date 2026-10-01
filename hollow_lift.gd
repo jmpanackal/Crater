@@ -10,6 +10,9 @@ const SoftWorldLabel := preload("res://soft_world_label.gd")
 @export var thin_speed_mult: float = 0.35
 @export var hint_text: String = "[W/S] ride lift"
 @export var parked_hint: String = "Presswater thin — lift parked"
+## Warden-run lifts: parked until this Access gate opens ("" = no lock).
+@export var access_gate_id: StringName = &""
+@export var locked_hint: String = "Warden-run — not cleared yet"
 @export var snap_epsilon: float = 2.5
 @export var default_stop_index: int = 1
 
@@ -58,8 +61,17 @@ func is_parked() -> bool:
 	return _parked
 
 
+func is_locked() -> bool:
+	if access_gate_id == &"" or not is_inside_tree():
+		return false
+	var access := get_tree().root.get_node_or_null("Access")
+	return access != null and not bool(access.is_open(access_gate_id))
+
+
 func service_speed_mult() -> float:
-	## healthy: 1.0 — thin: slow secondary — reserve: secondary parked (0)
+	## locked: 0 — healthy: 1.0 — thin: slow secondary — reserve: secondary parked (0)
+	if is_locked():
+		return 0.0
 	if is_essential():
 		return 1.0
 	var district := _district()
@@ -84,9 +96,9 @@ func _district() -> Node:
 
 func _refresh_service_state() -> void:
 	var mult := service_speed_mult()
-	_parked = mult <= 0.0 and not is_essential()
+	_parked = mult <= 0.0 and (not is_essential() or is_locked())
 	if _hint:
-		_hint.text = parked_hint if _parked else hint_text
+		_hint.text = locked_hint if is_locked() else (parked_hint if _parked else hint_text)
 
 
 func _build_collision() -> void:
@@ -169,8 +181,8 @@ func _build_visuals() -> void:
 	if lift_id == HollowLayout.FREIGHT_LIFT_ID:
 		floor_plank.color = Color(0.35, 0.4, 0.42, 0.95)
 		plate.color = Color(0.55, 0.71, 0.77, 0.75)
-	elif lift_id == HollowLayout.LEFT_SERVICE_ID:
-		floor_plank.color = Color(0.38, 0.34, 0.26, 0.95)
+	elif lift_id == HollowLayout.EAST_PASSENGER_ID:
+		floor_plank.color = Color(0.4, 0.36, 0.3, 0.95)
 
 
 func _build_rider_sensor() -> void:

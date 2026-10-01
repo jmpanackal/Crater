@@ -36,21 +36,28 @@ func _run() -> void:
 			push_error("FAIL background does not cover playable expansion decks")
 			quit(1)
 			return
-	var lifts := Macro.transport_guides()
-	if lifts.size() < 2:
-		push_error("FAIL expected west stack + east transports, got %s" % lifts.size())
+	var guides := Macro.transport_guides()
+	var lift_guides := 0
+	var ladder_guides := 0
+	for guide in guides:
+		if guide.get("ladder", false):
+			ladder_guides += 1
+		else:
+			lift_guides += 1
+	if lift_guides != HollowMap.lifts().size() or ladder_guides != HollowMap.ladders().size():
+		push_error("FAIL transport guides drifted from HollowMap (lifts %s/%s, ladders %s/%s)" % [lift_guides, HollowMap.lifts().size(), ladder_guides, HollowMap.ladders().size()])
 		quit(1)
 		return
-	var has_west_stack := false
-	var has_east := false
-	for lift in lifts:
-		var stops: Array = lift.stops
-		if stops.has(HollowLayout.WEST_ASHRAM_UPPER_Y) and stops.has(HollowLayout.BOTTOM_WEST_LOWER_Y):
-			has_west_stack = true
-		if stops.has(HollowLayout.UPPER_RES_Y) and stops.has(HollowLayout.CISTERN_Y):
-			has_east = true
-	if not has_west_stack or not has_east:
-		push_error("FAIL canonical transport spans drifted (west_stack=%s east=%s)" % [has_west_stack, has_east])
+	var has_west_lift := false
+	var has_east_freight := false
+	for guide in guides:
+		var stops: Array = guide.stops
+		if stops.has(HollowLayout.WEST_ASHRAM_LOWER_Y) and stops.has(HollowLayout.WICK_Y) and not guide.get("ladder", false):
+			has_west_lift = true
+		if stops.has(HollowLayout.WICK_Y) and stops.has(HollowLayout.CISTERN_Y) and not guide.get("ladder", false):
+			has_east_freight = true
+	if not has_west_lift or not has_east_freight:
+		push_error("FAIL canonical lift spans drifted (west civic=%s east freight=%s)" % [has_west_lift, has_east_freight])
 		quit(1)
 		return
 	var overlay := background.get_node_or_null("PlanningGuides")
@@ -62,7 +69,7 @@ func _run() -> void:
 		push_error("FAIL Mouth bounds differ from shared world metrics")
 		quit(1)
 		return
-	# Scale plan: Mouth void is x 1440..4960 (704 px ~1/5 world). East wall starts at PIT_RIGHT.
+	# Scale plan: Mouth void is x 1440..4960 (3520 px, ~1/5.5 of the 19200 px world). East wall starts at PIT_RIGHT.
 	if absf(Macro.MOUTH_BOUNDS.size.x - (HollowLayout.PIT_RIGHT - HollowLayout.PIT_LEFT)) > 0.5:
 		push_error("FAIL Mouth width drifted from PIT_LEFT..PIT_RIGHT")
 		quit(1)
@@ -110,9 +117,9 @@ func _run() -> void:
 		)
 		quit(1)
 		return
-	if mid_heart_bounds.size.y > 640.0:
+	if mid_heart_bounds.size.y > 1280.0:
 		push_error(
-			"FAIL Mid Heart guide must stay a thin deck band (h=%s), not a Mouth fill"
+			"FAIL Mid Heart guide must stay a thin deck cluster (h=%s), not a Mouth fill"
 			% mid_heart_bounds.size.y
 		)
 		quit(1)

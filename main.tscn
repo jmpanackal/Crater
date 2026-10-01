@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
@@ -8,7 +8,6 @@
 [ext_resource type="Script" path="res://hollow_npc.gd" id="8_npc"]
 [ext_resource type="Script" path="res://journal_hud.gd" id="9_journal"]
 [ext_resource type="Script" path="res://dialogue_panel.gd" id="10_dialogue"]
-[ext_resource type="Script" path="res://hollow_climb.gd" id="13_hollow_climb"]
 [ext_resource type="Script" path="res://dig_site_dressing.gd" id="15_dig_dress"]
 [ext_resource type="Script" path="res://dig_approach.gd" id="17_approach"]
 [ext_resource type="Script" path="res://camera_follow.gd" id="16_cam"]
@@ -19,6 +18,7 @@
 [ext_resource type="Script" path="res://home_court_dressing.gd" id="25_home"]
 [ext_resource type="Script" path="res://hollow_macro_background.gd" id="26_macro"]
 [ext_resource type="Script" path="res://hollow_minimap.gd" id="28_minimap"]
+[ext_resource type="Script" path="res://hollow_structures.gd" id="29_structures"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -40,183 +40,8 @@ script = ExtResource("22_hollow_terrain")
 z_index = -1
 script = ExtResource("25_home")
 
-[node name="LadderWestStack" type="Area2D" parent="Hollow"]
-position = Vector2(-1028, 320)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 7040)
-hint_text = "[W/S] climb"
-deck_open_x = -1040.0
-upper_land_side = -1
-
-[node name="LadderEastStack" type="Area2D" parent="Hollow"]
-position = Vector2(6732, 400)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 4960)
-hint_text = "[W/S] climb"
-deck_open_x = 6720.0
-upper_land_side = 1
-
-[node name="Zones" type="Node2D" parent="Hollow"]
-
-[node name="HomeCourt" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "home_court"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/HomeCourt"]
-position = Vector2(-80, 5440)
-
-[node name="LowerSwitchback" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "lower_switchback"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerSwitchback"]
-position = Vector2(-560, 5440)
-
-[node name="WestDispatchYard" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "west_dispatch_yard"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/WestDispatchYard"]
-position = Vector2(-1320, 5440)
-
-[node name="WorkerReturnAscent" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "worker_return_ascent"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/WorkerReturnAscent"]
-position = Vector2(-1520, 4160)
-
-[node name="Wickwork" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "wickwork"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Wickwork"]
-position = Vector2(-2160, 2880)
-
-[node name="MidAllotments" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "mid_allotments"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidAllotments"]
-position = Vector2(-1000, 4160)
-
-[node name="MidHeart" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "mid_heart"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidHeart"]
-position = Vector2(3200, 2880)
-
-[node name="MidEastLanding" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "mid_east_landing"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastLanding"]
-position = Vector2(5840, 2880)
-
-[node name="MidEastApproach" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "mid_east_approach"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastApproach"]
-position = Vector2(7680, 2880)
-
-[node name="MidEastDigFront" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "mid_east_dig_front"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/MidEastDigFront"]
-position = Vector2(10080, 2880)
-
-[node name="AshramWest" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "ashram_west"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/AshramWest"]
-position = Vector2(-1200, 320)
-
-[node name="AshramEast" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "ashram_east"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/AshramEast"]
-position = Vector2(6080, 400)
-
-[node name="Glowbeds" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "glowbeds"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Glowbeds"]
-position = Vector2(6080, 1120)
-
-[node name="GlowbedsHang" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "glowbeds_hang"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/GlowbedsHang"]
-position = Vector2(7280, 1840)
-
-[node name="LowerEastServices" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "lower_east_services"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerEastServices"]
-position = Vector2(6080, 4320)
-
-[node name="Cistern" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "cistern"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/Cistern"]
-position = Vector2(8640, 5360)
-
-[node name="SeepThreshold" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "seep_threshold"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/SeepThreshold"]
-position = Vector2(5680, 6080)
-
-[node name="BottomWestApproach" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "bottom_west_approach"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/BottomWestApproach"]
-position = Vector2(-2000, 6080)
-
-[node name="LowerLiftLanding" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "lower_lift_landing"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/LowerLiftLanding"]
-position = Vector2(-2240, 6080)
-
-[node name="BottomWestThreshold" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "bottom_west_threshold"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/BottomWestThreshold"]
-position = Vector2(-3760, 6720)
-
-[node name="FirstExpansionGallery" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "first_expansion_gallery"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/FirstExpansionGallery"]
-position = Vector2(-5000, 6720)
-
-[node name="CollapsedSideChamber" type="Node2D" parent="Hollow/Zones"]
-script = ExtResource("21_zone_anchor")
-zone_id = "collapsed_side_chamber"
-
-[node name="Idle1" type="Marker2D" parent="Hollow/Zones/CollapsedSideChamber"]
-position = Vector2(-5440, 7360)
+[node name="Structures" type="Node2D" parent="Hollow"]
+script = ExtResource("29_structures")
 
 [node name="NPCs" type="Node2D" parent="Hollow"]
 
@@ -600,8 +425,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -278.0
-offset_top = -176.0
+offset_left = -450.0
+offset_top = -224.0
 offset_right = -10.0
 offset_bottom = -20.0
 grow_horizontal = 0

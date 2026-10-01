@@ -8,18 +8,14 @@ zone_id = &"lower_switchback"
 display_name = "Lower Switchback"
 world_origin = Vector2(-560, 5440)
 seams = [{
-"edge": "east",
-"neighbor": "home_court",
-"position": -320
-}, {
 "edge": "west",
 "neighbor": "west_dispatch_yard",
 "position": -800
 }, {
-"edge": "north",
-"neighbor": "worker_return_ascent",
-"position": 5440
+"edge": "east",
+"neighbor": "home_court",
+"position": -320
 }]
 enclosed = true
-world_rect = Rect2(-800, 5120, 480, 640)
+world_rect = Rect2(-800, 4960, 480, 640)
 restricted = false

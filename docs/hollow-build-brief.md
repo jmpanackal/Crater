@@ -1,5 +1,7 @@
 # Hollow build brief — Act 1
 
+> **Coordinates in this file are historical.** Grid, spans, levels and connectors are defined by [`hollow-map-spec.md`](hollow-map-spec.md) and `hollow_layout.gd` (checked by `HollowMapLint`). Use this brief for *intent* (what districts are, what they feel like), not for numbers. Where it says 64px grid, Mouth 288-736, or a three-lift backbone, it is out of date.
+
 Production-ready visual and layout brief for Cursor. This turns the visual bible into one coherent, playable Hollow pass. It is not permission to redesign the economy, add a new camera, or build later acts.
 
 **Approved macro-layout reference:** [`refs/hollow-layout-act1-approved-2026-09-11.png`](refs/hollow-layout-act1-approved-2026-09-11.png). It locks composition and spatial hierarchy, not final in-game art or normal gameplay camera framing. The forthcoming chunk map governs player-scale layout.

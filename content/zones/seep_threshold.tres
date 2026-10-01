@@ -5,13 +5,13 @@
 [resource]
 script = ExtResource("1")
 zone_id = &"seep_threshold"
-display_name = "Seep / Service Threshold"
-world_origin = Vector2(5680, 6080)
+display_name = "Seep Gallery"
+world_origin = Vector2(7200, 7360)
 seams = [{
 "edge": "north",
-"neighbor": "cistern",
-"position": 6080
+"neighbor": "cistern_tanks",
+"position": 7360
 }]
 enclosed = true
-world_rect = Rect2(4960, 5920, 2080, 320)
+world_rect = Rect2(6400, 6880, 2880, 640)
 restricted = false

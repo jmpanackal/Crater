@@ -70,7 +70,6 @@ func _ready() -> void:
 	tile_set = _build_tileset()
 	_build_deposit_overlay()
 	_fill_ground()
-	_carve_hollow_civic_overlaps()
 	# Build Bible Spec 02's save contract only auto-discovers autoloads by
 	# root-relative name; Terrain has to live inside the play scene's
 	# hierarchy to render/collide correctly, so it registers itself with
@@ -144,10 +143,12 @@ func _build_fallback_tileset() -> TileSet:
 ## High-West Dig Front flanks, never aqua fill inside the Mouth.
 ## Re-derived for TILE_SIZE=16 against HollowLayout.EXIT_RIGHT / Dig Front tip.
 ## World-scale pass (2026-09-19): x5 against the rescaled HollowLayout values.
-const DIG_START_X := 400 ## world 6400 — after Hollow exit ledge (EXIT_RIGHT)
-const DIG_END_X := 800 ## exclusive; covers Mid-East Dig Front out to ~x=11840
-## High-West Dig Front (destructible outside Mouth) — world x -5680..-2880.
-const WEST_DIG_START_X := -355 ## world -5680
+const DIG_START_X := 580 ## world 9280 — the east civic wall (HollowLayout.EAST_CIVIC_RIGHT)
+const DIG_END_X := 800 ## exclusive; world 12800, past the Mid-East Dig Front tip (12160)
+## West dig flank (destructible outside Mouth) — world x -6080..-2880.
+## Starts 320px west of HIGH_WEST_DIG_LEFT (-5760) so every dig-front deck ends
+## against solid rock, not the edge of the envelope (HollowMapLint rule "end").
+const WEST_DIG_START_X := -380 ## world -6080
 const WEST_DIG_END_X := -180 ## exclusive; world -2880
 
 
@@ -166,6 +167,7 @@ func _fill_ground() -> void:
 		for y in range(FIRMAMENT_Y_MAX + 1, ENVELOPE_ROWS):
 			_place_random(Vector2i(x, y))
 	_fill_west_dig_front()
+	_carve_flank_air()
 
 
 ## High-West Dig Front — brown dig mass west of the Hollow civic void.
@@ -181,123 +183,23 @@ func _fill_west_dig_front() -> void:
 			_place_random(Vector2i(x, y))
 		for y in range(FIRMAMENT_Y_MAX + 1, y_max):
 			_place_random(Vector2i(x, y))
-	_carve_west_dig_front_overlaps()
 
 
-## Clear walk air above High-West / Bottom-West dig-front decks so HollowTerrain
-## owns the corridor; keep a thin diggable face above each walk clear.
-func _carve_west_dig_front_overlaps() -> void:
-	var dig_x0_px := float(WEST_DIG_START_X) * float(TILE_SIZE)
-	var dig_x1_px := float(WEST_DIG_END_X) * float(TILE_SIZE)
+## Carve the walk air the map needs out of both dig flanks, leaving everything else solid
+## and diggable: each flank deck gets 96px of air above it, flank ladders get their shaft,
+## flank stairs get air above every tread. HollowTerrain paints the floors and treads.
+func _carve_flank_air() -> void:
 	var walk_clear_px := 96.0
-	var dig_face_px := float(TILE_SIZE) * 2.0
-	for rect in HollowLayout.west_stack_deck_rects():
-		var x0_px: float = maxf(rect.x, dig_x0_px)
-		var x1_px: float = minf(rect.y, dig_x1_px)
-		if x1_px <= x0_px:
-			continue
-		_clear_dig_rect(x0_px, x1_px, rect.z - walk_clear_px, rect.z)
-		var face_y1 := rect.z - walk_clear_px
-		var face_y0 := face_y1 - dig_face_px
-		_restore_dig_rect(x0_px, x1_px, face_y0, face_y1)
-	# West ladder shaft through dig-front elevations (High-West / Bottom-West).
-	_clear_dig_rect(
-		HollowLayout.LADDER_WEST_OPEN_X,
-		HollowLayout.ladder_west_open_end(),
-		HollowLayout.WEST_ASHRAM_UPPER_Y - walk_clear_px,
-		HollowLayout.BOTTOM_WEST_LOWER_Y
-	)
+	var rects: Array[Rect2] = HollowMap.flank_air_rects(walk_clear_px)
+	rects.append_array(HollowMap.flank_stair_air(walk_clear_px))
+	for r in rects:
+		_clear_dig_rect(r.position.x, r.end.x, r.position.y, r.end.y, r.position.x < 0.0)
 
 
-## Hollow Mid-East / Ashram / Glowbeds / Cistern decks and LadderEastStack sit
-## inside the dig envelope (world x >= DIG_START_X * TILE). Solid-filling that
-## envelope buried those floors under teal dig rock and sealed the walk into the
-## east passenger shaft. Carve walk air + shaft openings so HollowTerrain owns
-## the civic approach.
-##
-## Civic band (DIG_START → civic_east_end): also clear inter-deck air so teal
-## dig rock does not read as aqua filler blocks between terraces. Dig Front
-## (past civic tip) keeps excavation mass; only corridor + shaft air is carved.
-func _carve_hollow_civic_overlaps() -> void:
-	var dig_x0_px := float(DIG_START_X) * float(TILE_SIZE)
-	var dig_x1_px := float(DIG_END_X) * float(TILE_SIZE)
-	var civic_end_px := HollowLayout.civic_east_end()
-	## Standing clearance above a deck top (player body + jump headroom).
-	var walk_clear_px := 96.0
-	## Thin diggable face kept above each civic corridor (not a void-filling slab).
-	var dig_face_px := float(TILE_SIZE) * 2.0
-	for rect in HollowLayout.expansion_deck_rects():
-		var x0_px: float = maxf(rect.x, dig_x0_px)
-		var x1_px: float = minf(rect.y, dig_x1_px)
-		if x1_px <= x0_px:
-			continue
-		_clear_dig_rect(x0_px, x1_px, rect.z - walk_clear_px, rect.z)
-	# Civic east wall: open the whole inhabited air column. Teal dig fill between
-	# Ashram / Glowbeds / Hang / Mid-East / Lower / Cistern read as aqua blocks
-	# east of LadderEastStack — clear them, then restore a thin diggable face
-	# above each corridor so Dig Front gameplay still has rock to chip.
-	var civic_x1 := minf(civic_end_px, dig_x1_px)
-	if civic_x1 > dig_x0_px:
-		_clear_dig_rect(
-			dig_x0_px,
-			civic_x1,
-			HollowLayout.UPPER_RES_Y - walk_clear_px,
-			HollowLayout.CISTERN_Y
-		)
-		for rect in HollowLayout.expansion_deck_rects():
-			var x0_px: float = maxf(rect.x, dig_x0_px)
-			var x1_px: float = minf(rect.y, civic_x1)
-			if x1_px <= x0_px:
-				continue
-			# Face sits just above walk clear: [deck - walk_clear - face, deck - walk_clear).
-			var face_y1 := rect.z - walk_clear_px
-			var face_y0 := face_y1 - dig_face_px
-			_restore_dig_rect(x0_px, x1_px, face_y0, face_y1)
-	# Full vertical east passenger shaft (Ashram → Cistern), including floor rows.
-	_clear_dig_rect(
-		HollowLayout.LADDER_EAST_OPEN_X,
-		HollowLayout.ladder_east_open_end(),
-		HollowLayout.UPPER_RES_Y - walk_clear_px,
-		HollowLayout.CISTERN_Y
-	)
-	# Freight cage sits west of dig-start today; clear defensively if it drifts east.
-	var freight_x0 := HollowLayout.FREIGHT_LIFT_X
-	var freight_x1 := freight_x0 + HollowLayout.LIFT_WIDTH
-	if freight_x1 > dig_x0_px and freight_x0 < dig_x1_px:
-		_clear_dig_rect(
-			maxf(freight_x0, dig_x0_px),
-			minf(freight_x1, dig_x1_px),
-			HollowLayout.HEART_Y - walk_clear_px,
-			HollowLayout.CISTERN_Y
-		)
-	# Dig Front: empty the sky-wall above the walk so Mid Heart / Mouth views
-	# don't show a solid mass. Keep a thin diggable face + rock below for digs.
-	var dig_front := HollowLayout.MID_EAST_DIG_FRONT
-	var df_x0 := maxf(dig_front.x, dig_x0_px)
-	var df_x1 := minf(dig_front.y, dig_x1_px)
-	if df_x1 > df_x0:
-		_clear_dig_rect(
-			df_x0,
-			df_x1,
-			HollowLayout.UPPER_RES_Y - walk_clear_px,
-			dig_front.z
-		)
-		var df_face_y1 := dig_front.z - walk_clear_px
-		var df_face_y0 := df_face_y1 - dig_face_px
-		_restore_dig_rect(df_x0, df_x1, df_face_y0, df_face_y1)
-		# Firmament diggable band (upward frontier) — rock only where digs belong.
-		_restore_dig_rect(
-			df_x0,
-			df_x1,
-			0.0,
-			float(FIRMAMENT_Y_MAX + 1) * float(TILE_SIZE)
-		)
-
-
-func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> void:
+func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float, west := false) -> void:
 	## Clears [x0,x1) × [y0,y1] in world pixels. y1 is an inclusive deck-top
 	## surface (matches HollowLayout floor convention / paint_floor's round).
-	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px)
+	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, true, west)
 	for cell in cells:
 		erase_cell(cell)
 		if _deposit_overlay != null:
@@ -311,12 +213,12 @@ func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> 
 				node.queue_free()
 
 
-func _restore_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> void:
+func _restore_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float, west := false) -> void:
 	## Re-places dig rock in [x0,x1) × [y0,y1) after a civic air carve — thin
 	## diggable faces only, never Mouth/inter-deck void fillers.
 	if _atlas_coords.is_empty():
 		return
-	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, false)
+	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, false, west)
 	for cell in cells:
 		if not is_within_dig_envelope(cell):
 			continue
@@ -328,10 +230,16 @@ func _dig_rect_cells(
 	x1_px: float,
 	y0_px: float,
 	y1_px: float,
-	y1_inclusive_deck := true
+	y1_inclusive_deck := true,
+	west := false
 ) -> Array[Vector2i]:
-	var x0 := clampi(int(floor(x0_px / float(TILE_SIZE))), DIG_START_X, DIG_END_X - 1)
-	var x1 := clampi(int(ceil(x1_px / float(TILE_SIZE))), DIG_START_X, DIG_END_X)
+	## west picks the High-West/Bottom-West dig flank instead of the east envelope.
+	## (Before 2026-10-01 this always clamped to the east envelope, so every west
+	## carve was an empty no-op and the west dig-front decks sat buried in rock.)
+	var lo := WEST_DIG_START_X if west else DIG_START_X
+	var hi := WEST_DIG_END_X if west else DIG_END_X
+	var x0 := clampi(int(floor(x0_px / float(TILE_SIZE))), lo, hi - 1)
+	var x1 := clampi(int(ceil(x1_px / float(TILE_SIZE))), lo, hi)
 	var y0 := clampi(int(floor(y0_px / float(TILE_SIZE))), 0, ENVELOPE_ROWS - 1)
 	var y1: int
 	if y1_inclusive_deck:

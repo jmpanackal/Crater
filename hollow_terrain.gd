@@ -8,6 +8,13 @@ extends TileMapLayer
 ##
 ## Elevation changes are one-tile-per-column staircases (Rule 2), never floating ramp
 ## polygons — paint_stairs() below.
+##
+## Map decks (HollowMap runs) are ONE-WAY platforms on a child layer, "Decks" (2026-10-01):
+## you stand on them, but climb up through them from below and press Down to drop through
+## to a stair or deck within DROP_PROBE beneath. That is what lets a stair rise through a
+## street and a ladder or lift pass a floor with no hole in it, so streets stay continuous.
+## Walls, stair treads and wedges stay solid on this layer. paint_floor() stays solid (it
+## paints walls, and test rigs rely on it); paint_deck() paints the one-way kind.
 
 const TILE_SIZE := 16
 const SOURCE_LEDGE := 0
@@ -18,61 +25,45 @@ const ATLAS_TOP_MID := Vector2i(0, 0)
 const LEDGE_COLOR := Color(0.5, 0.4, 0.3, 0.95)
 const BRIDGE_COLOR := Color(0.42, 0.32, 0.24, 0.95)
 const STAIR_COLOR := Color(0.58, 0.46, 0.34, 0.95)
+const DECK_GROUP := &"hollow_decks"
+
+var _decks: TileMapLayer
 
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_NEAREST
 	tile_set = _build_tileset()
-	_paint_opening_route()
-	_paint_playable_expansion()
+	_decks = TileMapLayer.new()
+	_decks.name = "Decks"
+	_decks.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_decks.tile_set = _build_tileset(true)
+	_decks.add_to_group(DECK_GROUP)
+	add_child(_decks)
+	_paint_map()
 
 
-## Home Court named pads on Lower Worker + Bottom-West dig-front pads.
-func _paint_opening_route() -> void:
-	for rect in HollowLayout.opening_route_deck_rects():
-		paint_floor(rect.x, rect.y, rect.z)
-	for stair in HollowLayout.opening_route_stair_rects():
-		paint_stairs(stair.x, stair.y, stair.z, stair.w)
-	# No solid rock fill between west decks — that buried Home Court air in
-	# collision (raycasts started inside the mass and the player fell through).
-	# HomeCourtDressing draws plaster as visuals only.
-
-
-## Uniform west stack + Mid Heart + east stack.
-func _paint_playable_expansion() -> void:
-	for rect in HollowLayout.expansion_deck_rects():
+## Paint everything HollowMap declares: one-way decks, wall columns at wall ends, and stair
+## wedges. Collision and visual are the same tile.
+func _paint_map() -> void:
+	for rect in HollowMap.deck_rects():
 		var source := SOURCE_BRIDGE if rect.w <= HollowLayout.BRIDGE_THICKNESS + 0.5 else SOURCE_LEDGE
-		paint_floor(rect.x, rect.y, rect.z, source)
-	for stair in HollowLayout.expansion_stair_rects():
-		paint_stairs(stair.x, stair.y, stair.z, stair.w)
-	# West ladder + left-lift + heart-hoist shafts: erase any residual floor in openings.
-	_clear_shaft_openings()
+		paint_deck(rect.x, rect.y, rect.z, source)
+	for stair in HollowMap.stairs():
+		paint_stairs(stair["foot_x"], stair["foot_y"], stair["top_x"], stair["top_y"])
+	for wall in HollowMap.wall_rects():
+		paint_block(wall, SOURCE_ROCK)
 
 
-func _clear_shaft_openings() -> void:
-	## West ladder pierces every stack deck except Bottom-West lower (solid landing).
-	## Secondary lift shafts are sealed.
-	var ladder := Vector2(HollowLayout.LADDER_WEST_OPEN_X, HollowLayout.ladder_west_open_end())
-	for level_y in HollowLayout.west_stack_level_ys():
-		if absf(level_y - HollowLayout.BOTTOM_WEST_LOWER_Y) < 0.5:
-			continue
-		var row := int(round(level_y / float(TILE_SIZE)))
-		var x0 := int(round(ladder.x / float(TILE_SIZE)))
-		var x1 := int(round(ladder.y / float(TILE_SIZE)))
-		for x in range(x0, x1):
-			erase_cell(Vector2i(x, row))
-
-
-func _build_tileset() -> TileSet:
+func _build_tileset(one_way: bool = false) -> TileSet:
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
 	tileset.add_physics_layer()
 	tileset.set_physics_layer_collision_layer(0, 1)
 	tileset.set_physics_layer_collision_mask(0, 0)
-	_add_placeholder_source(tileset, LEDGE_COLOR)
-	_add_placeholder_source(tileset, BRIDGE_COLOR)
-	_add_placeholder_source(tileset, STAIR_COLOR)
-	_add_placeholder_source(tileset, Color(0.22, 0.27, 0.25))
+	_add_placeholder_source(tileset, LEDGE_COLOR, one_way)
+	_add_placeholder_source(tileset, BRIDGE_COLOR, one_way)
+	_add_placeholder_source(tileset, STAIR_COLOR, one_way)
+	_add_placeholder_source(tileset, Color(0.22, 0.27, 0.25), one_way)
 	return tileset
 
 
@@ -81,7 +72,7 @@ func paint_block(bounds: Rect2, source_id: int) -> void:
 		paint_floor(bounds.position.x, bounds.end.x, row * TILE_SIZE, source_id)
 
 
-func _add_placeholder_source(tileset: TileSet, color: Color) -> void:
+func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = false) -> void:
 	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
 	image.fill(color)
 	var texture := ImageTexture.create_from_image(image)
@@ -104,6 +95,51 @@ func _add_placeholder_source(tileset: TileSet, color: Color) -> void:
 		Vector2(-half, half),
 	])
 	tile_data.set_collision_polygon_points(0, 0, poly)
+	if one_way:
+		tile_data.set_collision_polygon_one_way(0, 0, true)
+		tile_data.set_collision_polygon_one_way_margin(0, 0, 2.0)
+
+
+## The child layer map decks live on (one-way). Null before _ready.
+func deck_layer() -> TileMapLayer:
+	return _decks
+
+
+## Paint a flat ONE-WAY deck span (see the file header). Same arguments as paint_floor.
+func paint_deck(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURCE_LEDGE) -> void:
+	var x0 := int(round(x0_px / TILE_SIZE))
+	var x1 := int(round(x1_px / TILE_SIZE))
+	var y := int(round(y_px / TILE_SIZE))
+	if x0 > x1:
+		var tmp := x0
+		x0 = x1
+		x1 = tmp
+	for x in range(x0, x1):
+		_decks.set_cell(Vector2i(x, y), source_id, ATLAS_TOP_MID)
+
+
+## True if any tile (either layer) sits within `reach` px below the standing deck row at the
+## columns a body of half-width `half_width` covers around feet.x. The player asks this before
+## stepping through a one-way deck so Down never drops into open air or the Mouth.
+func has_support_below(feet: Vector2, half_width: float, reach: float) -> bool:
+	var row0 := int(floor(feet.y / TILE_SIZE)) + 1
+	var row1 := int(floor((feet.y + reach) / TILE_SIZE))
+	var col0 := int(floor((feet.x - half_width) / TILE_SIZE))
+	var col1 := int(floor((feet.x + half_width) / TILE_SIZE))
+	for row in range(row0, row1 + 1):
+		for col in range(col0, col1 + 1):
+			if cell_source(Vector2i(col, row)) != -1:
+				return true
+	return false
+
+
+## Source id painted at a cell on either layer (-1 = nothing). Decks win a shared cell.
+func cell_source(cell: Vector2i) -> int:
+	if _decks != null:
+		var d := _decks.get_cell_source_id(cell)
+		if d != -1:
+			return d
+	return get_cell_source_id(cell)
 
 
 ## Paint a flat walkable span. x0_px/x1_px/y_px are world pixels; y_px is the deck's
@@ -169,4 +205,6 @@ func painted_cell_count() -> int:
 	for cell in get_used_cells():
 		if get_cell_source_id(cell) != -1:
 			count += 1
+	if _decks != null:
+		count += _decks.get_used_cells().size()
 	return count
