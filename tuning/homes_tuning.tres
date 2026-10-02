@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/homes_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+mid_reach_min_trust = &"relied_on"
+ashram_min_trust = &"esteemed"
+mid_reach_tallies = 30
+ashram_tallies = 80
+mid_reach_flag = &"mid_reach_clearance"
+ashram_flag = &"ashram_clearance"
+improve_concealment_tallies = 15
+discovered_trust_delta_per_unit = -3.0
+discovered_trust_delta_cap = -18.0

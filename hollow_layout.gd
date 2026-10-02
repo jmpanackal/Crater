@@ -1,226 +1,250 @@
 class_name HollowLayout
 extends Object
-## Shared Hollow world metrics — multi-band Devil's Mouth settlement (side-view).
-## Upper / Mid / Lower civic anchors each contain inhabited sub-levels.
-## Primary vertical travel: three Presswater cage lifts. Dig Site at TerrainLayer.DIG_START_X.
-## Band tops are tile-aligned (multiples of TILE) so FloorVisual lips match collision.
+## Shared Hollow world metrics — constants and thin query helpers.
+##
+## The map itself (every deck, stair, ladder, lift, gate, reserve and zone) is declared in
+## hollow_map.gd and judged by hollow_map_lint.gd; see docs/hollow-map-spec.md. This file
+## keeps the named constants other systems read (level Ys, Mouth lips, spawn, key deck
+## spans) and answers "where" questions by delegating to HollowMap. Level Ys are all on the
+## grid y = 320 + 640 * k so nothing here may carry a hand-typed Y.
+##
+## History: TILE relaxed 64 -> 16 (2026-09-18); world x5 scale pass (2026-09-19); west stack
+## locked to 12 equal levels (2026-09-19); east stack re-gridded and the whole map rebuilt as
+## a data-driven cut-away with stairs, ladders, lifts and gates (2026-10-01).
 
-const TILE := 64
+const TILE := 16
 
-## Broad uninterrupted Devil's Mouth void (no full-width floor).
-const PIT_LEFT := 288.0
-const PIT_RIGHT := 736.0
+## Devil's Mouth: the open central void. Mid Heart (and only Mid Heart) crosses it.
+const PIT_LEFT := 1440.0
+const PIT_RIGHT := 4960.0 ## width 3520 px (~1/6 of the 19200 px world)
 
-## Minimum gap between consecutive walkable deck tops.
-## Clearance under an upper deck ≈ gap - FLOOR_THICKNESS; need > BODY_HEIGHT (32).
-const MIN_BAND_GAP := 128.0
-
-## --- Vertical society bands (deck tops; multiples of TILE) ---
-## Vaultward sits beneath the Firmament — locked until late Act 1.
-const VAULTWARD_Y := 0.0
-## Upper band: quiet residences + Glowbeds cultivation.
-const UPPER_RES_Y := 64.0
-const FARMS_Y := 192.0 ## Glowbeds main gallery (alias kept)
-const GLOW_SUB_Y := 320.0 ## Glowbeds hang / fiber racks
-## Mid band: Wickwork, Mid Heart, allotments.
-const WICK_Y := 512.0
-const HEART_Y := 512.0 ## Mid Heart civic cluster base
-const MID_ALLOT_Y := 640.0 ## mid allotment / residential street
-## Lower band: working terraces, Cistern, seep galleries.
-const LOWER_WORK_Y := 768.0 ## crowded worker terraces — Act 1 spawn band
-const CISTERN_Y := 960.0
-const SEEP_Y := 1088.0 ## lower seep / service gallery threshold
-
-## Left cliff carved rooms (negative X into rock).
-const HOLLOW_LEFT := -576.0
-const FARMS_GALLERY_END := -192.0
-const WICK_BAY_END := -160.0
-
-## Right cliff through civic-excavation exits toward Dig Site.
-const RIGHT_DECK_LEFT := 736.0
-const HOLLOW_RIGHT := 960.0
-const EXIT_RIGHT := 1024.0 ## meets dig columns
-const CISTERN_ALCOVE_START := 896.0
-const CISTERN_DECK_LEFT := 736.0
-
-## Legacy aliases.
-const LEFT_DECK_WIDTH := 256.0
+## Distance between consecutive levels; also the minimum headroom between stacked bands.
+const MIN_BAND_GAP := 640.0
 
 const FLOOR_THICKNESS := 32.0
 const BRIDGE_THICKNESS := 20.0
-## Shift FloorVisual so rock lips sit on collision tops (64px tiles, lip mid-tile).
+## Shift FloorVisual so rock lips sit on collision tops (lip two tiles into the 16px grid).
 const FLOOR_VISUAL_INSET := 32.0
 
-## --- Lift network (Presswater-powered; not fast travel) ---
+## Cages and ladders are sized to the 32px body, not to the city.
 const LIFT_OPENING := 64.0
 const LIFT_WIDTH := 48.0
-
-## 1) Heart hoist — essential Upper↔Mid↔Lower civic route (always available).
-const LIFT_OPEN_X := 224.0
-const LIFT_X := LIFT_OPEN_X + (LIFT_OPENING - LIFT_WIDTH) * 0.5
-const HEART_HOIST_ID := &"heart"
-
-## 2) Left-wall service lift — Glowbeds / Wickwork terraces (secondary).
-const LEFT_LIFT_OPEN_X := -64.0
-const LEFT_LIFT_X := LEFT_LIFT_OPEN_X + (LIFT_OPENING - LIFT_WIDTH) * 0.5
-const LEFT_SERVICE_ID := &"left_service"
-
-## 3) Right-wall Cistern freight lift (secondary).
-const FREIGHT_LIFT_OPEN_X := 848.0
-const FREIGHT_LIFT_X := FREIGHT_LIFT_OPEN_X + (LIFT_OPENING - LIFT_WIDTH) * 0.5
-const FREIGHT_LIFT_ID := &"freight"
-
-## Mid Heart — compact suspended decks over the void (flat walk tops; no snag bumps).
-const HEART_WEST := Vector4(352.0, 448.0, HEART_Y, BRIDGE_THICKNESS)
-const HEART_LINK_AB := Vector4(448.0, 480.0, HEART_Y, 16.0)
-const HEART_MID := Vector4(480.0, 592.0, HEART_Y, BRIDGE_THICKNESS)
-const HEART_LINK_BC := Vector4(592.0, 624.0, HEART_Y, 16.0)
-const HEART_EAST := Vector4(624.0, 736.0, HEART_Y, BRIDGE_THICKNESS)
-
-## Lift lip just east of Heart hoist before Mid Heart.
-const LIFT_LIP_MID := Vector4(PIT_LEFT, 352.0, WICK_Y, FLOOR_THICKNESS)
-
-## Lower Heart freight / worker transfer across the Mouth.
-const LOWER_SPAN_LEFT := PIT_LEFT
-const LOWER_SPAN_RIGHT := PIT_RIGHT
-
-## Local maintenance ladders only (not the primary vertical spine).
 const LADDER_OPENING := 64.0
 const LADDER_WIDTH := 40.0
-## Short residence climb (upper residences ↔ Glowbeds).
-const LADDER_UPPER_OPEN_X := -208.0
-const LADDER_UPPER_X := LADDER_UPPER_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-## Short Mid allotment ↔ Wick bay maintenance climb (left wall).
-const LADDER_MID_OPEN_X := -128.0
-const LADDER_MID_X := LADDER_MID_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-## Short right-terrace Cistern emergency climb (beside freight shaft).
-const LADDER_CISTERN_OPEN_X := 784.0
-const LADDER_CISTERN_X := LADDER_CISTERN_OPEN_X + (LADDER_OPENING - LADDER_WIDTH) * 0.5
-## Legacy Farms ladder removed; alias maps to Heart hoist shaft.
-const LADDER_FARMS_OPEN_X := LIFT_OPEN_X
-const LADDER_FARMS_X := LIFT_X
 
-## Presswater → lift service thresholds (Districts.PROTECTED_RESERVE / THIN).
+## --- Levels (deck tops): y = 320 + 640 * k -------------------------------------------------
+const WEST_LEVEL_GAP := MIN_BAND_GAP
+const WEST_ASHRAM_UPPER_Y := 320.0 ## L0
+const WEST_ASHRAM_LOWER_Y := WEST_ASHRAM_UPPER_Y + 1.0 * WEST_LEVEL_GAP ## L1 960
+const WEST_HIGH_UPPER_Y := WEST_ASHRAM_UPPER_Y + 2.0 * WEST_LEVEL_GAP ## L2 1600
+const WEST_HIGH_LOWER_Y := WEST_ASHRAM_UPPER_Y + 3.0 * WEST_LEVEL_GAP ## L3 2240
+const WICK_Y := WEST_ASHRAM_UPPER_Y + 4.0 * WEST_LEVEL_GAP ## L4 2880
+const HEART_Y := WICK_Y ## Mid Heart's main deck is level with Wickwork's street
+const WICK_LOWER_Y := WEST_ASHRAM_UPPER_Y + 5.0 * WEST_LEVEL_GAP ## L5 3520
+const MID_ALLOT_UPPER_Y := WEST_ASHRAM_UPPER_Y + 6.0 * WEST_LEVEL_GAP ## L6 4160
+const MID_ALLOT_LOWER_Y := WEST_ASHRAM_UPPER_Y + 7.0 * WEST_LEVEL_GAP ## L7 4800
+const WEST_LW_UPPER_Y := WEST_ASHRAM_UPPER_Y + 8.0 * WEST_LEVEL_GAP ## L8 5440 — Home Court / spawn
+const WEST_LW_LOWER_Y := WEST_ASHRAM_UPPER_Y + 9.0 * WEST_LEVEL_GAP ## L9 6080
+const BOTTOM_WEST_UPPER_Y := WEST_ASHRAM_UPPER_Y + 10.0 * WEST_LEVEL_GAP ## L10 6720
+const BOTTOM_WEST_LOWER_Y := WEST_ASHRAM_UPPER_Y + 11.0 * WEST_LEVEL_GAP ## L11 7360
+const VAULTWARD_Y := 0.0
+## Legacy aliases kept for older call sites.
+const MID_ALLOT_Y := MID_ALLOT_UPPER_Y
+const BOTTOM_WEST_Y := BOTTOM_WEST_UPPER_Y
+## Mid Heart's raised Ritual deck and lower freight tier (half levels, Mouth cluster only).
+const RITUAL_Y := WICK_Y - 0.5 * WEST_LEVEL_GAP ## 2560
+const FREIGHT_TIER_Y := WICK_Y + 0.5 * WEST_LEVEL_GAP ## 3200
+
+## East stack sits on the same grid, one deck per level (see HollowMap.runs()).
+const UPPER_RES_Y := WEST_ASHRAM_UPPER_Y ## L0 — Ashram Heights east (Firmament ceiling)
+const FARMS_Y := WEST_HIGH_UPPER_Y ## L2 — Glowbeds main gallery
+const GLOW_SUB_Y := WEST_HIGH_LOWER_Y ## L3 — Glowbeds hang / fiber racks
+const LOWER_WORK_Y := MID_ALLOT_LOWER_Y ## L7 — Lower-East services / freight yard
+const CISTERN_Y := WEST_LW_LOWER_Y ## L9 — Cistern core
+const SEEP_Y := BOTTOM_WEST_LOWER_Y ## L11 — Seep gallery
+
+## --- Walls of the Mouth ---------------------------------------------------------------------
+## West civic interior WEST_HOLLOW_LEFT..PIT_LEFT, dig flank HIGH_WEST_DIG_LEFT..WEST_HOLLOW_LEFT.
+## East civic interior PIT_RIGHT..EAST_CIVIC_RIGHT, dig flank EAST_CIVIC_RIGHT..EAST_FLANK_RIGHT.
+const WEST_HOLLOW_LEFT := -2880.0
+const WEST_HOLLOW_RIGHT := PIT_LEFT
+const HIGH_WEST_DIG_LEFT := -5760.0
+const HIGH_WEST_DIG_RIGHT := WEST_HOLLOW_LEFT
+const GALLERY_LEFT := HIGH_WEST_DIG_LEFT
+const EAST_CIVIC_RIGHT := 9280.0
+const EAST_FLANK_RIGHT := 12160.0
+## Legacy names for the same lines.
+const HOLLOW_LEFT := WEST_HOLLOW_LEFT
+const HOLLOW_RIGHT := EAST_CIVIC_RIGHT
+const EXIT_RIGHT := EAST_CIVIC_RIGHT ## where the east dig rock begins
+
+## --- Opening route (Home Court is the Act 1 spawn) ---------------------------------------------
+const HOME_COURT_LEFT := -320.0
+const HOME_COURT_DECK := Vector4(HOME_COURT_LEFT, 160.0, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+const HOME_LANDING := Vector4(160.0, 640.0, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+const SWITCHBACK_LEFT := -800.0
+const SWITCHBACK_FLOOR := Vector4(SWITCHBACK_LEFT, HOME_COURT_LEFT, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+const WEST_DISPATCH_LEFT := -1600.0
+const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, WEST_LW_UPPER_Y, FLOOR_THICKNESS)
+const HOME_ROOF_Y := WEST_LW_UPPER_Y - WEST_LEVEL_GAP
+const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 960.0, WEST_LW_UPPER_Y + 80.0 - HOME_ROOF_Y)
+const BOTTOM_WEST_THRESHOLD_LEFT := -4640.0
+const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -4080.0, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+const GALLERY_FLOOR := Vector4(HIGH_WEST_DIG_LEFT, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+const LOWER_LIFT_LANDING := Vector4(-3440.0, -2800.0, WEST_LW_LOWER_Y, FLOOR_THICKNESS)
+const APPROACH_LANDING1_Y := WEST_LW_LOWER_Y
+const APPROACH_LANDING2_Y := BOTTOM_WEST_UPPER_Y
+const WICK_BAY_WEST := -3680.0
+
+## --- Mid Heart and the east approach ---------------------------------------------------------
+## Main crossing: West Exchange raft -> stairs over the raised Ritual deck -> East Service raft.
+const HEART_WEST := Vector4(PIT_LEFT, 2400.0, HEART_Y, BRIDGE_THICKNESS)
+const HEART_RITUAL := Vector4(2720.0, 3680.0, RITUAL_Y, BRIDGE_THICKNESS)
+const HEART_EAST := Vector4(4000.0, PIT_RIGHT, HEART_Y, BRIDGE_THICKNESS)
+const HEART_FREIGHT := Vector4(1760.0, 4640.0, FREIGHT_TIER_Y, BRIDGE_THICKNESS)
+const HEART_SPAN := Vector4(PIT_LEFT, PIT_RIGHT, HEART_Y, BRIDGE_THICKNESS) ## extent only, not one deck
+const HEART_MID_X := (PIT_LEFT + PIT_RIGHT) * 0.5
+const HEART_MID := Vector4(HEART_MID_X - 32.0, HEART_MID_X + 32.0, RITUAL_Y, BRIDGE_THICKNESS)
+
+const MID_EAST_LANDING := Vector4(PIT_RIGHT, 7040.0, HEART_Y, FLOOR_THICKNESS)
+const MID_EAST_APPROACH := Vector4(7040.0, EAST_CIVIC_RIGHT, HEART_Y, FLOOR_THICKNESS)
+const MID_EAST_DIG_FRONT := Vector4(EAST_CIVIC_RIGHT, EAST_FLANK_RIGHT, HEART_Y, FLOOR_THICKNESS)
+
+## --- Lifts (ids shared with HollowMap.lifts) --------------------------------------------------
+const HEART_HOIST_ID := &"heart" ## west civic cage — always runs
+const EAST_PASSENGER_ID := &"east_passenger" ## Warden-run
+const FREIGHT_LIFT_ID := &"freight" ## Cistern freight cage
 const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
 
-static func lift_open_end() -> float:
-	return LIFT_OPEN_X + LIFT_OPENING
+## ---------------------------------------------------------------- map queries (via HollowMap)
+
+## Every walkable deck piece, as Vector4(x0, x1, y, thickness).
+static func all_deck_rects() -> Array[Vector4]:
+	return HollowMap.deck_rects()
 
 
-static func left_lift_open_end() -> float:
-	return LEFT_LIFT_OPEN_X + LIFT_OPENING
+## Decks that carry the opening route (Home Court spawn -> Dispatch -> Bottom-West).
+static func opening_route_deck_rects() -> Array[Vector4]:
+	return _rects_for_runs([&"LW8", &"BW9", &"BW10", &"BW11"])
 
 
-static func freight_lift_open_end() -> float:
-	return FREIGHT_LIFT_OPEN_X + LIFT_OPENING
+## Everything that is not the opening route.
+static func expansion_deck_rects() -> Array[Vector4]:
+	var opening := opening_route_deck_rects()
+	var out: Array[Vector4] = []
+	for r in HollowMap.deck_rects():
+		if not opening.has(r):
+			out.append(r)
+	return out
 
 
-static func ladder_farms_open_end() -> float:
-	return lift_open_end()
+static func west_stack_deck_rects() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	for r in HollowMap.deck_rects():
+		if r.y <= PIT_LEFT + 0.5:
+			out.append(r)
+	return out
 
 
-static func ladder_cistern_open_end() -> float:
-	return LADDER_CISTERN_OPEN_X + LADDER_OPENING
+static func _rects_for_runs(ids: Array[StringName]) -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	for p in HollowMap.deck_pieces():
+		if ids.has(p["run"]):
+			out.append(Vector4(p["x0"], p["x1"], p["y"], FLOOR_THICKNESS))
+	return out
 
 
-static func ladder_mid_open_end() -> float:
-	return LADDER_MID_OPEN_X + LADDER_OPENING
+## Stairs as Vector4(foot_x, foot_y, top_x, top_y) — the argument order of paint_stairs().
+static func opening_route_stair_rects() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	for s in HollowMap.stairs():
+		if [&"S_LW", &"S_BW1", &"S_BW2"].has(s["id"]):
+			out.append(Vector4(s["foot_x"], s["foot_y"], s["top_x"], s["top_y"]))
+	return out
 
 
-static func ladder_upper_open_end() -> float:
-	return LADDER_UPPER_OPEN_X + LADDER_OPENING
+static func expansion_stair_rects() -> Array[Vector4]:
+	var opening := opening_route_stair_rects()
+	var out: Array[Vector4] = []
+	for s in HollowMap.stairs():
+		var v := Vector4(s["foot_x"], s["foot_y"], s["top_x"], s["top_y"])
+		if not opening.has(v):
+			out.append(v)
+	return out
 
 
-static func ladder_upper_shaft_height() -> float:
-	return FARMS_Y - UPPER_RES_Y
+static func heart_deck_rects() -> Array[Vector4]:
+	var out: Array[Vector4] = []
+	for p in HollowMap.deck_pieces():
+		if p["x1"] > PIT_LEFT and p["x0"] < PIT_RIGHT and HollowMap.run_by_id(p["run"])["zone"] == &"mid_heart":
+			out.append(Vector4(p["x0"], p["x1"], p["y"], BRIDGE_THICKNESS))
+	return out
 
 
-static func ladder_mid_shaft_height() -> float:
-	return MID_ALLOT_Y - WICK_Y
+## Mid Heart reaches from the west lip to the east lip.
+static func mid_heart_spans_mouth() -> bool:
+	var rects := heart_deck_rects()
+	if rects.is_empty():
+		return false
+	var x0: float = rects[0].x
+	var x1: float = rects[0].y
+	for r in rects:
+		x0 = minf(x0, r.x)
+		x1 = maxf(x1, r.y)
+	return x0 <= PIT_LEFT + 0.5 and x1 >= PIT_RIGHT - 0.5
 
 
-static func ladder_cistern_shaft_height() -> float:
-	return CISTERN_Y - LOWER_WORK_Y
+## East tip of the civic east walk; the dig front begins here.
+static func civic_east_end() -> float:
+	return EAST_CIVIC_RIGHT
 
 
-static func lift_stop_ys() -> Array[float]:
-	## Heart hoist default (essential civic spine).
-	return heart_hoist_stop_ys()
+static func west_stack_level_ys() -> Array[float]:
+	return HollowMap.level_ys()
 
 
-static func heart_hoist_stop_ys() -> Array[float]:
-	return [FARMS_Y, WICK_Y, LOWER_WORK_Y]
+## Ladder shafts, as {"id", "open_x", "top_y", "bottom_y"}.
+static func ladder_defs() -> Array[Dictionary]:
+	return HollowMap.ladders()
 
 
-static func left_service_stop_ys() -> Array[float]:
-	return [FARMS_Y, GLOW_SUB_Y, WICK_Y]
-
-
-static func freight_lift_stop_ys() -> Array[float]:
-	return [WICK_Y, CISTERN_Y, SEEP_Y]
+static func ladder_open_end(open_x: float) -> float:
+	return open_x + LADDER_OPENING
 
 
 static func stop_ys_for_lift(lift_id: StringName) -> Array[float]:
-	match lift_id:
-		LEFT_SERVICE_ID:
-			return left_service_stop_ys()
-		FREIGHT_LIFT_ID:
-			return freight_lift_stop_ys()
-		_:
-			return heart_hoist_stop_ys()
+	for lf in HollowMap.lifts():
+		if lf["id"] == lift_id:
+			return lf["stops"]
+	return []
 
 
 static func lift_x_for(lift_id: StringName) -> float:
-	match lift_id:
-		LEFT_SERVICE_ID:
-			return LEFT_LIFT_X
-		FREIGHT_LIFT_ID:
-			return FREIGHT_LIFT_X
-		_:
-			return LIFT_X
+	for lf in HollowMap.lifts():
+		if lf["id"] == lift_id:
+			return float(lf["open_x"]) + (LIFT_OPENING - LIFT_WIDTH) * 0.5
+	return 0.0
 
 
 static func is_essential_lift(lift_id: StringName) -> bool:
 	return lift_id == LIFT_ESSENTIAL_ID or lift_id == &"" or lift_id == &"civic"
 
 
-static func farms_terrace_tiles() -> int:
-	return int((LIFT_OPEN_X - FARMS_GALLERY_END) / TILE)
+## Deliberate deviations from the lint rules, each with a reason a player could read off the
+## world. {"kind": "end"|"gap", "y": deck top, "x": the end/gap start, "reason": ...}.
+## Empty on purpose: every end in this map is a wall, a lip, a stair, a shaft or rock.
+static func intentional_exceptions() -> Array[Dictionary]:
+	return []
 
 
-static func farms_gallery_tiles() -> int:
-	return int((FARMS_GALLERY_END - HOLLOW_LEFT) / TILE)
-
-
-static func wick_left_street_tiles() -> int:
-	return int((LIFT_OPEN_X - WICK_BAY_END) / TILE)
-
-
-static func cistern_terrace_tiles() -> int:
-	return int((CISTERN_ALCOVE_START - CISTERN_DECK_LEFT) / TILE)
-
-
-static func cistern_alcove_tiles() -> int:
-	return int((EXIT_RIGHT - CISTERN_ALCOVE_START) / TILE)
-
-
-static func heart_deck_rects() -> Array[Vector4]:
-	return [HEART_WEST, HEART_LINK_AB, HEART_MID, HEART_LINK_BC, HEART_EAST]
-
-
-## Ordered walkable deck tops used for clearance checks (top → bottom).
+## Ordered walkable deck tops used for clearance checks (top -> bottom).
 static func walkable_band_ys() -> Array[float]:
-	return [
-		UPPER_RES_Y,
-		FARMS_Y,
-		GLOW_SUB_Y,
-		WICK_Y,
-		MID_ALLOT_Y,
-		LOWER_WORK_Y,
-		CISTERN_Y,
-		SEEP_Y,
-	]
+	var ys: Array[float] = HollowMap.level_ys()
+	ys.append(RITUAL_Y)
+	ys.append(FREIGHT_TIER_Y)
+	ys.sort()
+	return ys
 
 
 static func band_gap(upper_y: float, lower_y: float) -> float:
@@ -228,44 +252,32 @@ static func band_gap(upper_y: float, lower_y: float) -> float:
 
 
 static func band_headroom(upper_y: float, lower_y: float) -> float:
-	## Free space under upper deck collider bottom down to lower deck top.
 	return band_gap(upper_y, lower_y) - FLOOR_THICKNESS
 
 
 static func floor_visual_world_y(deck_top_y: float) -> float:
-	## World Y of the top edge of the FloorVisual tile for a deck top.
 	return deck_top_y - FLOOR_VISUAL_INSET
 
 
 static func floor_visual_lip_y(deck_top_y: float) -> float:
-	## Expected rock-lip Y inside a 64px ledge tile (mid-tile after inset).
 	return floor_visual_world_y(deck_top_y) + FLOOR_VISUAL_INSET
 
 
 static func player_spawn_point() -> Vector2:
-	## Feet on lower working terrace (CharacterBody2D origin ≈ body top-left).
-	return Vector2(120.0, LOWER_WORK_Y - 32.0)
+	## Feet on Lower Worker Terraces / Home Court (CharacterBody2D origin ~ body top-left).
+	return Vector2((HOME_COURT_DECK.x + HOME_COURT_DECK.y) * 0.5, WEST_LW_UPPER_Y - 32.0)
 
 
-## CharacterBody2D stand positions (feet on deck → position.y = deck_top - 32).
+## CharacterBody2D stand positions: every zone anchor (feet on a deck -> y = deck - 32).
 static func safe_stand_points() -> Array[Vector2]:
-	var body := 32.0
-	return [
-		player_spawn_point(),
-		Vector2(80.0, FARMS_Y - body), ## Glowbeds public terrace
-		Vector2(-320.0, FARMS_Y - body), ## Glowbeds gallery
-		Vector2(-280.0, GLOW_SUB_Y - body), ## Glowbeds hang
-		Vector2(40.0, UPPER_RES_Y - body), ## upper residence street
-		Vector2(-40.0, WICK_Y - body), ## Wickwork street
-		Vector2(-300.0, WICK_Y - body), ## Wick bay
-		Vector2(-200.0, MID_ALLOT_Y - body), ## mid allotment street
-		Vector2(536.0, HEART_Y - body), ## Mid Heart center
-		Vector2(400.0, HEART_WEST.z - body), ## Mid Heart west
-		Vector2(780.0, WICK_Y - body), ## right mid / excavation approach
-		Vector2(780.0, CISTERN_Y - body), ## Cistern
-		Vector2(200.0, LOWER_WORK_Y - body), ## Lower Heart west lip
-		Vector2(900.0, SEEP_Y - body), ## seep gallery approach
-	]
+	var out: Array[Vector2] = [player_spawn_point()]
+	for z in HollowMap.zones():
+		if z.get("volume", false):
+			continue
+		var a: Vector2 = z["anchor"]
+		out.append(Vector2(a.x, a.y - 32.0))
+	out.append(Vector2(HEART_MID_X, RITUAL_Y - 32.0))
+	return out
 
 
 static func nearest_safe_stand(from: Vector2) -> Vector2:

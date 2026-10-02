@@ -3,25 +3,20 @@ extends Node2D
 ## F11 toggles fullscreen; Esc closes Journal before returning to title.
 
 const UiStyleRef := preload("res://ui_style.gd")
-const WorkOrderTrackerScript := preload("res://work_order_tracker.gd")
 
 @onready var _dialogue: CanvasLayer = $UI/DialoguePanel
 @onready var _journal: CanvasLayer = $UI/JournalHud
 @onready var _hints: Label = $UI/Hints
-@onready var _npcs: Node2D = $Hollow/NPCs
+@onready var _npcs: Node2D = get_node_or_null("Hollow/NPCs")
 @onready var _primary_hud: PanelContainer = $UI/PrimaryHud
 
 var _hints_ttl := 8.0
 var _hints_pinned := false
-## "joss_offer" | "pell_help" | "" — which Yes/No prompt is open.
+## "pell_help" | "" — which Yes/No prompt is open.
 var _pending_choice_kind := ""
 
 
 func _ready() -> void:
-	var community := get_tree().root.get_node_or_null("Community")
-	if community:
-		community.skip_lie_prompt = false
-
 	var terrain := get_node_or_null("Terrain")
 	if terrain and terrain.has_signal("frontier_notice"):
 		terrain.frontier_notice.connect(_on_frontier_notice)
@@ -34,20 +29,7 @@ func _ready() -> void:
 	if _dialogue and _dialogue.has_signal("choice_made"):
 		_dialogue.choice_made.connect(_on_dialogue_choice)
 
-	_ensure_work_order_tracker()
 	_apply_hud_chrome()
-
-
-func _ensure_work_order_tracker() -> void:
-	var ui := get_node_or_null("UI")
-	if ui == null:
-		return
-	if ui.get_node_or_null("WorkOrderTracker") != null:
-		return
-	var tracker := Control.new()
-	tracker.name = "WorkOrderTracker"
-	tracker.set_script(WorkOrderTrackerScript)
-	ui.add_child(tracker)
 
 
 func _apply_hud_chrome() -> void:
@@ -59,10 +41,10 @@ func _apply_hud_chrome() -> void:
 	if _hints:
 		UiStyleRef.apply_label(_hints, &"muted")
 		_hints.modulate.a = 0.45
-	var harvest := get_node_or_null("UI/HarvestLabel") as Label
-	if harvest:
-		UiStyleRef.apply_label(harvest, &"stat")
-		harvest.modulate = Color(0.9, 0.9, 0.86, 0.92)
+	var cycle := get_node_or_null("UI/CycleLabel") as Label
+	if cycle:
+		UiStyleRef.apply_label(cycle, &"stat")
+		cycle.modulate = Color(0.9, 0.9, 0.86, 0.92)
 	var trust := get_node_or_null("UI/TrustLabel") as Label
 	if trust:
 		UiStyleRef.apply_label(trust, &"stat")
@@ -73,9 +55,6 @@ func _apply_hud_chrome() -> void:
 	var notice := get_node_or_null("UI/NoticeLabel") as Label
 	if notice:
 		UiStyleRef.apply_label(notice, &"body")
-	var lie_panel := get_node_or_null("UI/LiePromptPanel") as PanelContainer
-	if lie_panel:
-		UiStyleRef.apply_panel(lie_panel, &"copper", true)
 
 
 func _process(delta: float) -> void:
@@ -105,9 +84,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		var upgrade_panel := get_node_or_null("UI/UpgradePanel")
-		if upgrade_panel and upgrade_panel.has_method("is_theft_shop_open"):
-			if upgrade_panel.is_theft_shop_open() or upgrade_panel.is_requisition_open():
-				upgrade_panel.close_theft_shop()
+		if upgrade_panel and upgrade_panel.has_method("is_requisition_open"):
+			if upgrade_panel.is_requisition_open():
 				upgrade_panel.close_requisition()
 				get_viewport().set_input_as_handled()
 				return
@@ -146,17 +124,6 @@ func _on_npc_talk(npc: Node2D, lines: PackedStringArray, choice_prompt: String) 
 	var talk_lines := lines
 	var talk_choice := choice_prompt
 
-	if speaker == "Joss":
-		var wo := get_tree().root.get_node_or_null("WorkOrders")
-		if wo and wo.has_method("get_joss_lines"):
-			talk_lines = wo.get_joss_lines()
-			talk_choice = wo.get_joss_choice_prompt() if wo.has_method("get_joss_choice_prompt") else ""
-			if talk_choice != "":
-				_pending_choice_kind = "joss_offer"
-			elif wo.get_state() == wo.STATE_MATERIALS_DELIVERED:
-				# Show delivery lines, then mark awaiting Harvest.
-				wo.acknowledge_delivery()
-
 	if talk_choice != "" and _pending_choice_kind == "" and speaker == "Pell":
 		_pending_choice_kind = "pell_help"
 
@@ -166,31 +133,24 @@ func _on_npc_talk(npc: Node2D, lines: PackedStringArray, choice_prompt: String) 
 func _on_dialogue_choice(accepted: bool) -> void:
 	var kind := _pending_choice_kind
 	_pending_choice_kind = ""
-	if kind == "joss_offer":
-		var wo := get_tree().root.get_node_or_null("WorkOrders")
-		var community := get_tree().root.get_node_or_null("Community")
-		if accepted and wo and wo.has_method("accept_offered"):
-			wo.accept_offered()
-			if community and community.has_signal("notice_message"):
-				community.notice_message.emit("Work Order accepted: %s" % wo.get_title())
-		elif community and community.has_signal("notice_message"):
-			community.notice_message.emit("You leave the Work Order with Joss for now.")
-		return
-
-	# Rare prompt from Pell: "Help with the beds?" — tiny Trust nudge if yes.
+	# Rare prompt from Pell: "Help with the beds?" — a small, reasoned Trust event.
 	if kind != "pell_help":
 		return
-	var community2 := get_tree().root.get_node_or_null("Community")
-	if community2 == null:
-		return
 	if accepted:
-		community2.set_trust(community2.get_trust() + 1)
-		community2.notice_message.emit("You help in the Glowbeds. (+1 Trust)")
+		var trust := get_tree().root.get_node_or_null("Trust")
+		if trust and trust.has_method("submit_trust_event"):
+			trust.submit_trust_event(&"favor", 1.0, "Helped Pell with the Glowbeds")
+		_notice("You help in the Glowbeds.")
 	else:
-		community2.notice_message.emit("You make an excuse and slip away.")
+		_notice("You make an excuse and slip away.")
 
 
 func _on_frontier_notice(text: String) -> void:
-	var community := get_tree().root.get_node_or_null("Community")
-	if community and community.has_signal("notice_message"):
-		community.notice_message.emit(text)
+	_notice(text)
+
+
+## The HUD notice label is the single toast route for play-scene events.
+func _notice(text: String) -> void:
+	var upgrade_panel := get_node_or_null("UI/UpgradePanel")
+	if upgrade_panel and upgrade_panel.has_method("show_notice"):
+		upgrade_panel.show_notice(text)

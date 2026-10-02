@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/job_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+job_id = &"open_the_gallery"
+title = "Open the new gallery"
+description = "The Steward's crew is opening an expansion gallery at the dig front. Report to Dispatch, dig with the crew, and haul any Sutral the rock gives up to the worksite collection — Wickwork needs it for bindings. Most rock is worthless obstruction; the Material is the point. (Canon §15's opening reference scenario, thin slice.)"
+work_type = &"duty"
+deadline_shape = &"multi_cycle"
+deadline_cycles = 1
+tier = 0
+min_trust = &""
+district_id = &"wickwork"
+material_id = &"sutral"
+required_amount = 3
+tallies_reward = 6
+spawn_on_unmet_demand = false

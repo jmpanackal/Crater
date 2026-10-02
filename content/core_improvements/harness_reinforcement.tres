@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/core_improvement_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+improvement_id = &"harness_reinforcement"
+display_name = "Harness Reinforcement"
+description = "A foundational Rig improvement (canon §34): the underlying harness frame is rebuilt to comfortably support more mounted equipment. Raises Rig Capacity — the main way stronger combinations stop being strenuous (§36). Placeholder Act 1 content; its source (order / restored Component / Forbidden) is G6's mixed model, decided by the spec that grants it."
+slot_bonus = 0
+capacity_bonus = 2

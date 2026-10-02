@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/material_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+material_id = &"hullbit"
+display_name = "Hullbit"
+description = "Useful intact colony-ship structural composite. Civic reinforcement, infrastructure, Approved and Forbidden Gear, major projects, later shipbuilding."
+clue_hint = "Proximity to larger buried structures."

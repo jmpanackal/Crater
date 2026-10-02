@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"glowbeds_hang"
+display_name = "Glowbeds Hang"
+world_origin = Vector2(7200, 2240)
+seams = [{
+"edge": "north",
+"neighbor": "glowbeds",
+"position": 2240
+}, {
+"edge": "south",
+"neighbor": "mid_east_landing",
+"position": 2880
+}]
+enclosed = false
+world_rect = Rect2(5760, 1760, 2240, 640)
+restricted = false

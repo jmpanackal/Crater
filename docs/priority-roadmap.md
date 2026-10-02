@@ -10,9 +10,11 @@ USER answer log — this doc summarizes and sequences it, doesn't replace it),
 [`game-decisions.md`](game-decisions.md) (#28/#29 locks), [`materials.md`](materials.md),
 [`terminology-transition.md`](terminology-transition.md).
 
-**Status snapshot (2026-09-13):** 25/25 headless tests passing. Terminology
-migration complete except the two items in Phase 1 below. See "Known
-follow-ups" in `terminology-transition.md` for the full detail on each.
+**Status snapshot (2026-09-14):** [`mechanics-canon.md`](mechanics-canon.md)
+adopted as the mechanics source of truth. Phase 0–1 below were completed
+against the **pre-canon** model; their Requisition, Shortage Risk, Harvest,
+and named-goods implementations are now transitional (see the code
+migration backlog in `terminology-transition.md`). Phase 1.5 is new.
 
 ---
 
@@ -55,6 +57,18 @@ gaps between locked intent and current code, not open questions.*
 
 ---
 
+## Phase 1.5 — Build Bible + canon migration
+
+*Cost: design contract first, then scoped implementation. Opened 2026-09-14 when
+the mechanics canon superseded the Phase 0–1 economy model.*
+
+- [ ] Write the **Build Bible** (canon §66): implementation-level contracts for services/autoloads, stamina/fatigue/reservation, Materials/Components/Records, hauling/caching, district Capacity/Demand/Reserve, jobs/commitments, Trust/suspicion/evidence, Rig/Gear/Capacity/Strain, capability web, workspace/residences, destructible terrain persistence, save/load, and opening-route acceptance tests. Include an explicit **vertical-slice scope cut** (which systems ship thin, which defer).
+- [ ] Migrate code off retired mechanics per `terminology-transition.md` (Harvest → civic cycle/Ritual, Requisition → Approved Gear Orders, Shortage Risk → district condition + local suspicion, named goods/reserve 1/cap 6 → Capacity/Demand/Reserve, Salvage → Materials).
+
+**Sequencing note:** Phase 2's opening-route layout (canon §52) is unchanged by the canon, so layout work may continue in parallel; only rename labels (Holding → Ritual) as chunks are touched.
+
+---
+
 ## Phase 2 — Lock the opening-route spatial layout
 
 *Cost: design + a modest amount of generation. This is the map/chunk work
@@ -65,13 +79,15 @@ change.*
 Already scoped in [`docs/superpowers/plans/2026-09-12-full-hollow-chunk-atlas.md`](superpowers/plans/2026-09-12-full-hollow-chunk-atlas.md)
 Task 4 — don't re-plan it, execute it:
 
-- [ ] Approve a seam-locked `H-3-11` ↔ `H-4-11` master (draft exists, unapproved).
-- [ ] Generate `H-2-11` West Dispatch with its seam contracts.
-- [ ] Generate Bottom-West Approach + Threshold as one outward strip.
-- [ ] Generate First Expansion Gallery, Collapsed Side Chamber, Lower Lift Landing.
-- [ ] Stop there — do **not** scale to the full 288-cell atlas yet. Prove the opening route (~8 chunks) end-to-end in Godot first.
+- [x] Approve a seam-locked `H-3-11` ↔ `H-4-11` master — done (see `hollow-chunk-atlas.md`'s opening-route status table; this was stale here).
+- [x] Generate `H-2-11` West Dispatch with its seam contracts — approved.
+- [x] Generate Bottom-West Approach + Threshold as one outward strip — approved.
+- [x] Generate First Expansion Gallery, Collapsed Side Chamber — approved (Lower Lift Landing superseded by the locked stairs/switchback topology; see `hollow-chunk-atlas.md`'s "Locked transport topology").
+- [x] **Build the opening route as real, walkable Godot geometry** — rebuilt 2026-09-18 after the first attempt got the macro shape wrong (see below). `content/zones/*.tres` + `main.tscn`'s `Hollow/Zones` author all 8 opening-route zones (Home Court → Lower Switchback → West Dispatch Yard → Bottom-West Approach → Lower Lift Landing → Bottom-West Threshold → First Expansion Gallery → Collapsed Side Chamber) with real seams, and `hollow_terrain.gd` (one `TileMapLayer`, collision + visuals on the same tile — see `docs/hollow-level-authoring.md`) builds matching geometry. Greybox, per Phase 0's #8 decision. Covered by `tests/test_opening_route.gd`.
+- [x] **First pass corrected, not just patched:** the original build (`hollow_decks.gd`/`hollow_floor.gd`, since deleted) put Bottom-West Dig Front beside Home Court as a flat westward strip — checked against a to-scale blueprint with the user and found wrong twice (a quest-order sequence isn't a physical distance; Bottom-West sits *below* Home Court, mirroring Cistern below Glowbeds). Confirmed macro reference: https://claude.ai/artifact/Dq15YdDjhfe4B6e1hsvv7U.
+- [ ] Stop there — do **not** scale to the full 288-cell atlas yet, and don't wire actual digging into First Expansion Gallery yet (`terrain.gd` only supports one hardcoded envelope today — a real follow-up, not done here).
 
-**Exit condition:** the opening route (Home Court → Lower Lift Landing) is walkable in-engine with seam-correct art, not just approved reference images.
+**Exit condition:** the Home Court + Bottom-West Dig Front cluster is walkable in-engine — **done**. Wickwork, Glowbeds, Mid Heart, Cistern, and Ashram Heights are a later rebuild phase, same methodology (`docs/hollow-level-authoring.md`); their prior prototype geometry was deleted, not carried forward, since it had real canon mismatches (Glowbeds on the wrong wall, a non-canonical `LeftServiceLift`).
 
 ---
 
@@ -93,7 +109,7 @@ blocked by layout or art, only by Phase 0/1's economy rules being settled
 actually does).*
 
 - [ ] First Steward assignment dialogue (depends on Phase 0's #6 answer).
-- [ ] Tighten Cover/Shortage Risk-adjacent notice copy once Phase 1's rename lands.
+- [ ] Write theft/evidence and Trust-reason copy against the canon (human-readable reasons, no `+X Trust` popups, no percentages) once Phase 1.5 lands.
 - [ ] Expand the three Journal record stubs if the demo needs more than the Firmament-note gate.
 
 ---

@@ -2,13 +2,15 @@
 
 Living checklist for a **playable, coherent, demoable** Act 1 vertical slice. Not a full implementation brief — ordered work + known gaps.
 
-Related canon: [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-decisions.md`](game-decisions.md) (#28, #29), [`materials.md`](materials.md), [`game-pitch.md`](game-pitch.md).
+Related canon: **[`mechanics-canon.md`](mechanics-canon.md) (source of truth)**, [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-decisions.md`](game-decisions.md), [`materials.md`](materials.md), [`game-pitch.md`](game-pitch.md).
+
+> **2026-09-14 — mechanics canon adopted (USER).** The siphon diagnosis, fix list, and USER answers below are **historical** records of the pre-canon prototype. Where they mention Siphon, Cover / Shortage Risk, Requisition, Harvest, Standing, protected reserve, named District-production goods, or the Salvage wallet, read the canon replacement in [`terminology-transition.md`](terminology-transition.md). The next planning step is the canon's **Build Bible** (canon §66), which should replace this list with a vertical-slice scope cut.
 
 ---
 
-## Siphon diagnosis (why it feels nonsensical)
+## Siphon diagnosis (historical — pre-canon)
 
-**Design intent (canon — USER locked #29):**
+**Design intent at the time (superseded by mechanics canon):**
 
 - Public work returns assigned **Materials** → **Tallies** (personal pay for sanctioned gear) + **Trust** through reliable civic work + district inputs. Residence/access use Trust, Tallies/relocation cost, and story gates; there is no Contribution meter.
 - Districts passively turn inputs into **District production**; healthy output = **Siphon Cover**.
@@ -17,6 +19,8 @@ Related canon: [`CONTEXT.md`](../CONTEXT.md), [`story.md`](story.md), [`game-dec
 - Dig haul is **multi-type Materials** + rare **Records** (Records stay separate).
 - Siphon only happens when you are home in the Hollow.
 - Demo needs a thin **inventory**.
+
+**Canon now:** Approved Gear Orders (Tallies + authorized district output) vs Forbidden Gear (diverted output + Material/Component/Record); districts resolve Capacity/Demand/Reserve once per civic cycle; theft risk = civic harm + local detection/evidence; Materials are physically hauled; Ritual replaces Harvest; Trust is qualitative.
 
 **What the build does today:**
 
@@ -47,9 +51,9 @@ Partial slice landed (named District production + Materials turn-in). Remaining:
 
 ---
 
-## Priority implementation list (Act 1 demo)
+## Priority implementation list (Act 1 demo — pre-canon, to be replaced by the Build Bible)
 
-Ordered for “demo tomorrow” coherence — cut deep story beats before cutting clarity.
+Ordered for “demo tomorrow” coherence — cut deep story beats before cutting clarity. Terms: Harvest → civic cycle / **Ritual**; Standing → **Trust**; siphon → **diversion**; requisition → **Approved Gear Orders**; authored Firmament fissure → **thick-Firmament sustained excavation**.
 
 1. **Clarify siphon fiction in UI + economy (after Decision 2 + name confirm)**  
    Split open requisition vs secret divert; stop calling efficiency a siphon; make Cover mean something visible (target-good drain, local production state, and/or missing-goods toast). Tiny copy-only mitigations only if full split waits.
@@ -126,6 +130,8 @@ Ordered for “demo tomorrow” coherence — cut deep story beats before cuttin
 ---
 
 ## USER answers (siphon + demo scope)
+
+*Answers 1, 2, 4, and 5 are superseded by the mechanics canon (Requisition → Approved Gear Orders; Cover/Shortage Risk → district condition + local suspicion; protected reserve/cap → Capacity/Demand/Reserve per civic cycle). Answers 3, 6, 7, and 8 still stand — for #7, the stand-in flag now represents Ashram Heights residence access for sustained Firmament excavation.*
 
 ### Siphon fiction
 

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/material_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+material_id = &"sutral"
+display_name = "Sutral"
+description = "Naturally occurring and cultivable underground biological/fungal Material with a useful fibrous structure. Fibers, bindings, recovery and light, biological technology; the Glowbeds and Wickwork both depend on it."
+clue_hint = "Implies damp conditions or a nearby growth pocket."

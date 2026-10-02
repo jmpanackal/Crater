@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/job_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+job_id = &"senior_survey_run"
+title = "Senior survey run"
+description = "A better assignment, offered only to a hand society relies on: bring Wickwork two loads of Ravelstone from the deep seams for the hoist braces. Placeholder Act 1 content standing in for the higher-tier work canon §17 promises higher Trust unlocks."
+work_type = &"commitment"
+deadline_shape = &"multi_cycle"
+deadline_cycles = 2
+tier = 2
+min_trust = &"relied_on"
+district_id = &"wickwork"
+material_id = &"ravelstone"
+required_amount = 2
+tallies_reward = 6
+spawn_on_unmet_demand = false

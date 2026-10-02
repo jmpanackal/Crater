@@ -19,14 +19,16 @@
     on PATH.
 
 .PARAMETER TimeoutSeconds
-    Per-test wall-clock limit. A test whose SceneTree script hits an uncaught
-    error mid-function (push_error from a bad rename, a nonexistent method
-    call, etc.) never reaches its own quit() call, so the Godot process would
+    Per-test wall-clock limit, default 30s (generous for these single-scene
+    headless tests). A test whose SceneTree script hits an uncaught error
+    mid-function (push_error from a bad rename, a nonexistent method call,
+    etc.) never reaches its own quit() call, so the Godot process would
     otherwise idle forever and hang the whole suite - this happened during
     development. A timed-out test is killed and reported as a failure rather
-    than silently blocking every test after it. Default 30s is generous for
-    these single-scene headless tests; raise it only if a legitimately slow
-    test needs more.
+    than silently blocking every test after it. $PerTestTimeoutOverrides
+    below raises this for specific tests that are legitimately slow (not
+    hung) instead of raising it globally, which would weaken the hang-catch
+    for the other ~57 tests that normally finish in a second or two.
 
 .EXAMPLE
     tools/run_tests.ps1
@@ -41,6 +43,16 @@ param(
     [string]$GodotPath,
     [int]$TimeoutSeconds = 30
 )
+
+# Tests that are legitimately slow rather than hung, so they need more than
+# the default budget. test_home_court_navigation.gd walks the entire opening
+# route (measured ~176s wall-clock after the 2026-09-19 world-scale pass made
+# every walk segment ~5x longer); everything else still gets $TimeoutSeconds.
+$PerTestTimeoutOverrides = @{
+	"test_home_court_navigation.gd" = 300
+	"test_hollow_traversal.gd" = 600
+	"test_hollow_map_lint.gd" = 120
+}
 
 # Deliberately NOT "Stop": Godot writes real SCRIPT ERROR / WARNING lines to
 # stderr for things that aren't fatal to this runner (a failing test's own
@@ -116,7 +128,11 @@ try {
         $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
         $stderrTask = $proc.StandardError.ReadToEndAsync()
 
-        $finished = $proc.WaitForExit($TimeoutSeconds * 1000)
+        $effectiveTimeout = $TimeoutSeconds
+        if ($PerTestTimeoutOverrides.ContainsKey($file.Name) -and $PerTestTimeoutOverrides[$file.Name] -gt $TimeoutSeconds) {
+            $effectiveTimeout = $PerTestTimeoutOverrides[$file.Name]
+        }
+        $finished = $proc.WaitForExit($effectiveTimeout * 1000)
         $timedOut = -not $finished
         if ($timedOut) {
             try { $proc.Kill() } catch {}
@@ -139,7 +155,7 @@ try {
         }
 
         if ($timedOut) {
-            Write-Host "TIMEOUT after ${TimeoutSeconds}s - killed. Likely an uncaught error that never reached quit()." -ForegroundColor Red
+            Write-Host "TIMEOUT after ${effectiveTimeout}s - killed. Likely an uncaught error that never reached quit()." -ForegroundColor Red
         }
 
         $results += [PSCustomObject]@{

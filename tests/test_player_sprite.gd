@@ -1,5 +1,5 @@
 extends SceneTree
-## 8-dir idle mapping, textures load, dig still works, ColorRect replaced.
+## 8-dir idle mapping, placeholder frames built, dig still works, ColorRect replaced.
 
 
 func _init() -> void:
@@ -25,23 +25,6 @@ func _run_tests() -> void:
 			quit(1)
 			return
 		print("PASS facing ", dir, " -> ", actual)
-
-	var paths := [
-		"res://sprites/player/idle/south.png",
-		"res://sprites/player/idle/south-east.png",
-		"res://sprites/player/idle/east.png",
-		"res://sprites/player/idle/north-east.png",
-		"res://sprites/player/idle/north.png",
-		"res://sprites/player/idle/north-west.png",
-		"res://sprites/player/idle/west.png",
-		"res://sprites/player/idle/south-west.png",
-	]
-	for path in paths:
-		if load(path) == null:
-			push_error("FAIL missing texture %s" % path)
-			quit(1)
-			return
-	print("PASS all idle textures load")
 
 	var community: Node = root.get_node_or_null("Community")
 	if community:
@@ -79,7 +62,18 @@ func _run_tests() -> void:
 		push_error("FAIL sprite frames not built")
 		quit(1)
 		return
-	# 64px sheets must render at half scale so feet meet the 32px collider / deck.
+	# All 8 facings must have a real (procedurally-drawn placeholder) frame texture.
+	for anim_name: StringName in cases.values():
+		if not sprite.sprite_frames.has_animation(anim_name):
+			push_error("FAIL missing animation %s" % anim_name)
+			quit(1)
+			return
+		if sprite.sprite_frames.get_frame_texture(anim_name, 0) == null:
+			push_error("FAIL animation %s has no placeholder frame texture" % anim_name)
+			quit(1)
+			return
+	print("PASS all 8 facings have a placeholder frame texture")
+	# 64px placeholder canvas must render at half scale so feet meet the 32px collider / deck.
 	if absf(sprite.scale.x - player.SPRITE_SCALE) > 0.01 or absf(sprite.scale.y - player.SPRITE_SCALE) > 0.01:
 		push_error("FAIL sprite scale %s expected %s" % [sprite.scale, player.SPRITE_SCALE])
 		quit(1)

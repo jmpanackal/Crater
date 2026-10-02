@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/gear_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gear_id = &"counterweight_frame"
+display_name = "Counterweight Frame"
+description = "Heavy hauling Rig attachment (canon §65, Approved — Hauling / Endurance). Specializes in supporting large loads — a bigger bundle — and consumes significant Rig Capacity for it; trades flexibility for hauling strength."
+kind = &"approved"
+category = &"rig"
+capacity_cost = 3
+effects = {
+"hauling_capacity_bonus": 2.0
+}
+order_district = &"wickwork"
+order_tallies = 10
+order_output = 3.0
+order_min_trust = &"accepted"

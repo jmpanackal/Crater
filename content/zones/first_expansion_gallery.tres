@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"first_expansion_gallery"
+display_name = "First Expansion Gallery"
+world_origin = Vector2(-5000, 6720)
+seams = [{
+"edge": "south",
+"neighbor": "collapsed_side_chamber",
+"position": 7360
+}, {
+"edge": "east",
+"neighbor": "bottom_west_threshold",
+"position": -4640
+}]
+enclosed = true
+world_rect = Rect2(-5760, 6240, 1120, 640)
+restricted = false

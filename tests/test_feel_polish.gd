@@ -9,12 +9,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var community: Node = root.get_node_or_null("Community")
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	if community:
-		community.set_paused(true)
-		if "skip_lie_prompt" in community:
-			community.skip_lie_prompt = true
 	if save_load:
 		save_load.clear_save()
 
@@ -68,8 +63,8 @@ func _run() -> void:
 	root.add_child(terrain)
 	await process_frame
 	terrain.clear()
-	var firmament_cell := Vector2i(18, 2)
-	var mouth_cell := Vector2i(18, 12)
+	var firmament_cell := Vector2i(18, 10) ## World-scale pass (2026-09-19): row bands x5
+	var mouth_cell := Vector2i(18, 300)
 	terrain.set_cell(firmament_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 	terrain.set_cell(mouth_cell, 0, TerrainLayer.PLACEHOLDER_ATLAS)
 
@@ -107,15 +102,18 @@ func _run() -> void:
 		push_error("FAIL DigDressing missing")
 		quit(1)
 		return
-	if not dressing.has_method("firmament_quieter_than_mouth") or not dressing.firmament_quieter_than_mouth():
-		push_error("FAIL Firmament haze not quieter than Devil's Mouth gloom")
+	if dressing.get_node_or_null("FirmamentHaze") == null:
+		push_error("FAIL Firmament dressing rect missing")
 		quit(1)
 		return
-	if dressing.get_node_or_null("FirmamentHaze") == null or dressing.get_node_or_null("MouthGloom") == null:
-		push_error("FAIL Firmament/Devil's Mouth dressing rects missing")
+	# The downward dig direction used to carry its own "Devil's Mouth" gloom/
+	# label here too, reusing the name of the real crater void elsewhere in
+	# the Hollow — removed 2026-09-19 as a confusing stray artifact.
+	if dressing.get_node_or_null("MouthGloom") != null or dressing.get_node_or_null("DevilsMouthMark") != null:
+		push_error("FAIL stale Devil's Mouth dig-site dressing should be gone")
 		quit(1)
 		return
-	print("PASS Firmament↑ / Devil's Mouth↓ dig-site dressing")
+	print("PASS Firmament↑ dig-site dressing; no stray Devil's Mouth artifact")
 
 	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
 	FeelFx.reset_debug()
@@ -176,28 +174,29 @@ func _run() -> void:
 		return
 	print("PASS jump stretch (sprite only)")
 
-	# Orphan single-tile dig sheets retired — atlas remains.
+	# Orphan single-tile dig sheets retired. The real dig_site_tiles.png
+	# atlas is retired too (2026-09-17 scale correction) — sized for the
+	# old 64px grid and generated in a style that predates the
+	# placeholder-art-first plan; Terrain now uses a flat-color
+	# placeholder instead (see terrain.gd's _build_tileset()).
 	for orphan in [
 		"res://sprites/dig_site_cracked.png",
 		"res://sprites/dig_site_debris.png",
 		"res://sprites/dig_site_rubble.png",
 		"res://sprites/dig_site_solid.png",
+		"res://sprites/dig_site_tiles.png",
 	]:
 		if ResourceLoader.exists(orphan):
 			push_error("FAIL orphan still present: %s" % orphan)
 			quit(1)
 			return
-	if not ResourceLoader.exists("res://sprites/dig_site_tiles.png"):
-		push_error("FAIL dig_site_tiles.png missing")
-		quit(1)
-		return
-	print("PASS orphan dig_site_*.png retired; atlas kept")
+	print("PASS orphan/retired dig_site_*.png sheets gone; placeholder tileset in use")
 
-	# Lie UX dimmer present; journal subtitle/count helpers.
-	if scene.get_node_or_null("UI/LieDimmer") == null:
-		push_error("FAIL LieDimmer missing")
-		quit(1)
-		return
+	# Journal subtitle/count helpers. The retired Harvest-miss lie dimmer
+	# (UI/LieDimmer) has no successor — the lie/truth prompt it dimmed for
+	# is gone outright (Build Bible Spec 15: Ritual-miss is contextual,
+	# never an automatic stat penalty; no prompt is rebuilt), so there is
+	# nothing left for a dimmer to gate and no node to assert on.
 	var journal_hud := scene.get_node_or_null("UI/JournalHud")
 	if journal_hud == null:
 		push_error("FAIL JournalHud missing")
@@ -207,18 +206,15 @@ func _run() -> void:
 		push_error("FAIL Journal subtitle missing")
 		quit(1)
 		return
-	print("PASS Harvest lie dimmer + Journal subtitle")
+	print("PASS Journal subtitle")
 
-	# Soft fog drift node present.
-	if scene.get_node_or_null("Hollow/FarHaze") == null:
-		push_error("FAIL FarHaze parallax polish missing")
-		quit(1)
-		return
-	if scene.get_node_or_null("Hollow/PitShaftVeil") == null:
-		push_error("FAIL PitShaftVeil parallax layer missing")
-		quit(1)
-		return
-	print("PASS Hollow FarHaze + PitShaftVeil depth polish")
+	# QUARANTINED (2026-09-18): "Hollow FarHaze + PitShaftVeil depth polish"
+	# checked Hollow/FarHaze and Hollow/PitShaftVeil parallax dressing.
+	# main.tscn's Hollow subtree was deleted for a canon-grounded rebuild
+	# (docs/hollow-level-authoring.md). This pass only rebuilds Home Court +
+	# Bottom-West Dig Front; that depth-polish dressing is a later phase.
+	# Restore this test's real assertions once it is rebuilt — tracked in
+	# docs/priority-roadmap.md, not forgotten.
 
 	# Help text mentions climb.
 	var hints: Label = scene.get_node_or_null("UI/Hints") as Label
@@ -228,13 +224,17 @@ func _run() -> void:
 		return
 	print("PASS help text mentions climb")
 
-	# Dig approach threshold + hitstop helpers (smoke).
+	# Dig approach is a clean greybox threshold (no prop / label leftovers).
 	var approach: Node = scene.get_node_or_null("Approach")
 	if approach == null or not approach.has_method("entry_reads_as_threshold") or not approach.entry_reads_as_threshold():
-		push_error("FAIL dig approach threshold")
+		push_error("FAIL dig approach threshold not clean")
 		quit(1)
 		return
-	print("PASS dig approach threshold")
+	if scene.get_node_or_null("DigSiteLabel") != null:
+		push_error("FAIL DigSiteLabel leftover must be removed")
+		quit(1)
+		return
+	print("PASS dig approach clean (no Side galleries props/labels)")
 
 	FeelFx.reset_debug()
 	var firmament_h := FeelFx.dig_hitstop_ms(true, false)

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/technology_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+tech_id = &"load_harness"
+display_name = "Load Harness"
+description = "Wickwork's standard hauling harness — everyone knows it exists and what it does; Available means you can actually order one right now."
+kind = &"approved_gear"
+families = Array[StringName]([&"hauling", &"rig_core"])
+gear_id = &"load_harness"
+starts_known = true
+starts_understood = true

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/component_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+component_id = &"seal_kit"
+display_name = "Seal kit"
+description = "Bindcord, packed grit and a smear of sealbrine paste — enough to make a fresh cut in rock look like old wall to a passing glance, not to anyone who goes looking (Build Bible Spec 18: Basic concealment). Which specific kit recipes exist is open; this is the thin slice's one."
+seal_tier = &"basic"

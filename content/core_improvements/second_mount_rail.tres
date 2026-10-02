@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/core_improvement_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+improvement_id = &"second_mount_rail"
+display_name = "Second Mount Rail"
+description = "A foundational Rig improvement (canon §34): an additional mounting rail, adding one configurable Gear slot (the 3 -> 4 step of canon §36's slot progression). Placeholder Act 1 content; granted by a later spec per G6."
+slot_bonus = 1
+capacity_bonus = 0

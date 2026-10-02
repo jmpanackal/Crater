@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"high_west_front"
+display_name = "High-West Dig Front"
+world_origin = Vector2(-3000, 1600)
+seams = [{
+"edge": "south",
+"neighbor": "wickwork",
+"position": 2880
+}, {
+"edge": "north",
+"neighbor": "ashram_west",
+"position": 1600
+}]
+enclosed = false
+world_rect = Rect2(-5760, 1120, 7200, 1280)
+restricted = false

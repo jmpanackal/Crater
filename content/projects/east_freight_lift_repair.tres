@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/project_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+project_id = &"east_freight_lift_repair"
+display_name = "East freight lift repair"
+description = "A civic project: re-cable the east Cistern freight lift. Wickwork carries the work while it's built and a small cable-maintenance Demand afterwards (canon §26 Civic project). Its completion flag is what a gate on that route can key off (Spec 31). Placeholder Act 1 content."
+kind = &"civic"
+district_id = &"wickwork"
+requires_tech = &""
+requires_materials = {
+"sutral": 3
+}
+demand_while_building = 3.0
+capacity_gain = 0.0
+maintenance_demand = 1.0
+completion_flag = &"east_freight_lift_repaired"

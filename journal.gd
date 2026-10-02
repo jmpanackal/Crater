@@ -58,23 +58,12 @@ func unlock_record(record_id: StringName) -> bool:
 	return true
 
 
-## Soft social notice when a Record opens a forbidden theft option.
+## Records remain knowledge; any resulting capability is owned by its canon system.
 func _notify_knowledge_unlock(record_id: StringName) -> void:
 	var def := get_def(record_id)
-	var upgrade_id: StringName = StringName(str(def.get("unlocks_upgrade", "")))
-	if upgrade_id == StringName():
-		return
 	var hint := str(def.get("unlock_hint", ""))
-	var upgrades := get_tree().root.get_node_or_null("Upgrades")
-	var name := str(upgrade_id)
-	if upgrades and upgrades.has_method("get_display_name"):
-		name = str(upgrades.get_display_name(upgrade_id))
-	var text := "Knowledge unlocked: %s." % name
 	if hint != "":
-		text = "Knowledge unlocked: %s — %s" % [name, hint]
-	var community := get_tree().root.get_node_or_null("Community")
-	if community:
-		community.notice_message.emit(text)
+		print("Knowledge unlocked: %s" % hint)
 
 
 func get_unlocked_ids() -> Array[StringName]:
@@ -97,7 +86,14 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 	var chance := 0.04
 	if dug_upward:
 		chance = 0.12
-	if randf() > chance:
+	# Test hook: null = roll,
+	# false = never find, true = always find. The unseeded roll below is
+	# what made tests that dig the Firmament intermittently see a Record
+	# float after the salvage float (12% per upward dig).
+	if force_find_on_dig != null:
+		if not bool(force_find_on_dig):
+			return StringName()
+	elif randf() > chance:
 		return StringName()
 
 	var pick: StringName = pool[randi() % pool.size()]
@@ -106,6 +102,10 @@ func try_find_on_dig(dug_upward: bool) -> StringName:
 			pick = RECORD_FIRMAMENT_NOTE
 	unlock_record(pick)
 	return pick
+
+
+## When non-null, try_find_on_dig() skips its random roll (tests).
+var force_find_on_dig: Variant = null
 
 
 func get_snapshot() -> Array:
@@ -129,3 +129,21 @@ func apply_snapshot(ids: Array) -> void:
 func clear_all() -> void:
 	_unlocked.clear()
 	records_changed.emit()
+
+
+## Build Bible Spec 02 uniform SaveLoad contract. Wrapped in a Dictionary
+## (get_snapshot()/apply_snapshot() above are natively an Array) purely to
+## keep every domain's save_state() return type consistent — the real data
+## is still exactly what get_snapshot() already produced.
+func save_state() -> Dictionary:
+	return {"records": get_snapshot()}
+
+
+func load_state(data: Dictionary) -> void:
+	var records: Variant = data.get("records", [])
+	if typeof(records) == TYPE_ARRAY:
+		apply_snapshot(records)
+
+
+func reset_all() -> void:
+	clear_all()

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/technology_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+tech_id = &"counterweight_frame"
+display_name = "Counterweight Frame"
+description = "Heavy hauling Rig attachment. Known to any crew hand; understood once you've seen one worked (a Wickwork Record or a mention) — a lead for the Hauling family."
+kind = &"approved_gear"
+families = Array[StringName]([&"hauling"])
+gear_id = &"counterweight_frame"
+starts_known = true
+starts_understood = false
+understood_from_records = Array[StringName]([&"slate_shard"])

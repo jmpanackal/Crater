@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"mid_heart"
+display_name = "Mid Heart"
+world_origin = Vector2(3200, 2560)
+seams = [{
+"edge": "south",
+"neighbor": "wickwork",
+"position": 3520
+}, {
+"edge": "south",
+"neighbor": "mid_east_service",
+"position": 3520
+}, {
+"edge": "west",
+"neighbor": "wickwork",
+"position": 1440
+}, {
+"edge": "east",
+"neighbor": "mid_east_landing",
+"position": 4960
+}]
+enclosed = false
+world_rect = Rect2(1440, 2080, 3520, 1280)
+restricted = false

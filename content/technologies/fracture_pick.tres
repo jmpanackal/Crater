@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/technology_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+tech_id = &"fracture_pick"
+display_name = "Fracture Pick"
+description = "Precision excavation. Sanctioned and openly produced."
+kind = &"approved_gear"
+families = Array[StringName]([&"excavation"])
+gear_id = &"fracture_pick"
+starts_known = true
+starts_understood = true

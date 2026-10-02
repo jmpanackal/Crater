@@ -1,25 +1,54 @@
 # Terminology transition
 
+**Source of truth:** [`mechanics-canon.md`](mechanics-canon.md). This table tracks retired words so docs, copy, and code converge on the canon vocabulary.
+
 Current canonical terms:
 
 | Use now | Retired term | Meaning |
 | --- | --- | --- |
-| **Trust** | Social Standing / Standing | The Hollow's measure of how much people trust the player. It is affected by attendance, lies, forbidden work, and public help. Gates favors, alibis, watched/delayed upper access, and later recruitment. |
-| **Steal** / **theft** | Siphon / siphoning | The forbidden diversion of named District production for a personal work-rig upgrade. **Shortage Risk** is the measure of how likely missing production is to be noticed later — code still calls this **Cover** throughout (`districts.gd`'s `cover_changed`/`get_cover_health()`/`get_cover_for_good()`, `upgrade_hud.gd`'s Cover label/tooltips); see "Known follow-ups" below, this was not renamed in the 2026-09-13 pass. |
-| **Tallies** | (keep) | Personal work pay from public Material turn-ins; used for openly requisitioned, sanctioned gear. |
-| **Materials** | Salvage (as category) | Dig finds you carry and turn in. Transitional dig-haul id `salvage` may remain in code until Tallies UI fully lands. |
-| **District production** | stocks / stock (player-facing) | Named communal goods (Glowrations, Presswater, etc.). |
-| **Firmament** | Vault / roof (formal); also **Cap** in `cap_*` test-variable naming | Sacred ceiling; natural crash-sealed strata. Correction (2026-09-13): this row previously listed "Cap" under Devil's Mouth below, but the actual `cap_*` identifiers in `test_feel_feedback.gd`/`test_feel_polish.gd` consistently meant the Firmament case (paired against `pit_*` for Devil's Mouth) — renamed to `firmament_*` accordingly. |
-| **Devil’s Mouth** | Pit (as a place name) | Central impact crater void. Code may still use `PIT_*` layout constants (`hollow_layout.gd`) and `hollow_ambiance.gd`'s decorative `Pit*` node names — both explicitly allowed to remain. |
+| **Trust** | Social Standing / Standing | Society's accumulated, qualitative perception of the player's reliability. Shown as 4–5 standing states with human-readable reasons, not a raw number. Not spendable. |
+| **Ritual** | Holding; Harvest | The communal return anchor at the end of the Pulse-driven civic cycle. Missing it is contextual, not an automatic stat penalty. The Holding Raft is now the **Ritual Raft**. |
+| **Civic cycle** (Rousing → Working → Gathering → Ritual) | Harvest clock / 60-second Harvest timer | The Pulse-driven daily rhythm. Phase names and timings are still OPEN. |
+| **the Pulse** | — | Degraded surviving ship component at Mid Heart; civic timekeeper and relic. Original ship function OPEN. |
+| **Diversion / theft** (verb: divert, steal) | Siphon / siphoning | Secretly removing goods from a district's District Reserves into concealed personal storage toward Forbidden Gear. |
+| **District condition** (e.g. Comfortable / Stable / Strained / Shortage / Critical — names tunable) | Cover; Shortage Risk | How vulnerable a district's District Capacity/Demand/District Reserves balance currently is. There is no theft-success percentage. |
+| **Local suspicion / evidence** (sight, sound, persistent evidence) | Witness Risk (five-state meter); siphon notice chance | Detection records believable facts; suspicion belongs to an NPC, district, Wardens, location, or incident. No universal Suspicion meter. |
+| **Approved Gear** (category) / **Order** (action) | Requisition; efficiency / “safe magic” upgrades | Society-sanctioned equipment ordered with Tallies + authorized district output (plus Trust/access where relevant). |
+| **Divine Binding** / **Pulse Binders** | "magic" / "Magicians" (placeholder) | The Hollow's own religion, practiced as devotional labor over inherited technology. Not folk magic beside doctrine — it *is* doctrine. Binding always means joining technology to something. Pulse Binders join tech to tech (sanctioned) = Approved Gear. See [`mechanics-canon.md`](mechanics-canon.md) §32, §48. |
+| **Hellbinding** / **Voidbinding** / **Hell Binders** / **Void Binders** | "the Fused" / "the Breaking" / "the Broken" (earlier AI proposals, rejected) | The same Binding, unsanctioned: joining tech to a *body* instead of another tool = Forbidden Gear / bio-fusion. Names derive from the Mouth's existing folk nicknames ("Hell," "the Void"), interchangeable pair. See [`mechanics-canon.md`](mechanics-canon.md) §67. |
+| **Heavenfall** (formal); "the day the sky fell" (plain speech) | "the Correction"; "the Great Collapse" (earlier AI proposal) | The Hollow's founding disaster: an early expedition breached a waterlogged layer above the Firmament, causing a real collapse and flood. Doctrine reframed it as judgment afterward; the disaster itself was real. See [`game-decisions.md`](game-decisions.md) #1 and [`story.md`](story.md). |
+| **the Mid Reach** | Mid Hollow (residence tier) | The second of three Act 1 residence tiers (Lower → Mid Reach → Ashram Heights). Renamed because "Mid Hollow" confusingly reused the setting's own top-level name. "Lower" stays as-is — plain naming suits the starting tier. |
+| **the Firstwalkers** | "pioneer/expedition corps" (placeholder) | The colony ship's pre-crash pioneer/expedition corps, equipped with the restricted bio-integration tech that now sources Hellbinding/Voidbinding grafts. Name echoes "Firstfall" — meant to be first to walk the new world, never got the chance. See [`mechanics-canon.md`](mechanics-canon.md) §67. |
+| **Forbidden Gear** / **Forbidden Designs** | forbidden work-rig modules; knowledge upgrades | **Bodily fusion (grafts), not a worn device** — see [`mechanics-canon.md`](mechanics-canon.md) §67. Privately built from stolen/diverted output + a bio-Component + a compatibility Material + a Record. Uses no Gear slots; draws only on Rig Capacity. |
+| **Rig** | work rig; Mouthworker rig / suit | The player's single evolving loadout — covers both worn Approved equipment **and** fused Forbidden grafts (§67), not mechanical equipment alone. |
+| **Gear slots** + **Rig Capacity** / **Rig Strain** | three fixed mounts (Toolhead / Harness / Utility pack); Rig Load | Separate progression systems. **Slots apply to Approved Gear only** — grafts never use a slot. Capacity is a soft limit shared by Approved Gear and grafts alike; exceeding it creates Rig Strain, which blocks stamina. |
+| **Stamina block** | stamina reservation | The portion of the fixed stamina bar currently blocked by hauling, Rig Strain, or fatigue — visible on the bar, not spendable until released. |
+| **Overexertion** (verb: Overexert) | Push / Pushing | At zero usable stamina, the player may push through an action anyway; it converts capacity into fatigue rather than an instant stop. |
+| **Core Improvements** | — | Permanent baseline Rig improvements that do not use a Gear slot. |
+| **Materials** | Salvage (as category) | Bulk physical resources: Sutral, Ravelstone, Brinecrystal, Verdigris, Hullbit. |
+| **Sutral** | Sporemeal, Threadroot | Biological/fungal fibrous Material. |
+| **Ravelstone** | Charstone, Deeprock, Lunore, Karn, Tetzal | Dense structural stone Material. |
+| *(cut)* | Lampwick (as a mined Material) | Not a raw Material. |
+| **Components** / **Records** | “fragments” as a single track | Components = manufactured/ship parts; Records = knowledge (can unlock Approved *or* Forbidden capability). |
+| **District Output** / **District Capacity**, **Civic Demand**, **District Reserves**, **District Reserve Cap** | named District-production pairs (Glowrations + Glowfiber, Wicklamps + Bindcord, Presswater + Sealbrine); protected reserve of 1; cap of 6; 70/30 sibling weighting | District production resolves once per civic cycle. District Output is abstracted into units; named goods are flavor, not canon currencies. |
+| **Capability web** (Known → Understood → Available) | tech tree; junction choices | Technology is discovered, not shown as a full tree. |
+| **Firmament** | Vault / roof (everyday speech — still valid in dialogue); **Cap** in old `cap_*` test names | Sacred ceiling; thick, exceptionally hard natural crash-sealed strata. |
+| **Devil’s Mouth** | Pit (as a place name) | Central impact crater void. Code may still use `PIT_*` layout constants and decorative `Pit*` node names. |
 
-**Do not reintroduce** a separate **Contribution** meter or currency. Residence and band advancement are driven by **Trust** plus Tallies / relocation cost / story gates — not a second progress bar.
+**Still valid as in-world descriptive words** (not currencies or district-output goods): **Presswater** for the Cistern's pressurized service water that drives lifts, brakes, and docks; **Wicklamp** for the Hollow's lamp family; **Firstfall** for old ship relics.
+
+**Do not reintroduce** a separate **Contribution** meter or currency.
 
 The retired terms are retained only in this reference and legacy save migration notes. New player-facing copy, specs, APIs, tests, and implementation work must use the **Use now** column.
 
-## Known follow-ups (not done in the 2026-09-13 pass)
+## Code still using retired terms (migration backlog)
 
-Recorded here so they aren't silently lost — each needs its own scoped pass, not a blind find/replace:
+Code is not canon by default. As of 2026-09-14 the prototype still encodes the retired model and needs a scoped migration pass driven by the Build Bible, not a blind find/replace:
 
-- **Cover → Shortage Risk.** Deep and genuinely ambiguous, not just stale naming: `districts.gd`'s `cover_changed` signal, `get_cover_health()`, `get_cover_for_good()`; `upgrade_hud.gd`'s `CoverLabel`/`ShopCover` nodes and live tooltip/notice text ("How hidden your theft is. Higher Cover = safer diversion..."); `upgrades.gd`'s comments. The open question before renaming: "Cover" reads as *good* (higher = safer), while "Shortage Risk" as described above reads as a *risk* (higher = more likely noticed) — these may be the same value under different polarity, or two different framings of the mechanic. Needs a design decision, not a mechanical rename.
-- **`hollow_ambiance.gd` split** (~1859 lines). Bolts together ~12 responsibilities: cliff/backdrop painting, carved rooms, deck architecture, the Vaultward gate, NPC life dressing, bridge visuals, three separate per-district prop kits (Farms/Wick/Cistern), mid-Heart clutter, the lighting system, district ambience animation, camera vignette, and the fog/atmosphere system. The district kits, lighting, and fog read as the cleanest extraction candidates.
-- **`upgrade_hud.gd` split** (~700 lines). Mixes shop-modal UI, HUD stat-label refresh, a notice/toast queue, the lie-prompt flow, district production display, and the Materials turn-in transaction path — six largely-independent concerns in one controller.
+- **Harvest** 60s timer and Standing miss (`community.gd`, HUD) → civic cycle + Ritual + contextual Trust.
+- **Requisition** panel / `RequisitionPanel` (`upgrade_hud.gd`, `main.tscn`) → Approved Gear Orders.
+- **Shortage Risk** (`districts.gd` `get_shortage_risk*`, `shortage_risk_changed`, HUD labels) and the theft notice chance → district condition states + local suspicion/evidence.
+- **Named District-production goods, protected reserve 1, capacity 6, 70/30 weighting** (`districts.gd`, `Districts.divert_good`, tests `test_district_production.gd`, `test_districts_cover.gd`, `test_siphon_cover_risk.gd`, `test_economy_loop.gd`) → Capacity / Demand / Reserve / Reserve Cap resolved once per civic cycle.
+- **Salvage** wallet and `+Salvage` floats (`resources.gd`, `feel_fx.gd`) → Materials (physical haul) / Components / Records. *Partly done (2026-09-18):* the canon owner now exists — `autoload/storage.gd` (Build Bible Spec 11) holds Materials/Components under the locked names and refuses retired ones; `resources.gd` remains only as the retired wallet behind dig-yield, named goods and Tallies until Specs 12/13/22/23 migrate each consumer. New code must target `Storage`, never `Resources`.
+- **Dig Yield / Quiet Dig** upgrades (`upgrades.gd`) → Gear under Rig Capacity; Quiet Dig's role maps to Secrecy Gear (e.g. Dampening Wrap / Quieting Coupler).
+- **`hollow_ambiance.gd` split** (~1859 lines) and **`upgrade_hud.gd` split** (~700 lines) remain structural follow-ups; do them alongside the migration so new canon systems don't land in the god-objects.

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"mid_east_service"
+display_name = "Mid-East Service Court"
+world_origin = Vector2(6080, 3520)
+seams = [{
+"edge": "north",
+"neighbor": "mid_heart",
+"position": 3520
+}, {
+"edge": "north",
+"neighbor": "mid_east_approach",
+"position": 3520
+}, {
+"edge": "south",
+"neighbor": "lower_east_homes",
+"position": 4160
+}]
+enclosed = false
+world_rect = Rect2(4960, 3040, 2400, 640)
+restricted = false

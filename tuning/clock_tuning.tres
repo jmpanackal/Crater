@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/clock_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+cycle_length_minutes = 35.0
+rousing_proportion = 0.15
+working_proportion = 0.5
+gathering_proportion = 0.2
+ritual_proportion = 0.15

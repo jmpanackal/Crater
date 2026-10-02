@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/gear_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gear_id = &"quieting_coupler"
+display_name = "Quieting Coupler"
+description = "Forbidden — a graft, not a device (canon §65 role, §67 form): strongly suppresses the sound signature of excavation work, with heat/strain tradeoffs, and is difficult to explain if discovered. Uses no Gear slot; draws only on Rig Capacity. Its recipe (diverted District Output + Component + Material + Record) and fabrication are Spec 28's; Rig only installs it at a Mid Reach-or-better workspace."
+kind = &"graft"
+category = &"utility"
+capacity_cost = 2
+effects = {
+"quiet_dig_level": 2.0
+}

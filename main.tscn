@@ -5,401 +5,76 @@
 [ext_resource type="Script" path="res://terrain.gd" id="3_terrain"]
 [ext_resource type="Script" path="res://salvage_hud.gd" id="4_salvage_hud"]
 [ext_resource type="Script" path="res://upgrade_hud.gd" id="5_upgrade_hud"]
-[ext_resource type="Script" path="res://hollow_zone.gd" id="6_hollow"]
 [ext_resource type="Script" path="res://hollow_npc.gd" id="8_npc"]
 [ext_resource type="Script" path="res://journal_hud.gd" id="9_journal"]
 [ext_resource type="Script" path="res://dialogue_panel.gd" id="10_dialogue"]
-[ext_resource type="Script" path="res://soft_world_label.gd" id="11_soft_label"]
-[ext_resource type="Script" path="res://hollow_floor.gd" id="12_hollow_floor"]
-[ext_resource type="Script" path="res://hollow_climb.gd" id="13_hollow_climb"]
-[ext_resource type="Script" path="res://hollow_ambiance.gd" id="14_ambiance"]
 [ext_resource type="Script" path="res://dig_site_dressing.gd" id="15_dig_dress"]
 [ext_resource type="Script" path="res://dig_approach.gd" id="17_approach"]
 [ext_resource type="Script" path="res://camera_follow.gd" id="16_cam"]
-[ext_resource type="Script" path="res://hollow_decks.gd" id="18_hollow_decks"]
-[ext_resource type="Script" path="res://hollow_lift.gd" id="19_hollow_lift"]
+[ext_resource type="Script" path="res://zone_anchor.gd" id="21_zone_anchor"]
+[ext_resource type="Script" path="res://hollow_terrain.gd" id="22_hollow_terrain"]
+[ext_resource type="Script" path="res://opening_duty_dispatcher.gd" id="23_dispatcher"]
+[ext_resource type="Script" path="res://job_delivery_point.gd" id="24_delivery"]
+[ext_resource type="Script" path="res://home_court_dressing.gd" id="25_home"]
+[ext_resource type="Script" path="res://hollow_macro_background.gd" id="26_macro"]
+[ext_resource type="Script" path="res://hollow_minimap.gd" id="28_minimap"]
+[ext_resource type="Script" path="res://hollow_structures.gd" id="29_structures"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hollow_area"]
-size = Vector2(1900, 1400)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_climb_cistern"]
-size = Vector2(32, 232)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_climb_mid"]
-size = Vector2(32, 168)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lift"]
-size = Vector2(48, 12)
-
 [node name="root" type="Node2D"]
+physics_interpolation_mode = 2
 script = ExtResource("1_main")
 
 [node name="Hollow" type="Node2D" parent="."]
-script = ExtResource("14_ambiance")
 
-[node name="DepthBg" type="ColorRect" parent="Hollow"]
+[node name="MacroBackground" type="Node2D" parent="Hollow"]
 z_index = -4
-offset_left = -640.0
-offset_top = -200.0
-offset_right = 1200.0
-offset_bottom = 1280.0
-color = Color(0.04, 0.085, 0.095, 1)
-mouse_filter = 2
+script = ExtResource("26_macro")
 
-[node name="CliffLeft" type="ColorRect" parent="Hollow"]
-z_index = -3
-offset_left = -592.0
-offset_top = -80.0
-offset_right = 288.0
-offset_bottom = 1200.0
-color = Color(0.1, 0.155, 0.15, 1)
-mouse_filter = 2
+[node name="HollowTerrain" type="TileMapLayer" parent="Hollow"]
+script = ExtResource("22_hollow_terrain")
 
-[node name="CliffRight" type="ColorRect" parent="Hollow"]
-z_index = -3
-offset_left = 736.0
-offset_top = -80.0
-offset_right = 1104.0
-offset_bottom = 1200.0
-color = Color(0.09, 0.145, 0.15, 1)
-mouse_filter = 2
-
-[node name="CliffFaceLeft" type="ColorRect" parent="Hollow"]
-z_index = -2
-offset_left = 264.0
-offset_top = -80.0
-offset_right = 288.0
-offset_bottom = 1200.0
-color = Color(0.17, 0.24, 0.23, 1)
-mouse_filter = 2
-
-[node name="CliffFaceRight" type="ColorRect" parent="Hollow"]
-z_index = -2
-offset_left = 736.0
-offset_top = -80.0
-offset_right = 760.0
-offset_bottom = 1200.0
-color = Color(0.16, 0.23, 0.22, 1)
-mouse_filter = 2
-
-[node name="PitVoid" type="ColorRect" parent="Hollow"]
+[node name="HomeCourtDressing" type="Node2D" parent="Hollow"]
 z_index = -1
-offset_left = 288.0
-offset_top = -160.0
-offset_right = 736.0
-offset_bottom = 1280.0
-color = Color(0.004, 0.007, 0.01, 1)
-mouse_filter = 2
+script = ExtResource("25_home")
 
-[node name="PitFogDeep" type="ColorRect" parent="Hollow"]
-offset_left = 288.0
-offset_top = 900.0
-offset_right = 736.0
-offset_bottom = 1280.0
-color = Color(0.03, 0.08, 0.1, 0.62)
-mouse_filter = 2
-
-[node name="PitFogMid" type="ColorRect" parent="Hollow"]
-offset_left = 288.0
-offset_top = 480.0
-offset_right = 736.0
-offset_bottom = 700.0
-color = Color(0.05, 0.12, 0.14, 0.28)
-mouse_filter = 2
-
-[node name="Mist" type="ColorRect" parent="Hollow"]
-offset_left = 250.0
-offset_top = 1000.0
-offset_right = 800.0
-offset_bottom = 1180.0
-color = Color(0.08, 0.2, 0.22, 0.18)
-mouse_filter = 2
-
-[node name="PropFarms" type="ColorRect" parent="Hollow"]
-z_index = 1
-offset_left = -360.0
-offset_top = 160.0
-offset_right = -300.0
-offset_bottom = 192.0
-color = Color(0.34, 0.5, 0.3, 1)
-mouse_filter = 2
-
-[node name="PropWick" type="ColorRect" parent="Hollow"]
-z_index = 1
-offset_left = -280.0
-offset_top = 480.0
-offset_right = -220.0
-offset_bottom = 512.0
-color = Color(0.55, 0.36, 0.24, 1)
-mouse_filter = 2
-
-[node name="PropCistern" type="ColorRect" parent="Hollow"]
-z_index = 1
-offset_left = 760.0
-offset_top = 912.0
-offset_right = 820.0
-offset_bottom = 960.0
-color = Color(0.3, 0.44, 0.55, 1)
-mouse_filter = 2
-
-[node name="CivicLift" type="AnimatableBody2D" parent="Hollow"]
-position = Vector2(232, 768)
-collision_layer = 1
-collision_mask = 0
-sync_to_physics = true
-script = ExtResource("19_hollow_lift")
-lift_id = &"heart"
-hint_text = "[W/S] Heart hoist"
-default_stop_index = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/CivicLift"]
-position = Vector2(24, 6)
-shape = SubResource("RectangleShape2D_lift")
-
-[node name="LeftServiceLift" type="AnimatableBody2D" parent="Hollow"]
-position = Vector2(-56, 320)
-collision_layer = 1
-collision_mask = 0
-sync_to_physics = true
-script = ExtResource("19_hollow_lift")
-lift_id = &"left_service"
-hint_text = "[W/S] service lift"
-default_stop_index = 1
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/LeftServiceLift"]
-position = Vector2(24, 6)
-shape = SubResource("RectangleShape2D_lift")
-
-[node name="FreightLift" type="AnimatableBody2D" parent="Hollow"]
-position = Vector2(856, 960)
-collision_layer = 1
-collision_mask = 0
-sync_to_physics = true
-script = ExtResource("19_hollow_lift")
-lift_id = &"freight"
-hint_text = "[W/S] freight lift"
-default_stop_index = 1
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/FreightLift"]
-position = Vector2(24, 6)
-shape = SubResource("RectangleShape2D_lift")
-
-[node name="LadderCistern" type="Area2D" parent="Hollow"]
-position = Vector2(796, 768)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 192)
-grab_inset = 4.0
-deck_open_x = 784.0
-deck_open_width = 64.0
-upper_land_side = 0
-hint_text = "[W/S] emergency ladder"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/LadderCistern"]
-position = Vector2(20, 60)
-shape = SubResource("RectangleShape2D_climb_cistern")
-
-[node name="LadderMid" type="Area2D" parent="Hollow"]
-position = Vector2(-116, 512)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 128)
-grab_inset = 4.0
-deck_open_x = -128.0
-deck_open_width = 64.0
-upper_land_side = 0
-hint_text = "[W/S] maintenance ladder"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/LadderMid"]
-position = Vector2(20, 44)
-shape = SubResource("RectangleShape2D_climb_mid")
-
-[node name="LadderUpper" type="Area2D" parent="Hollow"]
-position = Vector2(-196, 64)
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("13_hollow_climb")
-shaft_size = Vector2(40, 128)
-grab_inset = 4.0
-deck_open_x = -208.0
-deck_open_width = 64.0
-upper_land_side = 0
-hint_text = "[W/S] residence climb"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/LadderUpper"]
-position = Vector2(20, 44)
-shape = SubResource("RectangleShape2D_climb_mid")
-
-[node name="Title" type="Label" parent="Hollow"]
-offset_left = -200.0
-offset_top = -48.0
-offset_right = 100.0
-offset_bottom = -20.0
-theme_override_font_sizes/font_size = 18
-text = "The Hollow"
-script = ExtResource("11_soft_label")
-show_radius = 320.0
-far_alpha = 0.28
-
-[node name="DistrictFarms" type="Label" parent="Hollow"]
-offset_left = -280.0
-offset_top = 112.0
-offset_right = -40.0
-offset_bottom = 140.0
-theme_override_colors/font_color = Color(0.82, 0.94, 0.78, 1)
-theme_override_font_sizes/font_size = 13
-text = "The Glowbeds"
-script = ExtResource("11_soft_label")
-show_radius = 240.0
-far_alpha = 0.4
-near_alpha = 0.95
-sign_style = "hanging"
-
-[node name="DistrictWickwork" type="Label" parent="Hollow"]
-offset_left = -280.0
-offset_top = 440.0
-offset_right = -60.0
-offset_bottom = 468.0
-theme_override_colors/font_color = Color(0.96, 0.84, 0.64, 1)
-theme_override_font_sizes/font_size = 13
-text = "The Wickwork"
-script = ExtResource("11_soft_label")
-show_radius = 240.0
-far_alpha = 0.4
-near_alpha = 0.95
-sign_style = "painted"
-
-[node name="DistrictMidHeart" type="Label" parent="Hollow"]
-offset_left = 500.0
-offset_top = 440.0
-offset_right = 620.0
-offset_bottom = 468.0
-theme_override_colors/font_color = Color(0.97, 0.88, 0.66, 1)
-theme_override_font_sizes/font_size = 13
-text = "Mid Heart"
-script = ExtResource("11_soft_label")
-show_radius = 220.0
-far_alpha = 0.38
-near_alpha = 0.95
-sign_style = "arch"
-
-[node name="DistrictCistern" type="Label" parent="Hollow"]
-offset_left = 760.0
-offset_top = 888.0
-offset_right = 980.0
-offset_bottom = 916.0
-theme_override_colors/font_color = Color(0.78, 0.92, 0.98, 1)
-theme_override_font_sizes/font_size = 13
-text = "The Cistern"
-script = ExtResource("11_soft_label")
-show_radius = 200.0
-far_alpha = 0.4
-near_alpha = 0.95
-sign_style = "hanging"
-
-[node name="DistrictVaultward" type="Label" parent="Hollow"]
-offset_left = -420.0
-offset_top = -40.0
-offset_right = -160.0
-offset_bottom = -12.0
-theme_override_colors/font_color = Color(0.7, 0.78, 0.82, 1)
-theme_override_font_sizes/font_size = 12
-text = "Vaultward — restricted"
-script = ExtResource("11_soft_label")
-show_radius = 180.0
-far_alpha = 0.2
-near_alpha = 0.7
-sign_style = "painted"
-
-[node name="Floor" type="StaticBody2D" parent="Hollow"]
-script = ExtResource("18_hollow_decks")
-
-[node name="FloorVisual" type="TileMapLayer" parent="Hollow"]
-z_index = 1
-texture_filter = 1
-modulate = Color(0.92, 0.86, 0.76, 1)
-script = ExtResource("12_hollow_floor")
-
-[node name="HollowZone" type="Area2D" parent="Hollow"]
-collision_layer = 0
-collision_mask = 1
-monitorable = false
-script = ExtResource("6_hollow")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hollow/HollowZone"]
-position = Vector2(200, 560)
-shape = SubResource("RectangleShape2D_hollow_area")
+[node name="Structures" type="Node2D" parent="Hollow"]
+script = ExtResource("29_structures")
 
 [node name="NPCs" type="Node2D" parent="Hollow"]
 
-[node name="Pell" type="Node2D" parent="Hollow/NPCs"]
-position = Vector2(-320, 192)
-script = ExtResource("8_npc")
-npc_name = "Pell"
-district_id = &"farms"
-body_color = Color(0.55, 0.72, 0.45, 1)
-lines = PackedStringArray("Glowbeds look healthy today.", "Don't step on the violet ones — they bruise.")
-choice_prompt = "Help tend the beds for a spell?"
+[node name="OpeningDutyDispatcher" type="Area2D" parent="Hollow"]
+position = Vector2(-1320, 5440)
+script = ExtResource("23_dispatcher")
 
-[node name="Rook" type="Node2D" parent="Hollow/NPCs"]
-position = Vector2(-220, 512)
-script = ExtResource("8_npc")
-npc_name = "Rook"
+[node name="OpeningDutyCollection" type="Area2D" parent="Hollow"]
+position = Vector2(-4800, 6720)
+script = ExtResource("24_delivery")
 district_id = &"wickwork"
-body_color = Color(0.75, 0.55, 0.35, 1)
-lines = PackedStringArray("Rope's taut. Lantern oil's thin.", "If the Wickwork slows, everyone notices the dark.")
+job_id = &"open_the_gallery"
 
-[node name="Sila" type="Node2D" parent="Hollow/NPCs"]
-position = Vector2(800, 960)
-script = ExtResource("8_npc")
-npc_name = "Sila"
-district_id = &"cistern"
-body_color = Color(0.45, 0.65, 0.8, 1)
-lines = PackedStringArray("Presswater's clean enough for the hoists.", "My uncle says the Firmament is just rock. Nobody listens.")
+[node name="Crate" type="ColorRect" parent="Hollow/OpeningDutyCollection"]
+offset_left = -12.0
+offset_top = -20.0
+offset_right = 12.0
+offset_bottom = 0.0
+mouse_filter = 2
+color = Color(0.46, 0.35, 0.22, 1)
 
-[node name="Joss" type="Node2D" parent="Hollow/NPCs"]
-position = Vector2(536, 512)
-script = ExtResource("8_npc")
-npc_name = "Joss"
-district_id = &"wickwork"
-body_color = Color(0.85, 0.7, 0.5, 1)
-lines = PackedStringArray("Mid Heart's where the allotments change hands.", "You heading to the side galleries again?")
+[node name="Label" type="Label" parent="Hollow/OpeningDutyCollection"]
+offset_left = -65.0
+offset_top = -42.0
+offset_right = 65.0
+offset_bottom = -25.0
+theme_override_font_sizes/font_size = 10
+text = "Gallery collection"
+horizontal_alignment = 1
+mouse_filter = 2
 
 [node name="Approach" type="Node2D" parent="."]
 script = ExtResource("17_approach")
-
-[node name="ExitVoid" type="ColorRect" parent="Approach"]
-offset_left = 960.0
-offset_top = 352.0
-offset_right = 1024.0
-offset_bottom = 820.0
-color = Color(0.012, 0.03, 0.04, 1)
-
-[node name="ExitMist" type="ColorRect" parent="Approach"]
-offset_left = 960.0
-offset_top = 520.0
-offset_right = 1024.0
-offset_bottom = 700.0
-color = Color(0.05, 0.14, 0.16, 0.28)
-
-[node name="DigSiteLabel" type="Label" parent="."]
-offset_left = 1040.0
-offset_top = 8.0
-offset_right = 1400.0
-offset_bottom = 48.0
-theme_override_font_sizes/font_size = 15
-text = "Dig Site — Firmament ↑ quiet / side galleries →"
-script = ExtResource("11_soft_label")
-show_radius = 260.0
-far_alpha = 0.18
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 script = ExtResource("3_terrain")
@@ -408,7 +83,8 @@ script = ExtResource("3_terrain")
 script = ExtResource("15_dig_dress")
 
 [node name="Player" type="CharacterBody2D" parent="."]
-position = Vector2(120, 736)
+physics_interpolation_mode = 1
+position = Vector2(-80, 5408)
 collision_layer = 1
 collision_mask = 1
 script = ExtResource("2_player")
@@ -422,11 +98,12 @@ position = Vector2(16, 16)
 shape = SubResource("RectangleShape2D_player")
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
+process_callback = 0
 position = Vector2(16, 16)
-limit_left = -592
-limit_top = -320
-limit_right = 1024
-limit_bottom = 1280
+limit_left = -6352
+limit_top = -392
+limit_right = 11840
+limit_bottom = 7752
 limit_enabled = true
 position_smoothing_enabled = true
 position_smoothing_speed = 5.5
@@ -455,17 +132,17 @@ offset_right = 228.0
 offset_bottom = 28.0
 theme_override_font_sizes/font_size = 12
 text = "Materials: 0"
-tooltip_text = "Materials from digging. Turn them in at the Hollow [E] to queue District production."
+tooltip_text = "Materials from digging. Delivered to districts through Jobs."
 script = ExtResource("4_salvage_hud")
 
-[node name="HarvestLabel" type="Label" parent="UI"]
+[node name="CycleLabel" type="Label" parent="UI"]
 offset_left = 18.0
 offset_top = 30.0
 offset_right = 228.0
 offset_bottom = 46.0
 theme_override_font_sizes/font_size = 11
-text = "Harvest ?"
-tooltip_text = "Return for the communal gathering before the clock runs out."
+text = "Cycle ?"
+tooltip_text = "The Pulse-driven civic cycle: Rousing, Working, Gathering, Ritual."
 modulate = Color(0.88, 0.88, 0.84, 0.9)
 
 [node name="TrustLabel" type="Label" parent="UI"]
@@ -507,11 +184,11 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="ShortageRiskLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
+[node name="DistrictConditionLabel" type="Label" parent="UI/UpgradePanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "Shortage Risk ?"
-tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
+text = "District condition ?"
+tooltip_text = "How a district's Capacity/Demand/Reserves balance is holding up right now."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
 [node name="RequisitionExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
@@ -520,15 +197,7 @@ focus_mode = 0
 custom_minimum_size = Vector2(0, 22)
 theme_override_font_sizes/font_size = 11
 text = "Requisition  [Q]"
-tooltip_text = "Open, sanctioned upgrades — spend Tallies to help the districts."
-
-[node name="TheftExpandHint" type="Button" parent="UI/UpgradePanel/Margin/Content"]
-layout_mode = 2
-focus_mode = 0
-custom_minimum_size = Vector2(0, 22)
-theme_override_font_sizes/font_size = 11
-text = "Steal  [U]"
-tooltip_text = "Forbidden upgrades — divert District production. Risks Trust if Shortage Risk is high."
+tooltip_text = "Order Approved Gear — spend Tallies and authorized District Output."
 
 [node name="RequisitionDimmer" type="ColorRect" parent="UI"]
 visible = false
@@ -575,14 +244,14 @@ modulate = Color(0.68, 0.82, 0.66, 0.95)
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Tallies ?"
-tooltip_text = "Personal work pay from public Material turn-ins."
+tooltip_text = "Personal work pay, earned through Jobs."
 modulate = Color(0.62, 0.82, 0.78, 0.92)
 
 [node name="DistrictToggle" type="Button" parent="UI/RequisitionPanel/Margin/VBox"]
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
-text = "Districts ▸"
+text = "District production ▸"
 
 [node name="DistrictLabel" type="Label" parent="UI/RequisitionPanel/Margin/VBox"]
 visible = false
@@ -590,7 +259,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Districts…"
 autowrap_mode = 3
-tooltip_text = "District production and output."
+tooltip_text = "District Capacity, Demand, and Reserves."
 modulate = Color(0.68, 0.72, 0.7, 0.82)
 
 [node name="RequisitionList" type="VBoxContainer" parent="UI/RequisitionPanel/Margin/VBox"]
@@ -602,64 +271,6 @@ layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 11
 text = "Close  [Q / Esc]"
-
-[node name="TheftShopDimmer" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0.02, 0.04, 0.05, 0.55)
-
-[node name="TheftShopPanel" type="PanelContainer" parent="UI"]
-visible = false
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -210.0
-offset_top = -292.0
-offset_right = 210.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="Margin" type="MarginContainer" parent="UI/TheftShopPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
-
-[node name="VBox" type="VBoxContainer" parent="UI/TheftShopPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Title" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Steal from production"
-modulate = Color(0.86, 0.68, 0.48, 0.95)
-
-[node name="ShopShortageRisk" type="Label" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "Shortage Risk ?"
-tooltip_text = "When the districts thrive, missing materials are harder to notice. Lower Shortage Risk = safer."
-modulate = Color(0.62, 0.82, 0.78, 0.92)
-
-[node name="TheftList" type="VBoxContainer" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="CloseButton" type="Button" parent="UI/TheftShopPanel/Margin/VBox"]
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 11
-text = "Close  [U / Esc]"
 
 [node name="NoticeLabel" type="Label" parent="UI"]
 visible = false
@@ -679,65 +290,6 @@ text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="LieDimmer" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.02, 0.04, 0.05, 0.55)
-
-[node name="LiePromptPanel" type="PanelContainer" parent="UI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -120.0
-offset_right = 220.0
-offset_bottom = 120.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="LiePrompt" type="VBoxContainer" parent="UI"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -100.0
-offset_right = 200.0
-offset_bottom = 100.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-
-[node name="LieLabel" type="Label" parent="UI/LiePrompt"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Harvest finished while you were away from the districts.
-People will ask where you were.
-
-Lie (Y) — dodge notice for now, risk worse later if exposed.
-Tell the truth (N) — −5 Trust now."
-autowrap_mode = 3
-
-[node name="YesButton" type="Button" parent="UI/LiePrompt"]
-layout_mode = 2
-focus_mode = 0
-text = "Lie about it (Y)"
-
-[node name="NoButton" type="Button" parent="UI/LiePrompt"]
-layout_mode = 2
-focus_mode = 0
-text = "Tell the truth (N)"
 
 [node name="JournalHud" type="CanvasLayer" parent="UI"]
 layer = 10
@@ -867,6 +419,21 @@ focus_mode = 0
 size_flags_horizontal = 3
 text = "No"
 
+[node name="HollowMinimap" type="Control" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -450.0
+offset_top = -224.0
+offset_right = -10.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("28_minimap")
+
 [node name="Hints" type="Label" parent="UI"]
 anchors_preset = 2
 anchor_top = 1.0
@@ -877,5 +444,5 @@ offset_right = 780.0
 offset_bottom = -8.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 11
-text = "A/D move · W/S lift or climb · R dig · Space jump · U shop · E talk · J journal · H help · Esc title"
+text = "A/D move · W/S lift or climb · R dig · Space jump · Q requisition · E talk/take · J journal · M map · H help · Esc title"
 modulate = Color(0.75, 0.78, 0.74, 0.45)

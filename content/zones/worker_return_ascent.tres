@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"worker_return_ascent"
+display_name = "Worker Stair Hall"
+world_origin = Vector2(400, 5440)
+seams = [{
+"edge": "north",
+"neighbor": "mid_allotments",
+"position": 5440
+}, {
+"edge": "west",
+"neighbor": "home_court",
+"position": 160
+}]
+enclosed = false
+world_rect = Rect2(160, 4960, 1280, 640)
+restricted = false

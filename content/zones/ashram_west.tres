@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"ashram_west"
+display_name = "Ashram Heights (west)"
+world_origin = Vector2(-200, 320)
+seams = [{
+"edge": "south",
+"neighbor": "high_west_front",
+"position": 1600
+}]
+enclosed = false
+world_rect = Rect2(-2720, -160, 4160, 1280)
+restricted = false

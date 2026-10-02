@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"wickwork"
+display_name = "Wickwork"
+world_origin = Vector2(-2160, 2880)
+seams = [{
+"edge": "north",
+"neighbor": "high_west_front",
+"position": 2880
+}, {
+"edge": "south",
+"neighbor": "mid_allotments",
+"position": 4160
+}, {
+"edge": "north",
+"neighbor": "mid_heart",
+"position": 3520
+}, {
+"edge": "east",
+"neighbor": "mid_heart",
+"position": 1440
+}]
+enclosed = false
+world_rect = Rect2(-3680, 2400, 5120, 1280)
+restricted = false

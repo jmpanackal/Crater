@@ -173,6 +173,20 @@ static func spawn_record_float(parent: Node, world_pos: Vector2, title: String =
 	)
 
 
+## A named Material extracted from a deposit (Build Bible Spec 12) —
+## clearer than the retired "+Salvage" tick because it names the find,
+## still restrained.
+static func spawn_material_float(parent: Node, world_pos: Vector2, display_name: String, amount: int) -> void:
+	_spawn_float(
+		parent,
+		world_pos + Vector2(0, -10),
+		"+%d %s" % [maxi(amount, 1), display_name],
+		Color(0.84, 0.7, 0.44, 0.85),
+		1.12,
+		&"material"
+	)
+
+
 static func _spawn_float(
 	parent: Node,
 	world_pos: Vector2,

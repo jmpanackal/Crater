@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"mid_east_landing"
+display_name = "Mid-East Landing"
+world_origin = Vector2(5840, 2880)
+seams = [{
+"edge": "north",
+"neighbor": "glowbeds_hang",
+"position": 2880
+}, {
+"edge": "west",
+"neighbor": "mid_heart",
+"position": 4960
+}, {
+"edge": "east",
+"neighbor": "mid_east_approach",
+"position": 7040
+}]
+enclosed = false
+world_rect = Rect2(4960, 2400, 2080, 640)
+restricted = false

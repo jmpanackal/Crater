@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/job_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+job_id = &"spare_hands"
+title = "Spare hands wanted"
+description = "The Cistern could use a load of Brinecrystal whenever someone happens to have one. Nobody is counting on it — Available Work: no promise, no expectation, no Trust either way."
+work_type = &"available"
+deadline_shape = &"none"
+deadline_cycles = 1
+tier = 0
+min_trust = &""
+district_id = &"cistern"
+material_id = &"brinecrystal"
+required_amount = 1
+tallies_reward = 3
+spawn_on_unmet_demand = false

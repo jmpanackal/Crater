@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"home_court"
+display_name = "Home Court"
+world_origin = Vector2(-80, 5440)
+seams = [{
+"edge": "west",
+"neighbor": "lower_switchback",
+"position": -320
+}, {
+"edge": "east",
+"neighbor": "worker_return_ascent",
+"position": 160
+}]
+enclosed = true
+world_rect = Rect2(-320, 4960, 480, 640)
+restricted = false

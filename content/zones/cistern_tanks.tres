@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"cistern_tanks"
+display_name = "Cistern Tanks"
+world_origin = Vector2(8000, 6720)
+seams = [{
+"edge": "south",
+"neighbor": "seep_threshold",
+"position": 7360
+}, {
+"edge": "north",
+"neighbor": "cistern",
+"position": 6720
+}]
+enclosed = true
+world_rect = Rect2(7360, 6240, 1920, 640)
+restricted = false

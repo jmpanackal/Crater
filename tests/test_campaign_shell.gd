@@ -1,5 +1,7 @@
 extends SceneTree
-## Title shell + new_game reset hooks.
+## Title shell + new_game reset hooks — against the current canon domains
+## (Storage, Rig, Trust, Journal, District) replacing the retired
+## Resources/Upgrades/Community/Districts prototype.
 
 
 func _init() -> void:
@@ -10,23 +12,27 @@ func _run_tests() -> void:
 	await process_frame
 
 	var save_load: Node = root.get_node_or_null("SaveLoad")
-	var wallet: Node = root.get_node_or_null("Resources")
-	var upgrades: Node = root.get_node_or_null("Upgrades")
-	var community: Node = root.get_node_or_null("Community")
+	var storage: Node = root.get_node_or_null("Storage")
+	var rig: Node = root.get_node_or_null("Rig")
+	var trust: Node = root.get_node_or_null("Trust")
 	var journal: Node = root.get_node_or_null("Journal")
-	var districts: Node = root.get_node_or_null("Districts")
-	if save_load == null:
-		push_error("FAIL SaveLoad missing")
+	var district: Node = root.get_node_or_null("District")
+	if save_load == null or storage == null or rig == null or trust == null or journal == null or district == null:
+		push_error("FAIL missing autoloads")
 		quit(1)
 		return
 
-	community.set_paused(true)
-	wallet.set_amount(wallet.SALVAGE, 40)
-	upgrades.set_level(upgrades.DIG_YIELD, 2)
-	community.set_trust(22)
-	community.set_pending_lie(true)
+	storage.reset_all()
+	rig.reset_all()
+	trust.reset_all()
+	journal.reset_all()
+	district.reset_all()
+
+	storage.deposit_material(&"sutral", 40)
+	rig.add_owned_gear(&"load_harness")
+	trust.submit_trust_event(&"test", -28.0, "campaign shell test")
 	journal.unlock_record(journal.RECORD_NURSERY)
-	districts.set_stock(districts.FARMS, 9.0)
+	district.request_withdrawal(&"wickwork", 2.0, {"recorded": true})
 	if not save_load.save_game():
 		push_error("FAIL save")
 		quit(1)
@@ -42,28 +48,24 @@ func _run_tests() -> void:
 		push_error("FAIL save still present after new_game")
 		quit(1)
 		return
-	if wallet.get_amount(wallet.SALVAGE) != 0:
-		push_error("FAIL salvage not reset")
+	if storage.get_material_count(&"sutral") != 0:
+		push_error("FAIL Materials not reset")
 		quit(1)
 		return
-	if upgrades.get_level(upgrades.DIG_YIELD) != 0:
-		push_error("FAIL upgrades not reset")
+	if rig.is_owned(&"load_harness"):
+		push_error("FAIL owned Gear not reset")
 		quit(1)
 		return
-	if community.get_trust() != community.TRUST_DEFAULT:
+	if not is_equal_approx(float(trust.get_trust_value()), float(trust.get_default_trust())):
 		push_error("FAIL trust not reset")
-		quit(1)
-		return
-	if community.has_pending_lie():
-		push_error("FAIL pending lie not cleared")
 		quit(1)
 		return
 	if journal.has_record(journal.RECORD_NURSERY):
 		push_error("FAIL journal not cleared")
 		quit(1)
 		return
-	if districts.get_good_amount(districts.GLOWRATIONS) != districts.PROTECTED_RESERVE:
-		push_error("FAIL district production not reset to reserve")
+	if not is_equal_approx(float(district.get_reserves(&"wickwork")), 2.0):
+		push_error("FAIL district Reserves not reset to the seeded starting value")
 		quit(1)
 		return
 	print("PASS new_game resets Act 1 state")
@@ -95,5 +97,11 @@ func _run_tests() -> void:
 		return
 	print("PASS title screen scene loads")
 
+	save_load.clear_save()
+	storage.reset_all()
+	rig.reset_all()
+	trust.reset_all()
+	journal.reset_all()
+	district.reset_all()
 	print("CAMPAIGN_SHELL_TESTS_PASSED")
 	quit(0)

@@ -1,4 +1,6 @@
 extends Node2D
+
+const AccessGateScript := preload("res://access_gate.gd")
 ## Runtime Hollow livability: Devil's Mouth drama, carved rooms, district kits, lantern grammar.
 ## No PixelLab — ColorRect / PointLight2D / soft particles that read as lived-in.
 
@@ -43,6 +45,7 @@ func _ready() -> void:
 	_paint_cliff_bands()
 	_add_carved_rooms()
 	_add_terrace_punctuation()
+	_add_opening_route_dressing()
 	_add_deck_architecture()
 	_add_heart_structure()
 	_add_bridge_crossing()
@@ -305,6 +308,16 @@ func _add_terrace_punctuation() -> void:
 	_step_riser(root, "CisternStepB", 780.0, HollowLayout.CISTERN_Y)
 	_visual_ramp(root, "CisternAlcoveRamp", 868.0, HollowLayout.CISTERN_Y, 24.0)
 	_room_entrance(root, "CisternServiceDoor", 860.0, HollowLayout.CISTERN_Y, CISTERN_LIGHT)
+
+
+func _add_opening_route_dressing() -> void:
+	## Greybox base — no doorway props / chamber leftovers on the west decks.
+	if get_node_or_null("OpeningRouteDressing") != null:
+		return
+	var root := Node2D.new()
+	root.name = "OpeningRouteDressing"
+	root.z_index = 1
+	add_child(root)
 
 
 func _visual_ramp(parent: Node, ramp_name: String, x: float, deck_y: float, width: float) -> void:
@@ -715,17 +728,20 @@ func _add_vaultward_gate() -> void:
 	root.add_child(bar)
 
 	# Collision wall: no free climb from upper residences into Vaultward.
-	var body := StaticBody2D.new()
+	# Build Bible Spec 31: a real access gate — solid until the player holds
+	# the Ashram Heights residence (the build brief's "Gate + collision
+	# block. Not free at start"), explained in the world without numbers.
+	var body: StaticBody2D = AccessGateScript.new()
 	body.name = "VaultwardBlock"
-	body.collision_layer = 1
-	body.collision_mask = 0
+	body.gate_id = &"vaultward"
+	body.required_residence = &"ashram_heights"
+	body.display_name = "Vaultward gate"
+	body.explanation = "The Council's seal. Only Ashram Heights residents pass beneath the Firmament."
+	body.barrier_size = Vector2(96.0, 40.0)
+	body.beyond_offset = Vector2(0.0, -56.0)
+	body.beyond_size = Vector2(96.0, 48.0)
+	body.position = Vector2(HollowLayout.HOLLOW_LEFT + 236.0, HollowLayout.VAULTWARD_Y - 20.0)
 	root.add_child(body)
-	var col := CollisionShape2D.new()
-	var shape := RectangleShape2D.new()
-	shape.size = Vector2(96.0, 40.0)
-	col.shape = shape
-	col.position = Vector2(HollowLayout.HOLLOW_LEFT + 236.0, HollowLayout.VAULTWARD_Y - 20.0)
-	body.add_child(col)
 
 
 func _add_society_life_cues() -> void:
@@ -1530,26 +1546,26 @@ func _add_warm_lights() -> void:
 	_point_light(root, "LightFarms", Vector2(-300, HollowLayout.FARMS_Y - 40), tex, 0.65, 2.3)
 	_point_light(root, "LightFarmsTerrace", Vector2(-40, HollowLayout.FARMS_Y - 40), tex, 0.55, 2.1)
 	_point_light(root, "LightWick", Vector2(-200, HollowLayout.WICK_Y - 40), tex, 0.85, 2.8)
-	_point_light(root, "LightBridge", Vector2(416, HollowLayout.WICK_Y - 36), tex, 0.7, 2.4)
-	_point_light(root, "LightWickRight", Vector2(700, HollowLayout.WICK_Y - 38), tex, 0.55, 2.3)
+	_point_light(root, "LightBridge", Vector2(HollowLayout.HEART_MID_X - 64.0, HollowLayout.WICK_Y - 36), tex, 0.7, 2.4)
+	_point_light(root, "LightWickRight", Vector2(HollowLayout.PIT_RIGHT - 80.0, HollowLayout.WICK_Y - 38), tex, 0.55, 2.3)
 	_point_light(
-		root, "LightCistern", Vector2(740, HollowLayout.CISTERN_Y - 40), tex, 0.55, 2.5, CISTERN_LIGHT
+		root, "LightCistern", Vector2(HollowLayout.PIT_RIGHT + 48.0, HollowLayout.CISTERN_Y - 40), tex, 0.55, 2.5, CISTERN_LIGHT
 	)
-	_point_light(root, "LightCisternSafety", Vector2(820, HollowLayout.CISTERN_Y - 36), tex, 0.35, 1.8, WARM)
-	_point_light(root, "LightPitCool", Vector2(416, HollowLayout.CISTERN_Y + 40), tex, 0.35, 3.2, COOL_PIT)
+	_point_light(root, "LightCisternSafety", Vector2(HollowLayout.FREIGHT_LIFT_X, HollowLayout.CISTERN_Y - 36), tex, 0.35, 1.8, WARM)
+	_point_light(root, "LightPitCool", Vector2(HollowLayout.HEART_MID_X - 64.0, HollowLayout.CISTERN_Y + 40), tex, 0.35, 3.2, COOL_PIT)
 	# Sparse deep lights in Devil's Mouth — scale cues, not bright fill.
-	_point_light(root, "LightDeepSparseA", Vector2(340, 480), tex, 0.12, 1.4, COOL_PIT)
-	_point_light(root, "LightDeepSparseB", Vector2(480, 560), tex, 0.1, 1.2, Color(0.4, 0.5, 0.55, 1.0))
-	_point_light(root, "LightDeepSparseC", Vector2(400, 620), tex, 0.08, 1.0, Color(0.35, 0.42, 0.48, 1.0))
+	_point_light(root, "LightDeepSparseA", Vector2(HollowLayout.HEART_MID_X - 160.0, 480), tex, 0.12, 1.4, COOL_PIT)
+	_point_light(root, "LightDeepSparseB", Vector2(HollowLayout.HEART_MID_X, 560), tex, 0.1, 1.2, Color(0.4, 0.5, 0.55, 1.0))
+	_point_light(root, "LightDeepSparseC", Vector2(HollowLayout.HEART_MID_X - 80.0, 620), tex, 0.08, 1.0, Color(0.35, 0.42, 0.48, 1.0))
 	_lamp_post(root, "LampPostFarms", Vector2(-304, HollowLayout.FARMS_Y - 22))
 	_lamp_post(root, "LampPostFarmsTerrace", Vector2(-44, HollowLayout.FARMS_Y - 22))
 	_lamp_post(root, "LampPostWick", Vector2(-204, HollowLayout.WICK_Y - 22))
-	_lamp_post(root, "LampPostWickRight", Vector2(696, HollowLayout.WICK_Y - 22))
-	_lamp_post(root, "LampPostCistern", Vector2(736, HollowLayout.CISTERN_Y - 22), CISTERN_LIGHT)
-	_lamp_post(root, "LampPostCisternSafety", Vector2(816, HollowLayout.CISTERN_Y - 22), WARM)
+	_lamp_post(root, "LampPostWickRight", Vector2(HollowLayout.PIT_RIGHT - 84.0, HollowLayout.WICK_Y - 22))
+	_lamp_post(root, "LampPostCistern", Vector2(HollowLayout.PIT_RIGHT, HollowLayout.CISTERN_Y - 22), CISTERN_LIGHT)
+	_lamp_post(root, "LampPostCisternSafety", Vector2(HollowLayout.FREIGHT_LIFT_X - 8.0, HollowLayout.CISTERN_Y - 22), WARM)
 	# Mid Heart civic lamp near tally booth / Joss.
-	_lamp_post(root, "LampPostMidHeart", Vector2(340, HollowLayout.WICK_Y - 22), WARM)
-	_point_light(root, "LightMidHeartBooth", Vector2(360, HollowLayout.WICK_Y - 36), tex, 0.75, 2.2)
+	_lamp_post(root, "LampPostMidHeart", Vector2(HollowLayout.PIT_LEFT + 52.0, HollowLayout.WICK_Y - 22), WARM)
+	_point_light(root, "LightMidHeartBooth", Vector2(HollowLayout.PIT_LEFT + 72.0, HollowLayout.WICK_Y - 36), tex, 0.75, 2.2)
 
 
 func _lamp_post(

@@ -13,7 +13,8 @@ const BODY_HEIGHT := 32.0
 ## Idle sheets are 64×64 (2× PixelLab); scale to match the 32×32 collider so feet sit on deck.
 const SPRITE_SCALE := 0.5
 ## Snap onto a landing if within this many px when climb ends.
-const CLIMB_LAND_SNAP_PX := 48.0
+## World-scale pass (2026-09-19): x5, tracking the now-5x-taller ladder shafts.
+const CLIMB_LAND_SNAP_PX := 240.0
 
 ## Fairness windows (see docs/game-feel-best-practices.md).
 const COYOTE_TIME := 0.10
@@ -23,8 +24,27 @@ const ACCEL := 1400.0
 const FRICTION := 1800.0
 const AIR_ACCEL := 1000.0
 const AIR_FRICTION := 400.0
-## Soft respawn if we drop past Hollow/dig void (below seep band).
-const VOID_FALL_Y := 1200.0
+## Soft respawn if we drop past Hollow/dig void (below deepest west deck).
+## Bottom-West Dig Front lower is the deepest landable west stack top
+## (BOTTOM_WEST_LOWER_Y=7360). Keep the same ~560px margin the old Seep-based
+## plane used (world-scale pass 2026-09-19: x5 of ~112px). Must track
+## HollowLayout.BOTTOM_WEST_LOWER_Y — a plane above that deck soft-kills the
+## climb/fall into Bottom-West before feet can land.
+const VOID_FALL_Y := 7920.0 ## BOTTOM_WEST_LOWER_Y + 560
+
+## QOL step-up: walking into a ledge exactly one dig/floor tile higher than
+## the current stand auto-climbs it instead of requiring a jump (a one-tile
+## rise is a stair riser, not an obstacle). Matches TerrainLayer/hollow_terrain
+## TILE_SIZE (16px) plus a small tolerance for tile-edge rounding.
+const STEP_HEIGHT := 16.0
+const STEP_PROBE_X := 4.0
+## test_move()'s default safe_margin (0.08) treats an exact flush touch as a
+## collision — a raised probe sitting precisely on top of the target tile
+## registered as "still blocked" even with zero real overlap (confirmed while
+## building this). A couple of extra px of real clearance during the test
+## avoids that false positive; floor_snap_length (8, see _ready()) easily
+## re-seats the body onto the tile afterward.
+const STEP_CLEARANCE := 2.0
 
 
 @export var terrain: TerrainLayer
@@ -44,6 +64,7 @@ var _climb_ladders: Array[Node] = []
 var _climbing := false
 ## After auto-landing at a deck end, ignore held W/S until released (avoids re-grab).
 var _climb_axis_release_required := false
+var _suppress_air_auto_grab := false
 
 var _coyote_timer := 0.0
 var _jump_buffer_timer := 0.0
@@ -67,9 +88,31 @@ func _ready() -> void:
 		_sprite.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
 		_play_idle_for_facing()
 		_ensure_contact_shadow()
+	_ensure_interaction()
 	_last_safe_pos = global_position
 	_has_safe_pos = true
 	_was_on_floor = is_on_floor()
+	reset_physics_interpolation()
+
+
+const InteractionScript := preload("res://interaction.gd")
+
+
+## Build Bible Spec 10 — one central Area2D-based Interaction component
+## instead of every interactable type handling its own input. Instantiated
+## via preload rather than the Interaction class_name identifier — a
+## freshly added class_name isn't in the global script class cache until
+## an editor rescan, which a headless test run never triggers.
+func _ensure_interaction() -> void:
+	if get_node_or_null("Interaction") != null:
+		return
+	var interaction: Area2D = InteractionScript.new()
+	interaction.name = "Interaction"
+	add_child(interaction)
+
+
+func get_interaction() -> Node:
+	return get_node_or_null("Interaction")
 
 
 ## Test hooks — keep jump fairness verifiable without Input frame races.
@@ -98,15 +141,31 @@ func debug_force_land_feel(impact: float = 1.0) -> void:
 
 
 func enter_climb_zone(ladder: Node = null) -> void:
-	_climb_zones += 1
-	if ladder != null and not _climb_ladders.has(ladder):
+	var was_in_zone := not _climb_ladders.is_empty()
+	if ladder != null:
+		if _climb_ladders.has(ladder):
+			return
 		_climb_ladders.append(ladder)
+	_climb_zones = _climb_ladders.size()
+	_suppress_air_auto_grab = false
+	if was_in_zone or _climbing:
+		return
+	# Already-held W/S (dig-aim) never sticky-mounts on zone enter.
+	if _read_climb_axis() != 0.0:
+		_climb_axis_release_required = true
+		_suppress_air_auto_grab = true
+		return
+	# Airborne near the upper lip with no climb key: auto-grab so walking into an
+	# opening never free-falls past. Mid-shaft descent stays free until W/S.
+	if _can_air_auto_grab() and _pay_strenuous_if_loaded():
+		_climbing = true
+		collision_mask = 0
 
 
 func exit_climb_zone(ladder: Node = null) -> void:
 	if ladder != null:
 		_climb_ladders.erase(ladder)
-	_climb_zones = maxi(0, _climb_zones - 1)
+	_climb_zones = _climb_ladders.size()
 	if _climb_zones == 0:
 		# Keep `ladder` for snap — array is empty after erase when it was the last zone.
 		_stop_climbing(true, ladder)
@@ -115,7 +174,7 @@ func exit_climb_zone(ladder: Node = null) -> void:
 
 
 func is_in_climb_zone() -> bool:
-	return _climb_zones > 0
+	return not _climb_ladders.is_empty()
 
 
 func is_climbing() -> bool:
@@ -139,10 +198,24 @@ func _physics_process(delta: float) -> void:
 			_climb_axis_release_required = false
 		else:
 			climb_y = 0.0
-	if in_zone and climb_y != 0.0:
-		_climbing = true
+	if in_zone and not _climbing:
+		if climb_y != 0.0:
+			# Floor mounts need a fresh W/S press so held dig-aim does not sticky-grab.
+			# Airborne key mounts remain allowed while falling through a shaft.
+			var floor_mount := is_on_floor() and _climb_axis_just_pressed()
+			var air_mount := not is_on_floor()
+			if (floor_mount or air_mount) and _pay_strenuous_if_loaded():
+				_climbing = true
+			else:
+				climb_y = 0.0
+		elif not _suppress_air_auto_grab and _can_air_auto_grab() and _pay_strenuous_if_loaded():
+			_climbing = true
+			collision_mask = 0
 
 	_update_coyote_and_buffer(delta)
+	_tick_drop_through(delta)
+	if _down_just_pressed() and is_on_floor() and not _climbing and not in_zone:
+		_try_drop_through()
 	var jumped := _try_consume_jump(in_zone)
 
 	if _climbing and not jumped:
@@ -182,6 +255,8 @@ func _physics_process(delta: float) -> void:
 	elif move_x != 0.0:
 		_facing_8 = Vector2i.RIGHT if move_x > 0.0 else Vector2i.LEFT
 
+	if is_on_floor() and not _climbing:
+		_try_step_up(move_x)
 	_apply_horizontal_move(move_x, delta)
 	if not is_on_floor() and velocity.y > 0.0:
 		_land_impact = maxf(_land_impact, velocity.y / 450.0)
@@ -193,6 +268,53 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("dig"):
 		_try_dig()
+	if Input.is_action_just_pressed("interact"):
+		var interaction := get_interaction()
+		if interaction != null:
+			interaction.try_interact(self)
+
+
+## Down on a one-way deck steps through it, but only onto something solid close beneath
+## (a stair tread, a lower deck within DROP_PROBE) — never into open air or the Mouth.
+const DROP_PROBE := 112.0
+const DROP_TIME := 0.25
+const DECK_GROUP := &"hollow_decks"
+var _drop_timer := 0.0
+var _prev_down_key := false
+
+
+func _down_just_pressed() -> bool:
+	var key := Input.is_physical_key_pressed(KEY_S)
+	var edge := key and not _prev_down_key
+	_prev_down_key = key
+	return edge or Input.is_action_just_pressed("ui_down")
+
+
+func _set_decks_enabled(enabled: bool) -> void:
+	for layer in get_tree().get_nodes_in_group(DECK_GROUP):
+		(layer as TileMapLayer).collision_enabled = enabled
+
+
+func _try_drop_through() -> void:
+	var layers := get_tree().get_nodes_in_group(DECK_GROUP)
+	if layers.is_empty():
+		return
+	var terrain: Node = layers[0].get_parent()
+	var feet := Vector2(global_position.x + BODY_HEIGHT * 0.5, global_position.y + BODY_HEIGHT)
+	if not terrain.has_method("has_support_below") or not terrain.has_support_below(feet, BODY_HEIGHT * 0.5 - 2.0, DROP_PROBE):
+		return
+	_set_decks_enabled(false)
+	_drop_timer = DROP_TIME
+	global_position.y += 2.0
+	velocity.y = maxf(velocity.y, 60.0)
+
+
+func _tick_drop_through(delta: float) -> void:
+	if _drop_timer <= 0.0:
+		return
+	_drop_timer -= delta
+	if _drop_timer <= 0.0:
+		_set_decks_enabled(true)
 
 
 func _update_coyote_and_buffer(delta: float) -> void:
@@ -215,12 +337,16 @@ func _try_consume_jump(in_zone: bool) -> bool:
 		return false
 	if not can_floor_jump and not can_ladder_jump:
 		return false
+	# A jump is strenuous while hauling (Spec 13 / G1); Exhausted refuses it.
+	if not _pay_strenuous_if_loaded():
+		return false
 
 	_jump_buffer_timer = 0.0
 	_coyote_timer = 0.0
 	collision_mask = WORLD_COLLISION_MASK
 	_climbing = false
 	_climb_axis_release_required = false
+	_suppress_air_auto_grab = true
 	velocity.y = JUMP_VELOCITY
 	_feel_scale = Vector2(0.88, 1.14) # stretch — sprite only
 	return true
@@ -261,7 +387,7 @@ func _ensure_contact_shadow() -> void:
 
 
 func _apply_horizontal_move(move_x: float, delta: float) -> void:
-	var x_speed := SPEED * (0.45 if _climbing else 1.0)
+	var x_speed := SPEED * (0.45 if _climbing else 1.0) * _hauling_speed_multiplier()
 	var target := move_x * x_speed
 	if _climbing:
 		# Ladder hops stay snappy so W/S + slight A/D feel responsive.
@@ -275,10 +401,41 @@ func _apply_horizontal_move(move_x: float, delta: float) -> void:
 	velocity.x = move_toward(velocity.x, target, rate * delta)
 
 
+## QOL: if walking horizontally would bump a ledge exactly one tile (up to
+## STEP_HEIGHT) above the current stand, hop the body up onto it instead of
+## stopping dead at the riser. Only fires when there's solid floor waiting at
+## the higher position (never steps up into open air) and the space directly
+## above is clear (never steps into a ceiling).
+func _try_step_up(move_x: float) -> void:
+	if move_x == 0.0:
+		return
+	var direction := Vector2(signf(move_x), 0.0)
+	var probe := direction * STEP_PROBE_X
+	if not test_move(global_transform, probe):
+		return # not actually blocked — nothing to step up onto
+	# Raise with a little extra clearance so the test doesn't flush-touch the
+	# target tile's top (see STEP_CLEARANCE) — a real gap, not exactly zero.
+	var raised := global_transform.translated(Vector2(0.0, -(STEP_HEIGHT + STEP_CLEARANCE)))
+	if test_move(raised, Vector2.ZERO):
+		return # ceiling right above — can't raise the body at all
+	if test_move(raised, probe):
+		return # still blocked at the raised height — not a 1-tile step
+	var settle := raised.translated(probe)
+	if not test_move(settle, Vector2(0.0, STEP_HEIGHT + STEP_CLEARANCE + 2.0)):
+		return # no floor waiting up there — would step into open air
+	# Move up AND forward together — raising Y alone leaves the body floating
+	# with no horizontal progress yet, racing gravity/move_and_slide over the
+	# following frames to clear the corner (confirmed unreliable in testing).
+	# Landing directly past the corner lets floor_snap settle it onto the
+	# tile next tick (floor_snap_length=8 easily covers STEP_CLEARANCE=2).
+	global_position = settle.origin
+	velocity.y = minf(velocity.y, 0.0)
+
+
 func _remember_safe_ground() -> void:
 	if _climbing or not is_on_floor():
 		return
-	if global_position.y >= VOID_FALL_Y - 40.0:
+	if global_position.y >= VOID_FALL_Y - 200.0:
 		return
 	_last_safe_pos = global_position
 	_has_safe_pos = true
@@ -290,6 +447,12 @@ func _soft_respawn_if_void() -> void:
 	var dest := _last_safe_pos if _has_safe_pos else HollowLayout.nearest_safe_stand(global_position)
 	if dest == Vector2.ZERO:
 		dest = HollowLayout.nearest_safe_stand(global_position)
+	# Build Bible Spec 30 (G22-B): a void fall is a severe fall — fatigue,
+	# the haul left behind at safe ground, lost civic time. Rescue owns
+	# those consequences; the controller only reports it (fail-safe).
+	var rescue := get_tree().root.get_node_or_null("Rescue")
+	if rescue != null and rescue.has_method("report_severe_fall"):
+		rescue.report_severe_fall(global_position, dest)
 	collision_mask = WORLD_COLLISION_MASK
 	_climbing = false
 	_climb_axis_release_required = false
@@ -297,6 +460,7 @@ func _soft_respawn_if_void() -> void:
 	_jump_buffer_timer = 0.0
 	velocity = Vector2.ZERO
 	global_position = dest
+	reset_physics_interpolation()
 
 
 ## Auto-land at shaft ends so we never exit the climb Area below the deck collider.
@@ -376,6 +540,25 @@ func _snap_to_nearest_deck_if_close(ladder: Node = null) -> void:
 		velocity.y = 0.0
 
 
+
+func _climb_axis_just_pressed() -> bool:
+	return (
+		Input.is_action_just_pressed("ui_up")
+		or Input.is_action_just_pressed("ui_down")
+	)
+
+
+## Catch free-falls past an upper ladder lip only — not mid-shaft gallery drops.
+func _can_air_auto_grab() -> bool:
+	if is_on_floor() and velocity.y <= 20.0:
+		return false
+	var ladder := _active_ladder()
+	if ladder == null or not ladder.has_method("deck_top_y"):
+		return not is_on_floor() or velocity.y > 20.0
+	var stand_top := float(ladder.deck_top_y()) - BODY_HEIGHT
+	return global_position.y <= stand_top + 24.0
+
+
 func _read_climb_axis() -> float:
 	var climb_y := 0.0
 	if Input.is_action_pressed("ui_up") or Input.is_physical_key_pressed(KEY_W):
@@ -388,6 +571,8 @@ func _read_climb_axis() -> float:
 ## Dig one adjacent tile in the current aim direction (held keys, else last aim).
 func _try_dig() -> void:
 	if terrain == null:
+		return
+	if not _can_afford_dig():
 		return
 
 	var dig_dir := _read_held_aim()
@@ -461,27 +646,131 @@ static func facing_to_idle_anim(dir: Vector2i) -> StringName:
 	return &"idle_north_west"
 
 
+## Build Bible Spec 07 (Player Controller) contract hooks into Stamina
+## (Spec 08, now built) and Hauling (Spec 13, not yet built). Contract-only
+## per Spec 07's own failure-case note: method signatures agreed, bodies
+## stubbed until real numbers exist — normal movement must never break just
+## because a dependency doesn't exist, or doesn't have a tuned cost yet.
+##
+## Player Controller calls these systems' public APIs directly for
+## blocking-relevant actions (Spec 07, confirmed option A) — no
+## intermediary "Action" layer between input and consequence. This matches
+## Spec 01's "reads are open, writes are not" ownership rule: Player
+## Controller only ever reads/requests here, it never mutates Stamina's or
+## Hauling's own state.
+
+## Digging's real stamina cost is canon-OPEN — not decided or tuned
+## anywhere yet, despite digging being explicitly named a strenuous action
+## in canon §9. 0.0 (always affordable) preserves today's actual game feel
+## exactly rather than inventing a number; this is the one line to change
+## once a real tuning value exists.
+const DIG_STAMINA_COST := 0.0
+
+
+## True when a dig is currently affordable per Stamina's current block
+## state. Fails safe (true) when Stamina doesn't exist yet — real once
+## Stamina (Spec 08) is present, using can_afford(cost: float), matching
+## its actual API rather than the guessed shape this stub used before
+## Spec 08 existed.
+func _can_afford_dig() -> bool:
+	var stamina := get_tree().root.get_node_or_null("Stamina")
+	if stamina == null or not stamina.has_method("can_afford"):
+		return true
+	return bool(stamina.can_afford(dig_stamina_cost()))
+
+
+## The per-dig stamina cost after Gear (Build Bible Spec 14: excavation
+## Gear like the Fracture Pick reduces it — Rig.EFFECT_DIG_COST_REDUCTION,
+## a fraction). Baseline digging itself is never Gear-gated; Gear can only
+## make it cheaper. Still 0.0 in practice while DIG_STAMINA_COST is
+## untuned, but the hook is real so tuning it is one constant.
+func dig_stamina_cost() -> float:
+	var rig := get_tree().root.get_node_or_null("Rig")
+	if rig == null or not rig.has_method("get_effect_sum"):
+		return DIG_STAMINA_COST
+	var reduction := clampf(float(rig.get_effect_sum(&"dig_stamina_cost_reduction")), 0.0, 1.0)
+	return DIG_STAMINA_COST * (1.0 - reduction)
+
+
+## Movement speed multiplier from Hauling's current loaded state — per the
+## locked G1 decision, being loaded makes climbing/ladders/ramps/jumps
+## strenuous and unlocks a slower loaded-movement speed. Player Controller
+## owns SPEED itself and only reads this adjustment (Spec 07, confirmed
+## option A) — Hauling never reaches in and sets it directly. Fails safe
+## (1.0, unaffected) when Hauling doesn't exist yet.
+func _hauling_speed_multiplier() -> float:
+	var hauling := get_tree().root.get_node_or_null("Hauling")
+	if hauling == null or not hauling.has_method("get_movement_speed_multiplier"):
+		return 1.0
+	return float(hauling.get_movement_speed_multiplier())
+
+
+## Build Bible Spec 13 (G1, option A): while a bundle is attached, jumps
+## and ladder grabs are strenuous — they spend stamina. Unloaded, they
+## stay free, exactly as before. At zero usable stamina the action still
+## happens as an Overexertion (G21, option A) — Stamina/Fatigue own that
+## conversion; only being Exhausted refuses the action outright. Returns
+## whether the action may proceed. Ramps aren't a distinct traversal in
+## the prototype yet and sprinting doesn't exist, so neither is gated here.
+func _pay_strenuous_if_loaded() -> bool:
+	var hauling := get_tree().root.get_node_or_null("Hauling")
+	if hauling == null or not hauling.has_method("is_loaded") or not bool(hauling.is_loaded()):
+		return true
+	var stamina := get_tree().root.get_node_or_null("Stamina")
+	if stamina == null or not stamina.has_method("can_afford"):
+		return true
+	if bool(stamina.is_exhausted()):
+		return false
+	var cost := float(hauling.get_strenuous_action_cost())
+	if bool(stamina.can_afford(cost)):
+		stamina.spend(cost)
+	else:
+		stamina.overexert(cost)
+	return true
+
+
+## Placeholder-art-first (2026-09-17): the real PixelLab idle sheets this
+## used to load (sprites/player/idle/*.png) were generated in an
+## "Eastward/Owlboy-detail" style that predates this project's
+## placeholder-art-first plan and its beginner-achievable pixel-art scale
+## — removed, not resized, since they were never the target style.
+## facing_to_idle_anim()'s 8-direction mapping is real, tested logic and
+## is unchanged; only the pixels backing each animation name changed, to
+## a procedurally drawn flat-color silhouette (hollow_npc.gd's convention).
+const ANIM_FACING := {
+	&"idle_south": Vector2i(0, 1),
+	&"idle_south_east": Vector2i(1, 1),
+	&"idle_east": Vector2i(1, 0),
+	&"idle_north_east": Vector2i(1, -1),
+	&"idle_north": Vector2i(0, -1),
+	&"idle_north_west": Vector2i(-1, -1),
+	&"idle_west": Vector2i(-1, 0),
+	&"idle_south_west": Vector2i(-1, 1),
+}
+
+
 func _build_idle_frames() -> SpriteFrames:
 	var frames := SpriteFrames.new()
-	var paths := {
-		&"idle_south": "res://sprites/player/idle/south.png",
-		&"idle_south_east": "res://sprites/player/idle/south-east.png",
-		&"idle_east": "res://sprites/player/idle/east.png",
-		&"idle_north_east": "res://sprites/player/idle/north-east.png",
-		&"idle_north": "res://sprites/player/idle/north.png",
-		&"idle_north_west": "res://sprites/player/idle/north-west.png",
-		&"idle_west": "res://sprites/player/idle/west.png",
-		&"idle_south_west": "res://sprites/player/idle/south-west.png",
-	}
 	# Remove the default empty animation Godot adds.
 	if frames.has_animation(&"default"):
 		frames.remove_animation(&"default")
 
-	for anim_name in paths.keys():
+	for anim_name: StringName in ANIM_FACING.keys():
 		frames.add_animation(anim_name)
 		frames.set_animation_loop(anim_name, true)
 		frames.set_animation_speed(anim_name, 1.0)
-		var tex: Texture2D = load(paths[anim_name])
-		if tex:
-			frames.add_frame(anim_name, tex)
+		frames.add_frame(anim_name, _placeholder_frame(ANIM_FACING[anim_name]))
 	return frames
+
+
+## Flat-color placeholder silhouette on a 64x64 canvas (matches the old
+## sheet's baseline so SPRITE_SCALE/BODY_HEIGHT math is unchanged). A
+## small offset "face" mark shows facing direction during playtesting.
+func _placeholder_frame(facing: Vector2i) -> Texture2D:
+	var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0.0, 0.0, 0.0, 0.0))
+	image.fill_rect(Rect2i(20, 20, 24, 36), Color(0.65, 0.5, 0.35, 0.9)) # body
+	image.fill_rect(Rect2i(24, 8, 16, 16), Color(0.75, 0.62, 0.48, 0.95)) # head
+	var face_center := Vector2i(32, 16) + facing * 6
+	image.fill_rect(Rect2i(face_center.x - 2, face_center.y - 2, 4, 4), Color(0.15, 0.12, 0.1, 1.0))
+	return ImageTexture.create_from_image(image)

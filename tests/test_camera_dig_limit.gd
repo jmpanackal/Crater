@@ -1,5 +1,7 @@
 extends SceneTree
-## Dig-approach camera: Hollow clamps dig strip, unlock expands without a hard snap.
+## Camera limits cover the whole map: both dig flank tips, the Vaultward line above and the
+## lowest deck below are all reachable with the player centred, and nothing is hidden by a
+## per-region clamp (the old east dig clamp is gone with the symmetric map).
 
 
 func _init() -> void:
@@ -18,70 +20,48 @@ func _run() -> void:
 		push_error("FAIL Player/Camera2D missing")
 		quit(1)
 		return
+	player.set_physics_process(false)
+	var pad: Vector2 = cam.edge_pad()
 
-	# Deep Hollow: dig columns must stay off-frame.
-	player.global_position = Vector2(520.0, HollowLayout.WICK_Y - 16.0)
-	player.velocity = Vector2.ZERO
-	await process_frame
-	await process_frame
-	if float(cam.limit_right) > 1100.0:
-		push_error("FAIL Hollow limit_right=%s exposes dig strip" % cam.limit_right)
-		quit(1)
-		return
-	print("PASS Hollow clamps dig strip")
-
-	# Walk toward civic excavation: limit_right must expand continuously (no unlock teleport).
-	var prev := float(cam.limit_right)
-	var max_step_jump := 0.0
-	var x := 880.0
-	while x <= 1160.0:
-		player.global_position.x = x
+	# Right clamp is static and clears the east flank tip with a full half-viewport.
+	var tip := HollowLayout.EAST_FLANK_RIGHT
+	for x in [HollowLayout.player_spawn_point().x, HollowLayout.PIT_RIGHT + 80.0, tip - 64.0]:
+		player.global_position = Vector2(x, HollowLayout.HEART_Y - 80.0)
+		await physics_frame
 		await process_frame
-		var cur := float(cam.limit_right)
-		var jump := absf(cur - prev)
-		if jump > max_step_jump:
-			max_step_jump = jump
-		# ~10px walk steps; a hard 1024→2200 unlock is ~1176 and must fail.
-		if jump > 160.0:
-			push_error(
-				"FAIL dig camera limit snap jump=%s at x=%s (prev=%s cur=%s)"
-				% [jump, x, prev, cur]
-			)
+		if float(cam.limit_right) < tip + pad.x - 1.0:
+			push_error("FAIL limit_right=%s hides the east flank tip (%s) at player x=%s" % [cam.limit_right, tip, x])
 			quit(1)
 			return
-		prev = cur
-		x += 10.0
-	print("PASS dig limit expands without snap (max step=%s)" % max_step_jump)
+		if absf(float(cam.desired_limit_right(x)) - float(cam.limit_right)) > 1.0:
+			push_error("FAIL desired_limit_right should be static (x=%s)" % x)
+			quit(1)
+			return
+	print("PASS east limit is static and frames the Mid-East Dig Front tip")
 
-	# Fully past dig mouth: full dig framing allowed.
-	player.global_position.x = 1600.0
-	await process_frame
-	await process_frame
-	if float(cam.limit_right) < 2000.0:
-		push_error("FAIL dig limit_right=%s still clamped" % cam.limit_right)
+	# West, top and bottom limits pad past the stand extents.
+	if float(cam.limit_left) > HollowLayout.HIGH_WEST_DIG_LEFT - pad.x:
+		push_error("FAIL limit_left=%s does not pad past the west dig tip" % cam.limit_left)
 		quit(1)
 		return
-	print("PASS dig limit fully unlocked in dig site")
+	if float(cam.limit_top) > HollowLayout.VAULTWARD_Y - pad.y:
+		push_error("FAIL limit_top=%s hides the Vaultward line" % cam.limit_top)
+		quit(1)
+		return
+	if float(cam.limit_bottom) < HollowLayout.BOTTOM_WEST_LOWER_Y + pad.y:
+		push_error("FAIL limit_bottom=%s hides the lowest deck" % cam.limit_bottom)
+		quit(1)
+		return
+	print("PASS west / top / bottom limits pad past the extents")
 
-	# Pure curve helper (if present): endpoints + continuity.
-	if cam.has_method("desired_limit_right"):
-		var deep: float = float(cam.desired_limit_right(400.0))
-		var dig: float = float(cam.desired_limit_right(1500.0))
-		if deep > 1100.0 or dig < 2000.0:
-			push_error("FAIL desired_limit_right endpoints deep=%s dig=%s" % [deep, dig])
-			quit(1)
-			return
-		var p := float(cam.desired_limit_right(860.0))
-		var sx := 870.0
-		while sx <= 1140.0:
-			var c := float(cam.desired_limit_right(sx))
-			if absf(c - p) > 160.0:
-				push_error("FAIL desired_limit_right discontinuity at %s" % sx)
-				quit(1)
-				return
-			p = c
-			sx += 10.0
-		print("PASS desired_limit_right curve")
+	# The map is symmetric: the camera's reach past each flank tip matches.
+	var west_reach := HollowLayout.HIGH_WEST_DIG_LEFT - float(cam.limit_left)
+	var east_reach := float(cam.limit_right) - HollowLayout.EAST_FLANK_RIGHT
+	if absf(west_reach - east_reach) > 64.0:
+		push_error("FAIL camera reach past the flank tips differs: west %s vs east %s" % [west_reach, east_reach])
+		quit(1)
+		return
+	print("PASS camera reaches equally past both flank tips")
 
-	print("CAMERA_DIG_LIMIT_TESTS_PASSED")
+	print("ALL TESTS PASSED")
 	quit(0)

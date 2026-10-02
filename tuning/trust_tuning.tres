@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tuning/trust_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+default_trust = 50.0
+min_trust = 0.0
+max_trust = 100.0
+reasons_capacity = 8
+standing_ids = Array[StringName]([&"distrusted", &"doubted", &"accepted", &"relied_on", &"esteemed"])
+standing_labels = Array[String](["Distrusted", "Doubted", "Accepted", "Relied on", "Esteemed"])
+standing_thresholds = Array[float]([0.0, 25.0, 45.0, 70.0, 90.0])

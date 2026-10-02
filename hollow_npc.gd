@@ -1,9 +1,24 @@
 extends Node2D
 ## Lightweight Hollow NPC — works/lives near a district, talks on interact.
 ## Most lines are talk-only (#20 D). Rare choice prompts handled by callers.
+##
+## Build Bible Spec 10 — implements the generic Interactable duck-typed
+## interface (get_interact_prompt()/on_interact()) via a small child
+## InteractableRelay Area2D (interactable_relay.gd), so the player's
+## central Interaction component (not this script) decides when "talk"
+## actually triggers — exactly the per-object-type input handling Spec 10
+## exists to replace. A relay child, not this node itself becoming an
+## Area2D, because main.tscn already declares each NPC's node type as
+## Node2D — the script's base class alone can't change that. Visual/
+## facing/bob logic below is unchanged from before this migration.
 
 signal talk_requested(npc: Node2D, lines: PackedStringArray, choice_prompt: String)
 
+const InteractableRelayScript := preload("res://interactable_relay.gd")
+
+## Build Bible Spec 16: which content/npcs/<npc_id>.tres schedule this body
+## follows. Empty = an unscheduled prop NPC that just stays where placed.
+@export var npc_id: StringName = &""
 @export var npc_name: String = "Neighbor"
 @export var district_id: StringName = &"farms"
 @export var body_color: Color = Color(0.85, 0.7, 0.45)
@@ -26,10 +41,64 @@ var _face_sign := 1.0
 
 
 func _ready() -> void:
+	_ensure_interactable_relay()
 	_wander_origin = position
 	_wander_t = randf() * TAU
 	_build_visuals()
 	_player = get_tree().get_first_node_in_group("player") as Node2D
+	if npc_id != &"":
+		var npcs := get_tree().root.get_node_or_null("Npcs")
+		if npcs != null and npcs.has_method("register_agent"):
+			npcs.register_agent(npc_id, self)
+
+
+func _exit_tree() -> void:
+	if npc_id == &"":
+		return
+	var npcs := get_tree().root.get_node_or_null("Npcs")
+	if npcs != null and npcs.has_method("unregister_agent") and npcs.get_agent(npc_id) == self:
+		npcs.unregister_agent(npc_id)
+
+
+## Build Bible Spec 16: the schedule moved this body to a zone idle point.
+## Direct placement — traversal between zones is the navigation spike's.
+## Resets the wander origin too, since _process re-derives position.x
+## from it every frame.
+func relocate_to(world_pos: Vector2) -> void:
+	global_position = world_pos
+	_wander_origin = position
+
+
+## Build Bible Spec 16: present = this body's scheduled zone is loaded.
+## Absent bodies are invisible, not interactable, and don't idle-animate —
+## the person is somewhere else, not standing here unseen.
+func set_present(present: bool) -> void:
+	visible = present
+	set_process(present)
+	var relay := get_node_or_null("InteractableRelay") as Area2D
+	if relay != null:
+		relay.monitorable = present
+
+
+func is_present() -> bool:
+	return visible
+
+
+func _ensure_interactable_relay() -> void:
+	if get_node_or_null("InteractableRelay") != null:
+		return
+	var relay: Area2D = InteractableRelayScript.new()
+	relay.name = "InteractableRelay"
+	add_child(relay)
+	relay.setup(interact_radius)
+
+
+func get_interact_prompt() -> String:
+	return "Talk to %s" % npc_name
+
+
+func on_interact(_player_node) -> void:
+	talk_requested.emit(self, lines, choice_prompt)
 
 
 func _build_visuals() -> void:
@@ -116,14 +185,17 @@ func debug_face_sign() -> float:
 	return _face_sign
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not _is_player_near():
-		return
-	if event.is_action_pressed("interact") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E):
-		talk_requested.emit(self, lines, choice_prompt)
-		get_viewport().set_input_as_handled()
+## Build Bible Spec 17: which way this body is looking (-1 left / +1
+## right), for Perception's facing-cone check. This prototype body leans
+## toward the player whenever one exists, so today "facing" is effectively
+## "toward the player"; a real animated NPC replaces this with its actual
+## heading without Perception changing.
+func get_facing_sign() -> float:
+	return _face_sign
 
 
+## Still used for the label/hint hover visuals below — not for gating the
+## actual talk trigger anymore (Interaction, via Area2D overlap, owns that).
 func _is_player_near() -> bool:
 	if _player == null:
 		return false
