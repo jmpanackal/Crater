@@ -69,7 +69,7 @@ func _run() -> void:
 		push_error("FAIL Mouth bounds differ from shared world metrics")
 		quit(1)
 		return
-	# Scale plan: Mouth void is x 1440..4960 (3520 px, ~1/5.5 of the 19200 px world). East wall starts at PIT_RIGHT.
+	# Scale plan: Mouth void is x 1440..4960 (3520 px, ~0.29 of the 12160 px between the civic walls). East wall starts at PIT_RIGHT.
 	if absf(Macro.MOUTH_BOUNDS.size.x - (HollowLayout.PIT_RIGHT - HollowLayout.PIT_LEFT)) > 0.5:
 		push_error("FAIL Mouth width drifted from PIT_LEFT..PIT_RIGHT")
 		quit(1)
@@ -78,8 +78,9 @@ func _run() -> void:
 		push_error("FAIL Mouth width must match scale plan (1440..4960 => 3520), got %s" % Macro.MOUTH_BOUNDS.size.x)
 		quit(1)
 		return
-	if Macro.MOUTH_BOUNDS.size.x / Macro.WORLD_BOUNDS.size.x < 0.16:
-		push_error("FAIL Mouth must be a prominent ~1/6+ of world width (got ratio %s)" % (Macro.MOUTH_BOUNDS.size.x / Macro.WORLD_BOUNDS.size.x))
+	var civic_width: float = HollowLayout.EAST_CIVIC_RIGHT - HollowLayout.WEST_HOLLOW_LEFT
+	if Macro.MOUTH_BOUNDS.size.x / civic_width < 0.25:
+		push_error("FAIL Mouth must be a prominent ~1/4+ of the civic width between the walls (got ratio %s)" % (Macro.MOUTH_BOUNDS.size.x / civic_width))
 		quit(1)
 		return
 	for region in Macro.district_guides():

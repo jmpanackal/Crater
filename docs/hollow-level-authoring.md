@@ -18,7 +18,7 @@ the in-engine scene and the blueprint silently diverge from each other.
 The Hollow's floor used to be built by three independent procedural systems —
 `hollow_decks.gd` (hand-computed collision rectangles), `hollow_floor.gd` (a separate
 tile layer painting matching-looking pixels), and `hollow_ambiance.gd` (decorative
-props positioned by eyeballed offsets) — all reconstructing positions from shared
+props positioned by eyeballed offsets; deleted 2026-10-01) — all reconstructing positions from shared
 constants with nothing forcing them to agree. The concrete failure: ramps had real
 collision with zero painted tile under them, so a player would stand on invisible
 ground. Beyond that specific bug, room widths and spacings were invented per-section
@@ -33,7 +33,7 @@ tile's `TileData`), not a separate `StaticBody2D` reconstructing the same rectan
 hand. A tile you can see is a tile you can stand on; there is no other kind. See
 `hollow_terrain.gd`.
 
-Decorative props (`hollow_ambiance.gd`) are not collision and never need to be, but
+Decorative props (when dressing returns) are not collision and never need to be, but
 their position must be derived from the same tile-span values used to paint the floor
 under them — never an independent hand-tuned offset. This is a review convention, not
 an enforced abstraction: when adding ambiance for a room, pass in the same x0/x1/y the

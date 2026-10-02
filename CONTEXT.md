@@ -204,7 +204,7 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `autoload/evidence.gd` | Stateless facade over Terrain's evidence deltas: tiers, `resolve_search` (must beat the tier), `seal`, kit lookup (Build Bible Spec 18) |
 | `seal_node.gd` | Exposed evidence as a Spec 10 Interactable: cancellable hold-to-seal consuming a seal-kit Component (Build Bible Spec 18) |
 | `tuning/evidence_tuning.gd` / `.tres` | Seal hold duration, search radius (Build Bible Spec 18) |
-| `content/zones/east_firmament.tres` / `east_dig_site.tres` | East envelope footprints: the Firmament band is the first authored **restricted** zone (Build Bible Spec 18) |
+| `content/zones/firmament.tres` / `east_dig_site.tres` / `west_dig_site.tres` | The rock shell's footprints (generated from `hollow_map.gd`): the Firmament across the top of the world is the first authored **restricted** zone (Build Bible Spec 18); the two flank volumes are sanctioned digging |
 | `autoload/trust.gd` | Canon owner of global Trust: reasoned events only, standing states from tuning, capped reasons window (Build Bible Spec 19) |
 | `tuning/trust_tuning.gd` / `.tres` | Default/min/max Trust, reasons capacity, standing ladder ids/labels/thresholds (Build Bible Spec 19) |
 | `autoload/investigation.gd` | Derived suspicion per context from the Fact Log window, threshold read against Trust, auto/authored `search_requested`, world-half resolution via Evidence → facts + one Trust event; owns no state (Build Bible Spec 20) |
@@ -268,12 +268,10 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `hollow_zone.gd` | Opens siphon station in Hollow |
 | `hollow_npc.gd` | District NPC body: idle/talk (Spec 10 relay) + scheduled placement/absence via `npc_id` (Build Bible Spec 16) |
 | `hollow_terrain.gd` | Terrace floor TileMap: collision + visuals on one tile, single source of truth (see `docs/hollow-level-authoring.md`) — replaces the retired `hollow_decks.gd`/`hollow_floor.gd` split |
-| `terrain.gd` | Diggable TileMapLayer; Firmament/Devil’s Mouth frontiers |
+| `terrain.gd` | Diggable TileMapLayer: the Hollow's rock shell (Firmament above, deep flanks, floor slab, the pit open); Firmament/Devil’s Mouth frontiers |
 | `feel_fx.gd` | Dig/land grit, soft shake, micro dig hitch, restrained +Salvage/Record floats (**→ Materials**) |
 | `feel_audio.gd` | Procedural dig/land click stubs with pitch randomize |
 | `camera_follow.gd` | Look-ahead, drag deadzone, shake on Camera2D |
-| `dig_site_dressing.gd` | Firmament haze / Devil’s Mouth gloom overlays at dig columns |
-| `dig_approach.gd` | Hollow→Dig Site threshold plank / chasm / placard |
 | `player.gd` | Move / dig / feel (coyote, squash, dust); owns the Interaction child |
 | `interaction.gd` | Area2D-based closest-interactable targeting (Build Bible Spec 10) |
 | `interactable_relay.gd` | Reusable child-Area2D relay for interactables whose root node can't become one (Build Bible Spec 10) |

@@ -173,41 +173,41 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	terrain.reset_all()
-	if float(investigation.get_suspicion(&"east_firmament")) != 0.0:
+	if float(investigation.get_suspicion(&"firmament")) != 0.0:
 		_fail("fresh zone should have zero suspicion")
 		return
-	var clean: Dictionary = investigation.trigger_investigation(&"east_firmament", "Wardens inspect the upper gallery")
-	if requests.size() != 1 or clean["stage"] != &"found_nothing" or investigation.get_investigation_stage(&"east_firmament") != &"found_nothing" or not trust_events.is_empty():
+	var clean: Dictionary = investigation.trigger_investigation(&"firmament", "Wardens inspect the upper gallery")
+	if requests.size() != 1 or clean["stage"] != &"found_nothing" or investigation.get_investigation_stage(&"firmament") != &"found_nothing" or not trust_events.is_empty():
 		_fail("authored trigger on a clean zone should request + resolve to found_nothing with no Trust event: %s %s" % [clean, trust_events])
 		return
 	# Dig a restricted cell, seal it: a routine (Basic) search finds nothing.
-	var cell := Vector2i(70, 10)
+	var cell := Vector2i(590, 10)
 	terrain.dig(terrain.to_global(terrain.map_to_local(cell + Vector2i.UP)), Vector2i.DOWN)
 	storage.add_component(&"seal_kit")
 	var sealed: Dictionary = evidence.seal(terrain.to_global(terrain.map_to_local(cell)), &"seal_kit")
 	if not bool(sealed["success"]):
 		_fail("setup: seal failed %s" % [sealed])
 		return
-	var hidden: Dictionary = investigation.trigger_investigation(&"east_firmament", "Wardens inspect again")
-	if hidden["stage"] != &"found_nothing" or not trust_events.is_empty() or _count(fact_log, &"found_evidence", &"east_firmament") != 0:
+	var hidden: Dictionary = investigation.trigger_investigation(&"firmament", "Wardens inspect again")
+	if hidden["stage"] != &"found_nothing" or not trust_events.is_empty() or _count(fact_log, &"found_evidence", &"firmament") != 0:
 		_fail("a search against successfully sealed evidence should be found_nothing: %s" % [hidden])
 		return
 	# An unconcealed cut is found: one found_evidence fact, exactly one
 	# Trust event, stage found_evidence.
-	var open_cell := Vector2i(72, 10)
+	var open_cell := Vector2i(592, 10)
 	terrain.dig(terrain.to_global(terrain.map_to_local(open_cell + Vector2i.UP)), Vector2i.DOWN)
 	var trust_before: float = float(trust.get_trust_value())
-	var found: Dictionary = investigation.trigger_investigation(&"east_firmament", "A Warden follows the dust")
-	if found["stage"] != &"found_evidence" or (found["found"] as Array).size() != 1 or investigation.get_investigation_stage(&"east_firmament") != &"found_evidence":
+	var found: Dictionary = investigation.trigger_investigation(&"firmament", "A Warden follows the dust")
+	if found["stage"] != &"found_evidence" or (found["found"] as Array).size() != 1 or investigation.get_investigation_stage(&"firmament") != &"found_evidence":
 		_fail("unconcealed evidence should be found: %s" % [found])
 		return
 	if trust_events.size() != 1 or float(trust.get_trust_value()) >= trust_before or str(trust_events[0]["reason"]) == "":
 		_fail("finding real evidence should submit exactly one reasoned Trust event: %s" % [trust_events])
 		return
-	if _count(fact_log, &"found_evidence", &"east_firmament") != 1 or _count(fact_log, &"search_requested", &"east_firmament") != 3:
-		_fail("resolution facts wrong (found %d, requests %d)" % [_count(fact_log, &"found_evidence", &"east_firmament"), _count(fact_log, &"search_requested", &"east_firmament")])
+	if _count(fact_log, &"found_evidence", &"firmament") != 1 or _count(fact_log, &"search_requested", &"firmament") != 3:
+		_fail("resolution facts wrong (found %d, requests %d)" % [_count(fact_log, &"found_evidence", &"firmament"), _count(fact_log, &"search_requested", &"firmament")])
 		return
-	if float(investigation.get_suspicion(&"east_firmament")) <= 0.0:
+	if float(investigation.get_suspicion(&"firmament")) <= 0.0:
 		_fail("found evidence should keep the zone's suspicion hot")
 		return
 	print("PASS the authored investigation always fires; sealed -> found_nothing; unconcealed -> found_evidence + one Trust event")

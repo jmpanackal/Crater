@@ -113,16 +113,6 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	var approach: Node = scene.get_node_or_null("Approach")
-	if approach == null or not approach.has_method("entry_reads_as_threshold"):
-		push_error("FAIL Approach dig entry script missing")
-		quit(1)
-		return
-	if not approach.entry_reads_as_threshold():
-		push_error("FAIL dig site entry still has leftover props/labels")
-		quit(1)
-		return
-	print("PASS dig site entry threshold clean")
 
 	# QUARANTINED (2026-09-18): "NPC face toward player + bob parts" drove
 	# Hollow/NPCs/Pell to prove facing + bob-part presence. main.tscn's

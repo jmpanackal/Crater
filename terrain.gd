@@ -21,24 +21,15 @@ const TILE_SIZE := 16
 # Default atlas used by tests / simple fills (first SpriteFusion vein tile).
 const PLACEHOLDER_ATLAS := Vector2i(0, 0)
 
-## Total envelope depth in rows (Firmament + mid band + Devil's Mouth
-## combined). Locked 2026-09-17 via the macro-layout scale pass — dig
-## deliberately reaches deeper than Hollow's own 74-tile height (1.25x),
-## per the interactive scale editor in CONTEXT.md. The single source of
-## truth for envelope depth — reference this, not a literal, anywhere
-## that needs the total (dig_site_dressing.gd's mouth overlay height was
-## a hardcoded "16" that silently went stale across two earlier scale
-## passes before this constant existed; don't repeat that).
-## World-scale pass (2026-09-19): row counts x5 — TILE_SIZE stays 16, so this
-## is 5x more rows covering 5x the world-px depth, same proportional split.
-const ENVELOPE_ROWS := 480
-## Cells with y <= this are Firmament rock (secret upward frontier).
-## 141 rows (0..140), same ~31% share of ENVELOPE_ROWS as the original split.
-const FIRMAMENT_Y_MAX := 140
-## Cells with y >= this are Devil’s Mouth walls (public-ish downward frontier).
-## Mid band is FIRMAMENT_Y_MAX+1 .. MOUTH_Y_MIN-1 (119 rows); Mouth is
-## MOUTH_Y_MIN .. ENVELOPE_ROWS-1 — same proportional split as before.
-const MOUTH_Y_MIN := 260
+## The dig envelope is the Hollow's rock shell (see hollow_map.gd): the Firmament above the whole
+## map, a deep flank on each side of the civic walls, and a floor slab under both walls. The civic
+## cavity between the walls is not rock, and the Devil's Mouth stays open below it: the pit.
+## Rows are 16px tiles, derived from HollowMap so the grid and the map cannot drift.
+const ENVELOPE_ROWS := int(HollowMap.ENV_BOTTOM / 16.0)
+## Cells with y <= this are Firmament rock (secret upward frontier): the top of the world.
+const FIRMAMENT_Y_MAX := int(HollowMap.ROCK_TOP / 16.0) - 1
+## Cells with y >= this are the floor slab and the flanks' deep rock (downward frontier toward the pit).
+const MOUTH_Y_MIN := int(HollowMap.CAVITY_BOTTOM / 16.0)
 
 ## Build Bible Spec 12 (Deposits + Extraction). Deposits are authored data
 ## (content/deposits/*.tres, filtered to this envelope's id) placed inside
@@ -138,54 +129,46 @@ func _build_fallback_tileset() -> TileSet:
 	return tileset
 
 
-## Dig columns start past the Hollow exit ledge (world x = cell * TILE_SIZE).
-## Dig lives OUTSIDE the Hollow civic void / Devil's Mouth — east Dig Front and
-## High-West Dig Front flanks, never aqua fill inside the Mouth.
-## Re-derived for TILE_SIZE=16 against HollowLayout.EXIT_RIGHT / Dig Front tip.
-## World-scale pass (2026-09-19): x5 against the rescaled HollowLayout values.
-const DIG_START_X := 580 ## world 9280 — the east civic wall (HollowLayout.EAST_CIVIC_RIGHT)
-const DIG_END_X := 800 ## exclusive; world 12800, past the Mid-East Dig Front tip (12160)
-## West dig flank (destructible outside Mouth) — world x -6080..-2880.
-## Starts 320px west of HIGH_WEST_DIG_LEFT (-5760) so every dig-front deck ends
-## against solid rock, not the edge of the envelope (HollowMapLint rule "end").
-const WEST_DIG_START_X := -380 ## world -6080
-const WEST_DIG_END_X := -180 ## exclusive; world -2880
+## Envelope columns (world x = cell * TILE_SIZE), all derived from HollowMap.
+const DIG_START_X := int(HollowMap.EAST_WALL / 16.0) ## 580: the east civic wall; the east flank begins here
+const DIG_END_X := int(HollowMap.ENV_RIGHT / 16.0) ## exclusive: the far east edge of the shell
+const WEST_DIG_START_X := int(HollowMap.ENV_LEFT / 16.0) ## the far west edge of the shell
+const WEST_DIG_END_X := int(HollowMap.WEST_WALL / 16.0) ## exclusive: the west civic wall
+const PIT_START_X := int(HollowMap.MOUTH_L / 16.0) ## the Mouth's west lip column
+const PIT_END_X := int(HollowMap.MOUTH_R / 16.0) ## exclusive: the Mouth's east lip column
+
+## Cells the player has dug (a delta from the authored rock). Saved and reapplied on load; the
+## air the map carves for galleries, stairs and shafts is authored, so it is never in here.
+var _dug: Dictionary = {}
 
 
 func _fill_ground() -> void:
-	# Dig site past Hollow terraces + exit ledge (see HollowLayout.EXIT_RIGHT).
-	# Firmament rock (secret) above the walk ledge; Devil’s Mouth walls deeper below.
 	_seed_deposits()
 	_clear_evidence()
+	_dug.clear()
+	clear()
 	if _atlas_coords.is_empty():
 		return
-	for x in range(DIG_START_X, DIG_END_X):
-		# Firmament / ceiling rock — upward secret frontier.
-		for y in range(0, FIRMAMENT_Y_MAX + 1):
-			_place_random(Vector2i(x, y))
-		# Mid band + Devil’s Mouth walls — downward public-ish danger.
-		for y in range(FIRMAMENT_Y_MAX + 1, ENVELOPE_ROWS):
-			_place_random(Vector2i(x, y))
-	_fill_west_dig_front()
+	# The shell: Firmament across the top, a flank on each side, a floor slab under each wall.
+	# The civic cavity between the walls and the pit under the Mouth stay empty.
+	var firmament_end := FIRMAMENT_Y_MAX + 1
+	_fill_rect(WEST_DIG_START_X, DIG_END_X, 0, firmament_end)
+	_fill_rect(WEST_DIG_START_X, WEST_DIG_END_X, firmament_end, ENVELOPE_ROWS)
+	_fill_rect(DIG_START_X, DIG_END_X, firmament_end, ENVELOPE_ROWS)
+	_fill_rect(WEST_DIG_END_X, PIT_START_X, MOUTH_Y_MIN, ENVELOPE_ROWS)
+	_fill_rect(PIT_END_X, DIG_START_X, MOUTH_Y_MIN, ENVELOPE_ROWS)
 	_carve_flank_air()
 
 
-## High-West Dig Front — brown dig mass west of the Hollow civic void.
-## Extends through Bottom-West Dig Front elevation so both dig fronts open
-## into destructible rock; never enters Devil's Mouth.
-func _fill_west_dig_front() -> void:
-	if _atlas_coords.is_empty():
-		return
-	var y_max := int(HollowLayout.BOTTOM_WEST_LOWER_Y / float(TILE_SIZE)) + 8
-	y_max = mini(y_max, ENVELOPE_ROWS)
-	for x in range(WEST_DIG_START_X, WEST_DIG_END_X):
-		for y in range(0, FIRMAMENT_Y_MAX + 1):
-			_place_random(Vector2i(x, y))
-		for y in range(FIRMAMENT_Y_MAX + 1, y_max):
-			_place_random(Vector2i(x, y))
+## Fills [x0, x1) x [y0, y1) cells with rock.
+func _fill_rect(x0: int, x1: int, y0: int, y1: int) -> void:
+	var atlas: Vector2i = _atlas_coords[0]
+	for x in range(x0, x1):
+		for y in range(y0, y1):
+			set_cell(Vector2i(x, y), 0, atlas)
 
 
-## Carve the walk air the map needs out of both dig flanks, leaving everything else solid
+## Carve the walk air the map needs out of both flanks, leaving everything else solid
 ## and diggable: each flank deck gets 96px of air above it, flank ladders get their shaft,
 ## flank stairs get air above every tread. HollowTerrain paints the floors and treads.
 func _carve_flank_air() -> void:
@@ -193,13 +176,13 @@ func _carve_flank_air() -> void:
 	var rects: Array[Rect2] = HollowMap.flank_air_rects(walk_clear_px)
 	rects.append_array(HollowMap.flank_stair_air(walk_clear_px))
 	for r in rects:
-		_clear_dig_rect(r.position.x, r.end.x, r.position.y, r.end.y, r.position.x < 0.0)
+		_clear_dig_rect(r.position.x, r.end.x, r.position.y, r.end.y)
 
 
-func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float, west := false) -> void:
-	## Clears [x0,x1) × [y0,y1] in world pixels. y1 is an inclusive deck-top
+func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> void:
+	## Clears [x0,x1) x [y0,y1] in world pixels. y1 is an inclusive deck-top
 	## surface (matches HollowLayout floor convention / paint_floor's round).
-	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, true, west)
+	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px)
 	for cell in cells:
 		erase_cell(cell)
 		if _deposit_overlay != null:
@@ -213,39 +196,11 @@ func _clear_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float, wes
 				node.queue_free()
 
 
-func _restore_dig_rect(x0_px: float, x1_px: float, y0_px: float, y1_px: float, west := false) -> void:
-	## Re-places dig rock in [x0,x1) × [y0,y1) after a civic air carve — thin
-	## diggable faces only, never Mouth/inter-deck void fillers.
-	if _atlas_coords.is_empty():
-		return
-	var cells := _dig_rect_cells(x0_px, x1_px, y0_px, y1_px, false, west)
-	for cell in cells:
-		if not is_within_dig_envelope(cell):
-			continue
-		_place_random(cell)
-
-
-func _dig_rect_cells(
-	x0_px: float,
-	x1_px: float,
-	y0_px: float,
-	y1_px: float,
-	y1_inclusive_deck := true,
-	west := false
-) -> Array[Vector2i]:
-	## west picks the High-West/Bottom-West dig flank instead of the east envelope.
-	## (Before 2026-10-01 this always clamped to the east envelope, so every west
-	## carve was an empty no-op and the west dig-front decks sat buried in rock.)
-	var lo := WEST_DIG_START_X if west else DIG_START_X
-	var hi := WEST_DIG_END_X if west else DIG_END_X
-	var x0 := clampi(int(floor(x0_px / float(TILE_SIZE))), lo, hi - 1)
-	var x1 := clampi(int(ceil(x1_px / float(TILE_SIZE))), lo, hi)
+func _dig_rect_cells(x0_px: float, x1_px: float, y0_px: float, y1_px: float) -> Array[Vector2i]:
+	var x0 := clampi(int(floor(x0_px / float(TILE_SIZE))), WEST_DIG_START_X, DIG_END_X - 1)
+	var x1 := clampi(int(ceil(x1_px / float(TILE_SIZE))), WEST_DIG_START_X, DIG_END_X)
 	var y0 := clampi(int(floor(y0_px / float(TILE_SIZE))), 0, ENVELOPE_ROWS - 1)
-	var y1: int
-	if y1_inclusive_deck:
-		y1 = clampi(int(round(y1_px / float(TILE_SIZE))) + 1, 0, ENVELOPE_ROWS)
-	else:
-		y1 = clampi(int(ceil(y1_px / float(TILE_SIZE))), 0, ENVELOPE_ROWS)
+	var y1 := clampi(int(round(y1_px / float(TILE_SIZE))) + 1, 0, ENVELOPE_ROWS)
 	var cells: Array[Vector2i] = []
 	if x1 <= x0 or y1 <= y0:
 		return cells
@@ -255,33 +210,28 @@ func _dig_rect_cells(
 	return cells
 
 
-func _place_random(cell: Vector2i) -> void:
-	var atlas_coords: Vector2i = _atlas_coords[randi() % _atlas_coords.size()]
-	set_cell(cell, 0, atlas_coords)
-
-
 ## True if this map cell currently has a diggable tile.
 func has_tile(cell: Vector2i) -> bool:
 	return get_cell_source_id(cell) != -1
 
 
 ## Build Bible Spec 06 contract surface — see docs/build-bible/specs/06-
-## destructible-terrain.md. The envelope is currently the same rectangle
-## _fill_ground() authors (DIG_START_X..DIG_END_X, y 0..ENVELOPE_ROWS-1) —
-## opt-in destructibility per §63/the atlas's "fixed outer envelope of
-## destructible chunks" language: nothing outside it is diggable, full
-## stop, regardless of whether a real Zone (Spec 05, not authored yet)
-## eventually replaces this rectangle with real chunk-authored bounds.
+## destructible-terrain.md. The envelope is the Hollow's rock shell: the Firmament across the
+## top, a flank each side of the civic walls, and the floor slab under each wall (see
+## _fill_ground). Nothing outside it is diggable, full stop. The civic cavity between the
+## walls and the pit under the Mouth are not rock, so they are outside it too (opt-in
+## destructibility per §63: "a no-op with feedback, never an unintended tunnel into fixed geography").
 func is_within_dig_envelope(cell: Vector2i) -> bool:
 	if cell.y < 0 or cell.y >= ENVELOPE_ROWS:
 		return false
-	if cell.x >= DIG_START_X and cell.x < DIG_END_X:
+	if cell.x < WEST_DIG_START_X or cell.x >= DIG_END_X:
+		return false
+	if cell.y <= FIRMAMENT_Y_MAX:
 		return true
-	# West dig flank — Firmament through Bottom-West Dig Front (not Mouth).
-	var west_y_max := int(HollowLayout.BOTTOM_WEST_LOWER_Y / float(TILE_SIZE)) + 8
-	if cell.x >= WEST_DIG_START_X and cell.x < WEST_DIG_END_X and cell.y < west_y_max:
-		return true
-	return false
+	if cell.x >= WEST_DIG_END_X and cell.x < DIG_START_X:
+		# Between the civic walls: open cavity above the floor slab; below it, rock either side of the pit.
+		return cell.y >= MOUTH_Y_MIN and (cell.x < PIT_START_X or cell.x >= PIT_END_X)
+	return true
 
 
 ## can_dig(position) from the spec's contract surface, in world space to
@@ -470,6 +420,7 @@ func destroy_cell(cell: Vector2i, direction: Vector2i = Vector2i.ZERO) -> bool:
 	if not has_tile(cell):
 		return false
 	erase_cell(cell)
+	_dug[cell] = true
 	# Digging the rock a deposit sits in EXPOSES it (Spec 12: discover ->
 	# expose); it does not hand the Material over — that's extraction.
 	if _deposits.has(cell) and not bool(_deposits[cell]["exposed"]):
@@ -526,6 +477,7 @@ func expose_deposit(world_pos: Vector2) -> bool:
 		return false
 	if has_tile(cell):
 		erase_cell(cell)
+		_dug[cell] = true
 	_expose_deposit_cell(cell, true)
 	return true
 
@@ -830,23 +782,16 @@ func _to_cardinal(direction: Vector2i) -> Vector2i:
 ## Build Bible Spec 02 uniform SaveLoad contract, via register_scene_domain()
 ## (see _ready() above) rather than autoload discovery.
 ##
-## Persists as the set of currently-dug cells within the envelope — the
-## SIMPLEST of the representations 00-dependency-map.md's technical spike
-## is meant to choose between ("per-tile deltas... or full chunk snapshots,
-## or something else"). This is a working placeholder that round-trips
-## correctly, not a claim that the spike question is settled; Spec 06's own
-## text is explicit that the representation itself isn't this spec's call.
-## Scans rather than tracking a parallel dug-cells set, since the
-## TileMapLayer itself is already the authoritative state (Spec 01: no
-## shadow copies of something already readable from its owner) — the
-## envelope is only 5888 cells, cheap to scan.
+## Persists as the set of cells the player has dug (a delta from the authored rock) — the
+## SIMPLEST of the representations 00-dependency-map.md's technical spike is meant to choose
+## between ("per-tile deltas... or full chunk snapshots, or something else"). It is tracked as
+## the player digs instead of scanned, because the shell is ~500k cells. A working placeholder
+## that round-trips correctly, not a claim that the spike question is settled.
 func save_state() -> Dictionary:
 	var dug: Array = []
-	for x in range(DIG_START_X, DIG_END_X):
-		for y in range(ENVELOPE_ROWS):
-			var cell := Vector2i(x, y)
-			if not has_tile(cell):
-				dug.append([cell.x, cell.y])
+	for key: Variant in _dug.keys():
+		var cell: Vector2i = key
+		dug.append([cell.x, cell.y])
 	# Deposits: only the delta from the authored seed (content defines the
 	# pockets; a save only records which ones the player has exposed or
 	# depleted). Finite-and-never-regenerates lives here — a depleted
@@ -872,7 +817,9 @@ func load_state(data: Dictionary) -> void:
 	if typeof(dug) == TYPE_ARRAY:
 		for entry: Variant in dug:
 			if typeof(entry) == TYPE_ARRAY and entry.size() == 2:
-				erase_cell(Vector2i(int(entry[0]), int(entry[1])))
+				var dug_cell := Vector2i(int(entry[0]), int(entry[1]))
+				erase_cell(dug_cell)
+				_dug[dug_cell] = true
 	var deposits: Variant = data.get("deposits", [])
 	if typeof(deposits) == TYPE_ARRAY:
 		for entry: Variant in deposits:

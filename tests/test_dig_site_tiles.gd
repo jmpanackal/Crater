@@ -51,29 +51,38 @@ func _run_tests() -> void:
 	print("PASS dig removes 16px neighbors")
 
 	# Scene terrain filled with real placeholder tiles (not empty), confined
-	# to the authored envelope — no bleed into the Hollow.
+	# to the authored envelope: no rock in the civic cavity and none in the pit.
 	var scene: Node = (load("res://main.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
 	await process_frame
 	var layer: TerrainLayer = scene.get_node("Terrain")
 	var found := false
 	var hollow_bleed := false
-	for x in range(0, TerrainLayer.DIG_END_X + 2):
+	for x in range(TerrainLayer.WEST_DIG_START_X - 2, TerrainLayer.DIG_END_X + 2):
 		for y in range(0, TerrainLayer.ENVELOPE_ROWS):
 			if not layer.has_tile(Vector2i(x, y)):
 				continue
-			if x < TerrainLayer.DIG_START_X:
+			if not layer.is_within_dig_envelope(Vector2i(x, y)):
 				hollow_bleed = true
 			found = true
 	if hollow_bleed:
-		push_error("FAIL dig tiles bleed into Hollow/approach (x < %d)" % TerrainLayer.DIG_START_X)
+		push_error("FAIL dig tiles outside the envelope (civic cavity, pit or past the shell)")
 		quit(1)
 		return
 	if not found:
 		push_error("FAIL dig site empty")
 		quit(1)
 		return
-	print("PASS dig site filled past chasm (x>=%d), no Hollow bleed" % TerrainLayer.DIG_START_X)
+	for edge in [Vector2i(TerrainLayer.WEST_DIG_START_X, 50), Vector2i(TerrainLayer.DIG_END_X - 1, 50), Vector2i(0, 5), Vector2i(TerrainLayer.DIG_START_X + 40, TerrainLayer.ENVELOPE_ROWS - 1), Vector2i(TerrainLayer.WEST_DIG_START_X + 40, TerrainLayer.ENVELOPE_ROWS - 1)]:
+		if not layer.has_tile(edge):
+			push_error("FAIL the shell has a gap at %s" % edge)
+			quit(1)
+			return
+	if layer.has_tile(Vector2i(0, 200)) or layer.has_tile(Vector2i(TerrainLayer.PIT_START_X + 20, TerrainLayer.ENVELOPE_ROWS - 1)):
+		push_error("FAIL the civic cavity or the pit has rock in it")
+		quit(1)
+		return
+	print("PASS the shell is rock on every side (Firmament, both flanks, floor slab) and the cavity and pit are open")
 
 	print("DIG_SITE_TILES_TESTS_PASSED")
 	quit(0)

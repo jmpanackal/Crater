@@ -40,7 +40,7 @@ func _run() -> void:
 	var inside_cell := origin_cell + Vector2i.DOWN
 	var inside_world := terrain.to_global(terrain.map_to_local(origin_cell))
 	var inside_cell_world := terrain.to_global(terrain.map_to_local(inside_cell))
-	var outside_world := terrain.to_global(terrain.map_to_local(Vector2i(0, 6)))  # well left of DIG_START_X
+	var outside_world := terrain.to_global(terrain.map_to_local(Vector2i(0, 200)))  # inside the civic cavity: not rock
 
 	# --- 1. can_dig / dig outside the envelope fails cleanly — no mutation,
 	# no crash. ---

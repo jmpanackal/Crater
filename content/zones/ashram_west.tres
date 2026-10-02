@@ -6,12 +6,12 @@
 script = ExtResource("1")
 zone_id = &"ashram_west"
 display_name = "Ashram Heights (west)"
-world_origin = Vector2(-200, 320)
+world_origin = Vector2(-200, 1792)
 seams = [{
 "edge": "south",
 "neighbor": "high_west_front",
-"position": 1600
+"position": 2560
 }]
 enclosed = false
-world_rect = Rect2(-2720, -160, 4160, 1280)
+world_rect = Rect2(-2720, 1536, 4160, 768)
 restricted = false

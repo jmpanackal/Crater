@@ -2,9 +2,11 @@
 extends Node2D
 
 const Layout := preload("res://hollow_layout.gd")
-## Symmetric about the Mouth centre (x=3200): west flank edge -6400, east flank edge 12800.
-const WORLD_BOUNDS := Rect2(-6400, -1600, 19200, 10000)
-const MOUTH_BOUNDS := Rect2(Layout.PIT_LEFT, -640, Layout.PIT_RIGHT - Layout.PIT_LEFT, 9000)
+## The whole dig envelope, symmetric about the Mouth centre (x=3200). The rock shell is painted over
+## this by the terrain layers; what shows through is the civic cavity.
+const WORLD_BOUNDS := Rect2(Layout.ENV_LEFT, Layout.ENV_TOP, Layout.ENV_RIGHT - Layout.ENV_LEFT, Layout.ENV_BOTTOM - Layout.ENV_TOP)
+## The Mouth: open void from under the Firmament all the way down the pit.
+const MOUTH_BOUNDS := Rect2(Layout.PIT_LEFT, Layout.ROCK_TOP, Layout.PIT_RIGHT - Layout.PIT_LEFT, Layout.ENV_BOTTOM - Layout.ROCK_TOP)
 const GUIDE_COLOR := Color(0.57, 0.76, 0.72, 0.65)
 const FUTURE_COLOR := Color(0.77, 0.61, 0.38, 0.8)
 
@@ -70,13 +72,12 @@ func _draw() -> void:
 		draw_rect(WORLD_BOUNDS, Color(0.10, 0.155, 0.15))
 		# Ink void — open shaft, not a solid filler block (docs: #091419).
 		draw_rect(MOUTH_BOUNDS, Color(0.035, 0.078, 0.098))
-		draw_rect(Rect2(WORLD_BOUNDS.position, Vector2(WORLD_BOUNDS.size.x, 960)), Color(0.18, 0.22, 0.21))
 		return
 	if not show_planning_guides or (not Engine.is_editor_hint() and not show_guides_in_game):
 		return
-	_label(Vector2(-6160, -1320), "HOLLOW SCALE PLAN  |  GUIDES ONLY - NO COLLISION", 24, GUIDE_COLOR)
-	_label(Vector2(-6160, -1160), "16 px tiles / 32 px player. Dashed extents and routes are provisional, not playable platforms.", 17, GUIDE_COLOR)
-	_label(Vector2(-2800, -800), "FIRMAMENT / sustained upward excavation, locked at start", 19, GUIDE_COLOR)
+	_label(Vector2(-2800, 160), "HOLLOW SCALE PLAN  |  GUIDES ONLY - NO COLLISION", 24, GUIDE_COLOR)
+	_label(Vector2(-2800, 320), "16 px tiles / 32 px player. Dashed extents and routes are provisional, not playable platforms.", 17, GUIDE_COLOR)
+	_label(Vector2(-2800, 800), "FIRMAMENT / sustained upward excavation, locked at start", 19, GUIDE_COLOR)
 	draw_rect(WORLD_BOUNDS, GUIDE_COLOR, false, 2)
 	for district in district_guides():
 		var bounds: Rect2 = district.bounds
@@ -103,15 +104,16 @@ func _draw() -> void:
 		var run := HollowMap.run_by_id(gate["run"])
 		if not run.is_empty():
 			draw_line(Vector2(gate["x"], float(run["y"]) - 128.0), Vector2(gate["x"], run["y"]), Color(1.0, 0.35, 0.3, 0.9), 3)
-	_label(Vector2(Layout.HEART_MID_X - 80.0, 4400), "DEVIL'S MOUTH", 22, GUIDE_COLOR)
-	_label(Vector2(Layout.HEART_MID_X - 120.0, 4560), "OPEN VOID / MID HEART IS THE ONLY CROSSING", 12, GUIDE_COLOR)
+	_label(Vector2(Layout.HEART_MID_X - 80.0, Layout.HEART_Y + 1200.0), "DEVIL'S MOUTH", 22, GUIDE_COLOR)
+	_label(Vector2(Layout.HEART_MID_X - 120.0, Layout.HEART_Y + 1360.0), "OPEN VOID / MID HEART IS THE ONLY CROSSING", 12, GUIDE_COLOR)
 	## Physical reference markers — deliberately NOT scaled: still the real
 	## 32px player body and the real 256px (16-tile) span, so they stay true
 	## after the world-scale pass. Only their anchor position moves.
-	draw_rect(Rect2(-6160, 6400, 32, 32), GUIDE_COLOR, false, 2)
-	_label(Vector2(-5920, 6520), "32 px player reference", 17, GUIDE_COLOR)
-	draw_line(Vector2(-6160, 6800), Vector2(-6160, 6800) + Vector2(256, 0), GUIDE_COLOR, 2)
-	_label(Vector2(-6160, 6960), "256 px / 16 tiles", 17, GUIDE_COLOR)
+	var ref := Vector2(Layout.HIGH_WEST_DIG_LEFT, Layout.WEST_LW_UPPER_Y - 600.0)
+	draw_rect(Rect2(ref, Vector2(32, 32)), GUIDE_COLOR, false, 2)
+	_label(ref + Vector2(40, 40), "32 px player reference", 17, GUIDE_COLOR)
+	draw_line(ref + Vector2(0, 80), ref + Vector2(256, 80), GUIDE_COLOR, 2)
+	_label(ref + Vector2(0, 120), "256 px / 16 tiles", 17, GUIDE_COLOR)
 
 
 func _outline(bounds: Rect2, color: Color) -> void:

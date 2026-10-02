@@ -9,8 +9,8 @@ const LOOK_AHEAD_Y := 34.0
 const LOOK_LERP := 5.2
 const SHAKE_DECAY := 10.0
 
-## The camera is clamped to the map's real extents on every side (2026-10-01): west flank
-## tip, east flank tip, Vaultward line above, Bottom-West lower below. Both walls are symmetric
+## The camera is clamped to the dig envelope on every side (2026-10-01): the far edge of each
+## flank, the top of the Firmament above, the bottom of the pit below. Both walls are symmetric
 ## and nothing is hidden from view, so there is no per-region right clamp any more.
 
 ## Design play framing (tools / movement stability). Edge limits use at least
@@ -66,11 +66,7 @@ func dev_zoom_index() -> int:
 
 ## Map extents the fit-the-whole-map view frames.
 static func map_rect() -> Rect2:
-	var x0 := HollowLayout.HIGH_WEST_DIG_LEFT
-	var x1 := HollowLayout.EAST_FLANK_RIGHT
-	var y0 := HollowLayout.VAULTWARD_Y - 320.0
-	var y1 := HollowLayout.BOTTOM_WEST_LOWER_Y + 480.0
-	return Rect2(x0, y0, x1 - x0, y1 - y0)
+	return HollowMap.env_rect()
 
 
 func cycle_dev_zoom() -> void:
@@ -159,17 +155,17 @@ func _apply_play_edge_limits() -> void:
 	var pad := edge_pad()
 	# Godot clamps camera *center* to [limit + half_view, limit - half_view].
 	# Pad past stand extents so the center can still sit on the player.
-	# Top uses Vaultward (highest civic band); Ashram is below and stays covered.
-	limit_left = int(floor(HollowLayout.HIGH_WEST_DIG_LEFT - pad.x - STAND_CENTER_SLACK))
-	limit_top = int(floor(HollowLayout.VAULTWARD_Y - pad.y - STAND_CENTER_SLACK))
-	limit_bottom = int(ceil(HollowLayout.BOTTOM_WEST_LOWER_Y + pad.y + STAND_CENTER_SLACK))
+	# Top is the top of the Firmament; the pit below the Mouth runs to the bottom of the envelope.
+	limit_left = int(floor(HollowLayout.ENV_LEFT - pad.x - STAND_CENTER_SLACK))
+	limit_top = int(floor(HollowLayout.ENV_TOP - pad.y - STAND_CENTER_SLACK))
+	limit_bottom = int(ceil(HollowLayout.ENV_BOTTOM + pad.y + STAND_CENTER_SLACK))
 	limit_right = int(desired_limit_right())
 
 
 ## Right clamp: the east flank tip plus the half-viewport pad. (Kept as a function of the
 ## player's x so older callers keep working; it no longer depends on x.)
 func desired_limit_right(_player_x: float = 0.0) -> float:
-	return ceil(HollowLayout.EAST_FLANK_RIGHT + edge_pad().x + STAND_CENTER_SLACK)
+	return ceil(HollowLayout.ENV_RIGHT + edge_pad().x + STAND_CENTER_SLACK)
 
 
 func apply_shake(amplitude: float) -> void:

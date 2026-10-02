@@ -6,11 +6,13 @@ extends Object
 ## hollow_map.gd and judged by hollow_map_lint.gd; see docs/hollow-map-spec.md. This file
 ## keeps the named constants other systems read (level Ys, Mouth lips, spawn, key deck
 ## spans) and answers "where" questions by delegating to HollowMap. Level Ys are all on the
-## grid y = 320 + 640 * k so nothing here may carry a hand-typed Y.
+## grid y = LEVEL_ORIGIN + LEVEL_GAP * k so nothing here may carry a hand-typed Y.
 ##
 ## History: TILE relaxed 64 -> 16 (2026-09-18); world x5 scale pass (2026-09-19); west stack
 ## locked to 12 equal levels (2026-09-19); east stack re-gridded and the whole map rebuilt as
-## a data-driven cut-away with stairs, ladders, lifts and gates (2026-10-01).
+## a data-driven cut-away with stairs, ladders, lifts and gates (2026-10-01). Same day: level
+## gap 640 -> 384 and ROOM_HEIGHT 480 -> 256 (rooms were 15 bodies tall), the Firmament moved to
+## the top of the whole map and the Hollow wrapped in a diggable shell with deep side flanks.
 
 const TILE := 16
 
@@ -19,7 +21,7 @@ const PIT_LEFT := 1440.0
 const PIT_RIGHT := 4960.0 ## width 3520 px (~1/6 of the 19200 px world)
 
 ## Distance between consecutive levels; also the minimum headroom between stacked bands.
-const MIN_BAND_GAP := 640.0
+const MIN_BAND_GAP := HollowMap.LEVEL_GAP
 
 const FLOOR_THICKNESS := 32.0
 const BRIDGE_THICKNESS := 20.0
@@ -32,28 +34,28 @@ const LIFT_WIDTH := 48.0
 const LADDER_OPENING := 64.0
 const LADDER_WIDTH := 40.0
 
-## --- Levels (deck tops): y = 320 + 640 * k -------------------------------------------------
+## --- Levels (deck tops): y = LEVEL_ORIGIN + LEVEL_GAP * k ---------------------------------------
 const WEST_LEVEL_GAP := MIN_BAND_GAP
-const WEST_ASHRAM_UPPER_Y := 320.0 ## L0
-const WEST_ASHRAM_LOWER_Y := WEST_ASHRAM_UPPER_Y + 1.0 * WEST_LEVEL_GAP ## L1 960
-const WEST_HIGH_UPPER_Y := WEST_ASHRAM_UPPER_Y + 2.0 * WEST_LEVEL_GAP ## L2 1600
-const WEST_HIGH_LOWER_Y := WEST_ASHRAM_UPPER_Y + 3.0 * WEST_LEVEL_GAP ## L3 2240
-const WICK_Y := WEST_ASHRAM_UPPER_Y + 4.0 * WEST_LEVEL_GAP ## L4 2880
+const WEST_ASHRAM_UPPER_Y := HollowMap.LEVEL_ORIGIN ## L0 1792
+const WEST_ASHRAM_LOWER_Y := WEST_ASHRAM_UPPER_Y + 1.0 * WEST_LEVEL_GAP ## L1 2176
+const WEST_HIGH_UPPER_Y := WEST_ASHRAM_UPPER_Y + 2.0 * WEST_LEVEL_GAP ## L2 2560
+const WEST_HIGH_LOWER_Y := WEST_ASHRAM_UPPER_Y + 3.0 * WEST_LEVEL_GAP ## L3 2944
+const WICK_Y := WEST_ASHRAM_UPPER_Y + 4.0 * WEST_LEVEL_GAP ## L4 3328
 const HEART_Y := WICK_Y ## Mid Heart's main deck is level with Wickwork's street
-const WICK_LOWER_Y := WEST_ASHRAM_UPPER_Y + 5.0 * WEST_LEVEL_GAP ## L5 3520
-const MID_ALLOT_UPPER_Y := WEST_ASHRAM_UPPER_Y + 6.0 * WEST_LEVEL_GAP ## L6 4160
-const MID_ALLOT_LOWER_Y := WEST_ASHRAM_UPPER_Y + 7.0 * WEST_LEVEL_GAP ## L7 4800
-const WEST_LW_UPPER_Y := WEST_ASHRAM_UPPER_Y + 8.0 * WEST_LEVEL_GAP ## L8 5440 — Home Court / spawn
-const WEST_LW_LOWER_Y := WEST_ASHRAM_UPPER_Y + 9.0 * WEST_LEVEL_GAP ## L9 6080
-const BOTTOM_WEST_UPPER_Y := WEST_ASHRAM_UPPER_Y + 10.0 * WEST_LEVEL_GAP ## L10 6720
-const BOTTOM_WEST_LOWER_Y := WEST_ASHRAM_UPPER_Y + 11.0 * WEST_LEVEL_GAP ## L11 7360
-const VAULTWARD_Y := 0.0
+const WICK_LOWER_Y := WEST_ASHRAM_UPPER_Y + 5.0 * WEST_LEVEL_GAP ## L5 3712
+const MID_ALLOT_UPPER_Y := WEST_ASHRAM_UPPER_Y + 6.0 * WEST_LEVEL_GAP ## L6 4096
+const MID_ALLOT_LOWER_Y := WEST_ASHRAM_UPPER_Y + 7.0 * WEST_LEVEL_GAP ## L7 4480
+const WEST_LW_UPPER_Y := WEST_ASHRAM_UPPER_Y + 8.0 * WEST_LEVEL_GAP ## L8 4864 — Home Court / spawn
+const WEST_LW_LOWER_Y := WEST_ASHRAM_UPPER_Y + 9.0 * WEST_LEVEL_GAP ## L9 5248
+const BOTTOM_WEST_UPPER_Y := WEST_ASHRAM_UPPER_Y + 10.0 * WEST_LEVEL_GAP ## L10 5632
+const BOTTOM_WEST_LOWER_Y := WEST_ASHRAM_UPPER_Y + 11.0 * WEST_LEVEL_GAP ## L11 6016
+const VAULTWARD_Y := 0.0 ## top of the Firmament, the top of the world
 ## Legacy aliases kept for older call sites.
 const MID_ALLOT_Y := MID_ALLOT_UPPER_Y
 const BOTTOM_WEST_Y := BOTTOM_WEST_UPPER_Y
 ## Mid Heart's raised Ritual deck and lower freight tier (half levels, Mouth cluster only).
-const RITUAL_Y := WICK_Y - 0.5 * WEST_LEVEL_GAP ## 2560
-const FREIGHT_TIER_Y := WICK_Y + 0.5 * WEST_LEVEL_GAP ## 3200
+const RITUAL_Y := WICK_Y - 0.5 * WEST_LEVEL_GAP ## 3136
+const FREIGHT_TIER_Y := WICK_Y + 0.5 * WEST_LEVEL_GAP ## 3520
 
 ## East stack sits on the same grid, one deck per level (see HollowMap.runs()).
 const UPPER_RES_Y := WEST_ASHRAM_UPPER_Y ## L0 — Ashram Heights east (Firmament ceiling)
@@ -68,11 +70,17 @@ const SEEP_Y := BOTTOM_WEST_LOWER_Y ## L11 — Seep gallery
 ## East civic interior PIT_RIGHT..EAST_CIVIC_RIGHT, dig flank EAST_CIVIC_RIGHT..EAST_FLANK_RIGHT.
 const WEST_HOLLOW_LEFT := -2880.0
 const WEST_HOLLOW_RIGHT := PIT_LEFT
-const HIGH_WEST_DIG_LEFT := -5760.0
+const HIGH_WEST_DIG_LEFT := -5760.0 ## the authored galleries stop here; the rock runs on to ENV_LEFT
 const HIGH_WEST_DIG_RIGHT := WEST_HOLLOW_LEFT
 const GALLERY_LEFT := HIGH_WEST_DIG_LEFT
 const EAST_CIVIC_RIGHT := 9280.0
 const EAST_FLANK_RIGHT := 12160.0
+## The dig envelope (the shell): rock on every side of the Hollow except the pit.
+const ENV_LEFT := HollowMap.ENV_LEFT
+const ENV_RIGHT := HollowMap.ENV_RIGHT
+const ENV_TOP := HollowMap.ENV_TOP
+const ENV_BOTTOM := HollowMap.ENV_BOTTOM
+const ROCK_TOP := HollowMap.ROCK_TOP ## Firmament thickness above the highest room
 ## Legacy names for the same lines.
 const HOLLOW_LEFT := WEST_HOLLOW_LEFT
 const HOLLOW_RIGHT := EAST_CIVIC_RIGHT
@@ -89,7 +97,7 @@ const WEST_DISPATCH_YARD := Vector4(WEST_DISPATCH_LEFT, SWITCHBACK_LEFT, WEST_LW
 const HOME_ROOF_Y := WEST_LW_UPPER_Y - WEST_LEVEL_GAP
 const HOME_BOUNDS := Rect2(HOME_COURT_LEFT, HOME_ROOF_Y, 960.0, WEST_LW_UPPER_Y + 80.0 - HOME_ROOF_Y)
 const BOTTOM_WEST_THRESHOLD_LEFT := -4640.0
-const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -4080.0, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
+const BOTTOM_WEST_THRESHOLD := Vector4(BOTTOM_WEST_THRESHOLD_LEFT, -3440.0 - HollowMap.RISE, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
 const GALLERY_FLOOR := Vector4(HIGH_WEST_DIG_LEFT, BOTTOM_WEST_THRESHOLD_LEFT, BOTTOM_WEST_UPPER_Y, FLOOR_THICKNESS)
 const LOWER_LIFT_LANDING := Vector4(-3440.0, -2800.0, WEST_LW_LOWER_Y, FLOOR_THICKNESS)
 const APPROACH_LANDING1_Y := WEST_LW_LOWER_Y
@@ -98,10 +106,10 @@ const WICK_BAY_WEST := -3680.0
 
 ## --- Mid Heart and the east approach ---------------------------------------------------------
 ## Main crossing: West Exchange raft -> stairs over the raised Ritual deck -> East Service raft.
-const HEART_WEST := Vector4(PIT_LEFT, 2400.0, HEART_Y, BRIDGE_THICKNESS)
-const HEART_RITUAL := Vector4(2720.0, 3680.0, RITUAL_Y, BRIDGE_THICKNESS)
-const HEART_EAST := Vector4(4000.0, PIT_RIGHT, HEART_Y, BRIDGE_THICKNESS)
-const HEART_FREIGHT := Vector4(1760.0, 4640.0, FREIGHT_TIER_Y, BRIDGE_THICKNESS)
+const HEART_WEST := Vector4(PIT_LEFT, HollowMap.RITUAL_LEFT - 0.5 * HollowMap.RISE, HEART_Y, BRIDGE_THICKNESS)
+const HEART_RITUAL := Vector4(HollowMap.RITUAL_LEFT, HollowMap.RITUAL_RIGHT, RITUAL_Y, BRIDGE_THICKNESS)
+const HEART_EAST := Vector4(HollowMap.RITUAL_RIGHT + 0.5 * HollowMap.RISE, PIT_RIGHT, HEART_Y, BRIDGE_THICKNESS)
+const HEART_FREIGHT := Vector4(PIT_LEFT + 0.5 * HollowMap.RISE, PIT_RIGHT - 0.5 * HollowMap.RISE, FREIGHT_TIER_Y, BRIDGE_THICKNESS)
 const HEART_SPAN := Vector4(PIT_LEFT, PIT_RIGHT, HEART_Y, BRIDGE_THICKNESS) ## extent only, not one deck
 const HEART_MID_X := (PIT_LEFT + PIT_RIGHT) * 0.5
 const HEART_MID := Vector4(HEART_MID_X - 32.0, HEART_MID_X + 32.0, RITUAL_Y, BRIDGE_THICKNESS)
@@ -289,6 +297,12 @@ static func nearest_safe_stand(from: Vector2) -> Vector2:
 			best_d = d
 			best = p
 	return best
+
+
+## True inside the civic cavity: the Hollow's own air, between the Firmament and the floor slab and
+## between the two civic walls. The dig galleries, the rock shell and the pit are "out in the field".
+static func in_hollow(p: Vector2) -> bool:
+	return HollowMap.cavity_rect().has_point(p)
 
 
 static func vaultward_locked() -> bool:

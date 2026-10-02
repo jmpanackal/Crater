@@ -5,7 +5,8 @@
 "blueprint" link) disagrees with this file or with `hollow_map.gd`, **this file and the code
 win** — those docs are design intent and history, not coordinates.
 
-Rebuilt 2026-10-01 (second pass). The first pass only re-gridded the east stack; the user's
+Rebuilt 2026-10-01 (second pass), then tightened the same day (third pass: tighter levels, the
+rock shell, Glowbeds open from the start - see section 1). The first pass only re-gridded the east stack; the user's
 review found two real problems: the east wall read much smaller than the west (it was built
 first as a sandbox and never revisited), and the whole map was flat platforms stacked on
 platforms. This pass rebuilds everything from the canon outward — no existing coordinate was
@@ -24,15 +25,27 @@ treated as sacred.
 ## 1. What the map is
 
 A cut-away of rock with carved rooms, one wall on each side of the Devil's Mouth, **each 12
-levels tall and ~4300 px of civic interior wide, plus a ~2900 px dig flank**:
+levels tall and ~4300 px of civic interior wide**, wrapped in a **diggable rock shell**:
 
 ```
-x:   -6080 ... -5760 ......... -2880 ........... 1440 | Mouth 3520 | 4960 ........... 9280 ......... 12160 ... 12800
-     rock      west dig flank   west civic interior    |   (void)   |  east civic interior   east dig flank   rock
+x:  -10560 ............... -5760 ... -2880 ........ 1440 | Mouth 3520 | 4960 ........ 9280 ... 12160 ............... 16960
+     west flank rock       galleries   west civic    |  (void, and   |  east civic    galleries   east flank rock
+     (7680 px deep)        stop here   interior      |   the pit)    |  interior                  (7680 px deep)
+
+y:   0 ........ 1536 ........... 1792 (L0) ........ 6016 (L11) ... 6032 ........ 7040
+     Firmament    first room's air  the twelve levels             floor slab (open under the Mouth: the pit)
 ```
 
-Total world 19200 px wide, symmetric about the Mouth's centre (x=3200). Walkable deck length:
-west 37.5 k px, east 35.0 k px (ratio 0.93; the lint fails outside 0.8–1.25).
+**The shell** (`HollowMap.ENV_*`, `ROCK_TOP`, `ROCK_BOTTOM`, `SIDE_DEPTH`): diggable rock on every
+side of the Hollow except the pit. 1536 px of **Firmament** across the whole top of the world (the
+secret upward frontier; the same placeholder rock for now, a tougher material later), a flank
+7680 px deep past each civic wall (the authored dig galleries only reach 2880 px into it, so
+there is rock to dig for a long time), and a 1024 px floor slab under both walls. The Mouth is open
+all the way down: the pit. `TerrainLayer` fills exactly this (about 520 000 tiles; the scene
+builds in ~3 s headless); `HollowMapLint` checks it (`shell`).
+
+Total world 27520 px wide, symmetric about the Mouth's centre (x=3200). Walkable deck length:
+west 39.2 k px, east 36.5 k px (ratio 0.93; the lint fails outside 0.8–1.25).
 
 Four structures move you: **stairs, ladders, lifts, and Mid Heart's own stairs and bridges**.
 Everything else is a room. Nothing floats.
@@ -62,11 +75,11 @@ One-way decks replaced it.)
 | Tile | 16 px | `HollowLayout.TILE` |
 | Player body | 32 × 32 px | |
 | Walk / climb / jump | 200 / 140 px/s / ~90 px high | `player.gd` |
-| Level spacing | **640 px, everywhere** (≈ one screen) | `HollowMap.LEVEL_GAP` |
-| Level grid | `y = 320 + 640·k`, k = 0..11 | `HollowMap.lvl(k)` |
-| Half levels | only Mid Heart (Ritual deck 2560, freight tier 3200) | |
-| Room height | 480 px of air above a deck | `HollowMap.ROOM_HEIGHT` |
-| Stair | 45°, rise = run (640 per level, 320 per half level) | `HollowMap.stairs()` |
+| Level spacing | **384 px, everywhere** (12 body heights) | `HollowMap.LEVEL_GAP` |
+| Level grid | `y = 1792 + 384·k`, k = 0..11 (`LEVEL_ORIGIN = ROCK_TOP + ROOM_HEIGHT`) | `HollowMap.lvl(k)` |
+| Half levels | only Mid Heart (Ritual deck 3136, freight tier 3520) | |
+| Room height | 256 px of air above a deck (8 body heights), then 128 px of floor slab and ceiling | `HollowMap.ROOM_HEIGHT` |
+| Stair | 45°, rise = run (`RISE` = 384 per level, 192 per half level) | `HollowMap.stairs()` |
 | Ladder / lift shaft width | 64 px | `SHAFT_OPENING` |
 
 Deck "Y" is the walkable top surface; standing y = deck Y − 32.
@@ -75,9 +88,17 @@ Deck "Y" is the walkable top surface; standing y = deck Y − 32.
 
 Press **Z** to cycle the camera: normal -> 0.6x -> 0.35x -> 0.2x -> the whole map fitted to the
 window (camera limits lifted; a label shows the mode). The minimap (bottom right, **M** hides it)
-is drawn from the same data: rock flanks, the Mouth, decks, stairs, ladders, lifts, gates (red =
-shut), warm outlines on places held out at the start, your level row, the camera's view box, and
-the name of the place you stand in.
+is drawn from the same data: the rock shell (Firmament, flanks, floor slab), the Mouth and the pit,
+decks, stairs, ladders, lifts, gates (red = shut), warm outlines on places held out at the start,
+your level row, your position as a dot, and the name of the place you stand in. Labels are small
+(7 px) and faint so they do not hide the map.
+
+**Why 384, not 640 (decided 2026-10-01, from playing it):** with 640 px between decks and 480 px of
+air, every room was 15 body heights tall and the empty map looked like it had room for another
+floor between each pair. 384 / 256 is eight body heights of air, enough for a two-storey building
+with 128 px floors, or for a mezzanine half-level (192 px, the Mid Heart pattern) later. Both are
+single constants (`LEVEL_GAP`, `ROOM_HEIGHT`, with `RISE` following); stair tops follow `RISE`, so
+a change moves the flights, and the lint says which runs have to follow.
 
 ## 2. The model (`hollow_map.gd`)
 
@@ -87,7 +108,7 @@ the name of the place you stand in.
 | **stair** | foot, direction, rise. A solid wedge below the flight. The foot is the end of the lower run (the wedge is that run's wall); the street above passes over the flight |
 | **ladder** | open_x, top and bottom level; a deck must cover the shaft at both ends |
 | **lift** | open_x and stops; every stop has a deck; the lift passes no deck it does not serve |
-| **gate** | a barrier on a run, with a story-flag requirement. `blocks=false` is a lock with no bar (the Warden lift) |
+| **gate** | a barrier on a run, with a story-flag requirement (a flag is just a named yes/no in the story, e.g. `ashram_clearance`; the gate opens when the story sets it). `blocks=false` is a lock with no bar across the deck (no gate uses it now) |
 | **reserve** | an empty, rock-backed footprint a district grows into. Nothing may be built in it |
 | **zone** | a named place: rect + anchor on a deck. Zones never overlap |
 
@@ -101,18 +122,18 @@ East = x 4960..9280 civic, east of that is the dig flank.
 
 | Lvl | Y | West wall | East wall |
 | --- | --- | --- | --- |
-| L0 | 320 | **Ashram Heights W** residences + Mouth overlook (gated) | **Ashram Heights E** residences, Firmament ceiling (gated) |
-| L1 | 960 | Ashram W promenade + gateway lobby (lift stop, Warden gate) | Ashram E promenade + lobby (lift stop, Warden gate) |
-| L2 | 1600 | **High-West Dig Front** upper: terrace + gallery into the flank (guarded) | **Glowbeds** terrace (Warden lift) |
-| L3 | 2240 | High-West lower gallery | **Glowbeds Hang** (fibre racks) |
-| L4 | 2880 | **Wickwork** street, bay into the west rock, runs into **Mid Heart** | Mid Heart's east raft, **Mid-East Landing, Approach, Dig Front** (to 12160) |
-| L5 | 3520 | Wickwork lower repair bays (Mouth dock) | Mid-East Service Court (clinic, trade) |
-| L6 | 4160 | **Mid Allotments** upper — the Mid Reach residence | Lower-East Homes |
-| L7 | 4800 | Allotment street | Lower-East Services (rail-cart freight yard; freight stop) |
-| L8 | 5440 | **Lower Worker Terraces — Home Court (spawn)**, Switchback, Dispatch Yard, Worker Stair hall | Cistern Freight Landing (basin approach; freight stop) |
-| L9 | 6080 | Lower Landing + Bottom-West Approach | **Cistern** core (pressure basin; freight bottom stop) |
-| L10 | 6720 | **Bottom-West Dig Front**: threshold + First Expansion Gallery | Cistern Tanks (maintenance) |
-| L11 | 7360 | Collapsed Side Chamber + the locked deeper service run | Seep gallery + the sealed Cistern flood gate |
+| L0 | 1792 | **Ashram Heights W** residences + Mouth overlook (gated) | **Ashram Heights E** residences, Firmament ceiling (gated) |
+| L1 | 2176 | Ashram W promenade + gateway lobby (lift stop, Warden gate) | Ashram E promenade + lobby (lift stop, Warden gate) |
+| L2 | 2560 | **High-West Dig Front** upper: terrace + gallery into the flank (guarded) | **Glowbeds** terrace (open: passenger lift or stairs) |
+| L3 | 2944 | High-West lower gallery | **Glowbeds Hang** (fibre racks) |
+| L4 | 3328 | **Wickwork** street, bay into the west rock, runs into **Mid Heart** | Mid Heart's east raft, **Mid-East Landing, Approach, Dig Front** (to 12160) |
+| L5 | 3712 | Wickwork lower repair bays (Mouth dock) | Mid-East Service Court (clinic, trade) |
+| L6 | 4096 | **Mid Allotments** upper — the Mid Reach residence | Lower-East Homes |
+| L7 | 4480 | Allotment street | Lower-East Services (rail-cart freight yard; freight stop) |
+| L8 | 4864 | **Lower Worker Terraces — Home Court (spawn)**, Switchback, Dispatch Yard, Worker Stair hall | Cistern Freight Landing (basin approach; freight stop) |
+| L9 | 5248 | Lower Landing + Bottom-West Approach | **Cistern** core (pressure basin; freight bottom stop) |
+| L10 | 5632 | **Bottom-West Dig Front**: threshold + First Expansion Gallery | Cistern Tanks (maintenance) |
+| L11 | 6016 | Collapsed Side Chamber + the locked deeper service run | Seep gallery + the sealed Cistern flood gate |
 
 Mid Heart (L4 plus its two half levels) is the only structure over the Mouth — see §5.
 
@@ -127,10 +148,10 @@ East: `S_EA1`, `S_EG3`, `S_EM5`, `S_LE6`, `S_LS7` (with `S_LE6` it forms the con
 **Lower-East Stair** diagonal), `S_CF` (with `S_CL10`: the **Cistern Stair**).
 Mid Heart: `H_RIT_W`, `H_RIT_E` (over the raised Ritual deck), `H_FRT_W`, `H_FRT_E` (the lower freight tier).
 
-### Ladders (13) — local shortcuts, one level each
+### Ladders (14) — local shortcuts, one level each
 
 `LAD_A`, `LAD_HW`, `LAD_WK4` (cargo hoist), `LAD_WK5`, `LAD_AL2`, `LAD_AL`, `LAD_BW` (to the
-Collapsed Side Chamber), `LAD_EA`, `LAD_EG`, `LAD_LE2`, `LAD_EF`, `LAD_CC`, `LAD_SE`. No two
+Collapsed Side Chamber), `LAD_EA`, `LAD_EG`, `LAD_EG4` (Mid-East Landing up to Glowbeds Hang, so Glowbeds can be reached without the lift), `LAD_LE2`, `LAD_EF`, `LAD_CC`, `LAD_SE`. No two
 share an x across more than one level, so a ladder chain is never a full-height shaft (canon:
 lower-west workers use stairs, not a shaft).
 
@@ -139,10 +160,10 @@ lower-west workers use stairs, not a shaft).
 | Lift | x | Stops | Role |
 | --- | --- | --- | --- |
 | `heart` (west civic) | −2560 | L1, L2, L3, L4 | Always runs. Wickwork up to High-West and the Ashram gateway |
-| `east_passenger` | 6400 | L1, L2, L3, L4 | Warden-run; parked until `east_ward_clearance`. Recessed Mid-East landing up through Glowbeds |
+| `east_passenger` | 6400 | L1, L2, L3, L4 | Always runs (Glowbeds is a main district, open from the start). Recessed Mid-East landing up through Glowbeds |
 | `freight` | 8640 | L4, L7, L8, L9 | Heavy; slows and parks with the Cistern's condition. Mid-East down to the Cistern |
 
-### Travel times (200 px/s walking, 140 px/s ladders; rough)
+### Travel times (200 px/s walking, 140 px/s ladders; rough, before the 384 px levels)
 
 | Trip | By stairs | With ladder shortcuts |
 | --- | --- | --- |
@@ -151,7 +172,9 @@ lower-west workers use stairs, not a shaft).
 | Mid Heart → Cistern (stairs + freight lift) | ~90 s | ~60 s |
 | Wickwork → High-West (lift) | ~12 s | — |
 
-If these feel too long in play, shorten *corridors* (move a stair), do not shrink the levels.
+The 384 px levels shorten every flight and shaft by 40 % (a stair is `RISE` long; a ladder climbs
+384 px, not 640), so these are upper bounds now. If the trip still feels long in play, shorten
+*corridors* (move a stair); do not shrink the levels again without playing it first.
 
 ### Future movement upgrades (reserved, not built)
 
@@ -164,11 +187,11 @@ such as High-West ↔ Mid-East are the design target (see the memory note on the
 
 One cluster over the Mouth, and nothing else may touch the Mouth:
 
-- **West Exchange raft** (L4, x 1440–2400): Joss's counter, Approved Gear orders. Continuous with Wickwork's street.
-- **Ritual Raft** (y 2560, x 2720–3680): the raised hall. The main crossing climbs `H_RIT_W`
-  (320 px) over it and descends `H_RIT_E` — a walkable crossing that is never flat.
-- **East Service raft** (L4, x 4000–4960): care, notices, civic offices. Continuous with the Mid-East Landing.
-- **Lower freight tier** (y 3200, x 1760–4640): carts and cargo. A second route across, reached
+- **West Exchange raft** (L4, x 1440–2528): Joss's counter, Approved Gear orders. Continuous with Wickwork's street.
+- **Ritual Raft** (y 3136, x 2720–3680): the raised hall. The main crossing climbs `H_RIT_W`
+  (192 px) over it and descends `H_RIT_E` — a walkable crossing that is never flat.
+- **East Service raft** (L4, x 3872–4960): care, notices, civic offices. Continuous with the Mid-East Landing.
+- **Lower freight tier** (y 3520, x 1632–4768): carts and cargo. A second route across, reached
   only from the cliffs (Wickwork's lower dock by `H_FRT_W`, the Mid-East Service Court by `H_FRT_E`),
   never from the Ritual deck.
 
@@ -176,15 +199,19 @@ The lint checks the cluster's own decks and stairs connect the west lip to the e
 
 ## 6. Access: what is open, what is held
 
-Start-closed gates (all `closed_at_start()`); every requirement is a story flag (names are
-**AI-proposed — USER to confirm**; they are plain `StringName`s in `HollowMap.gates()`):
+Start-closed gates (all `closed_at_start()`); every requirement is a story flag (a named
+yes/no the story sets; names are **AI-proposed — USER to confirm**; they are plain `StringName`s
+in `HollowMap.gates()`).
+
+**Every main district is open from the start**: Wickwork, the Allotments, Mid Heart, **Glowbeds**
+(the passenger lift now always runs), Lower-East, and the **Cistern**. What stays gated is the
+Warden's Ashram Heights, the two guarded dig fronts, and the sealed deep runs:
 
 | Gate | Where | Flag | Holds back |
 | --- | --- | --- | --- |
 | `gate_ashram_west` | L1 x −1920 | `ashram_clearance` | Ashram W promenade + residences |
 | `gate_ashram_east` | L1 x 7040 | `ashram_clearance` | Ashram E promenade + residences |
 | `gate_high_west`, `_low` | L2/L3 x −3520 | `high_west_cleared` | High-West gallery into the flank |
-| `gate_east_lift` | the passenger lift | `east_ward_clearance` | Glowbeds and Glowbeds Hang (they are only reachable by that lift) |
 | `gate_mid_east_dig` | L4 x 9280 | `mid_east_survey_cleared` | Mid-East Dig Front |
 | `gate_bw_deep` | L11 x −4480 | `bottom_west_service_open` | the deeper Bottom-West run |
 | `gate_cistern_deep` | L11 x 8640 | `cistern_flood_gate_open` | the sealed flood-gate side |
@@ -193,30 +220,33 @@ The lint proves two things: with every gate open every deck is reachable, and wi
 gates shut every zone in `early_zones()` is still reachable **and** every point in `held_points()`
 is not (so a gate cannot be walked around).
 
-**Decision for the USER:** Glowbeds is held back entirely by the Warden lift (the brief says it is
-"reached by the guarded east upper passenger lift after clearance"). If Pell and Glowbeds must be
-visitable in the opening, either clear `east_ward_clearance` early or add a public stair from the
-Mid-East Service Court — one `_stair()` line plus a run, and the lint will tell you what else moves.
+History: the first rebuild held Glowbeds back behind a Warden-run lift (`gate_east_lift`, flag
+`east_ward_clearance`, from the build brief). The user wants every main district visitable from
+the start, so that gate is gone and `glowbeds` / `glowbeds_hang` are in `early_zones()`. If the
+story later wants the lift Warden-run again, add the gate back and put those zones out of
+`early_zones()`; the lint will tell you what else moves.
 
 ## 7. Growth space
 
 | Reserve | District | Size | Meaning |
 | --- | --- | --- | --- |
-| `R_WICKWORK` | Wickwork | 1760 × 1120 west of the bay | next workshop tier |
-| `R_GLOWBEDS` | Glowbeds | 480 × 1120 past the planter court | next cultivation tier |
-| `R_CISTERN` | Cistern | 1280 × 1760 east of the flood gate | pressure basin / tank expansion |
-| `R_BW_DEEP` | Bottom-West | 320 × 640 | the locked service run continues |
+| `R_WICKWORK` | Wickwork | 1760 × 640 west of the bay | next workshop tier |
+| `R_GLOWBEDS` | Glowbeds | 480 × 640 past the planter court | next cultivation tier |
+| `R_CISTERN` | Cistern | 1280 × 1024 east of the flood gate | pressure basin / tank expansion |
+| `R_BW_DEEP` | Bottom-West | 320 × 352 | the locked service run continues |
 
 Dig fronts grow by digging into the flank rock; High-West, Bottom-West and Mid-East each end in
-rock beyond their last deck. The Firmament is the rock above Ashram (rows above L0; its thick
-band is `TerrainLayer.FIRMAMENT_Y_MAX`).
+rock beyond their last deck, with at least 1600 px of it left (`MIN_FLANK_BEYOND`). The Firmament
+is the 1536 px of rock above the whole map (`TerrainLayer.FIRMAMENT_Y_MAX`; zone `firmament`,
+restricted). The two flank volumes (`west_dig_site`, `east_dig_site`) are sanctioned digging; where
+a gallery zone overlaps one, the smaller rect wins (`Zones.get_zone_at`).
 
 ## 8. Lint rules (what makes a test fail)
 
 | Rule | Meaning |
 | --- | --- |
-| `grid` | every deck on the 640 px grid (Heart's two half levels excepted) |
-| `stack` | decks that overlap in x are ≥ 320 px apart; runs never overlap |
+| `grid` | every deck on the 384 px grid (Heart's two half levels excepted) |
+| `stack` | decks that overlap in x are ≥ 192 px apart; runs never overlap |
 | `end` | every run end is a wall, Mouth lip, rock, stair foot/top, or Mouth join — and the stair it names exists |
 | `stair` | foot on a run end, top lands on a deck, the wedge touches no other deck, no deck crosses the flight between its two levels |
 | `ladder`, `lift` | a deck covers the shaft at each end/stop; a lift never passes a deck it does not stop at |
@@ -226,7 +256,8 @@ band is `TerrainLayer.FIRMAMENT_Y_MAX`).
 | `zone` | zones never overlap, anchors on decks, every deck inside a zone |
 | `reach` | all decks reachable with gates open; early zones reachable and held points sealed with gates closed |
 | `space` | west and east walkable length within 0.8–1.25 |
-| scene | structures instanced to match; every deck painted one-way; walls and treads painted; headroom above every deck and tread; rock beyond flank ends |
+| `shell` | Firmament ≥ 1024, floor slab ≥ 512, flanks ≥ 3200 deep; every room sits inside the civic cavity (or a flank); ≥ 1600 px of rock beyond every gallery end; the pit is open to the bottom |
+| scene | structures instanced to match; every deck painted one-way; walls and treads painted; headroom above every deck and tread; rock beyond flank ends; the shell is really painted (Firmament, slab, edges), the cavity and the pit really empty |
 
 ## 9. Protocol for anyone (human or AI) changing the map
 
@@ -247,14 +278,14 @@ band is `TerrainLayer.FIRMAMENT_Y_MAX`).
 
 ## 10. Known follow-ups
 
-- **Dressing is not redone.** `hollow_ambiance.gd`, `hollow_ledge.gd`, `hollow_bridge.gd` and
-  `home_court_dressing.gd` are keyed to the old layout and are not instanced (the first three
-  would not compile against the new constants). Dressing a district now means reading its zone
-  rect and runs from the map.
+- **There is no dressing.** The old dressing scripts (`hollow_ambiance`, `hollow_ledge`,
+  `hollow_bridge`, `home_court_dressing`, `dig_site_dressing`, `dig_approach`) were deleted
+  2026-10-01: they were keyed to the old layout and nothing instanced them. Dressing a district now
+  means reading its zone rect and runs from the map and building on top.
 - Visuals for walls/wedges are the flat placeholder rock colour.
-- Dig-front gameplay beyond the carved galleries (deposits, evidence, Firmament thickness above
-  the Ashram residences) was only re-seated, not re-designed: deposits moved with the east dig
-  start; the Firmament is still the existing rock band, not a new thick mass above Ashram.
+- The Firmament is a plain 1536 px band of the placeholder rock; a tougher material and its dig
+  rules come later. Deposits are still the old east pockets (`content/deposits/east_dig_site.tres`)
+  - the west flank has none yet.
 - `hollow_lift.gd` got an `access_gate_id` lock; the Warden lock is evaluated by `Access`.
 - The east flank has one dig front (Mid-East) to the west flank's four galleries; the Cistern
   reserve is where a second east front would go.

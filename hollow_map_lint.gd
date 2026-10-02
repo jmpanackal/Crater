@@ -17,13 +17,19 @@ extends Object
 ##   reach      with all gates open every deck is reachable from spawn (and can get back);
 ##              with the start-closed gates shut every early zone is still reachable
 ##   space      the two walls carry comparable walkable length
+##   shell      the Hollow is encased in rock: Firmament above, deep flanks, a floor slab, the pit open
 ## Scene rules: structures instanced to match, walls and treads painted, headroom above every
 ## deck and tread, rock beyond flank ends.
 
 const EPS := 0.5
 const MIN_PIECE := 96.0
-## Smallest vertical separation between decks that overlap in x.
-const MIN_STACK := 320.0
+## Smallest vertical separation between decks that overlap in x (half a level: Mid Heart's tiers).
+const MIN_STACK := HollowMap.LEVEL_GAP * 0.5
+## Rock that must remain past the end of an authored dig gallery, so the player can dig on.
+const MIN_FLANK_BEYOND := 1600.0
+## Thinnest acceptable Firmament and floor slab.
+const MIN_FIRMAMENT := 1024.0
+const MIN_SLAB := 512.0
 
 
 ## {"errors", "warnings", "info": Array[String], "pieces": Array[Dictionary], "reach": Dictionary}
@@ -41,6 +47,7 @@ static func run() -> Dictionary:
 	_check_zones(rep)
 	_check_reach(rep)
 	_space_report(rep)
+	_check_shell(rep)
 	return rep
 
 
@@ -63,7 +70,7 @@ static func _check_grid_and_stack(rep: Dictionary) -> void:
 	for r in runs:
 		var half_ok: bool = r["zone"] == &"mid_heart"
 		if not _on_grid(r["y"], half_ok):
-			_err(rep, "grid: %s is off the 640px level grid" % run_label(r))
+			_err(rep, "grid: %s is off the %dpx level grid" % [run_label(r), int(HollowMap.LEVEL_GAP)])
 		if float(r["x1"]) - float(r["x0"]) < MIN_PIECE:
 			_err(rep, "end: %s is shorter than %dpx" % [run_label(r), int(MIN_PIECE)])
 	for i in runs.size():
@@ -117,7 +124,7 @@ static func _check_ends(rep: Dictionary) -> void:
 				if absf(x0 - HollowMap.MOUTH_R) > EPS:
 					_err(rep, "end: %s claims a Mouth lip on its left at x=%d; the east lip is x=%d" % [run_label(r), int(x0), int(HollowMap.MOUTH_R)])
 			HollowMap.END_ROCK:
-				if not (x0 >= HollowMap.WEST_FLANK_LEFT - EPS and x0 < HollowMap.WEST_WALL):
+				if not (x0 >= HollowMap.ENV_LEFT + MIN_FLANK_BEYOND - EPS and x0 < HollowMap.WEST_WALL):
 					_err(rep, "end: %s claims rock at x=%d, outside the west flank" % [run_label(r), int(x0)])
 			HollowMap.END_FOOT:
 				if not _stair_at_foot(x0, y, -1):
@@ -137,7 +144,7 @@ static func _check_ends(rep: Dictionary) -> void:
 				if absf(x1 - HollowMap.MOUTH_L) > EPS:
 					_err(rep, "end: %s claims a Mouth lip on its right at x=%d; the west lip is x=%d" % [run_label(r), int(x1), int(HollowMap.MOUTH_L)])
 			HollowMap.END_ROCK:
-				if not (x1 > HollowMap.EAST_WALL - EPS and x1 <= HollowMap.EAST_FLANK_RIGHT + EPS):
+				if not (x1 > HollowMap.EAST_WALL - EPS and x1 <= HollowMap.ENV_RIGHT - MIN_FLANK_BEYOND + EPS):
 					_err(rep, "end: %s claims rock at x=%d, outside the east flank" % [run_label(r), int(x1)])
 			HollowMap.END_FOOT:
 				if not _stair_at_foot(x1, y, 1):
@@ -561,6 +568,41 @@ static func _space_report(rep: Dictionary) -> void:
 		_err(rep, "space: east and west walls differ too much in walkable length (west %d, east %d)" % [int(west), int(east)])
 
 
+## The shell: the Hollow is wrapped in diggable rock on every side but the pit.
+static func _check_shell(rep: Dictionary) -> void:
+	var env := HollowMap.env_rect()
+	var cavity := HollowMap.cavity_rect()
+	var pit := HollowMap.pit_rect()
+	if HollowMap.ROCK_TOP < MIN_FIRMAMENT:
+		_err(rep, "shell: the Firmament is only %dpx thick (min %d)" % [int(HollowMap.ROCK_TOP), int(MIN_FIRMAMENT)])
+	if HollowMap.ROCK_BOTTOM < MIN_SLAB:
+		_err(rep, "shell: the floor slab is only %dpx thick (min %d)" % [int(HollowMap.ROCK_BOTTOM), int(MIN_SLAB)])
+	if HollowMap.SIDE_DEPTH < MIN_FLANK_BEYOND * 2.0:
+		_err(rep, "shell: the side flanks are only %dpx deep (min %d)" % [int(HollowMap.SIDE_DEPTH), int(MIN_FLANK_BEYOND * 2.0)])
+	if not env.encloses(cavity):
+		_err(rep, "shell: the civic cavity is not inside the dig envelope")
+	if absf(pit.size.x - (HollowMap.MOUTH_R - HollowMap.MOUTH_L)) > EPS or pit.end.y < env.end.y - EPS:
+		_err(rep, "shell: the pit is not the full Mouth width open to the bottom of the envelope")
+	for r in HollowMap.runs():
+		var air := Rect2(float(r["x0"]), float(r["y"]) - HollowMap.ROOM_HEIGHT, float(r["x1"]) - float(r["x0"]), HollowMap.ROOM_HEIGHT + 16.0)
+		var inside_cavity := cavity.encloses(air)
+		var flank_run: bool = float(r["x0"]) < HollowMap.WEST_WALL - EPS or float(r["x1"]) > HollowMap.EAST_WALL + EPS
+		if not flank_run and not inside_cavity:
+			_err(rep, "shell: %s sticks out of the civic cavity (Firmament %d, floor slab %d)" % [run_label(r), int(HollowMap.ROCK_TOP), int(HollowMap.CAVITY_BOTTOM)])
+		if float(r["y"]) - HollowMap.ROOM_HEIGHT < HollowMap.ROCK_TOP - EPS:
+			_err(rep, "shell: %s has its room inside the Firmament" % run_label(r))
+		if float(r["y"]) + 16.0 > HollowMap.CAVITY_BOTTOM + EPS:
+			_err(rep, "shell: %s is below the floor of the cavity" % run_label(r))
+		if float(r["x0"]) < env.position.x + MIN_FLANK_BEYOND - EPS and r["l"] != HollowMap.END_ROCK:
+			_err(rep, "shell: %s starts too close to the west edge of the envelope" % run_label(r))
+		if float(r["x0"]) < env.position.x + MIN_FLANK_BEYOND - EPS or float(r["x1"]) > env.end.x - MIN_FLANK_BEYOND + EPS:
+			_err(rep, "shell: %s leaves less than %dpx of rock beyond its end" % [run_label(r), int(MIN_FLANK_BEYOND)])
+	for z in HollowMap.zones():
+		if z.get("volume", false) and not env.encloses(z["rect"]):
+			_err(rep, "shell: volume '%s' is outside the dig envelope" % str(z["id"]))
+	rep["info"].append("shell: envelope x %d..%d, y 0..%d; Firmament %dpx, floor slab %dpx, flanks %dpx past each wall" % [int(env.position.x), int(env.end.x), int(env.end.y), int(HollowMap.ROCK_TOP), int(HollowMap.ROCK_BOTTOM), int(HollowMap.SIDE_DEPTH)])
+
+
 ## ------------------------------------------------------------------ scene checks
 
 ## Solid tile layers only (dig rock, walls, treads). One-way decks are checked separately.
@@ -581,6 +623,55 @@ static func _solid_at(layers: Array[TileMapLayer], x: float, y: float) -> bool:
 	var cell := Vector2i(int(floor(x / 16.0)), int(floor(y / 16.0)))
 	for layer in layers:
 		if layer.get_cell_source_id(cell) != -1:
+			return true
+	return false
+
+
+## The shell is really painted: Firmament overhead, floor slab under both walls, rock at both
+## edges, the cavity open, the pit open all the way down.
+static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> void:
+	var env := HollowMap.env_rect()
+	var cavity := HollowMap.cavity_rect()
+	var x := env.position.x + 8.0
+	var missing := 0
+	while x < env.end.x:
+		if not _solid_at(layers, x, 8.0) or not _solid_at(layers, x, HollowMap.ROCK_TOP - 8.0):
+			missing += 1
+		x += 320.0
+	if missing > 0:
+		_err(rep, "shell: the Firmament has %d unpainted samples along the top of the world" % missing)
+	var slab_missing := 0
+	x = cavity.position.x + 8.0
+	while x < cavity.end.x:
+		var over_pit := x > HollowMap.MOUTH_L - 16.0 and x < HollowMap.MOUTH_R
+		var solid := _solid_at(layers, x, HollowMap.CAVITY_BOTTOM + 8.0) and _solid_at(layers, x, env.end.y - 8.0)
+		if over_pit and (_solid_at(layers, x, HollowMap.CAVITY_BOTTOM + 8.0) or _solid_at(layers, x, env.end.y - 8.0)):
+			_err(rep, "shell: the pit is plugged at x=%d" % int(x))
+			break
+		if not over_pit and not solid:
+			slab_missing += 1
+		x += 320.0
+	if slab_missing > 0:
+		_err(rep, "shell: the floor slab has %d unpainted samples under the civic walls" % slab_missing)
+	var edge_missing := 0
+	var y := HollowMap.ROCK_TOP + 8.0
+	while y < env.end.y:
+		for ex in [env.position.x + 8.0, env.end.x - 8.0, HollowMap.WEST_WALL - 8.0, HollowMap.EAST_WALL + 8.0]:
+			if not _solid_at(layers, ex, y) and not _is_carved_air(ex, y):
+				edge_missing += 1
+		y += 320.0
+	if edge_missing > 0:
+		_err(rep, "shell: the side flanks have %d unpainted samples at the envelope edges and civic walls" % edge_missing)
+	# The civic cavity itself must be empty of rock at its centre line between decks.
+	if _solid_at(layers, HollowMap.HEART_X, HollowMap.ROCK_TOP + 64.0) or _solid_at(layers, HollowMap.HEART_X, HollowMap.CAVITY_BOTTOM - 64.0):
+		_err(rep, "shell: rock is filling the Mouth inside the civic cavity")
+
+
+## True where the map carves walk air out of a flank (galleries, shafts, stairs): not a hole.
+static func _is_carved_air(x: float, y: float) -> bool:
+	var p := Vector2(x, y)
+	for rc in HollowMap.flank_air_rects(96.0):
+		if rc.grow(8.0).has_point(p):
 			return true
 	return false
 
@@ -681,6 +772,7 @@ static func lint_scene(scene: Node) -> Dictionary:
 			y += 64.0
 		if missing > 0:
 			_err(rep, "wall: column at x=%d y=%d..%d is missing %d painted samples" % [int(w.position.x), int(w.position.y), int(w.end.y), missing])
+	_lint_shell_scene(layers, rep)
 	# Rock beyond flank ends.
 	for r in HollowMap.runs():
 		if r["l"] == HollowMap.END_ROCK and not _solid_at(layers, float(r["x0"]) - 8.0, float(r["y"]) - 160.0):

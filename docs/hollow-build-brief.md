@@ -210,8 +210,7 @@ Powerful because of **scale, exposure, and history** (crashed colony ship crater
 | Floor collision + visuals (single source of truth) | `hollow_terrain.gd` on `Hollow/HollowTerrain` — see `docs/hollow-level-authoring.md`. Replaces the old split between `hollow_decks.gd` (collision) and `hollow_floor.gd`/`hollow_ledge.gd`/`hollow_bridge.gd` (paint), retired 2026-09-18 after that split caused a real bug (painted-nothing ramp collision). Currently only paints the Home Court + Bottom-West Dig Front cluster; everything past it is a later rebuild phase. |
 | Lift network | `hollow_lift.gd` → `CivicLift` (west mid-to-high), `FreightLift` (east Low-to-Mid Cistern), and `EastUpperLift` (east Mid-to-High passenger); retire `LeftServiceLift` as a main-route role. Not yet re-instantiated post-rebuild — Wickwork (its home band) isn't built yet; Lower Lift Landing is growth-reserved for its future lower stop instead (Rule 5). |
 | Local ladders | `hollow_climb.gd` → `LadderChamber` (Collapsed Side Chamber), `LadderShortcut` (Lower Lift Landing ↔ Bottom-West Threshold). `LadderCistern`/`LadderMid`/`LadderUpper` not yet re-instantiated post-rebuild. |
-| Ambiance / Ashram Heights / life | `hollow_ambiance.gd` — not yet re-instantiated post-rebuild; greybox only for the currently-built cluster. |
-| Dig threshold | `dig_approach.gd` |
+| Ambiance / Ashram Heights / life | none yet: the old dressing scripts were deleted 2026-10-01. Dress a district from its zone rect and runs in `hollow_map.gd`. |
 | Camera dig blend | `camera_follow.gd` |
 | Scene tree | `main.tscn` Hollow subtree |
 

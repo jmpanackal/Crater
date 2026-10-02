@@ -40,13 +40,16 @@ func _run() -> void:
 	# --- 1. Restricted vs sanctioned is authored on zones with a real
 	# footprint: the east Firmament band is restricted, the dig site below
 	# it is not, and unmapped space belongs to no zone. ---
-	if str(zones.get_zone_at(Vector2(1100, 100))) != "east_firmament" or not bool(zones.is_restricted_at(Vector2(1100, 100))):
-		_fail("east_firmament footprint/restricted flag not authored (%s)" % zones.get_zone_at(Vector2(1100, 100)))
+	var firmament_point := Vector2(1100, 100)
+	var dig_site_point := Vector2(10000, 2800)
+	var nowhere := Vector2(0, -2000)
+	if str(zones.get_zone_at(firmament_point)) != "firmament" or not bool(zones.is_restricted_at(firmament_point)):
+		_fail("firmament footprint/restricted flag not authored (%s)" % zones.get_zone_at(firmament_point))
 		return
-	if str(zones.get_zone_at(Vector2(1500, 1000))) != "east_dig_site" or bool(zones.is_restricted_at(Vector2(1500, 1000))):
-		_fail("east_dig_site should be sanctioned (%s)" % zones.get_zone_at(Vector2(1500, 1000)))
+	if str(zones.get_zone_at(dig_site_point)) != "east_dig_site" or bool(zones.is_restricted_at(dig_site_point)):
+		_fail("east_dig_site should be sanctioned (%s)" % zones.get_zone_at(dig_site_point))
 		return
-	if str(zones.get_zone_at(Vector2(0, 0))) != "" or bool(zones.is_restricted_at(Vector2(0, 0))):
+	if str(zones.get_zone_at(nowhere)) != "" or bool(zones.is_restricted_at(nowhere)):
 		_fail("unmapped space should belong to no zone")
 		return
 	if not bool(evidence.is_seal_kit(&"seal_kit")) or evidence.kit_tier(&"seal_kit_fine") != &"improved" or bool(evidence.is_seal_kit(&"firstfall_coupling")):
@@ -63,8 +66,8 @@ func _run() -> void:
 	terrain.reset_all()
 	var events: Array = []
 	bus.evidence_changed.connect(func(cell: Vector2i, tier: StringName, exists: bool) -> void: events.append({"cell": cell, "tier": tier, "exists": exists}))
-	var restricted_cell := Vector2i(70, 10)
-	var sanctioned_cell := Vector2i(70, 60)
+	var restricted_cell := Vector2i(590, 10) # Firmament rock above the east flank
+	var sanctioned_cell := Vector2i(590, 100) # flank rock below it (east_dig_site)
 	if not bool(terrain.is_restricted_dig_cell(restricted_cell)) or bool(terrain.is_restricted_dig_cell(sanctioned_cell)):
 		_fail("is_restricted_dig_cell disagrees with the authored zones")
 		return
@@ -73,7 +76,7 @@ func _run() -> void:
 		_fail("restricted dig did not flag evidence: %s" % [dug])
 		return
 	var info: Dictionary = terrain.get_evidence_info(restricted_cell)
-	if info["sealed_tier"] != &"" or str(info["zone_id"]) != "east_firmament":
+	if info["sealed_tier"] != &"" or str(info["zone_id"]) != "firmament":
 		_fail("evidence record wrong: %s" % [info])
 		return
 	var node: Node = terrain.get_evidence_node(restricted_cell)
@@ -151,13 +154,13 @@ func _run() -> void:
 
 	# --- 4. Searches: a search must BEAT the tier; a clean or
 	# well-concealed area returns nothing; zone- and position-scoped. ---
-	var second_cell := Vector2i(72, 10)
+	var second_cell := Vector2i(592, 10)
 	terrain.dig(terrain.to_global(terrain.map_to_local(second_cell + Vector2i.UP)), Vector2i.DOWN)
-	var basic_search: Array[Dictionary] = evidence.resolve_search("east_firmament", &"basic")
+	var basic_search: Array[Dictionary] = evidence.resolve_search("firmament", &"basic")
 	if basic_search.size() != 1 or basic_search[0]["cell"] != second_cell:
 		_fail("a Basic search should find only the exposed delta, got %s" % [basic_search])
 		return
-	var improved_search: Array[Dictionary] = evidence.resolve_search("east_firmament", &"improved")
+	var improved_search: Array[Dictionary] = evidence.resolve_search("firmament", &"improved")
 	if improved_search.size() != 2:
 		_fail("an Improved search should beat the Basic seal and find both, got %d" % improved_search.size())
 		return
@@ -176,11 +179,11 @@ func _run() -> void:
 	if not bool(fine["success"]) or fine["tier"] != &"improved" or int(storage.count_components(&"seal_kit_fine")) != 0:
 		_fail("fine kit did not seal at Improved: %s" % [fine])
 		return
-	var improved_after: Array[Dictionary] = evidence.resolve_search("east_firmament", &"improved")
+	var improved_after: Array[Dictionary] = evidence.resolve_search("firmament", &"improved")
 	if improved_after.size() != 1 or improved_after[0]["cell"] != restricted_cell:
 		_fail("an Improved search should still beat the Basic seal but NOT the Improved one (must strictly beat), got %s" % [improved_after])
 		return
-	if (evidence.resolve_search("east_firmament", &"advanced") as Array).size() != 2:
+	if (evidence.resolve_search("firmament", &"advanced") as Array).size() != 2:
 		_fail("an Advanced search should find both sealed deltas")
 		return
 	print("PASS a search finds exposed evidence and only sealed evidence whose tier it beats; clean areas return nothing")
@@ -215,7 +218,7 @@ func _run() -> void:
 	# --- 6. Evidence + tiers persist with the terrain delta through the
 	# real SaveLoad path; only still-exposed evidence gets its
 	# interactable back. ---
-	var third_cell := Vector2i(74, 10)
+	var third_cell := Vector2i(594, 10)
 	terrain.dig(terrain.to_global(terrain.map_to_local(third_cell + Vector2i.UP)), Vector2i.DOWN)
 	var pre_save: Dictionary = terrain.save_state()
 	if not pre_save.has("evidence") or (pre_save["evidence"] as Array).size() != 3:
@@ -243,7 +246,7 @@ func _run() -> void:
 	if terrain.get_evidence_node(third_cell) == null or terrain.get_evidence_node(restricted_cell) != null:
 		_fail("seal interactables not restored for exactly the exposed evidence")
 		return
-	if (evidence.resolve_search("east_firmament", &"basic") as Array).size() != 1:
+	if (evidence.resolve_search("firmament", &"basic") as Array).size() != 1:
 		_fail("search after reload wrong")
 		return
 	print("PASS evidence and concealment tiers survive a save/load cycle with the terrain delta")

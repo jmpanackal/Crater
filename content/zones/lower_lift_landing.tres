@@ -6,16 +6,16 @@
 script = ExtResource("1")
 zone_id = &"lower_lift_landing"
 display_name = "Lower Landing"
-world_origin = Vector2(-3100, 6080)
+world_origin = Vector2(-3100, 5248)
 seams = [{
 "edge": "south",
 "neighbor": "bottom_west_threshold",
-"position": 6720
+"position": 5632
 }, {
 "edge": "east",
 "neighbor": "bottom_west_approach",
 "position": -2800
 }]
 enclosed = true
-world_rect = Rect2(-3440, 5600, 640, 640)
+world_rect = Rect2(-3440, 4992, 640, 384)
 restricted = false

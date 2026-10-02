@@ -24,13 +24,9 @@ const ACCEL := 1400.0
 const FRICTION := 1800.0
 const AIR_ACCEL := 1000.0
 const AIR_FRICTION := 400.0
-## Soft respawn if we drop past Hollow/dig void (below deepest west deck).
-## Bottom-West Dig Front lower is the deepest landable west stack top
-## (BOTTOM_WEST_LOWER_Y=7360). Keep the same ~560px margin the old Seep-based
-## plane used (world-scale pass 2026-09-19: x5 of ~112px). Must track
-## HollowLayout.BOTTOM_WEST_LOWER_Y — a plane above that deck soft-kills the
-## climb/fall into Bottom-West before feet can land.
-const VOID_FALL_Y := 7920.0 ## BOTTOM_WEST_LOWER_Y + 560
+## Soft respawn if we fall down the pit (the Devil's Mouth runs open to the bottom of the dig
+## envelope). Tracks HollowMap so the plane stays below every landable deck and the rock slab.
+const VOID_FALL_Y := HollowMap.ENV_BOTTOM + 320.0
 
 ## QOL step-up: walking into a ledge exactly one dig/floor tile higher than
 ## the current stand auto-climbs it instead of requiring a jump (a one-tile

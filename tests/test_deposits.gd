@@ -15,10 +15,11 @@ extends SceneTree
 
 const InteractionScript := preload("res://interaction.gd")
 
-const SUTRAL_CELL := Vector2i(70, 34)      # sutral x3
-const RAVELSTONE_CELL := Vector2i(84, 44)  # ravelstone x4
-const BRINE_CELL := Vector2i(76, 60)       # brinecrystal x2
-const PLAIN_CELL := Vector2i(66, 40)       # ordinary rock, no pocket
+const SUTRAL_CELL := Vector2i(610, 170)      # sutral x3
+const RAVELSTONE_CELL := Vector2i(600, 220)  # ravelstone x4
+const BRINE_CELL := Vector2i(640, 300)       # brinecrystal x2
+const PLAIN_CELL := Vector2i(620, 190)       # ordinary rock, no pocket
+const HIDDEN_CELL := Vector2i(670, 200)      # a second sutral pocket (x2), never dug here
 
 
 func _init() -> void:
@@ -263,8 +264,8 @@ func _run() -> void:
 		push_error("FAIL restored exposed deposit is buried under rock again")
 		quit(1)
 		return
-	var hidden_world: Vector2 = terrain.to_global(terrain.map_to_local(Vector2i(98, 40)))
-	if bool(terrain.is_deposit_exposed(Vector2i(98, 40))) or terrain.get_deposit_state(hidden_world) != &"intact":
+	var hidden_world: Vector2 = terrain.to_global(terrain.map_to_local(HIDDEN_CELL))
+	if bool(terrain.is_deposit_exposed(HIDDEN_CELL)) or terrain.get_deposit_state(hidden_world) != &"intact":
 		push_error("FAIL an untouched pocket did not stay hidden/intact")
 		quit(1)
 		return

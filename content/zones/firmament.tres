@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"east_dig_site"
-display_name = "East Dig Site"
-world_origin = Vector2(13120, 4096)
+zone_id = &"firmament"
+display_name = "Firmament"
+world_origin = Vector2(3200, 768)
 seams = []
 enclosed = true
-world_rect = Rect2(9280, 1536, 7680, 5504)
-restricted = false
+world_rect = Rect2(-10560, 0, 27520, 1536)
+restricted = true

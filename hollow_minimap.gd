@@ -9,13 +9,15 @@ const MAP_SIZE := Vector2(440, 204)
 const PAD := 8.0
 ## Strip above the map for the current place name.
 const HEADER_H := 16.0
-const LABEL_SIZE := 9
+const LABEL_SIZE := 7
 ## World-space padding around the inhabited map.
 const CONTENT_PAD := Vector2(200.0, 120.0)
 
 const PANEL_BG := Color(0.04, 0.06, 0.07, 0.9)
 const PANEL_BORDER := Color(0.62, 0.42, 0.28, 0.7)
 const ROCK_FILL := Color(0.17, 0.14, 0.12, 0.95)
+const FIRMAMENT_FILL := Color(0.14, 0.15, 0.16, 0.95)
+const CAVITY_FILL := Color(0.075, 0.1, 0.11, 1.0)
 const ZONE_LINE := Color(0.3, 0.42, 0.42, 0.35)
 const ZONE_HELD := Color(0.62, 0.36, 0.3, 0.45)
 const DECK_COLOR := Color(0.88, 0.64, 0.38, 0.95)
@@ -25,7 +27,7 @@ const LADDER_COLOR := Color(0.5, 0.82, 0.72, 0.9)
 const LIFT_COLOR := Color(0.38, 0.66, 1.0, 0.95)
 const GATE_CLOSED := Color(1.0, 0.32, 0.28, 0.95)
 const GATE_OPEN := Color(0.45, 0.75, 0.5, 0.6)
-const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.85)
+const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.7)
 
 var _player: Node2D
 var _panel: StyleBoxFlat
@@ -65,10 +67,12 @@ func map_world_bounds() -> Rect2:
 
 
 static func map_content_bounds() -> Rect2:
-	var bounds := Macro.MOUTH_BOUNDS
+	# Top of the Firmament to the bottom of the pit, and the authored galleries side to side. The
+	# rock that runs on past the galleries is not framed: it would shrink the map to nothing.
+	var bounds := Rect2(HollowLayout.HIGH_WEST_DIG_LEFT, HollowLayout.ENV_TOP, HollowLayout.EAST_FLANK_RIGHT - HollowLayout.HIGH_WEST_DIG_LEFT, HollowLayout.ENV_BOTTOM - HollowLayout.ENV_TOP)
 	for district in Macro.district_guides():
 		bounds = bounds.merge(district.bounds)
-	bounds = Rect2(bounds.position - CONTENT_PAD, bounds.size + CONTENT_PAD * 2.0)
+	bounds = Rect2(bounds.position - Vector2(CONTENT_PAD.x, 0.0), bounds.size + Vector2(CONTENT_PAD.x * 2.0, 0.0))
 	return bounds.intersection(Macro.WORLD_BOUNDS)
 
 
@@ -302,13 +306,13 @@ func _draw() -> void:
 	var bounds := map_world_bounds()
 	draw_rect(area, Color(0.055, 0.075, 0.085, 1.0))
 
-	# Rock flanks: the two dig walls, so the two halves read as equals.
-	var rock_h := HollowLayout.BOTTOM_WEST_LOWER_Y + 480.0
-	for flank in [
-		Rect2(HollowLayout.HIGH_WEST_DIG_LEFT - 320.0, 0.0, HollowLayout.WEST_HOLLOW_LEFT - HollowLayout.HIGH_WEST_DIG_LEFT + 320.0, rock_h),
-		Rect2(HollowLayout.EAST_CIVIC_RIGHT, 0.0, HollowLayout.EAST_FLANK_RIGHT - HollowLayout.EAST_CIVIC_RIGHT + 320.0, rock_h),
-	]:
-		draw_rect(_rect_to_map(flank).intersection(area), ROCK_FILL)
+	# The rock shell: Firmament across the top, a flank each side, a slab under each wall. The
+	# civic cavity is left open between the walls, and the Mouth runs on down as the pit.
+	draw_rect(_rect_to_map(HollowMap.env_rect()).intersection(area), ROCK_FILL)
+	var firmament := _rect_to_map(Rect2(HollowMap.ENV_LEFT, HollowMap.ENV_TOP, HollowMap.ENV_RIGHT - HollowMap.ENV_LEFT, HollowMap.ROCK_TOP - HollowMap.ENV_TOP)).intersection(area)
+	draw_rect(firmament, FIRMAMENT_FILL)
+	draw_rect(_rect_to_map(HollowMap.cavity_rect()).intersection(area), CAVITY_FILL)
+	draw_string(font, Vector2(firmament.position.x + 4.0, firmament.end.y - 3.0), "FIRMAMENT", HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0.7, 0.75, 0.75, 0.35))
 
 	# The Mouth: open void between the lips, never a plug.
 	var mouth := _rect_to_map(Macro.MOUTH_BOUNDS).intersection(area)
@@ -377,16 +381,10 @@ func _draw() -> void:
 		label_rect.position.y = clampf(label_rect.position.y, area.position.y, area.end.y - label_rect.size.y)
 		placed.append(label_rect)
 		var at := Vector2(label_rect.position.x, label_rect.position.y + label_rect.size.y - 2.0)
-		draw_rect(label_rect.grow_individual(2.0, 0.0, 2.0, 0.0), Color(0.03, 0.045, 0.05, 0.62))
-		draw_string(font, at + Vector2(1, 1), str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0, 0, 0, 0.75))
+		draw_string(font, at + Vector2(1, 1), str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0, 0, 0, 0.55))
 		draw_string(font, at, str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, LABEL_COLOR)
 
-	# What the camera sees, then the player.
-	var cam := get_viewport().get_camera_2d()
-	if cam != null:
-		var view_size := get_viewport().get_visible_rect().size / cam.zoom
-		var view := Rect2(cam.get_screen_center_position() - view_size * 0.5, view_size)
-		draw_rect(_rect_to_map(view).intersection(area), Color(0.95, 0.9, 0.7, 0.55), false, 1.0)
+	# The player: a dot, nothing else.
 	if _player and is_instance_valid(_player):
 		var p := world_to_map(_player.global_position + Vector2(16.0, 16.0))
 		if area.grow(3.0).has_point(p):

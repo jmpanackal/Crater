@@ -97,23 +97,6 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	var dressing: Node = scene.get_node_or_null("DigDressing")
-	if dressing == null:
-		push_error("FAIL DigDressing missing")
-		quit(1)
-		return
-	if dressing.get_node_or_null("FirmamentHaze") == null:
-		push_error("FAIL Firmament dressing rect missing")
-		quit(1)
-		return
-	# The downward dig direction used to carry its own "Devil's Mouth" gloom/
-	# label here too, reusing the name of the real crater void elsewhere in
-	# the Hollow — removed 2026-09-19 as a confusing stray artifact.
-	if dressing.get_node_or_null("MouthGloom") != null or dressing.get_node_or_null("DevilsMouthMark") != null:
-		push_error("FAIL stale Devil's Mouth dig-site dressing should be gone")
-		quit(1)
-		return
-	print("PASS Firmament↑ dig-site dressing; no stray Devil's Mouth artifact")
 
 	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
 	FeelFx.reset_debug()
@@ -224,17 +207,11 @@ func _run() -> void:
 		return
 	print("PASS help text mentions climb")
 
-	# Dig approach is a clean greybox threshold (no prop / label leftovers).
-	var approach: Node = scene.get_node_or_null("Approach")
-	if approach == null or not approach.has_method("entry_reads_as_threshold") or not approach.entry_reads_as_threshold():
-		push_error("FAIL dig approach threshold not clean")
-		quit(1)
-		return
 	if scene.get_node_or_null("DigSiteLabel") != null:
 		push_error("FAIL DigSiteLabel leftover must be removed")
 		quit(1)
 		return
-	print("PASS dig approach clean (no Side galleries props/labels)")
+	print("PASS no DigSiteLabel leftover")
 
 	FeelFx.reset_debug()
 	var firmament_h := FeelFx.dig_hitstop_ms(true, false)

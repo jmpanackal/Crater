@@ -6,16 +6,16 @@
 script = ExtResource("1")
 zone_id = &"cistern_freight"
 display_name = "Cistern Freight Landing"
-world_origin = Vector2(7360, 5440)
+world_origin = Vector2(7360, 4864)
 seams = [{
 "edge": "north",
 "neighbor": "lower_east_services",
-"position": 5440
+"position": 4864
 }, {
 "edge": "south",
 "neighbor": "cistern",
-"position": 6080
+"position": 5248
 }]
 enclosed = false
-world_rect = Rect2(5440, 4960, 3840, 640)
+world_rect = Rect2(5440, 4608, 3840, 384)
 restricted = false

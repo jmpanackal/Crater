@@ -151,16 +151,23 @@ func get_display_name(zone_id: String) -> String:
 	return name if name != "" else zone_id
 
 
-## Position -> zone (Build Bible Spec 18): the first authored zone whose
-## world_rect contains the point, in sorted-id order for determinism.
+## Position -> zone (Build Bible Spec 18): the authored zone whose world_rect contains the
+## point (the smallest one where several do), sorted-id order breaking ties for determinism.
 ## "" when no authored footprint covers it.
 func get_zone_at(world_pos: Vector2) -> String:
+	# Where footprints overlap (a dig gallery inside the rock volume around it) the smaller
+	# rect is the more specific place and wins; ties go to the first id alphabetically.
+	var best := ""
+	var best_area := INF
 	for zone_id: String in get_authored_zone_ids():
 		var zone: Resource = _zones[zone_id]
 		var rect: Rect2 = zone.get("world_rect")
 		if rect.size.x > 0.0 and rect.size.y > 0.0 and rect.has_point(world_pos):
-			return zone_id
-	return ""
+			var area := rect.size.x * rect.size.y
+			if area < best_area:
+				best = zone_id
+				best_area = area
+	return best
 
 
 func is_zone_restricted(zone_id: String) -> bool:

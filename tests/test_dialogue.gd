@@ -67,13 +67,13 @@ func _run() -> void:
 	# assertion is refused. ---
 	var before := int(fact_log.count())
 	var claim: Dictionary = dialogue.make_claim(&"not_near_firmament", true, {
-		"asserts": "was_not_at", "location": "east_firmament", "text": "I haven't been near the upper gallery",
+		"asserts": "was_not_at", "location": "firmament", "text": "I haven't been near the upper gallery",
 	})
 	if claim.is_empty() or int(fact_log.count()) != before + 1 or claim["type"] != &"claim_made":
 		_fail("make_claim did not write one claim_made fact: %s" % [claim])
 		return
 	var ctx: Dictionary = claim["context"]
-	if not bool(ctx["trust_relevant"]) or str(ctx["asserts"]) != "was_not_at" or int(ctx["cycle"]) != int(clock.get_cycles_elapsed()) or claim["location"] != &"east_firmament":
+	if not bool(ctx["trust_relevant"]) or str(ctx["asserts"]) != "was_not_at" or int(ctx["cycle"]) != int(clock.get_cycles_elapsed()) or claim["location"] != &"firmament":
 		_fail("claim fact shape wrong: %s" % [claim])
 		return
 	# Deflection: nothing is called, nothing is written.
@@ -92,7 +92,7 @@ func _run() -> void:
 		_fail("an uncontradicted claim was contradicted/exposed")
 		return
 	var witnesses: Array[String] = ["pell"]
-	fact_log.record(&"excavated_restricted_wall", "player", &"east_firmament", witnesses, {"npc_id": "pell", "sense": "sight"}, int(clock.get_cycles_elapsed()))
+	fact_log.record(&"excavated_restricted_wall", "player", &"firmament", witnesses, {"npc_id": "pell", "sense": "sight"}, int(clock.get_cycles_elapsed()))
 	if not bool(dialogue.is_contradicted(&"not_near_firmament")):
 		_fail("a Witness fact placing the player at the location should contradict the claim")
 		return
@@ -104,8 +104,8 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	terrain.reset_all()
-	terrain.dig(terrain.to_global(terrain.map_to_local(Vector2i(70, 9))), Vector2i.DOWN)
-	var result: Dictionary = investigation.trigger_investigation(&"east_firmament", "A Warden follows the dust")
+	terrain.dig(terrain.to_global(terrain.map_to_local(Vector2i(590, 9))), Vector2i.DOWN)
+	var result: Dictionary = investigation.trigger_investigation(&"firmament", "A Warden follows the dust")
 	if result["stage"] != &"found_evidence":
 		_fail("setup: investigation should find the fresh cut: %s" % [result])
 		return
@@ -122,14 +122,14 @@ func _run() -> void:
 	fact_log.clear_all()
 	trust.reset_all()
 	trust_events.clear()
-	dialogue.make_claim(&"white_lie", false, {"asserts": "was_not_at", "location": "east_firmament", "text": "Nothing to worry about up there"})
-	fact_log.record(&"excavated_restricted_wall", "player", &"east_firmament", witnesses, {"npc_id": "pell", "sense": "sight"}, int(clock.get_cycles_elapsed()))
+	dialogue.make_claim(&"white_lie", false, {"asserts": "was_not_at", "location": "firmament", "text": "Nothing to worry about up there"})
+	fact_log.record(&"excavated_restricted_wall", "player", &"firmament", witnesses, {"npc_id": "pell", "sense": "sight"}, int(clock.get_cycles_elapsed()))
 	if not bool(dialogue.is_contradicted(&"white_lie")):
 		_fail("setup: white lie should be contradicted")
 		return
 	terrain.reset_all()
-	terrain.dig(terrain.to_global(terrain.map_to_local(Vector2i(70, 9))), Vector2i.DOWN)
-	investigation.trigger_investigation(&"east_firmament", "Again")
+	terrain.dig(terrain.to_global(terrain.map_to_local(Vector2i(590, 9))), Vector2i.DOWN)
+	investigation.trigger_investigation(&"firmament", "Again")
 	var direct: bool = bool(dialogue.expose_claim(&"white_lie"))
 	if direct or exposed_lie_count.call() != 0:
 		_fail("a trust_relevant:false claim produced a Trust event")

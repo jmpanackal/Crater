@@ -109,7 +109,7 @@ func _player_in_hollow() -> bool:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return false
-	return player.global_position.x >= HollowLayout.HOLLOW_LEFT and player.global_position.x <= HollowLayout.HOLLOW_RIGHT and player.global_position.y >= HollowLayout.VAULTWARD_Y and player.global_position.y <= HollowLayout.SEEP_Y
+	return HollowLayout.in_hollow(player.global_position)
 
 
 # --- Severe fall (G22-B) ----------------------------------------------------------------

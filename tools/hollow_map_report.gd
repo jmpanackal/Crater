@@ -30,22 +30,28 @@ func _run() -> void:
 
 
 ## No text (headless has no font): level rows are the grid lines. Colours:
-## rock brown, Mouth black, decks amber, stairs orange, ladders teal, lifts blue,
-## gates red, growth reserves hatched grey, zone anchors yellow, spawn white.
+## rock brown (Firmament slightly cooler), civic cavity dark teal, the pit black, decks amber,
+## stairs orange, ladders teal, lifts blue, gates red, growth reserves hatched grey, zone
+## anchors yellow, spawn white. The image is the whole dig envelope.
 func _save_png(path: String) -> void:
-	var s := 0.1
-	var x_min := -6400.0
-	var y_min := -400.0
-	var img := Image.create(int(19200.0 * s), int(8200.0 * s), false, Image.FORMAT_RGB8)
-	img.fill(Color("14181a"))
+	var s := 0.06
+	var margin := 120.0
+	var env := HollowMap.env_rect()
+	var x_min := env.position.x - margin / s
+	var y_min := env.position.y - margin / s
+	var img := Image.create(int(env.size.x * s + margin * 2.0), int(env.size.y * s + margin * 2.0), false, Image.FORMAT_RGB8)
+	img.fill(Color("0b0e10"))
 	var px := func(x: float) -> int: return int((x - x_min) * s)
 	var py := func(y: float) -> int: return int((y - y_min) * s)
-	var rock := Color("2b2622")
-	img.fill_rect(Rect2i(px.call(HollowMap.WEST_FLANK_LEFT - 320.0), py.call(0.0), int((HollowMap.WEST_WALL - HollowMap.WEST_FLANK_LEFT + 320.0) * s), int(7700.0 * s)), rock)
-	img.fill_rect(Rect2i(px.call(HollowMap.EAST_WALL), py.call(0.0), int((12800.0 - HollowMap.EAST_WALL) * s), int(7700.0 * s)), rock)
-	img.fill_rect(Rect2i(px.call(HollowMap.MOUTH_L), 0, int((HollowMap.MOUTH_R - HollowMap.MOUTH_L) * s), img.get_height()), Color("050b0e"))
+	var rect_px := func(r: Rect2, c: Color) -> void:
+		img.fill_rect(Rect2i(px.call(r.position.x), py.call(r.position.y), maxi(int(r.size.x * s), 1), maxi(int(r.size.y * s), 1)), c)
+	rect_px.call(env, Color("2b2622"))
+	rect_px.call(Rect2(env.position.x, env.position.y, env.size.x, HollowMap.ROCK_TOP), Color("262a2c"))
+	rect_px.call(HollowMap.cavity_rect(), Color("0f1a1c"))
+	rect_px.call(HollowMap.pit_rect(), Color("050b0e"))
+	rect_px.call(Rect2(HollowMap.MOUTH_L, HollowMap.ROCK_TOP, HollowMap.MOUTH_R - HollowMap.MOUTH_L, HollowMap.CAVITY_BOTTOM - HollowMap.ROCK_TOP), Color("050b0e"))
 	for k in range(12):
-		img.fill_rect(Rect2i(0, py.call(HollowMap.lvl(float(k))), img.get_width(), 1), Color("2a3438"))
+		img.fill_rect(Rect2i(px.call(HollowMap.WEST_WALL), py.call(HollowMap.lvl(float(k))), int((HollowMap.EAST_WALL - HollowMap.WEST_WALL) * s), 1), Color("1d2a2e"))
 	for z in HollowMap.zones():
 		if z.get("volume", false):
 			continue
