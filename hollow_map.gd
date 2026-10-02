@@ -41,6 +41,9 @@ const WALL_THICK := 32.0
 const RISE := LEVEL_GAP
 ## Width of a ladder or lift shaft (the cage and the ladder frame are sized to the body).
 const SHAFT_OPENING := 64.0
+## Air carved above a deck in a dig gallery (the flanks). 160 = five body heights: roomy enough to
+## brace, cart and dress, tight enough to read as dug rock rather than a hall.
+const FLANK_CLEAR := 160.0
 
 const MOUTH_L := 1440.0
 const MOUTH_R := 4960.0

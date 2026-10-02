@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://player.gd" id="2_player"]
@@ -16,6 +16,9 @@
 [ext_resource type="Script" path="res://hollow_macro_background.gd" id="26_macro"]
 [ext_resource type="Script" path="res://hollow_minimap.gd" id="28_minimap"]
 [ext_resource type="Script" path="res://hollow_structures.gd" id="29_structures"]
+[ext_resource type="Script" path="res://mine_controller.gd" id="30_mine"]
+[ext_resource type="Script" path="res://hollow_dressing_builder.gd" id="31_dressing"]
+[ext_resource type="Script" path="res://vision_layer.gd" id="32_vision"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
@@ -37,6 +40,9 @@ script = ExtResource("22_hollow_terrain")
 script = ExtResource("29_structures")
 
 [node name="NPCs" type="Node2D" parent="Hollow"]
+
+[node name="Dressing" type="Node2D" parent="Hollow"]
+script = ExtResource("31_dressing")
 
 [node name="OpeningDutyDispatcher" type="Area2D" parent="Hollow"]
 position = Vector2(-1320, 4864)
@@ -84,6 +90,9 @@ position = Vector2(16, 16)
 position = Vector2(16, 16)
 shape = SubResource("RectangleShape2D_player")
 
+[node name="MineController" type="Node2D" parent="Player"]
+script = ExtResource("30_mine")
+
 [node name="Camera2D" type="Camera2D" parent="Player"]
 process_callback = 0
 position = Vector2(16, 16)
@@ -101,6 +110,10 @@ drag_top_margin = 0.18
 drag_right_margin = 0.12
 drag_bottom_margin = 0.24
 script = ExtResource("16_cam")
+
+[node name="Vision" type="CanvasLayer" parent="."]
+layer = 1
+script = ExtResource("32_vision")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -431,5 +444,5 @@ offset_right = 780.0
 offset_bottom = -8.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 11
-text = "A/D move · W/S lift or climb · R dig · Space jump · Q requisition · E talk/take · J journal · M map · H help · Esc title"
+text = "A/D move · W/S lift or climb · Click or R dig · Space jump · Q requisition · E talk/take · J journal · M map · H help · Esc title"
 modulate = Color(0.75, 0.78, 0.74, 0.45)

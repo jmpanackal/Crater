@@ -259,6 +259,13 @@ a gallery zone overlaps one, the smaller rect wins (`Zones.get_zone_at`).
 | `shell` | Firmament ≥ 1024, floor slab ≥ 512, flanks ≥ 3200 deep; every room sits inside the civic cavity (or a flank); ≥ 1600 px of rock beyond every gallery end; the pit is open to the bottom |
 | scene | structures instanced to match; every deck painted one-way; walls and treads painted; headroom above every deck and tread; rock beyond flank ends; the shell is really painted (Firmament, slab, edges), the cavity and the pit really empty |
 
+## 8b. Dressing (the opening-route slice)
+
+What lives in the rooms is data too: `hollow_dressing.gd`, judged by the lint rule `dress` (things stand on a deck in their
+own zone, clear of stairs, shafts and gates, under the ceiling; a slice zone may not thin out). The slice, what is in it and
+how mouse mining works: [`hollow-slice-opening-route.md`](hollow-slice-opening-route.md). Dig galleries are
+`HollowMap.FLANK_CLEAR` = 160 px tall.
+
 ## 9. Protocol for anyone (human or AI) changing the map
 
 1. **Read this file and `hollow_map.gd`.** Do not read the old briefs for coordinates.

@@ -210,9 +210,18 @@ func is_open() -> bool:
 	return visible
 
 
-func _process(_delta: float) -> void:
+## The panel is a quiet overview: redrawing it ten times a second is plenty and keeps it cheap.
+const REDRAW_INTERVAL := 0.1
+var _redraw_in := 0.0
+
+
+func _process(delta: float) -> void:
 	if not visible:
 		return
+	_redraw_in -= delta
+	if _redraw_in > 0.0:
+		return
+	_redraw_in = REDRAW_INTERVAL
 	if _player == null or not is_instance_valid(_player):
 		_resolve_player()
 	queue_redraw()

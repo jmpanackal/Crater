@@ -19,7 +19,7 @@ const SUTRAL_CELL := Vector2i(610, 170)      # sutral x3
 const RAVELSTONE_CELL := Vector2i(600, 220)  # ravelstone x4
 const BRINE_CELL := Vector2i(640, 300)       # brinecrystal x2
 const PLAIN_CELL := Vector2i(620, 190)       # ordinary rock, no pocket
-const HIDDEN_CELL := Vector2i(670, 200)      # a second sutral pocket (x2), never dug here
+const HIDDEN_CELL := Vector2i(670, 188)      # a second sutral pocket (x2), never dug here
 
 
 func _init() -> void:

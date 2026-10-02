@@ -244,7 +244,7 @@ func _run() -> void:
 
 	# --- 5. Spec 12 seam: extraction is refused, deposit left intact, when
 	# the bundle can't carry the find. ---
-	var pocket := Vector2i(670, 200)  # sutral x2
+	var pocket := Vector2i(670, 188)  # sutral x2
 	terrain.dig(terrain.to_global(terrain.map_to_local(pocket + Vector2i.UP)), Vector2i.DOWN)
 	var pocket_world: Vector2 = terrain.to_global(terrain.map_to_local(pocket))
 	if int(terrain.complete_extraction(pocket)) != 0 or terrain.get_deposit_state(pocket_world) != &"intact":

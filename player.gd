@@ -579,6 +579,15 @@ func _try_dig() -> void:
 	terrain.dig_in_direction(origin, dig_dir)
 
 
+## Turn toward a dig direction. The mouse miner (mine_controller.gd) calls this so the body
+## faces the tile it is breaking.
+func face_toward(dir: Vector2i) -> void:
+	if dir == Vector2i.ZERO:
+		return
+	_aim_dir = dir
+	_facing_8 = dir
+
+
 ## Current dig aim from WASD / arrows. Vertical wins over horizontal if both held
 ## so "hold W + R" digs up even while also nudging left/right.
 func _read_held_aim() -> Vector2i:

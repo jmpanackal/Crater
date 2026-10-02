@@ -22,9 +22,11 @@ const SOURCE_BRIDGE := 1
 const SOURCE_STAIR := 2
 const SOURCE_ROCK := 3
 const ATLAS_TOP_MID := Vector2i(0, 0)
-const LEDGE_COLOR := Color(0.5, 0.4, 0.3, 0.95)
-const BRIDGE_COLOR := Color(0.42, 0.32, 0.24, 0.95)
-const STAIR_COLOR := Color(0.58, 0.46, 0.34, 0.95)
+## Stone and timber, lit from the top-left (see RockTextures.tile).
+const LEDGE_COLOR := Color(0.46, 0.4, 0.34)
+const BRIDGE_COLOR := Color(0.44, 0.31, 0.2)
+const STAIR_COLOR := Color(0.52, 0.45, 0.38)
+const WALL_COLOR := Color(0.21, 0.21, 0.26)
 const DECK_GROUP := &"hollow_decks"
 
 var _decks: TileMapLayer
@@ -60,10 +62,10 @@ func _build_tileset(one_way: bool = false) -> TileSet:
 	tileset.add_physics_layer()
 	tileset.set_physics_layer_collision_layer(0, 1)
 	tileset.set_physics_layer_collision_mask(0, 0)
-	_add_placeholder_source(tileset, LEDGE_COLOR, one_way)
-	_add_placeholder_source(tileset, BRIDGE_COLOR, one_way)
-	_add_placeholder_source(tileset, STAIR_COLOR, one_way)
-	_add_placeholder_source(tileset, Color(0.22, 0.27, 0.25), one_way)
+	_add_placeholder_source(tileset, LEDGE_COLOR, one_way, &"slab")
+	_add_placeholder_source(tileset, BRIDGE_COLOR, one_way, &"plank")
+	_add_placeholder_source(tileset, STAIR_COLOR, one_way, &"step")
+	_add_placeholder_source(tileset, WALL_COLOR, one_way, &"wall")
 	return tileset
 
 
@@ -72,10 +74,19 @@ func paint_block(bounds: Rect2, source_id: int) -> void:
 		paint_floor(bounds.position.x, bounds.end.x, row * TILE_SIZE, source_id)
 
 
-func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = false) -> void:
-	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
-	image.fill(color)
-	var texture := ImageTexture.create_from_image(image)
+## The atlas tile for a cell: carved wall and wedge mass is the same cave-rock cobble as the dig rock, cut
+## into an 8 x 8 atlas indexed by the cell, so it continues the stones around it; the rest are single tiles.
+const ROCK_ATLAS := 8
+
+
+static func _coords(source_id: int, x: int, y: int) -> Vector2i:
+	if source_id == SOURCE_ROCK:
+		return Vector2i(posmod(x, ROCK_ATLAS), posmod(y, ROCK_ATLAS))
+	return ATLAS_TOP_MID
+
+
+func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = false, kind: StringName = &"wall") -> void:
+	var texture: Texture2D = RockTextures.cobble() if kind == &"wall" else RockTextures.tile(kind, color)
 	var atlas := TileSetAtlasSource.new()
 	atlas.texture = texture
 	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
@@ -84,9 +95,6 @@ func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = fal
 	# TileSet that has physics layers; doing this in the other order silently leaves
 	# tile_data with zero physics layers ("Index p_layer_id = 0 is out of bounds").
 	tileset.add_source(atlas)
-	atlas.create_tile(ATLAS_TOP_MID)
-	var tile_data := atlas.get_tile_data(ATLAS_TOP_MID, 0)
-	tile_data.add_collision_polygon(0)
 	var half := TILE_SIZE * 0.5
 	var poly := PackedVector2Array([
 		Vector2(-half, -half),
@@ -94,10 +102,17 @@ func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = fal
 		Vector2(half, half),
 		Vector2(-half, half),
 	])
-	tile_data.set_collision_polygon_points(0, 0, poly)
-	if one_way:
-		tile_data.set_collision_polygon_one_way(0, 0, true)
-		tile_data.set_collision_polygon_one_way_margin(0, 0, 2.0)
+	var span := ROCK_ATLAS if kind == &"wall" else 1
+	for ty in span:
+		for tx in span:
+			var coords := Vector2i(tx, ty)
+			atlas.create_tile(coords)
+			var tile_data := atlas.get_tile_data(coords, 0)
+			tile_data.add_collision_polygon(0)
+			tile_data.set_collision_polygon_points(0, 0, poly)
+			if one_way:
+				tile_data.set_collision_polygon_one_way(0, 0, true)
+				tile_data.set_collision_polygon_one_way_margin(0, 0, 2.0)
 
 
 ## The child layer map decks live on (one-way). Null before _ready.
@@ -115,7 +130,7 @@ func paint_deck(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURCE
 		x0 = x1
 		x1 = tmp
 	for x in range(x0, x1):
-		_decks.set_cell(Vector2i(x, y), source_id, ATLAS_TOP_MID)
+		_decks.set_cell(Vector2i(x, y), source_id, _coords(source_id, x, y))
 
 
 ## True if any tile (either layer) sits within `reach` px below the standing deck row at the
@@ -157,7 +172,7 @@ func paint_floor(x0_px: float, x1_px: float, y_px: float, source_id: int = SOURC
 		x0 = x1
 		x1 = tmp
 	for x in range(x0, x1):
-		set_cell(Vector2i(x, y), source_id, ATLAS_TOP_MID)
+		set_cell(Vector2i(x, y), source_id, _coords(source_id, x, y))
 
 
 ## Paint a one-tile-per-column staircase between two deck tops (Rule 2 — no floating
@@ -196,8 +211,10 @@ func paint_stairs(x0_px: float, y0_px: float, x1_px: float, y1_px: float) -> voi
 		if in_mouth:
 			set_cell(Vector2i(x, y), SOURCE_STAIR, ATLAS_TOP_MID)
 		else:
-			for fy in range(y, y_bottom + 1):
-				set_cell(Vector2i(x, fy), SOURCE_STAIR, ATLAS_TOP_MID)
+			# the tread is a stone step; the mass under it is carved rock
+			set_cell(Vector2i(x, y), SOURCE_STAIR, ATLAS_TOP_MID)
+			for fy in range(y + 1, y_bottom + 1):
+				set_cell(Vector2i(x, fy), SOURCE_ROCK, _coords(SOURCE_ROCK, x, fy))
 
 
 func painted_cell_count() -> int:

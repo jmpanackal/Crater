@@ -12,7 +12,7 @@ pockets = [{
 "note": "Damp fungal cavity just below the walk ledge - mid band."
 }, {
 "amount": 2,
-"cell": Vector2i(670, 200),
+"cell": Vector2i(670, 188),
 "material_id": &"sutral",
 "note": "Second growth pocket, drier, smaller."
 }, {

@@ -272,6 +272,9 @@ Surface/Reef, settlement recruitment, ship, alien contact, villain confrontation
 | `feel_fx.gd` | Dig/land grit, soft shake, micro dig hitch, restrained +Salvage/Record floats (**→ Materials**) |
 | `feel_audio.gd` | Procedural dig/land click stubs with pitch randomize |
 | `camera_follow.gd` | Look-ahead, drag deadzone, shake on Camera2D |
+| `mine_controller.gd` | Terraria-style mouse mining (hover + hold LMB; reach, line of sight, crack stages); `Player/MineController` |
+| `hollow_dressing.gd` / `_view.gd` / `_builder.gd` | The opening-route slice as data: buildings, props, lamps, people, stations; drawn and built from the data (see `docs/hollow-slice-opening-route.md`) |
+| `hollow_ambient.gd`, `rest_point.gd`, `lore_fragment.gd` | Ambient people; the bed (sleep); a find that unlocks a Journal record |
 | `player.gd` | Move / dig / feel (coyote, squash, dust); owns the Interaction child |
 | `interaction.gd` | Area2D-based closest-interactable targeting (Build Bible Spec 10) |
 | `interactable_relay.gd` | Reusable child-Area2D relay for interactables whose root node can't become one (Build Bible Spec 10) |

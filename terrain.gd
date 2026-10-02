@@ -39,7 +39,8 @@ const MOUTH_Y_MIN := int(HollowMap.CAVITY_BOTTOM / 16.0)
 ## completing that depletes it for good. Depletion is drawn exactly as
 ## canon §6 locks it: base terrain + an intact overlay -> a depleted
 ## overlay, on a placeholder overlay layer here.
-const ENVELOPE_ID := &"east"
+## One envelope now (the whole shell); the deposit files are split by side: east_dig_site, west_dig_site.
+const ENVELOPE_IDS: Array[StringName] = [&"east", &"west"]
 const DEPOSITS_DIR := "res://content/deposits/"
 const DEPOSIT_INTACT_ATLAS := Vector2i(0, 0)
 const DEPOSIT_DEPLETED_ATLAS := Vector2i(1, 0)
@@ -58,6 +59,7 @@ var _deposit_overlay: TileMapLayer
 func _ready() -> void:
 	add_to_group("terrain")
 	texture_filter = TEXTURE_FILTER_NEAREST
+	material = RockTextures.rock_material()
 	tile_set = _build_tileset()
 	_build_deposit_overlay()
 	_fill_ground()
@@ -100,33 +102,36 @@ func _build_tileset() -> TileSet:
 	return _build_fallback_tileset()
 
 
+## The rock is one seamless lumpy cobble texture (RockTextures), cut into an 8 x 8 atlas; a cell at
+## (x, y) uses atlas tile (x mod 8, y mod 8), so neighbouring tiles continue the same stones.
+const ATLAS_TILES := 8
+
+
 func _build_fallback_tileset() -> TileSet:
 	_atlas_coords = [PLACEHOLDER_ATLAS]
-	var image := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
-	image.fill(DIG_ROCK_COLOR)
-	var texture := ImageTexture.create_from_image(image)
+	var texture := RockTextures.cobble(TILE_SIZE * ATLAS_TILES)
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
 	tileset.add_physics_layer()
 	var atlas := TileSetAtlasSource.new()
 	atlas.texture = texture
 	atlas.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	atlas.create_tile(PLACEHOLDER_ATLAS)
 	tileset.add_source(atlas)
 	var half := float(TILE_SIZE) / 2.0
-	var tile_data := atlas.get_tile_data(PLACEHOLDER_ATLAS, 0)
-	tile_data.add_collision_polygon(0)
-	tile_data.set_collision_polygon_points(
-		0,
-		0,
-		PackedVector2Array([
-			Vector2(-half, -half),
-			Vector2(half, -half),
-			Vector2(half, half),
-			Vector2(-half, half),
-		])
-	)
+	var square := PackedVector2Array([Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half)])
+	for ty in ATLAS_TILES:
+		for tx in ATLAS_TILES:
+			var coords := Vector2i(tx, ty)
+			atlas.create_tile(coords)
+			var tile_data := atlas.get_tile_data(coords, 0)
+			tile_data.add_collision_polygon(0)
+			tile_data.set_collision_polygon_points(0, 0, square)
 	return tileset
+
+
+## The atlas tile a cell uses so the cobble pattern is continuous across the world.
+static func rock_atlas_for(cell: Vector2i) -> Vector2i:
+	return Vector2i(posmod(cell.x, ATLAS_TILES), posmod(cell.y, ATLAS_TILES))
 
 
 ## Envelope columns (world x = cell * TILE_SIZE), all derived from HollowMap.
@@ -162,17 +167,17 @@ func _fill_ground() -> void:
 
 ## Fills [x0, x1) x [y0, y1) cells with rock.
 func _fill_rect(x0: int, x1: int, y0: int, y1: int) -> void:
-	var atlas: Vector2i = _atlas_coords[0]
 	for x in range(x0, x1):
+		var tx := posmod(x, ATLAS_TILES)
 		for y in range(y0, y1):
-			set_cell(Vector2i(x, y), 0, atlas)
+			set_cell(Vector2i(x, y), 0, Vector2i(tx, posmod(y, ATLAS_TILES)))
 
 
 ## Carve the walk air the map needs out of both flanks, leaving everything else solid
-## and diggable: each flank deck gets 96px of air above it, flank ladders get their shaft,
+## and diggable: each flank deck gets FLANK_CLEAR px of air above it, flank ladders get their shaft,
 ## flank stairs get air above every tread. HollowTerrain paints the floors and treads.
 func _carve_flank_air() -> void:
-	var walk_clear_px := 96.0
+	var walk_clear_px := HollowMap.FLANK_CLEAR
 	var rects: Array[Rect2] = HollowMap.flank_air_rects(walk_clear_px)
 	rects.append_array(HollowMap.flank_stair_air(walk_clear_px))
 	for r in rects:
@@ -624,7 +629,7 @@ func _seed_deposits() -> void:
 			var res: Resource = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REPLACE)
 			if res == null:
 				push_warning("Terrain: failed to load deposit pockets %s — skipped" % path)
-			elif StringName(str(res.get("envelope_id"))) == ENVELOPE_ID:
+			elif ENVELOPE_IDS.has(StringName(str(res.get("envelope_id")))):
 				var pockets: Array = res.get("pockets")
 				for pocket: Dictionary in pockets:
 					_place_authored_pocket(pocket, path)
@@ -686,7 +691,7 @@ func get_deposit_overlay() -> TileMapLayer:
 
 func _debug_list_deposits(_args: Array[String]) -> String:
 	if _deposits.is_empty():
-		return "No deposits authored for envelope '%s'." % ENVELOPE_ID
+		return "No deposits authored for the dig envelope."
 	var lines: PackedStringArray = []
 	var cells: Array = _deposits.keys()
 	cells.sort()

@@ -3,7 +3,8 @@ extends SceneTree
 ## and at spawn, and saves screenshots so the Hollow's scale and rock shell can be judged by eye.
 ## Not a headless test: needs a real window.
 ## Run: godot --path . --windowed --resolution 1920x1080 --script res://tools/check_overview_render.gd -- output=tmp
-## Add `at=x,y` to also shoot a normal-zoom frame with the player moved there (feet position).
+## Add `at=x,y` to also shoot a normal-zoom frame with the player moved there (feet position),
+## and `mine=x,y` to hover the mouse miner on that world point and hold it for a few frames first.
 
 var _output_dir := "res://tmp"
 
@@ -27,9 +28,13 @@ func _run() -> void:
 		quit(1)
 		return
 	var at := Vector2.INF
+	var mine := Vector2.INF
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("output="):
 			_output_dir = argument.trim_prefix("output=")
+		elif argument.begins_with("mine="):
+			var mparts := argument.trim_prefix("mine=").split(",")
+			mine = Vector2(float(mparts[0]), float(mparts[1]))
 		elif argument.begins_with("at="):
 			var parts := argument.trim_prefix("at=").split(",")
 			at = Vector2(float(parts[0]), float(parts[1]))
@@ -40,7 +45,19 @@ func _run() -> void:
 	if at != Vector2.INF:
 		player.global_position = at - Vector2(0.0, 32.0)
 		player.velocity = Vector2.ZERO
+		cam.reset_smoothing()
+		for tick in range(40):
+			await physics_frame # let the camera and the light grid catch up to the teleport
+	if mine != Vector2.INF:
+		var mc: Node2D = player.get_node("MineController")
+		mc.set("aim_override", mine)
+		for tick in range(20):
+			await physics_frame
+		Input.action_press("mine")
+		for tick in range(9):
+			await physics_frame
 	await _shoot("view-normal.png")
+	Input.action_release("mine")
 	cam.set_dev_zoom(3)
 	await _shoot("view-zoom-0.2.png")
 	cam.set_dev_zoom(4)

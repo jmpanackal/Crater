@@ -18,6 +18,8 @@ extends Object
 ##              with the start-closed gates shut every early zone is still reachable
 ##   space      the two walls carry comparable walkable length
 ##   shell      the Hollow is encased in rock: Firmament above, deep flanks, a floor slab, the pit open
+##   dress      dressing (props, buildings, people, lamps, stations) stands on a deck in its own zone,
+##              clear of stairs, shafts and gates, under the ceiling, and no slice zone is left thin
 ## Scene rules: structures instanced to match, walls and treads painted, headroom above every
 ## deck and tread, rock beyond flank ends.
 
@@ -48,6 +50,7 @@ static func run() -> Dictionary:
 	_check_reach(rep)
 	_space_report(rep)
 	_check_shell(rep)
+	_check_dressing(rep)
 	return rep
 
 
@@ -568,6 +571,149 @@ static func _space_report(rep: Dictionary) -> void:
 		_err(rep, "space: east and west walls differ too much in walkable length (west %d, east %d)" % [int(west), int(east)])
 
 
+## Spans a thing occupies along a deck, as [x0, x1].
+static func _span(x: float, w: float) -> Vector2:
+	return Vector2(x - w * 0.5, x + w * 0.5)
+
+
+## Why a span on a level cannot hold dressing: a stair wedge, the street over a flight, a ladder or
+## lift shaft, a closed gate bar. "" when it can.
+static func _dress_conflict(span: Vector2, k: int, allow_shaft: bool) -> String:
+	var y := HollowMap.lvl(float(k))
+	for s in HollowMap.stairs():
+		var lo := minf(float(s["foot_x"]), float(s["top_x"]))
+		var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
+		if absf(float(s["foot_y"]) - y) < EPS and span.x < hi and span.y > lo:
+			return "stair %s's wedge" % str(s["id"])
+		if absf(float(s["top_y"]) - y) < EPS:
+			var tx: float = s["top_x"]
+			var a := minf(tx, tx - float(s["dir"]) * 112.0)
+			var b := maxf(tx, tx - float(s["dir"]) * 112.0)
+			if span.x < b and span.y > a:
+				return "the street over stair %s" % str(s["id"])
+	if not allow_shaft:
+		for l in HollowMap.ladders():
+			if y >= float(l["top_y"]) - EPS and y <= float(l["bottom_y"]) + EPS:
+				var ox: float = l["open_x"]
+				if span.x < ox + HollowMap.SHAFT_OPENING + 16.0 and span.y > ox - 16.0:
+					return "ladder %s's shaft" % str(l["id"])
+		for lf in HollowMap.lifts():
+			if (lf["stops"] as Array).has(y):
+				var lx: float = lf["open_x"]
+				if span.x < lx + HollowMap.SHAFT_OPENING + 16.0 and span.y > lx - 16.0:
+					return "lift %s's shaft" % str(lf["id"])
+	for g in HollowMap.gates():
+		if not g["blocks"]:
+			continue
+		var gr := HollowMap.run_by_id(g["run"])
+		if not gr.is_empty() and absf(float(gr["y"]) - y) < EPS and span.x < float(g["x"]) + 32.0 and span.y > float(g["x"]) - 32.0:
+			return "gate %s" % str(g["id"])
+	return ""
+
+
+## Height of the air above a deck at x: a room in the civic cavity, a carved gallery in a flank.
+static func _ceiling_at(x: float) -> float:
+	return (HollowMap.FLANK_CLEAR if HollowMap.in_flank(x) else HollowMap.ROOM_HEIGHT) - 8.0
+
+
+static func _check_dressing(rep: Dictionary) -> void:
+	var zone_ids: Dictionary = {}
+	for z in HollowMap.zones():
+		zone_ids[z["id"]] = true
+	var label := func(kind: String, id: Variant, x: float, k: int) -> String:
+		return "%s %s (x=%d level %d)" % [kind, str(id), int(x), k]
+	for p in HollowDressing.props():
+		var k: int = p["k"]
+		var y := HollowMap.lvl(float(k))
+		var sp := _span(float(p["x"]), float(p["w"]))
+		var who: String = label.call("prop", p["id"], p["x"], k)
+		if not zone_ids.has(p["zone"]):
+			_err(rep, "dress: %s names unknown zone %s" % [who, str(p["zone"])])
+			continue
+		if not _covers(y, float(p["x"]) - 1.0, float(p["x"]) + 1.0):
+			_err(rep, "dress: %s does not stand on a deck" % who)
+		elif zone_of(Vector2(float(p["x"]), y - 32.0)) != p["zone"]:
+			_err(rep, "dress: %s is outside zone %s" % [who, str(p["zone"])])
+		var ceiling := _ceiling_at(float(p["x"]))
+		if float(p["y_off"]) + float(p["h"]) > ceiling:
+			_err(rep, "dress: %s reaches the ceiling (%d of %d)" % [who, int(float(p["y_off"]) + float(p["h"])), int(ceiling)])
+		var why := _dress_conflict(sp, k, false)
+		if why != "":
+			_err(rep, "dress: %s overlaps %s" % [who, why])
+	for l in HollowDressing.lamps():
+		var lk: int = l["k"]
+		var lwho: String = label.call("lamp", l["zone"], l["x"], lk)
+		if not _covers(HollowMap.lvl(float(lk)), float(l["x"]) - 1.0, float(l["x"]) + 1.0):
+			_err(rep, "dress: %s does not hang over a deck" % lwho)
+		elif zone_of(Vector2(float(l["x"]), HollowMap.lvl(float(lk)) - 32.0)) != l["zone"]:
+			_err(rep, "dress: %s is outside zone %s" % [lwho, str(l["zone"])])
+		if float(l["y_off"]) > _ceiling_at(float(l["x"])):
+			_err(rep, "dress: %s hangs above the ceiling" % lwho)
+	var seen_spans: Array[Dictionary] = []
+	for b in HollowDressing.buildings():
+		var bk: int = b["k"]
+		var by := HollowMap.lvl(float(bk))
+		var bwho: String = label.call("building", b["id"], b["x0"], bk)
+		if not _covers(by, float(b["x0"]) + 1.0, float(b["x1"]) - 1.0):
+			_err(rep, "dress: %s is not wholly over one deck" % bwho)
+		if zone_of(Vector2(float(b["x0"]) + 8.0, by - 32.0)) != b["zone"] or zone_of(Vector2(float(b["x1"]) - 8.0, by - 32.0)) != b["zone"]:
+			_err(rep, "dress: %s leaves zone %s" % [bwho, str(b["zone"])])
+		var civic: bool = not HollowMap.in_flank(float(b["x0"])) and not HollowMap.in_flank(float(b["x1"]))
+		var bceil := HollowMap.ROOM_HEIGHT if civic else minf(_ceiling_at(float(b["x0"])), _ceiling_at(float(b["x1"])))
+		if float(b["height"]) + float(b["y_off"]) > bceil + EPS:
+			_err(rep, "dress: %s is taller than the room" % bwho)
+		var bwhy := _dress_conflict(Vector2(float(b["x0"]), float(b["x1"])), bk, true)
+		if bwhy != "" and not str(bwhy).begins_with("gate") and not str(bwhy).begins_with("the street"):
+			_err(rep, "dress: %s overlaps %s" % [bwho, bwhy])
+		for o in seen_spans:
+			var nested: bool = o["kind"] == &"nook" or b["kind"] == &"nook" or bool(o.get("overlay", false)) or bool(b.get("overlay", false)) # a nook is cut into a wall; an overlay stands in front of one
+			if o["k"] == bk and not nested and float(o["x0"]) < float(b["x1"]) and float(b["x0"]) < float(o["x1"]):
+				_err(rep, "dress: %s overlaps building %s" % [bwho, str(o["id"])])
+		seen_spans.append(b)
+		for dx in b["doors"]:
+			if float(dx) < float(b["x0"]) or float(dx) > float(b["x1"]):
+				_err(rep, "dress: %s has a door at x=%d outside itself" % [bwho, int(dx)])
+	for a in HollowDressing.actors():
+		var ak: int = a["k"]
+		var ay := HollowMap.lvl(float(ak))
+		var awho: String = label.call("person", a["id"], a["x"], ak)
+		var rng: float = a["range"]
+		var asp := Vector2(float(a["x"]) - 16.0 - rng, float(a["x"]) + 16.0 + rng)
+		if not _covers(ay, asp.x, asp.y):
+			_err(rep, "dress: %s walks off the end of the deck" % awho)
+		elif zone_of(Vector2(float(a["x"]), ay - 32.0)) != a["zone"]:
+			_err(rep, "dress: %s is outside zone %s" % [awho, str(a["zone"])])
+		var awhy := _dress_conflict(asp, ak, false)
+		if awhy != "":
+			_err(rep, "dress: %s stands in %s" % [awho, awhy])
+		if not HollowDressing.ROLES.has(a["role"]):
+			_err(rep, "dress: %s has unknown role %s" % [awho, str(a["role"])])
+	var used: Array[Dictionary] = []
+	for st in HollowDressing.stations():
+		var sk: int = st["k"]
+		var swho: String = label.call("station", st["id"], st["x"], sk)
+		if not _covers(HollowMap.lvl(float(sk)), float(st["x"]) - 8.0, float(st["x"]) + 8.0):
+			_err(rep, "dress: %s is not on a deck" % swho)
+		elif zone_of(Vector2(float(st["x"]), HollowMap.lvl(float(sk)) - 32.0)) != st["zone"]:
+			_err(rep, "dress: %s is outside zone %s" % [swho, str(st["zone"])])
+		var swhy := _dress_conflict(_span(float(st["x"]), 24.0), sk, false)
+		if swhy != "":
+			_err(rep, "dress: %s sits in %s" % [swho, swhy])
+		for o2 in used:
+			if o2["k"] == sk and absf(float(o2["x"]) - float(st["x"])) < 40.0:
+				_err(rep, "dress: %s is within 40px of station %s (you could not pick one)" % [swho, str(o2["id"])])
+		used.append(st)
+	var thin: Array[String] = []
+	for zone in HollowDressing.SLICE_ZONES.keys():
+		var want: Dictionary = HollowDressing.SLICE_ZONES[zone]
+		var have := HollowDressing.counts(zone)
+		for key in ["props", "lamps", "actors"]:
+			if int(have[key]) < int(want[key]):
+				_err(rep, "dress: zone %s has %d %s, the slice needs %d" % [str(zone), int(have[key]), key, int(want[key])])
+				thin.append(str(zone))
+	rep["info"].append("dress: %d props, %d lamps, %d buildings, %d people, %d stations across %d slice zones" % [HollowDressing.props().size(), HollowDressing.lamps().size(), HollowDressing.buildings().size(), HollowDressing.actors().size(), HollowDressing.stations().size(), HollowDressing.SLICE_ZONES.size()])
+
+
 ## The shell: the Hollow is wrapped in diggable rock on every side but the pit.
 static func _check_shell(rep: Dictionary) -> void:
 	var env := HollowMap.env_rect()
@@ -627,6 +773,38 @@ static func _solid_at(layers: Array[TileMapLayer], x: float, y: float) -> bool:
 	return false
 
 
+## The dressing builder made everything the data declares, where the data says.
+static func _lint_dressing_scene(scene: Node, rep: Dictionary) -> void:
+	var dressing := scene.get_node_or_null("Hollow/Dressing")
+	if dressing == null:
+		_err(rep, "scene: Hollow/Dressing is missing (props, people and stations are built there)")
+		return
+	var back_views := 0
+	var rock_views := 0
+	for child in dressing.get_children():
+		if child.name.begins_with("View_back_"):
+			back_views += 1
+		elif child.name.begins_with("Rock_"):
+			rock_views += 1
+	if back_views == 0 or rock_views != back_views:
+		_err(rep, "scene: the dressing was not built in chunks (%d drawing, %d rock)" % [back_views, rock_views])
+	var npcs := scene.get_node_or_null("Hollow/NPCs")
+	for a in HollowDressing.actors():
+		var path := ("Talker_%s" % str(a["id"])) if bool(a["talk"]) else ("Person_%s" % str(a["id"]))
+		var holder: Node = npcs if bool(a["talk"]) else dressing
+		var node := holder.get_node_or_null(path) as Node2D if holder != null else null
+		if node == null:
+			_err(rep, "scene: person %s was not built" % str(a["id"]))
+		elif absf(node.position.x - float(a["x"])) > float(a["range"]) + 14.0 or absf(node.position.y - (HollowMap.lvl(float(a["k"])) - float(a["y_off"]))) > EPS:
+			_err(rep, "scene: person %s stands at %s, the data says (%d, %d)" % [str(a["id"]), str(node.position), int(a["x"]), int(HollowMap.lvl(float(a["k"])) - float(a["y_off"]))])
+	for s in HollowDressing.stations():
+		var st := dressing.get_node_or_null("Station_%s" % str(s["id"])) as Node2D
+		if st == null:
+			_err(rep, "scene: station %s was not built" % str(s["id"]))
+		elif not st.has_method("get_interact_prompt") and not st.has_method("on_interact"):
+			_err(rep, "scene: station %s is not an interactable" % str(s["id"]))
+
+
 ## The shell is really painted: Firmament overhead, floor slab under both walls, rock at both
 ## edges, the cavity open, the pit open all the way down.
 static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> void:
@@ -670,7 +848,7 @@ static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> v
 ## True where the map carves walk air out of a flank (galleries, shafts, stairs): not a hole.
 static func _is_carved_air(x: float, y: float) -> bool:
 	var p := Vector2(x, y)
-	for rc in HollowMap.flank_air_rects(96.0):
+	for rc in HollowMap.flank_air_rects(HollowMap.FLANK_CLEAR):
 		if rc.grow(8.0).has_point(p):
 			return true
 	return false
@@ -715,6 +893,7 @@ static func lint_scene(scene: Node) -> Dictionary:
 				var marker: Node2D = anchor.get_child(0) as Node2D if anchor.get_child_count() > 0 else null
 				if marker == null or marker.global_position.distance_to(z["anchor"]) > EPS:
 					_err(rep, "scene: zone %s idle marker is not at its anchor" % str(z["id"]))
+	_lint_dressing_scene(scene, rep)
 	var decks := _deck_layer(scene)
 	if layers.size() < 2 or decks == null:
 		_err(rep, "scene: terrain layers (Terrain, HollowTerrain, HollowTerrain/Decks) missing")

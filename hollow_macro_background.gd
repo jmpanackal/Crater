@@ -69,9 +69,9 @@ func _sync_overlay() -> void:
 
 func _draw() -> void:
 	if not _guides_only:
-		draw_rect(WORLD_BOUNDS, Color(0.10, 0.155, 0.15))
+		draw_rect(WORLD_BOUNDS, Color(0.035, 0.05, 0.085))
 		# Ink void — open shaft, not a solid filler block (docs: #091419).
-		draw_rect(MOUTH_BOUNDS, Color(0.035, 0.078, 0.098))
+		draw_rect(MOUTH_BOUNDS, Color(0.02, 0.03, 0.06))
 		return
 	if not show_planning_guides or (not Engine.is_editor_hint() and not show_guides_in_game):
 		return

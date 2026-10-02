@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/deposit_pocket_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+envelope_id = &"west"
+pockets = [{
+"amount": 3,
+"cell": Vector2i(-362, 348),
+"material_id": &"sutral",
+"note": "First Expansion Gallery: a damp fungal seam in the unfinished west face, a few tiles in from the floor."
+}, {
+"amount": 2,
+"cell": Vector2i(-365, 345),
+"material_id": &"ravelstone",
+"note": "First Expansion Gallery: dense impact strata just above the sutral seam."
+}, {
+"amount": 2,
+"cell": Vector2i(-300, 356),
+"material_id": &"sutral",
+"note": "First Expansion Gallery: a pocket under the work floor, reached by digging down from the gallery."
+}]
