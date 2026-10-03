@@ -14,6 +14,8 @@ const CallScript := preload("res://elevator_call.gd")
 @export var lift_id: StringName = &""
 @export var snap_epsilon := 2.5
 @export var thin_speed_mult := 0.35
+const CALL_RANGE := 240.0
+var auto_call := true ## the cab answers a player waiting on its landing
 
 var kind: StringName = &"freight"
 var width := 160.0
@@ -22,6 +24,7 @@ var access_gate_id: StringName = &""
 var move_speed := 140.0
 
 var _stops: Array[float] = []
+var _home_x := 0.0 ## the shaft: a cab only ever moves along y
 var _stop_index := 0
 var _target_y := 0.0
 var _moving := false
@@ -46,13 +49,15 @@ func _ready() -> void:
 	move_speed = 220.0 if kind == &"premium" else 140.0
 	collision_layer = 1
 	collision_mask = 0
-	sync_to_physics = true
+	sync_to_physics = false # moved from _physics_process, so no extra sync; the shaft x is re-asserted every tick
 	z_index = 3
 	_stops = HollowLayout.stop_ys_for_lift(lift_id)
 	# Park at the bottom stop: a rider arriving from below finds the cab waiting.
 	_stop_index = _stops.size() - 1
 	_target_y = _stops[_stop_index]
-	position = Vector2(HollowLayout.lift_x_for(lift_id), _target_y)
+	_home_x = HollowLayout.lift_x_for(lift_id)
+	position = Vector2(_home_x, _target_y)
+	reset_physics_interpolation()
 	_build_collision()
 	_build_visuals()
 	_build_rider_sensor()
@@ -176,6 +181,7 @@ func _build_visuals() -> void:
 	var floor_col := Color(0.82, 0.76, 0.62, 0.95) if premium else Color(0.3, 0.33, 0.35, 0.95)
 	var h := 76.0 if premium else 92.0
 	_rect(cab, "Floor", Vector2(0.0, 0.0), Vector2(width, 10.0), floor_col)
+	_rect(cab, "BackPanel", Vector2(6.0, -h), Vector2(width - 12.0, h), floor_col.darkened(0.35), -1)
 	_rect(cab, "RailL", Vector2(2.0, -h), Vector2(4.0, h), frame)
 	_rect(cab, "RailR", Vector2(width - 6.0, -h), Vector2(4.0, h), frame)
 	_rect(cab, "Canopy", Vector2(0.0, -h - 4.0), Vector2(width, 6.0), frame)
@@ -192,7 +198,10 @@ func _build_visuals() -> void:
 		_rect(cab, "Pipe", Vector2(width - 14.0, -h), Vector2(6.0, h), Color(0.38, 0.55, 0.58, 0.85), 1)
 	_gauge = _rect(cab, "PressureGauge", Vector2(10.0, -h + 8.0), Vector2(14.0, 8.0), Color(0.45, 0.78, 0.7, 0.9), 2)
 	_cable_top_offset = -h - 4.0
-	_cable = _rect(cab, "GuideCable", Vector2(width * 0.5 - 1.0, 0.0), Vector2(2.0, 0.0), Color(0.35, 0.32, 0.28, 0.5), -2)
+	# the ram: a chrome rod from the header down to the cab canopy, with a darker sleeve beside it
+	_cable = _rect(cab, "GuideCable", Vector2(width * 0.5 - 3.0, 0.0), Vector2(6.0, 0.0), Color(0.82, 0.84, 0.84, 0.9) if not premium else Color(0.9, 0.84, 0.66, 0.9), -1)
+	_rect(cab, "RamBoss", Vector2(width * 0.5 - 8.0, -h - 10.0), Vector2(16.0, 8.0), frame.darkened(0.3), 1)
+	_rect(cab, "CabSkirt", Vector2(0.0, 10.0), Vector2(width, 4.0), frame.darkened(0.35), 1)
 	_update_cable()
 
 
@@ -242,6 +251,9 @@ func _build_call_points() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if absf(position.x - _home_x) > 0.01:
+		push_warning("lift %s drifted to x=%d, putting it back on its shaft at x=%d" % [str(lift_id), int(position.x), int(_home_x)])
+		position.x = _home_x
 	_refresh_service_state()
 	_resync_riders()
 	var speed_mult := service_speed_mult()
@@ -261,6 +273,8 @@ func _physics_process(delta: float) -> void:
 			_stop_index += 1
 			_target_y = _stops[_stop_index]
 			_moving = true
+	if not _moving:
+		_auto_call()
 	if not _moving:
 		position.y = _stops[_stop_index]
 		_update_cable()
@@ -299,10 +313,28 @@ func _update_landings() -> void:
 func _update_cable() -> void:
 	if _cable == null or _stops.is_empty():
 		return
-	var top_local := _stops[0] - position.y
+	var top_local := _stops[0] - position.y - 120.0
 	_cable.position.y = top_local
 	_cable.size.y = maxf(0.0, _cable_top_offset - top_local)
 	_update_landings()
+
+
+## The cab comes to you: a player standing on a stop's deck near the shaft, with the cab elsewhere and nobody
+## riding, sends it there on its own (Interact at the landing and W/S there still work). Presswater out, or a
+## locked lift, means it stays put.
+func _auto_call() -> void:
+	if not auto_call or _riders > 0 or _parked or _moving:
+		return
+	for body in get_tree().get_nodes_in_group("player"):
+		var p := body as Node2D
+		if p == null:
+			continue
+		var i := stop_for_y(roundf((p.global_position.y + 32.0) / 16.0) * 16.0)
+		if i < 0 or i == _stop_index:
+			continue
+		if absf(p.global_position.x - (position.x + width * 0.5)) < width * 0.5 + CALL_RANGE:
+			call_to(i)
+			return
 
 
 func _resync_riders() -> void:

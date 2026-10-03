@@ -5,6 +5,7 @@ extends Node2D
 
 const ClimbScript := preload("res://hollow_climb.gd")
 const ElevatorScript := preload("res://hollow_elevator.gd")
+const ElevatorFrameScript := preload("res://hollow_elevator_frame.gd")
 const GateScript := preload("res://access_gate.gd")
 const ZoneAnchorScript := preload("res://zone_anchor.gd")
 
@@ -44,6 +45,11 @@ func _build_lifts() -> void:
 		lift.name = "Lift_%s" % str(lf["id"])
 		lift.set_script(ElevatorScript)
 		lift.set("lift_id", lf["id"])
+		var frame := Node2D.new()
+		frame.name = "LiftFrame_%s" % str(lf["id"])
+		frame.set_script(ElevatorFrameScript)
+		frame.set("lift_id", lf["id"])
+		add_child(frame)
 		add_child(lift)
 		_build_landings(lf, lift)
 

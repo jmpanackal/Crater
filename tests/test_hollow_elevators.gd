@@ -43,6 +43,7 @@ func _run() -> void:
 			continue
 		# a cab sits flush with its landing: the deck, the cab floor and the call point agree
 		var cab_x: float = float(lf["open_x"]) + float(lf["width"]) * 0.5
+		lift.auto_call = false
 		# with the cab at the bottom, the landing at the top stop still holds a walker up (the floor is open, the plate is not)
 		_reset(player)
 		player.global_position = Vector2(cab_x, float(stops[0]) - 64.0)
@@ -101,6 +102,20 @@ func _run() -> void:
 			await physics_frame
 			if lift.current_stop_index() == n - 1 and not lift.is_moving():
 				break
+		# a player waiting on a landing, the cab elsewhere: the cab comes by itself
+		lift.auto_call = true
+		_reset(player)
+		player.global_position = Vector2(cab_x - float(lf["width"]) * 0.5 - 60.0, float(stops[n - 2]) - 32.0)
+		var came := false
+		for _i in range(900):
+			await physics_frame
+			if lift.current_stop_index() == n - 2 and not lift.is_moving():
+				came = true
+				break
+		if not came:
+			_fail("lift %s did not come to a player waiting at its landing" % str(lf["id"]))
+			continue
+		lift.auto_call = false
 		rode += 1
 	if _failed:
 		quit(1)
