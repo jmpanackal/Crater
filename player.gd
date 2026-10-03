@@ -193,10 +193,8 @@ func enter_climb_zone(ladder: Node = null) -> void:
 	_suppress_air_auto_grab = false
 	if was_in_zone or _climbing:
 		return
-	# Already-held W/S (dig-aim) never sticky-mounts on zone enter.
+	# W or S, pressed or already held, mounts the ladder: no jump needed (USER 2026-10-02).
 	if _read_climb_axis() != 0.0:
-		_climb_axis_release_required = true
-		_suppress_air_auto_grab = true
 		return
 	# Airborne near the upper lip with no climb key: auto-grab so walking into an
 	# opening never free-falls past. Mid-shaft descent stays free until W/S.
@@ -243,11 +241,10 @@ func _physics_process(delta: float) -> void:
 			climb_y = 0.0
 	if in_zone and not _climbing:
 		if climb_y != 0.0:
-			# Floor mounts need a fresh W/S press so held dig-aim does not sticky-grab.
-			# Airborne key mounts remain allowed while falling through a shaft.
-			var floor_mount := is_on_floor() and _climb_axis_just_pressed()
-			var air_mount := not is_on_floor()
-			if (floor_mount or air_mount) and _pay_strenuous_if_loaded():
+			# W climbs up and S climbs down the moment you are in a ladder's zone, on the floor or in the air.
+			# (After stepping off a deck end, _climb_axis_release_required makes you release the key first so you
+			# are not pulled straight back on.)
+			if _pay_strenuous_if_loaded():
 				_climbing = true
 			else:
 				climb_y = 0.0

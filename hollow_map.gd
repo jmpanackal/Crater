@@ -1,7 +1,7 @@
 class_name HollowMap
 extends Object
 ## THE Hollow map, as data. Everything walkable, climbable, rideable or gated is declared
-## here once; terrain painting, scene structures (ladders, lifts, gates, zone anchors),
+## here once; terrain painting, scene structures (ladders, gates, zone anchors),
 ## carving, the minimap and HollowMapLint all derive from it. See docs/hollow-map-spec.md.
 ##
 ## Model: a cut-away of rock with carved rooms.
@@ -9,7 +9,6 @@ extends Object
 ##   stair    a 45-degree flight between two decks; a solid wedge below. The deck above is one-way,
 ##            so the flight rises through it; Down steps back through (HollowTerrain, player.gd)
 ##   ladder   a shaft climbed with W/S; decks are one-way, so there is no hatch
-##   lift     a Presswater cage; it rides up through one-way decks, so there is no gap
 ##   gate     a physical access barrier on a run
 ##   reserve  empty footprint kept for a district's growth (nothing may be built in it)
 ##   zone     a named place: rect + anchor standing on a deck
@@ -41,7 +40,7 @@ const FLOOR_THICK := 32.0
 const WALL_THICK := 32.0
 ## Stairs are 45 degrees, so a flight is as long as the level gap is tall.
 const RISE := LEVEL_GAP
-## Width of a ladder or lift shaft (the cage and the ladder frame are sized to the body).
+## Width of a ladder shaft (the ladder frame is sized to the body).
 const SHAFT_OPENING := 64.0
 ## Air carved above a deck in a dig gallery (the flanks). 160 = five body heights: roomy enough to
 ## brace, cart and dress, tight enough to read as dug rock rather than a hall.
@@ -215,8 +214,6 @@ static func _terraces() -> Array[Dictionary]:
 		# ---- Cistern: the core, the tanks and the seep threshold, broken up (footprint unchanged)
 		{"id": &"E9", "zone": &"cistern", "k": 13, "l": END_FOOT, "r": END_OPEN, "pieces": [
 			[6400.0, 7312.0, 0.0], [7408.0, 7792.0, -48.0], [7888.0, 8096.0, 0.0]]}, # a maintenance balcony over the basin chamber
-		{"id": &"PF13", "zone": &"cistern", "k": 13, "l": END_OPEN, "r": END_OPEN, "pieces": [
-			[8528.0, 8752.0, 0.0]]}, # the freight lift's bottom landing: a pier in the basin chamber
 		{"id": &"E10", "zone": &"cistern_tanks", "k": 14, "l": END_FOOT, "r": END_WALL, "pieces": [
 			[7360.0, 7616.0, 0.0], [7680.0, 7904.0, 32.0], [7968.0, EAST_WALL, 0.0]]},
 		{"id": &"E11", "zone": &"seep_threshold", "k": 15, "l": END_WALL, "r": END_WALL, "pieces": [
@@ -367,7 +364,7 @@ static func nothing_above(k: float, x0: float, x1: float) -> bool:
 ## ---------------------------------------------------------------- derived: the rock between rooms
 
 ## Air in the civic cavity, as Rect2 (x, y, w, h) in px: every room (ceiling to the deck row), every flight
-## (112 px above each tread; a terrace step opens the whole room height), every ladder and lift shaft, and
+## (112 px above each tread; a terrace step opens the whole room height), every ladder shaft, and
 ## every dome. Everything else in the civic cavity, outside the Mouth, is solid rock (civic_rock_rows).
 static func air_rects() -> Array[Rect2]:
 	if _cache.has("air_rects"):
@@ -400,9 +397,6 @@ static func air_rects() -> Array[Rect2]:
 		if in_flank(float(l["open_x"])):
 			continue
 		out.append(Rect2(float(l["open_x"]) - 8.0, float(l["top_y"]), SHAFT_OPENING + 16.0, float(l["bottom_y"]) - float(l["top_y"])))
-	for lf in lifts():
-		var stops: Array = lf["stops"]
-		out.append(Rect2(float(lf["open_x"]) - 16.0, float(stops[0]), SHAFT_OPENING + 32.0, float(stops[stops.size() - 1]) - float(stops[0])))
 	out.append_array(dome_rects())
 	out.append_array(hall_rects())
 	_cache["air_rects"] = out
@@ -679,7 +673,7 @@ static func ladders() -> Array[Dictionary]:
 		_ladder(&"LAD_BW", &"bottom_west", -5120.0, 14, 15),
 		_ladder(&"LAD_EA", &"ashram_east", 7360.0, 4, 5),
 		_ladder(&"LAD_EG", &"glowbeds", 7040.0, 6, 7),
-		_ladder(&"LAD_EG4", &"glowbeds_hang", 7520.0, 7, 8), ## a lift-free way up from the Mid-East Landing
+		_ladder(&"LAD_EG4", &"glowbeds_hang", 7520.0, 7, 8), ## a way up from the Mid-East Landing
 		_ladder(&"LAD_EP11", &"east_rows_1", 5072.0, 10, 11),
 		_ladder(&"LAD_EP12", &"east_rows_2", 5200.0, 11, 12),
 		_ladder(&"LAD_EP15", &"east_rows_4", 5600.0, 14, 15),
@@ -689,6 +683,10 @@ static func ladders() -> Array[Dictionary]:
 		_ladder(&"LAD_LP16", &"lower_rows_4", 208.0, 15, 16),
 		_ladder(&"LAD_BW2", &"bottom_west_deeper", -3920.0, 15, 16),
 		_ladder(&"LAD_BW3", &"bottom_west_lowest", -4800.0, 16, 17),
+		# connections the three lifts used to make (lifts were removed 2026-10-02)
+		_ladder(&"LAD_A5", &"wickwork", -2560.0, 5, 6), # the Ashram promenade down to the High-West gallery
+		_ladder(&"LAD_HW2", &"high_west_front", -2688.0, 6, 7), # High-West upper gallery to the lower
+		_ladder(&"LAD_E1", &"glowbeds", 6416.0, 5, 6), # the east Ashram promenade down to Glowbeds
 		_ladder(&"LAD_MB10", &"mid_allotments", 1200.0, 9, 10),
 		_ladder(&"LAD_ME10", &"lower_east_homes", 4976.0, 9, 10),
 		_ladder(&"LAD_ME13", &"cistern_intake", 5520.0, 12, 13),
@@ -701,36 +699,10 @@ static func ladders() -> Array[Dictionary]:
 	return out
 
 
-## ---------------------------------------------------------------- lifts
-
-static func _lift(id: StringName, zone: StringName, open_x: float, stops_k: Array, gate: StringName) -> Dictionary:
-	var ys: Array[float] = []
-	for k in stops_k:
-		ys.append(lvl(float(k)))
-	ys.sort()
-	return {"id": id, "zone": zone, "open_x": open_x, "stops": ys, "gate": gate}
-
-
-static func lifts() -> Array[Dictionary]:
-	if _cache.has("lifts"):
-		return _cache["lifts"]
-	var out: Array[Dictionary] = [
-		# West civic cage: always runs. Wickwork up to High-West and the Ashram gateway.
-		_lift(&"heart", &"wickwork", -2560.0, [5, 6, 7, 8], FLAG_NONE),
-		# East passenger cage: recessed Mid-East landing up through Glowbeds to Ashram. Always runs:
-		# Glowbeds is a main district and is open from the start (the Ashram gate is further on).
-		_lift(&"east_passenger", &"mid_east", 6400.0, [5, 6, 7, 8], FLAG_NONE),
-		# East freight cage: Mid-East down to the Cistern. Heavy, slow, follows Cistern condition.
-		_lift(&"freight", &"cistern_freight", 8640.0, [8, 11, 12, 13], FLAG_NONE),
-	]
-	_cache["lifts"] = out
-	return out
-
-
 ## ---------------------------------------------------------------- gates
 
 static func _gate(id: StringName, run: StringName, x: float, label: String, explanation: String, blocks: bool = true, trust: StringName = &"", flag: StringName = &"", residence: StringName = &"", beyond: int = 1) -> Dictionary:
-	## blocks=false: a logic gate (a lift's Warden lock) with no bar across the deck.
+	## blocks=false: a logic gate  with no bar across the deck.
 	return {
 		"id": id, "run": run, "x": x, "label": label, "explanation": explanation, "blocks": blocks,
 		"trust": trust, "flag": flag, "residence": residence, "beyond": beyond,
@@ -760,7 +732,7 @@ static func gates() -> Array[Dictionary]:
 	return out
 
 
-## Gates that are shut at the start of Act 1 and block walking (lifts are handled by `gate`).
+## Gates that are shut at the start of Act 1 and block walking.
 static func closed_at_start() -> Array[StringName]:
 	return [&"gate_ashram_west", &"gate_high_west", &"gate_high_west_low", &"gate_bw_deep", &"gate_ashram_east", &"gate_mid_east_dig", &"gate_cistern_deep"]
 
@@ -923,7 +895,7 @@ static func run_by_id(id: StringName) -> Dictionary:
 	return {}
 
 
-## Deck pieces: the runs themselves. Decks are one-way (HollowTerrain), so ladders, lifts and
+## Deck pieces: the runs themselves. Decks are one-way (HollowTerrain), so ladders and
 ## stairs pass through them with no hole cut — a street is never split. Kept as pieces so a
 ## future cut (a collapsed floor, a trapdoor) has one place to go.
 static func deck_pieces() -> Array[Dictionary]:
@@ -936,10 +908,66 @@ static func deck_pieces() -> Array[Dictionary]:
 	return out
 
 
+## Stair openings (2026-10-02, USER): where a flight rises through a street, the street's deck is simply
+## absent over the last stretch before the stair top, so you climb out of an open stairwell and drop into
+## it from either side; there is no one-way covering and no key to press. The opening is as long as the
+## flight needs for a body to stand on the tread under the deck: 64 px of depth per unit of pitch, plus a
+## margin of two tiles. Terrace steps (rise under 96 px) have no street over them and no opening.
+static func stair_hole_length(s: Dictionary) -> float:
+	var rise := float(s["foot_y"]) - float(s["top_y"])
+	if rise < 96.0:
+		return 0.0
+	var pitch := absf(float(s["top_x"]) - float(s["foot_x"])) / rise
+	return ceilf((64.0 * pitch + 32.0) / 16.0) * 16.0
+
+
+## The openings as {"id", "x0", "x1", "y"}: columns the street deck at y skips. A flight rising east leaves its
+## top tread at top_x and the opening runs west of it; rising west, the opening runs east of the top tread.
+static func stair_holes() -> Array[Dictionary]:
+	if _cache.has("stair_holes"):
+		return _cache["stair_holes"]
+	var out: Array[Dictionary] = []
+	for s in stairs():
+		var l := stair_hole_length(s)
+		if l <= 0.0:
+			continue
+		var tx: float = s["top_x"]
+		if int(s["dir"]) > 0:
+			out.append({"id": s["id"], "x0": tx - l, "x1": tx, "y": s["top_y"]})
+		else:
+			out.append({"id": s["id"], "x0": tx + 16.0, "x1": tx + 16.0 + l, "y": s["top_y"]})
+	_cache["stair_holes"] = out
+	return out
+
+
+static func in_hole(x: float, y: float) -> bool:
+	for h in stair_holes():
+		if absf(float(h["y"]) - y) < 0.5 and x >= float(h["x0"]) and x < float(h["x1"]):
+			return true
+	return false
+
+
+## Deck rects Vector4(x0, x1, y, thickness) as painted: every run piece minus the stair openings in it.
 static func deck_rects() -> Array[Vector4]:
 	var out: Array[Vector4] = []
 	for p in deck_pieces():
-		out.append(Vector4(p["x0"], p["x1"], p["y"], FLOOR_THICK))
+		var segs: Array[Vector2] = [Vector2(float(p["x0"]), float(p["x1"]))]
+		for h in stair_holes():
+			if absf(float(h["y"]) - float(p["y"])) > 0.5:
+				continue
+			var next: Array[Vector2] = []
+			for sg in segs:
+				if float(h["x1"]) <= sg.x or float(h["x0"]) >= sg.y:
+					next.append(sg)
+					continue
+				if float(h["x0"]) > sg.x:
+					next.append(Vector2(sg.x, float(h["x0"])))
+				if float(h["x1"]) < sg.y:
+					next.append(Vector2(float(h["x1"]), sg.y))
+			segs = next
+		for sg in segs:
+			if sg.y - sg.x >= 16.0:
+				out.append(Vector4(sg.x, sg.y, p["y"], FLOOR_THICK))
 	return out
 
 

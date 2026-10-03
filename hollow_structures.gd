@@ -1,27 +1,20 @@
 extends Node2D
-## Builds every ladder, lift, gate and zone anchor that HollowMap declares, so main.tscn
+## Builds every ladder, gate and zone anchor that HollowMap declares, so main.tscn
 ## carries none of them by hand and they cannot drift from the map (HollowMapLint.lint_scene
 ## checks the result). Place one of these as Hollow/Structures.
 
 const ClimbScript := preload("res://hollow_climb.gd")
-const LiftScript := preload("res://hollow_lift.gd")
 const GateScript := preload("res://access_gate.gd")
 const ZoneAnchorScript := preload("res://zone_anchor.gd")
 
-const SoftWorldLabel := preload("res://soft_world_label.gd")
 
 const GATE_BAR := Vector2(32.0, 128.0)
-## Decks are one-way: going up a stair needs nothing, going down means pressing Down on the
-## street above the flight. This is the cue.
-const STAIR_DOWN_HINT := "[S] stairs down"
 
 
 func _ready() -> void:
 	_build_ladders()
-	_build_lifts()
 	_build_gates()
 	_build_zone_anchors()
-	_build_stair_hints()
 
 
 func _build_ladders() -> void:
@@ -41,20 +34,6 @@ func _build_ladders() -> void:
 		ladder.set("deck_open_width", 0.0)
 		ladder.set("upper_land_side", 0)
 		add_child(ladder)
-
-
-func _build_lifts() -> void:
-	for lf in HollowMap.lifts():
-		var lift := AnimatableBody2D.new()
-		lift.name = "Lift_%s" % str(lf["id"])
-		lift.set_script(LiftScript)
-		lift.set("lift_id", lf["id"])
-		lift.set("access_gate_id", lf["gate"])
-		# Presswater cages beat a ladder (140 px/s): the essential civic cage fastest.
-		lift.set("move_speed", 220.0 if HollowLayout.is_essential_lift(lf["id"]) else 160.0)
-		# Park at the bottom stop: a rider arriving from below finds the cage waiting.
-		lift.set("default_stop_index", (lf["stops"] as Array).size() - 1)
-		add_child(lift)
 
 
 func _build_gates() -> void:
@@ -94,22 +73,3 @@ func _build_zone_anchors() -> void:
 		marker.name = "Idle1"
 		marker.position = z["anchor"]
 		anchor.add_child(marker)
-
-
-func _build_stair_hints() -> void:
-	for st in HollowMap.stairs():
-		# A flight that tops out on a landing is walked down, not dropped onto from a street.
-		if HollowMap.is_step(st) or HollowMap.is_landing_at(float(st["top_x"]), float(st["top_y"])):
-			continue
-		var hint := Label.new()
-		hint.name = "StairHint_%s" % str(st["id"])
-		hint.text = STAIR_DOWN_HINT
-		hint.position = Vector2(float(st["top_x"]) - float(st["dir"]) * 56.0 - 44.0, float(st["top_y"]) - 70.0)
-		hint.add_theme_font_size_override("font_size", 11)
-		hint.set_script(SoftWorldLabel)
-		hint.set("show_radius", 260.0)
-		hint.set("far_alpha", 0.0)
-		hint.set("near_alpha", 0.75)
-		hint.modulate = Color(0.85, 0.78, 0.6, 0.75)
-		hint.z_index = 4
-		add_child(hint)

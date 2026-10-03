@@ -51,7 +51,11 @@ func _run() -> void:
 	for s in HollowMap.stairs():
 		_reset(player)
 		var dir := float(s["dir"])
-		player.global_position = Vector2(float(s["foot_x"]) - dir * 80.0, float(s["foot_y"]) - 32.0)
+		# start a little behind the foot, on the lower street (not inside a stair opening)
+		var back := 80.0
+		while back > 16.0 and HollowMap.in_hole(float(s["foot_x"]) - dir * back, float(s["foot_y"])):
+			back -= 16.0
+		player.global_position = Vector2(float(s["foot_x"]) - dir * back, float(s["foot_y"]) - 32.0)
 		for _i in range(20):
 			await physics_frame
 		var action := "ui_right" if dir > 0.0 else "ui_left"
@@ -141,32 +145,6 @@ func _run() -> void:
 			_fail("ladder %s cannot be mounted from the deck on top and climbed down (ended at %s)" % [str(l["id"]), str(player.global_position)])
 	print("PASS %d/%d ladders climb up, and mount from the top deck to climb down" % [ladders_ok, HollowMap.ladders().size()])
 
-	# --- lifts: park at the bottom stop, ride to the top ---
-	for lf in HollowMap.lifts():
-		_reset(player)
-		var lift: Node = structures.get_node("Lift_%s" % str(lf["id"]))
-		var stops: Array = lf["stops"]
-		if lf["gate"] != &"":
-			if not lift.is_locked():
-				_fail("lift %s is Warden-run and must start locked" % str(lf["id"]))
-			continue
-		lift.position.y = stops[stops.size() - 1]
-		lift._stop_index = stops.size() - 1
-		lift._target_y = lift.position.y
-		player.global_position = Vector2(HollowLayout.lift_x_for(lf["id"]) + 8.0, float(stops[stops.size() - 1]) - 32.0)
-		for _i in range(30):
-			await physics_frame
-		Input.action_press("ui_up")
-		var top := false
-		for _i in range(4000):
-			await physics_frame
-			if absf(player.global_position.y - (float(stops[0]) - 32.0)) < 6.0 and not lift.is_moving():
-				top = true
-				break
-		Input.action_release("ui_up")
-		if not top:
-			_fail("lift %s did not carry the player to its top stop (ended at %s)" % [str(lf["id"]), str(player.global_position)])
-	print("PASS open lifts ride from the bottom stop to the top stop; the Warden lift starts locked")
 
 	# --- gates: shut at the start, open on their story flag ---
 	var story: Node = root.get_node_or_null("Story")

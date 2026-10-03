@@ -63,13 +63,13 @@ func _run() -> void:
 	player.enter_climb_zone(ladder)
 	for _i in range(8):
 		await physics_frame
-	if player.is_climbing():
-		push_error("FAIL held dig-aim W sticky-mounted on floor re-enter")
+	if not player.is_climbing():
+		push_error("FAIL a held W in the ladder zone should climb without a fresh press or a jump")
 		Input.action_release("ui_up")
 		quit(1)
 		return
 	Input.action_release("ui_up")
-	print("PASS floor mount needs fresh W/S (no sticky held-W grab)")
+	print("PASS W (or S) in a ladder's zone climbs on the floor, pressed or held, with no jump")
 
 	# Auto-grab only near the shaft top (the street's lip).
 	player.exit_climb_zone(ladder)

@@ -37,27 +37,12 @@ func _run() -> void:
 			quit(1)
 			return
 	var guides := Macro.transport_guides()
-	var lift_guides := 0
 	var ladder_guides := 0
 	for guide in guides:
 		if guide.get("ladder", false):
 			ladder_guides += 1
-		else:
-			lift_guides += 1
-	if lift_guides != HollowMap.lifts().size() or ladder_guides != HollowMap.ladders().size():
-		push_error("FAIL transport guides drifted from HollowMap (lifts %s/%s, ladders %s/%s)" % [lift_guides, HollowMap.lifts().size(), ladder_guides, HollowMap.ladders().size()])
-		quit(1)
-		return
-	var has_west_lift := false
-	var has_east_freight := false
-	for guide in guides:
-		var stops: Array = guide.stops
-		if stops.has(HollowLayout.WEST_ASHRAM_LOWER_Y) and stops.has(HollowLayout.WICK_Y) and not guide.get("ladder", false):
-			has_west_lift = true
-		if stops.has(HollowLayout.WICK_Y) and stops.has(HollowLayout.CISTERN_Y) and not guide.get("ladder", false):
-			has_east_freight = true
-	if not has_west_lift or not has_east_freight:
-		push_error("FAIL canonical lift spans drifted (west civic=%s east freight=%s)" % [has_west_lift, has_east_freight])
+	if ladder_guides != HollowMap.ladders().size() or guides.size() != ladder_guides:
+		push_error("FAIL transport guides drifted from HollowMap (ladders %s/%s)" % [ladder_guides, HollowMap.ladders().size()])
 		quit(1)
 		return
 	var overlay := background.get_node_or_null("PlanningGuides")

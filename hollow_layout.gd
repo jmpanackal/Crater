@@ -2,7 +2,7 @@ class_name HollowLayout
 extends Object
 ## Shared Hollow world metrics — constants and thin query helpers.
 ##
-## The map itself (every deck, stair, ladder, lift, gate, reserve and zone) is declared in
+## The map itself (every deck, stair, ladder, gate, reserve and zone) is declared in
 ## hollow_map.gd and judged by hollow_map_lint.gd; see docs/hollow-map-spec.md. This file
 ## keeps the named constants other systems read (level Ys, Mouth lips, spawn, key deck
 ## spans) and answers "where" questions by delegating to HollowMap. Level Ys are all on the
@@ -10,7 +10,7 @@ extends Object
 ##
 ## History: TILE relaxed 64 -> 16 (2026-09-18); world x5 scale pass (2026-09-19); west stack
 ## locked to 12 equal levels (2026-09-19); east stack re-gridded and the whole map rebuilt as
-## a data-driven cut-away with stairs, ladders, lifts and gates (2026-10-01). Same day: level
+## a data-driven cut-away with stairs, ladders and gates (2026-10-01). Same day: level
 ## gap 640 -> 384 and ROOM_HEIGHT 480 -> 256 (rooms were 15 bodies tall), the Firmament moved to
 ## the top of the whole map and the Hollow wrapped in a diggable shell with deep side flanks.
 
@@ -29,8 +29,6 @@ const BRIDGE_THICKNESS := 20.0
 const FLOOR_VISUAL_INSET := 32.0
 
 ## Cages and ladders are sized to the 32px body, not to the city.
-const LIFT_OPENING := 64.0
-const LIFT_WIDTH := 48.0
 const LADDER_OPENING := 64.0
 const LADDER_WIDTH := 40.0
 
@@ -118,11 +116,6 @@ const MID_EAST_LANDING := Vector4(PIT_RIGHT, 7040.0, HEART_Y, FLOOR_THICKNESS)
 const MID_EAST_APPROACH := Vector4(7040.0, EAST_CIVIC_RIGHT, HEART_Y, FLOOR_THICKNESS)
 const MID_EAST_DIG_FRONT := Vector4(EAST_CIVIC_RIGHT, EAST_FLANK_RIGHT, HEART_Y, FLOOR_THICKNESS)
 
-## --- Lifts (ids shared with HollowMap.lifts) --------------------------------------------------
-const HEART_HOIST_ID := &"heart" ## west civic cage — always runs
-const EAST_PASSENGER_ID := &"east_passenger" ## Warden-run
-const FREIGHT_LIFT_ID := &"freight" ## Cistern freight cage
-const LIFT_ESSENTIAL_ID := HEART_HOIST_ID
 
 
 ## ---------------------------------------------------------------- map queries (via HollowMap)
@@ -219,24 +212,6 @@ static func ladder_defs() -> Array[Dictionary]:
 
 static func ladder_open_end(open_x: float) -> float:
 	return open_x + LADDER_OPENING
-
-
-static func stop_ys_for_lift(lift_id: StringName) -> Array[float]:
-	for lf in HollowMap.lifts():
-		if lf["id"] == lift_id:
-			return lf["stops"]
-	return []
-
-
-static func lift_x_for(lift_id: StringName) -> float:
-	for lf in HollowMap.lifts():
-		if lf["id"] == lift_id:
-			return float(lf["open_x"]) + (LIFT_OPENING - LIFT_WIDTH) * 0.5
-	return 0.0
-
-
-static func is_essential_lift(lift_id: StringName) -> bool:
-	return lift_id == LIFT_ESSENTIAL_ID or lift_id == &"" or lift_id == &"civic"
 
 
 ## Deliberate deviations from the lint rules, each with a reason a player could read off the

@@ -9,8 +9,7 @@ extends Object
 ##              and the stair it names really is there
 ##   stair      foot on a run end, top on a deck, wedge clear of every other deck
 ##   ladder     a deck covers the shaft at its top and at its bottom
-##   lift       every stop has a deck; the lift passes no deck it does not serve
-##   gate       gates sit on a run, away from ladders and lifts
+##   gate       gates sit on a run, away from ladders
 ##   mouth      only Mid Heart touches the Mouth
 ##   reserve    growth footprints are empty, rock-backed and touch their own district
 ##   zone       zones never overlap, anchors stand on decks, every deck belongs to a zone
@@ -50,7 +49,6 @@ static func run() -> Dictionary:
 	_check_ends(rep)
 	_check_stairs(rep)
 	_check_ladders(rep)
-	_check_lifts(rep)
 	_check_gates(rep)
 	_check_mouth(rep)
 	_check_reserves(rep)
@@ -186,9 +184,6 @@ static func _check_doors(rep: Dictionary) -> void:
 		for l in HollowMap.ladders():
 			if (absf(float(l["top_y"]) - y) < EPS or absf(float(l["bottom_y"]) - y) < EPS) and absf(float(l["open_x"]) + 32.0 - x) < 96.0:
 				_err(rep, "door: %s at x=%d stands in ladder %s's shaft" % [id, int(x), str(l["id"])])
-		for lf in HollowMap.lifts():
-			if (lf["stops"] as Array).has(y) and absf(float(lf["open_x"]) + 32.0 - x) < 96.0:
-				_err(rep, "door: %s at x=%d stands in lift %s's shaft" % [id, int(x), str(lf["id"])])
 		for g in HollowMap.gates():
 			if g["run"] == d["run"] and absf(float(g["x"]) - x) < 96.0:
 				_err(rep, "door: %s at x=%d is on top of gate %s" % [id, int(x), str(g["id"])])
@@ -260,10 +255,6 @@ static func _check_roofs(rep: Dictionary) -> void:
 		for l in HollowMap.ladders():
 			if float(l["top_y"]) < deck - EPS and float(l["bottom_y"]) > room_top + EPS and float(l["open_x"]) - 16.0 < x1 and float(l["open_x"]) + HollowMap.SHAFT_OPENING + 16.0 > x0:
 				_err(rep, "roof: %s hangs in ladder %s's shaft" % [id, str(l["id"])])
-		for lf in HollowMap.lifts():
-			var stops: Array = lf["stops"]
-			if float(stops[0]) < deck - EPS and float(stops[stops.size() - 1]) > room_top + EPS and float(lf["open_x"]) - 16.0 < x1 and float(lf["open_x"]) + HollowMap.SHAFT_OPENING + 16.0 > x0:
-				_err(rep, "roof: %s hangs in lift %s's shaft" % [id, str(lf["id"])])
 		for s in HollowMap.stairs():
 			var lo := minf(float(s["foot_x"]), float(s["top_x"]))
 			var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
@@ -403,30 +394,6 @@ static func _check_ladders(rep: Dictionary) -> void:
 				_err(rep, "ladder: %s clips the end of %s" % [id, run_label(r)])
 
 
-static func _check_lifts(rep: Dictionary) -> void:
-	for lf in HollowMap.lifts():
-		var id := str(lf["id"])
-		var x0: float = lf["open_x"]
-		var x1 := x0 + HollowMap.SHAFT_OPENING
-		var stops: Array = lf["stops"]
-		for y in stops:
-			if not _covers(y, x0, x1):
-				_err(rep, "lift: %s has no deck at its stop y=%d" % [id, int(y)])
-		var lo: float = stops[0]
-		var hi: float = stops[stops.size() - 1]
-		for r in HollowMap.runs():
-			var y: float = r["y"]
-			if y > lo + EPS and y < hi - EPS and not stops.has(y) and float(r["x0"]) < x1 and float(r["x1"]) > x0:
-				_err(rep, "lift: %s passes through %s without a stop there" % [id, run_label(r)])
-		if lf["gate"] != &"":
-			var found := false
-			for g in HollowMap.gates():
-				if g["id"] == lf["gate"]:
-					found = true
-			if not found:
-				_err(rep, "lift: %s names gate %s, which does not exist" % [id, str(lf["gate"])])
-
-
 static func _check_gates(rep: Dictionary) -> void:
 	for g in HollowMap.gates():
 		var r := HollowMap.run_by_id(g["run"])
@@ -440,9 +407,6 @@ static func _check_gates(rep: Dictionary) -> void:
 			for l in HollowMap.ladders():
 				if absf(float(l["open_x"]) + 32.0 - x) < 64.0 and float(r["y"]) >= float(l["top_y"]) - EPS and float(r["y"]) <= float(l["bottom_y"]) + EPS:
 					_err(rep, "gate: %s at x=%d stands on ladder %s" % [str(g["id"]), int(x), str(l["id"])])
-			for lf in HollowMap.lifts():
-				if absf(float(lf["open_x"]) + 32.0 - x) < 64.0 and (lf["stops"] as Array).has(r["y"]):
-					_err(rep, "gate: %s at x=%d stands on lift %s" % [str(g["id"]), int(x), str(lf["id"])])
 	for id in HollowMap.closed_at_start():
 		var known := false
 		for g in HollowMap.gates():
@@ -568,7 +532,7 @@ static func _check_zones(rep: Dictionary) -> void:
 				break
 
 
-## Walk graph over deck pieces. Ladders, lifts and stairs link pieces both ways; closed gates
+## Walk graph over deck pieces. Ladders and stairs link pieces both ways; closed gates
 ## split the piece they stand on. Falling is never an edge (a fall is a rescue, not a route).
 static func build_graph(open_gates: bool) -> Dictionary:
 	var nodes: Array[Dictionary] = []
@@ -617,15 +581,11 @@ static func build_graph(open_gates: bool) -> Dictionary:
 			if na["run"] != nb["run"] and absf(float(na["y"]) - float(nb["y"])) < EPS:
 				if absf(float(na["x1"]) - float(nb["x0"])) < EPS or absf(float(nb["x1"]) - float(na["x0"])) < EPS:
 					link.call(i, j)
-	# Ladders and lifts: decks are one-way, so the shaft passes through them. Every deck that
+	# Ladders: decks are one-way, so the shaft passes through them. Every deck that
 	# covers the shaft at a served level is linked to the others.
 	var shafts: Array[Dictionary] = []
 	for l in HollowMap.ladders():
 		shafts.append({"x": l["open_x"], "ys": [l["top_y"], l["bottom_y"]]})
-	for lf in HollowMap.lifts():
-		if lf["gate"] != &"" and not open_gates and closed.has(lf["gate"]):
-			continue
-		shafts.append({"x": lf["open_x"], "ys": lf["stops"]})
 	for sh in shafts:
 		var ox: float = sh["x"]
 		var members: Array[int] = []
@@ -642,8 +602,9 @@ static func build_graph(open_gates: bool) -> Dictionary:
 		var foot_node: int = find.call(s2["foot_y"], s2["foot_x"], -1 if int(s2["dir"]) > 0 else 1)
 		var tx: float = s2["top_x"]
 		link.call(foot_node, find.call(s2["top_y"], tx, 0))
-		var reach_lo := minf(tx, tx - float(s2["dir"]) * 112.0)
-		var reach_hi := maxf(tx, tx - float(s2["dir"]) * 112.0)
+		var hole_reach := maxf(HollowMap.stair_hole_length(s2), 112.0)
+		var reach_lo := minf(tx, tx - float(s2["dir"]) * hole_reach)
+		var reach_hi := maxf(tx, tx - float(s2["dir"]) * hole_reach)
 		for i in nodes.size():
 			var n2: Dictionary = nodes[i]
 			if absf(float(n2["y"]) - float(s2["top_y"])) < EPS and float(n2["x0"]) < reach_hi and float(n2["x1"]) > reach_lo:
@@ -768,7 +729,7 @@ static func _span(x: float, w: float) -> Vector2:
 
 
 ## Why a span on a level cannot hold dressing: a stair wedge, the street over a flight, a ladder or
-## lift shaft, a closed gate bar. "" when it can.
+## a closed gate bar. "" when it can.
 static func _dress_conflict(span: Vector2, k: int, allow_shaft: bool) -> String:
 	var y := HollowMap.deck_y_at((span.x + span.y) * 0.5, float(k))
 	for s in HollowMap.stairs():
@@ -788,11 +749,6 @@ static func _dress_conflict(span: Vector2, k: int, allow_shaft: bool) -> String:
 				var ox: float = l["open_x"]
 				if span.x < ox + HollowMap.SHAFT_OPENING + 16.0 and span.y > ox - 16.0:
 					return "ladder %s's shaft" % str(l["id"])
-		for lf in HollowMap.lifts():
-			if (lf["stops"] as Array).has(y):
-				var lx: float = lf["open_x"]
-				if span.x < lx + HollowMap.SHAFT_OPENING + 16.0 and span.y > lx - 16.0:
-					return "lift %s's shaft" % str(lf["id"])
 	for g in HollowMap.gates():
 		if not g["blocks"]:
 			continue
@@ -1065,7 +1021,7 @@ static func lint_scene(scene: Node) -> Dictionary:
 	var layers := _layers(scene)
 	var structures := scene.get_node_or_null("Hollow/Structures")
 	if structures == null:
-		_err(rep, "scene: Hollow/Structures is missing (ladders, lifts, gates and zone anchors are built there)")
+		_err(rep, "scene: Hollow/Structures is missing (ladders, gates and zone anchors are built there)")
 	else:
 		for l in HollowMap.ladders():
 			var node := structures.get_node_or_null(str(l["id"])) as Node2D
@@ -1078,12 +1034,6 @@ static func lint_scene(scene: Node) -> Dictionary:
 			var h: float = node.get("shaft_size").y
 			if absf(h - (float(l["bottom_y"]) - float(l["top_y"]))) > EPS:
 				_err(rep, "scene: ladder %s is %dpx tall, map says %dpx" % [str(l["id"]), int(h), int(float(l["bottom_y"]) - float(l["top_y"]))])
-		for lf in HollowMap.lifts():
-			var node := structures.get_node_or_null("Lift_%s" % str(lf["id"])) as Node2D
-			if node == null:
-				_err(rep, "scene: lift %s was not built" % str(lf["id"]))
-			elif absf(node.position.x - HollowLayout.lift_x_for(lf["id"])) > EPS:
-				_err(rep, "scene: lift %s is at x=%d, map says %d" % [str(lf["id"]), int(node.position.x), int(HollowLayout.lift_x_for(lf["id"]))])
 		for g in HollowMap.gates():
 			if structures.get_node_or_null(str(g["id"])) == null:
 				_err(rep, "scene: gate %s was not built" % str(g["id"]))
@@ -1107,7 +1057,9 @@ static func lint_scene(scene: Node) -> Dictionary:
 		var unpainted := 0
 		var dx: float = float(p["x0"]) + 8.0
 		while dx < float(p["x1"]):
-			if decks.get_cell_source_id(Vector2i(int(floor(dx / 16.0)), int(round(float(p["y"]) / 16.0)))) == -1:
+			var open_here := HollowMap.in_hole(dx, float(p["y"]))
+			var painted := decks.get_cell_source_id(Vector2i(int(floor(dx / 16.0)), int(round(float(p["y"]) / 16.0)))) != -1
+			if painted == open_here: # painted where a stair opening should be, or missing where it should not
 				unpainted += 1
 			dx += 64.0
 		if unpainted > 0:

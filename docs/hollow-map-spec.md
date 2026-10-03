@@ -49,7 +49,7 @@ builds in ~3 s headless); `HollowMapLint` checks it (`shell`).
 Total world 27520 px wide, symmetric about the Mouth's centre (x=3200). Walkable deck length:
 west 39.2 k px, east 36.5 k px (ratio 0.93; the lint fails outside 0.8–1.25).
 
-Four structures move you: **stairs, ladders, lifts, and Mid Heart's own stairs and bridges**.
+Three structures move you: **stairs, ladders, and Mid Heart's own stairs and bridges**. (Lifts were removed 2026-10-02, USER.)
 Everything else is a room. Nothing floats.
 
 ### Decks are one-way
@@ -58,17 +58,11 @@ Every deck is a **one-way platform** (HollowTerrain's child layer `Decks`): you 
 you climb up through it from below. Walls, stair treads and stair wedges are solid. That one rule
 is what keeps the map readable:
 
-- a **stair rises through the street above it**, so a street is never cut by a stairwell. Going
-  up needs nothing; going down means standing on the street over the flight and pressing
-  **Down (S)**, which steps through the deck onto the tread (only when a tread or deck is within
-  112 px below — never into the Mouth). Each stair top carries a faint `[S] stairs down` cue.
-- a **ladder has no hatch**. Climb up through the deck and land on it; press Down on the deck
-  over a ladder to grab it (the ladder's hit box reaches 28 px above the deck).
-- a **lift rides up through the decks** with no gap cut in any floor.
+- a **stair opens through the street above it** (USER 2026-10-02): the deck is simply absent over the stretch of the flight just before its top (`HollowMap.stair_holes()`, 64 px of depth per unit of pitch plus two tiles). You climb out of an open stairwell and drop into it from either side; there is no covering and no key to press, and no "stairs down" cue. Terrace steps under 96 px have no street over them and no opening. The rest of the street still passes over the lower flight.
+- a **ladder has no hatch**. Climb up through the deck and land on it. **W or S in a ladder's zone climbs at once** (pressed or held, on the floor or in the air; no jump), and the ladder's hit box reaches 28 px above the deck so S on the deck over a ladder goes down.
+- **there are no lifts** (removed 2026-10-02, USER); ladders and stairs make every connection a lift used to.
 
-(The first version of this rebuild cut a 96/128 px hole in the deck above every stair and
-every shaft. The route walk showed it split the street: you could not walk across a stairwell.
-One-way decks replaced it.)
+(The first version of this rebuild cut a 96/128 px hole in the deck above every stair and every shaft, which split streets; one-way decks replaced it; the stair opening is now back, but only over the last stretch of a flight, so the street still continues on both sides of it.)
 
 ### Units
 
@@ -167,13 +161,9 @@ Collapsed Side Chamber), `LAD_EA`, `LAD_EG`, `LAD_EG4` (Mid-East Landing up to G
 share an x across more than one level, so a ladder chain is never a full-height shaft (canon:
 lower-west workers use stairs, not a shaft).
 
-### Lifts (3) — Presswater, physical, never fast travel
+### Lifts
 
-| Lift | x | Stops | Role |
-| --- | --- | --- | --- |
-| `heart` (west civic) | −2560 | L5, L6, L7, L8 | Always runs. Wickwork up to High-West and the Ashram gateway |
-| `east_passenger` | 6400 | L5, L6, L7, L8 | Always runs (Glowbeds is a main district, open from the start). Recessed Mid-East landing up through Glowbeds |
-| `freight` | 8640 | L8, L11, L12, L13 | Heavy; slows and parks with the Cistern's condition. Mid-East down to the Cistern |
+None. The three Presswater lifts (`heart`, `east_passenger`, `freight`) were removed on 2026-10-02 (USER): they did not work with the 18 levels and the rock between districts. Their routes are `LAD_A5` (Ashram promenade down to High-West), `LAD_HW2` (High-West upper to lower), `LAD_E1` (east Ashram promenade down to Glowbeds) and the existing ladders and stairs. The Cistern freight route is the Lower-East ladders and the Cistern stairs. Any future lift is a new design.
 
 ### Travel times (200 px/s walking, 140 px/s ladders; rough, before the 384 px levels)
 
@@ -182,7 +172,7 @@ lower-west workers use stairs, not a shaft).
 | Home Court → Mid Heart west lip | ~70 s | ~45 s |
 | Home Court → Bottom-West first gallery | ~35 s | — |
 | Mid Heart → Cistern (stairs + freight lift) | ~90 s | ~60 s |
-| Wickwork → High-West (lift) | ~12 s | — |
+| Wickwork → High-West (ladder `LAD_WK4` and the sloped street) | — | — |
 
 The 384 px levels shorten every flight and shaft by 40 % (a stair is `RISE` long; a ladder climbs
 384 px, not 640), so these are upper bounds now. If the trip still feels long in play, shorten

@@ -24,7 +24,6 @@ const DECK_COLOR := Color(0.88, 0.64, 0.38, 0.95)
 const HEART_COLOR := Color(1.0, 0.8, 0.45, 1.0)
 const STAIR_COLOR := Color(0.95, 0.5, 0.22, 0.9)
 const LADDER_COLOR := Color(0.5, 0.82, 0.72, 0.9)
-const LIFT_COLOR := Color(0.38, 0.66, 1.0, 0.95)
 const GATE_CLOSED := Color(1.0, 0.32, 0.28, 0.95)
 const GATE_OPEN := Color(0.45, 0.75, 0.5, 0.6)
 const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.7)
@@ -350,7 +349,7 @@ func _draw() -> void:
 		var r := _rect_to_map(drawn).intersection(area)
 		draw_rect(r, ZONE_HELD if held_zones.has(district.id) else ZONE_LINE, false, 1.0)
 
-	# The map itself: decks, stairs, ladders, lifts, gates.
+	# The map itself: decks, stairs, ladders, gates.
 	for piece in HollowMap.deck_pieces():
 		var heart: bool = HollowMap.run_by_id(piece["run"])["zone"] == &"mid_heart"
 		_line(Vector2(piece["x0"], piece["y"]), Vector2(piece["x1"], piece["y"]), HEART_COLOR if heart else DECK_COLOR, 2.0 if heart else 1.6, area)
@@ -359,14 +358,6 @@ func _draw() -> void:
 	for ladder in HollowMap.ladders():
 		var lx: float = float(ladder["open_x"]) + 32.0
 		_line(Vector2(lx, ladder["top_y"]), Vector2(lx, ladder["bottom_y"]), LADDER_COLOR, 1.2, area)
-	for lift in HollowMap.lifts():
-		var stops: Array = lift["stops"]
-		var cx: float = float(lift["open_x"]) + 32.0
-		_line(Vector2(cx, stops[0]), Vector2(cx, stops[stops.size() - 1]), LIFT_COLOR, 2.4, area)
-		for stop_y in stops:
-			var sp := world_to_map(Vector2(cx, stop_y))
-			if area.has_point(sp):
-				draw_circle(sp, 1.8, LIFT_COLOR)
 	var access := get_tree().root.get_node_or_null("Access")
 	for gate in HollowMap.gates():
 		var run := HollowMap.run_by_id(gate["run"])

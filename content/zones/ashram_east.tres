@@ -8,13 +8,13 @@ zone_id = &"ashram_east"
 display_name = "Ashram Heights (east)"
 world_origin = Vector2(6800, 3328)
 seams = [{
-"edge": "north",
-"neighbor": "ashram_east_3",
-"position": 3328
-}, {
 "edge": "south",
 "neighbor": "glowbeds",
 "position": 4096
+}, {
+"edge": "north",
+"neighbor": "ashram_east_3",
+"position": 3328
 }]
 enclosed = false
 world_rect = Rect2(4864, 3072, 3936, 768)

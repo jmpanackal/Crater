@@ -8,10 +8,6 @@ zone_id = &"mid_east_landing"
 display_name = "Mid-East Landing"
 world_origin = Vector2(5840, 4864)
 seams = [{
-"edge": "north",
-"neighbor": "glowbeds_hang",
-"position": 4864
-}, {
 "edge": "west",
 "neighbor": "mid_heart",
 "position": 4960

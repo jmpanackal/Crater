@@ -31,7 +31,7 @@ func _run() -> void:
 
 ## No text (headless has no font): level rows are the grid lines. Colours:
 ## rock brown (Firmament slightly cooler), civic cavity dark teal, the pit black, decks amber,
-## stairs orange, ladders teal, lifts blue, gates red, growth reserves hatched grey, zone
+## stairs orange, ladders teal, gates red, growth reserves hatched grey, zone
 ## anchors yellow, spawn white. The image is the whole dig envelope.
 func _save_png(path: String) -> void:
 	var s := 0.06
@@ -79,12 +79,6 @@ func _save_png(path: String) -> void:
 	for l in HollowMap.ladders():
 		var lx: float = float(l["open_x"]) + 32.0
 		img.fill_rect(Rect2i(px.call(lx) - 1, py.call(l["top_y"]), 3, int((float(l["bottom_y"]) - float(l["top_y"])) * s)), Color("7fd1b9"))
-	for lf in HollowMap.lifts():
-		var ys: Array = lf["stops"]
-		var lx2: float = float(lf["open_x"]) + 32.0
-		img.fill_rect(Rect2i(px.call(lx2) - 2, py.call(ys[0]), 5, int((float(ys[ys.size() - 1]) - float(ys[0])) * s)), Color("4aa3ff"))
-		for y in ys:
-			img.fill_rect(Rect2i(px.call(lx2) - 4, py.call(y) - 2, 9, 5), Color("a8d4ff"))
 	for g in HollowMap.gates():
 		var gr := HollowMap.run_by_id(g["run"])
 		if gr.is_empty():

@@ -15,8 +15,19 @@ func _init() -> void:
 func _hold_until(player: CharacterBody2D, action: String, pred: Callable, max_frames: int, what: String) -> void:
 	Input.action_press(action)
 	var ok := false
+	var dir := -1.0 if action == "ui_left" else 1.0
 	for _frame in range(max_frames):
 		await physics_frame
+		# a stair opening in the street ahead (it is open, with no covering): jump it like a player would
+		if player.is_on_floor():
+			var feet_y := player.global_position.y + 32.0
+			for h in HollowMap.stair_holes():
+				var ahead_x := player.global_position.x + dir * 24.0
+				if absf(float(h["y"]) - feet_y) < 8.0 and ahead_x >= float(h["x0"]) - 8.0 and ahead_x < float(h["x1"]) and _street_over(ahead_x, feet_y):
+					Input.action_press("ui_accept")
+					await physics_frame
+					Input.action_release("ui_accept")
+					break
 		if pred.call():
 			ok = true
 			break
@@ -28,6 +39,14 @@ func _hold_until(player: CharacterBody2D, action: String, pred: Callable, max_fr
 	else:
 		_failed = true
 		push_error("FAIL %s (stopped at %s)" % [what, str(player.global_position)])
+
+
+## True when a street (run piece) passes over x at this deck height: only then is a stair opening a gap to jump.
+func _street_over(x: float, y: float) -> bool:
+	for p in HollowMap.deck_pieces():
+		if absf(float(p["y"]) - y) < 0.5 and x >= float(p["x0"]) and x <= float(p["x1"]):
+			return true
+	return false
 
 
 func _on(player: CharacterBody2D, x: float, deck_y: float, slop: float = 24.0) -> bool:
