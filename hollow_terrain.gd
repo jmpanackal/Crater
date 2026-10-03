@@ -47,6 +47,7 @@ func _ready() -> void:
 ## Paint everything HollowMap declares: one-way decks, wall columns at wall ends, and stair
 ## wedges. Collision and visual are the same tile.
 func _paint_map() -> void:
+	_paint_civic_rock() # first: the stair treads, walls and roofs below overwrite what they need
 	for rect in HollowMap.deck_rects():
 		var source := SOURCE_BRIDGE if rect.w <= HollowLayout.BRIDGE_THICKNESS + 0.5 else SOURCE_LEDGE
 		paint_deck(rect.x, rect.y, rect.z, source)
@@ -54,6 +55,20 @@ func _paint_map() -> void:
 		paint_stairs(stair["foot_x"], stair["foot_y"], stair["top_x"], stair["top_y"])
 	for wall in HollowMap.wall_rects():
 		paint_block(wall, SOURCE_ROCK)
+	for roof in HollowMap.roof_rects():
+		paint_block(roof, SOURCE_ROCK)
+	for door in HollowMap.door_rects():
+		paint_block(door, SOURCE_ROCK)
+
+
+## The solid rock between rooms (HollowMap.civic_rock_rows): the whole civic cavity except the rooms, flights,
+## shafts, domes and the Mouth. Not diggable (this layer is not the dig Terrain).
+func _paint_civic_rock() -> void:
+	var rows := HollowMap.civic_rock_rows()
+	for row in rows.keys():
+		for span: Vector2 in rows[row]:
+			for x in range(int(span.x / TILE_SIZE), int(span.y / TILE_SIZE)):
+				set_cell(Vector2i(x, int(row)), SOURCE_ROCK, _coords(SOURCE_ROCK, x, int(row)))
 
 
 func _build_tileset(one_way: bool = false) -> TileSet:
@@ -108,6 +123,9 @@ func _add_placeholder_source(tileset: TileSet, color: Color, one_way: bool = fal
 			var coords := Vector2i(tx, ty)
 			atlas.create_tile(coords)
 			var tile_data := atlas.get_tile_data(coords, 0)
+			if kind == &"wall":
+				# the same rock shader as the slabs and the dig rock, so the wedges and walls match them
+				tile_data.material = RockTextures.rock_material()
 			tile_data.add_collision_polygon(0)
 			tile_data.set_collision_polygon_points(0, 0, poly)
 			if one_way:

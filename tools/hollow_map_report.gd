@@ -50,7 +50,7 @@ func _save_png(path: String) -> void:
 	rect_px.call(HollowMap.cavity_rect(), Color("0f1a1c"))
 	rect_px.call(HollowMap.pit_rect(), Color("050b0e"))
 	rect_px.call(Rect2(HollowMap.MOUTH_L, HollowMap.ROCK_TOP, HollowMap.MOUTH_R - HollowMap.MOUTH_L, HollowMap.CAVITY_BOTTOM - HollowMap.ROCK_TOP), Color("050b0e"))
-	for k in range(12):
+	for k in range(HollowMap.LEVELS):
 		img.fill_rect(Rect2i(px.call(HollowMap.WEST_WALL), py.call(HollowMap.lvl(float(k))), int((HollowMap.EAST_WALL - HollowMap.WEST_WALL) * s), 1), Color("1d2a2e"))
 	for z in HollowMap.zones():
 		if z.get("volume", false):

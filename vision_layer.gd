@@ -84,12 +84,13 @@ func _ready() -> void:
 	_cavity = Rect2i(int(cav.position.x) / CELL, int(cav.position.y) / CELL, int(cav.size.x) / CELL, int(cav.size.y) / CELL)
 	var authored: Array[Rect2] = HollowMap.flank_air_rects(HollowMap.FLANK_CLEAR)
 	authored.append_array(HollowMap.flank_stair_air(HollowMap.FLANK_CLEAR))
+	authored.append_array(HollowMap.dome_rects())
 	for r in authored:
 		var cx0 := int(floorf(r.position.x / float(CELL)))
 		var cy0 := int(floorf(r.position.y / float(CELL)))
 		_walk_rects.append(Rect2i(cx0, cy0, int(ceilf(r.end.x / float(CELL))) - cx0, int(ceilf(r.end.y / float(CELL))) - cy0))
 	for l in HollowDressing.lamps():
-		_lamp_cells.append(Vector2i(int(floorf(float(l["x"]) / float(CELL))), int(floorf((HollowMap.lvl(float(l["k"])) - float(l["y_off"])) / float(CELL)))))
+		_lamp_cells.append(Vector2i(int(floorf(float(l["x"]) / float(CELL))), int(floorf((HollowMap.deck_y_at(float(l["x"]), float(l["k"])) - float(l["y_off"])) / float(CELL)))))
 	set_process_unhandled_key_input(true)
 
 

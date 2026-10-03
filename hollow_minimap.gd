@@ -181,6 +181,8 @@ static func district_draw_bounds(bounds: Rect2) -> Rect2:
 		bounds.position.x >= HollowLayout.PIT_LEFT - 0.5
 		and bounds.end.x <= HollowLayout.PIT_RIGHT + 0.5
 	)
+	if fully_in_mouth and bounds.size.x <= HollowMap.LEDGE_MAX:
+		return Rect2() # a Mouth ledge strip: its deck is drawn with its run, the void stays open
 	if fully_in_mouth:
 		return bounds
 	var clipped := bounds
@@ -334,7 +336,7 @@ func _draw() -> void:
 	var player_row := -1
 	if _player != null and is_instance_valid(_player):
 		player_row = int(roundf((_player.global_position.y + 32.0 - HollowMap.LEVEL_ORIGIN) / HollowMap.LEVEL_GAP))
-	for k in range(12):
+	for k in range(HollowMap.LEVELS):
 		var gy := HollowMap.lvl(float(k))
 		var on_row := k == player_row
 		_line(Vector2(bounds.position.x, gy), Vector2(bounds.end.x, gy), Color(0.4, 0.55, 0.55, 0.28 if on_row else 0.08), 1.0, area)

@@ -6,20 +6,20 @@
 script = ExtResource("1")
 zone_id = &"glowbeds_hang"
 display_name = "Glowbeds Hang"
-world_origin = Vector2(7200, 2944)
+world_origin = Vector2(7200, 4480)
 seams = [{
 "edge": "north",
 "neighbor": "glowbeds",
-"position": 2944
+"position": 4480
 }, {
 "edge": "south",
 "neighbor": "mid_east_approach",
-"position": 3328
+"position": 4864
 }, {
 "edge": "south",
 "neighbor": "mid_east_landing",
-"position": 3328
+"position": 4864
 }]
 enclosed = false
-world_rect = Rect2(5760, 2688, 2240, 384)
+world_rect = Rect2(5008, 4224, 2992, 384)
 restricted = false

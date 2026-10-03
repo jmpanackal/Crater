@@ -172,7 +172,7 @@ func _run() -> void:
 	for _i in range(5):
 		await physics_frame
 	terrain.reset_all()
-	var cache_cell := Vector2i(586, 150)
+	var cache_cell := Vector2i(586, 246)
 	terrain.dig(terrain.to_global(terrain.map_to_local(cache_cell + Vector2i.UP)), Vector2i.DOWN)
 	var cache_world: Vector2 = terrain.to_global(terrain.map_to_local(cache_cell))
 	hauling.attach(&"ravelstone", 3)
@@ -181,7 +181,7 @@ func _run() -> void:
 		push_error("FAIL caching inside the Hollow's civic space was not refused cleanly: %s" % [civic])
 		quit(1)
 		return
-	var rock: Dictionary = hauling.cache_at(terrain.to_global(terrain.map_to_local(Vector2i(586, 155))))
+	var rock: Dictionary = hauling.cache_at(terrain.to_global(terrain.map_to_local(Vector2i(586, 251))))
 	if bool(rock["success"]) or str(rock["reason"]) != "blocked_by_rock":
 		push_error("FAIL caching inside un-dug rock was not refused cleanly: %s" % [rock])
 		quit(1)
@@ -244,7 +244,7 @@ func _run() -> void:
 
 	# --- 5. Spec 12 seam: extraction is refused, deposit left intact, when
 	# the bundle can't carry the find. ---
-	var pocket := Vector2i(670, 188)  # sutral x2
+	var pocket := Vector2i(670, 284)  # sutral x2
 	terrain.dig(terrain.to_global(terrain.map_to_local(pocket + Vector2i.UP)), Vector2i.DOWN)
 	var pocket_world: Vector2 = terrain.to_global(terrain.map_to_local(pocket))
 	if int(terrain.complete_extraction(pocket)) != 0 or terrain.get_deposit_state(pocket_world) != &"intact":

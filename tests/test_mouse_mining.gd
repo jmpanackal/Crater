@@ -116,7 +116,7 @@ func _run() -> void:
 	print("PASS air is not a target")
 
 	# --- 5. Line of sight: rock between you and a tile blocks it. Synthetic tiles in the cavity. ---
-	var open := Vector2(1000.0, HollowLayout.WICK_Y - 400.0)
+	var open := Vector2(1000.0, HollowLayout.WICK_Y - 150.0)
 	player.global_position = open
 	player.velocity = Vector2.ZERO
 	var base := terrain.world_to_cell(open + Vector2(16.0, 16.0))

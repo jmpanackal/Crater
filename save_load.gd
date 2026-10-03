@@ -28,7 +28,7 @@ const SAVE_TEMP_PATH := "user://krater_save.json.tmp"
 ## predates this contract and is intentionally not migrated; see Spec 02's
 ## note that the exact migration mechanism is a separate, spike-owned
 ## question. An old save simply fails to load rather than being misread.
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2 ## 2: the Hollow grew from 12 to 18 levels (world y shifted), old saves no longer line up
 
 ## Every autoload name SaveLoad persists, in save order. A domain missing
 ## save_state()/load_state() is skipped with a warning rather than failing

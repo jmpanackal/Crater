@@ -180,6 +180,10 @@ func _carve_flank_air() -> void:
 	var walk_clear_px := HollowMap.FLANK_CLEAR
 	var rects: Array[Rect2] = HollowMap.flank_air_rects(walk_clear_px)
 	rects.append_array(HollowMap.flank_stair_air(walk_clear_px))
+	# domes over top-level rooms rise into the Firmament (diggable shell); the part below its line is civic rock
+	for dome_rect in HollowMap.dome_rects():
+		if dome_rect.position.y < HollowMap.ROCK_TOP:
+			rects.append(Rect2(dome_rect.position.x, dome_rect.position.y, dome_rect.size.x, minf(dome_rect.size.y, HollowMap.ROCK_TOP - dome_rect.position.y)))
 	for r in rects:
 		_clear_dig_rect(r.position.x, r.end.x, r.position.y, r.end.y)
 

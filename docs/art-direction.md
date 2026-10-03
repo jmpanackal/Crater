@@ -70,6 +70,49 @@ Play frames should read: **foreground clutter → mid play strip → far Devil�
 
 ---
 
+## Layout character — improvised, varied, not formal (USER direction, 2026-10-02)
+
+Recorded from the user's review of the stairs and reference shots (Blasphemous-style stacked ruins; Terraria stair/room builds). Direction, not yet implemented; the current map is a **placeholder for size, shape and scale**, not the final traversal layout.
+
+- **Origin story drives the shape.** The Hollow is a society that moved into the walls of a cavern a crashed ship hollowed out. Layout should read as *adapted and improvised* around the rock, not formally planned: curved terraces, uneven ledges, walkways that follow the rock face, structures wedged into the wall.
+- **No long monotone stretches.** Avoid long runs of one kind of space (a single long flight of stairs, a flat street with buildings along it). Break routes up with landings, doorways, alcoves, changes of direction, and changes of room height, while still flowing together.
+- **Every area feels unique.** Nearly every district/area gets its own layout identity. Deliberately plain areas are fine as *contrast* against more intricate ones, but the default is variety, not a flat plane with buildings stacked on it.
+- **Stairs belong to rooms.** A stairwell is a carved space with a ceiling and back wall (rock), not a bare wedge in void. Prefer shorter flights with landings over a single 45-degree run.
+- **More curvature.** Prefer curved or irregular platform and terrace edges and stepped-tile approximations of slopes over dead-straight platforms and uniform stairs. (Terrain stays tile-built: see `hollow-level-authoring.md` Rule 2, no freehand collision ramps.)
+- Because the current layout is placeholder, changes to stairs, level heights and district footprints for this purpose are expected, via the `hollow-map-spec.md` protocol and lint, not by hand.
+
+### Decisions on the variety pass (USER, 2026-10-02)
+
+1. **Level variation: keep the 12 bands.** Allow only small per-run deck offsets (about +/-16-96 px) and half-level landings. No free deck heights, no mezzanines anywhere yet.
+2. **Stairwells: visual only.** The street still passes over a flight (one-way decks); stairwells get a carved ceiling and back wall but do not enclose or interrupt the street.
+3. **Opening-route slice: limited change.** Only stairwell visuals and landings on its 3 stairs. Its dressing, routes and tests otherwise stay; revisit last.
+4. **Variety enforcement: a lint warning**, not a hard error: flat runs longer than a set length with no landing, step or stair get flagged. Which districts stay deliberately plain, and any new place names, are still the user's call.
+
+### Direction from the space review (USER, 2026-10-02)
+
+Answers to [`hollow-space-review.md`](hollow-space-review.md). Direction, not yet built; items 5-6 need a canon decision before any layout change (see the report in the session notes / DEV-STATE).
+
+1. **Mouth side varies by purpose.** The stretches facing the Mouth should differ in how close they come: some areas put out longer terraces that reach a little over it, others are tucked back and closed off from it. It depends on what the area is for, and it should be varied, not uniform.
+2. **Lower west gets more area.** Bottom-West should hold more than it does now.
+3. **Too wide, not tall enough.** The map feels horizontally stretched. A main story thread is buying housing further and further up the Hollow, so the vertical climb needs to be tall enough that low and high housing contrast strongly.
+4. **More vertical separation by rock.** Areas should be separated vertically by rock, with doors or other things to get through, not one continuous stack of open streets.
+5. **One Mid-East dig front only.** No second east front.
+6. **Annexes are welcome, but nearly everything should have a gameplay purpose.** Small annexes are fine if they do something (no decorative-only rooms).
+8. **Decision (USER, 2026-10-02): add levels and separate districts by rock.** The Hollow gets taller by *adding levels* (about 16-18, same 384 px spacing, extra levels at the top and bottom to lengthen the housing climb) and each district becomes a rock-separated pocket joined by doors, gates, shafts or lifts, not a continuous street. Civic width may shrink somewhat. This lifts decision 1's "keep the 12 bands".
+9. **Decision (USER, 2026-10-02): a short cantilevered ledge over the Mouth is acceptable** at a cliff edge. It is not a bridge or a structure: Mid Heart stays the only thing that spans the Mouth.
+10. **Decision (USER, 2026-10-02): 18 levels, +4 at the top and +2 at the bottom** (the Hollow grows from 12 to 18 levels at the same 384 px spacing). Home Court (spawn) moves down four levels with everything else; the new top levels lengthen the housing climb and the new bottom levels feed Bottom-West and the Cistern.
+11. **Decision (USER, 2026-10-02): the rock between districts is solid and not diggable** (painted rock with collision, like the wall columns). Digging stays in the flanks, the Firmament and the floor slab, so doors and gates cannot be bypassed.
+12. **Decision (USER, 2026-10-02): a Mouth ledge reaches at most 128 px over the Mouth.**
+13. **Direction (USER, 2026-10-02): there are three housing tiers: lower, mid, and high (Ashram).** The climb is lower to mid to Ashram.
+14. **Direction (USER, 2026-10-02): doors come in varieties** (plain doors, gates, archways); what each door is for can be decided later.
+15. **Direction (USER, 2026-10-02): the new bottom levels, Bottom-West's extra area and every space's purpose are to be worked out from the docs** (AI proposals, user reviews).
+16. **Feedback (USER, 2026-10-02) on the 18-level render: too simple.** Too few terraces over the pit and the variety pass is not finished: the map still reads as long straight strips. Wants many more Mouth ledges (varied reach) and more variation in district shapes.
+17. **Decision (USER, 2026-10-02): add stepped halls and sloped streets.** Streets may climb a whole level on a long shallow slope (stepped tiles, pitch 2 or more), and a stepped hall is a tall open space joining several levels with a cascade of landings and flights. This lifts decision 1's "no free deck heights, no mezzanines anywhere yet" for these two forms. Wickwork, the Cistern and Glowbeds are to take the shape the docs describe (Wickwork: a broad stepped repair terrace with a diagonal descent; Glowbeds: a stepped planter court with a switchback; Cistern: a tall pressure-basin chamber with galleries and a freight lift).
+18. **Direction (USER, 2026-10-02): a dev movement-speed toggle** for crossing the map fast (built: X cycles 1/3/6/12, console `speed <n>`).
+7. **Reference (concept art, not production art):** an AI-generated Hollow atlas the user made (stacked inhabited storeys, round and domed rooms, pipes and tanks in the Cistern, bridges over the Mouth, dark void between). Useful for scale, detail and variation only; it is not connected and not a layout.
+
+Implementation plan (architect, 2026-10-02): phases are stairwell visuals, then variable pitch + landings on one non-slice district, then a zero-change `deck_y_at(x, k)` refactor, then stepped terraces, then district-by-district rework. Tracked in [`DEV-STATE.md`](DEV-STATE.md).
+
 ## Cultural material and architectural language (approved)
 
 The Hollow is a mature human civilization grown over generations, not a camp made only from wreckage. Its visual vocabulary comes from **four interwoven sources**: crater geology; cultivated underground life and minerals; reclaimed Firstfall remnants; and generations of local human craft, ritual, and household taste. A prop does not need an overt fungal or ship explanation to belong here, but it must feel plausible in a closed, resource-conscious crater society.

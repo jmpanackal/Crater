@@ -6,24 +6,24 @@
 script = ExtResource("1")
 zone_id = &"wickwork"
 display_name = "Wickwork"
-world_origin = Vector2(-2160, 3328)
+world_origin = Vector2(-2160, 4864)
 seams = [{
 "edge": "north",
 "neighbor": "high_west_front",
-"position": 3328
+"position": 4864
 }, {
 "edge": "south",
 "neighbor": "mid_allotments",
-"position": 4096
+"position": 5632
 }, {
 "edge": "north",
 "neighbor": "mid_heart",
-"position": 3712
+"position": 5248
 }, {
 "edge": "east",
 "neighbor": "mid_heart",
 "position": 1440
 }]
 enclosed = true
-world_rect = Rect2(-3680, 3072, 5120, 768)
+world_rect = Rect2(-3680, 4608, 5120, 768)
 restricted = false

@@ -103,12 +103,12 @@ func _run() -> void:
 	vision.enabled = true
 	var cam: Camera2D = player.get_node("Camera2D") as Camera2D
 	cam.set_dev_zoom(2)
-	await _frames(3)
+	await _frames(12)
 	if vision.is_dark_visible():
 		_fail("the dark must hide in the dev overview zoom")
 		return
 	cam.set_dev_zoom(0)
-	await _frames(3)
+	await _frames(12) # the viewport transform eases back to zoom 1 over a few frames
 	if not vision.is_dark_visible():
 		_fail("back at normal zoom the dark should return")
 		return

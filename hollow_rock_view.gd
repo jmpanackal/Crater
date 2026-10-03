@@ -14,6 +14,8 @@ extends Node2D
 const SLAB := HollowMap.LEVEL_GAP - HollowMap.ROOM_HEIGHT - 16.0 ## 112
 const SLOT := 12.0
 const EDGE_DARK := Color(0.02, 0.03, 0.06, 0.55)
+## Back-wall tint: dim, so the lit foreground reads in front (HollowStairwellView matches it).
+const BACK_TONE := Color(0.45, 0.45, 0.55)
 
 
 func _ready() -> void:
@@ -36,12 +38,12 @@ func _in_chunk(x0: float, x1: float) -> Vector2:
 
 func _draw() -> void:
 	for r in HollowMap.runs():
-		if absf(float(r["y"]) - HollowMap.lvl(float(chunk_k))) > 1.0 and chunk_k != -999:
+		if absf(float(r["k"]) - float(chunk_k)) > 0.01 and chunk_k != -999:
 			continue
 		_gallery_back(r)
 		_slab(r)
 	for b in HollowDressing.buildings():
-		if HollowMap.lvl(float(b["k"])) == HollowMap.lvl(float(chunk_k)):
+		if int(b["k"]) == chunk_k:
 			_roof(b)
 
 
@@ -138,17 +140,23 @@ func _slab(r: Dictionary) -> void:
 		_jagged_end(x1, top, top + SLAB, 1.0, 5)
 
 
+## The dim cobble back wall of the dug galleries (FLANK_CLEAR tall). The civic cavity has its own
+## (HollowBackdropView).
 func _gallery_back(r: Dictionary) -> void:
+	if r["zone"] == &"mid_heart":
+		return
 	var deck: float = r["y"]
-	var segments: Array[Vector2] = []
-	if float(r["x0"]) < HollowMap.WEST_WALL:
-		segments.append(Vector2(float(r["x0"]), minf(float(r["x1"]), HollowMap.WEST_WALL)))
-	if float(r["x1"]) > HollowMap.EAST_WALL:
-		segments.append(Vector2(maxf(float(r["x0"]), HollowMap.EAST_WALL), float(r["x1"])))
-	for s in segments:
-		var seg := _in_chunk(s.x, s.y)
+	var x0: float = r["x0"]
+	var x1: float = r["x1"]
+	var parts: Array[Vector3] = [] # x0, x1, height
+	if x0 < HollowMap.WEST_WALL:
+		parts.append(Vector3(x0, minf(x1, HollowMap.WEST_WALL), HollowMap.FLANK_CLEAR))
+	if x1 > HollowMap.EAST_WALL:
+		parts.append(Vector3(maxf(x0, HollowMap.EAST_WALL), x1, HollowMap.FLANK_CLEAR))
+	for part in parts:
+		var seg := _in_chunk(part.x, part.y)
 		if seg.y > seg.x:
-			_rock_rect(Rect2(seg.x, deck - HollowMap.FLANK_CLEAR, seg.y - seg.x, HollowMap.FLANK_CLEAR), Color(0.45, 0.45, 0.55))
+			_rock_rect(Rect2(seg.x, deck - part.z, seg.y - seg.x, part.z), BACK_TONE)
 
 
 ## A civic room needs a rock roof: where no floor above supplies one, draw the slab here.
@@ -159,7 +167,7 @@ func _roof(b: Dictionary) -> void:
 	var x1: float = b["x1"]
 	if HollowMap.in_flank(x0) or HollowMap.in_flank(x1):
 		return
-	var deck := HollowMap.lvl(float(b["k"]))
+	var deck := HollowMap.deck_y_at((x0 + x1) * 0.5, float(b["k"]))
 	var above := deck - HollowMap.LEVEL_GAP
 	for r in HollowMap.runs():
 		if absf(float(r["y"]) - above) < 1.0 and float(r["x0"]) <= x1 and float(r["x1"]) >= x0 and r["zone"] != &"mid_heart":

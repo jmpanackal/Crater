@@ -45,11 +45,11 @@ script = ExtResource("29_structures")
 script = ExtResource("31_dressing")
 
 [node name="OpeningDutyDispatcher" type="Area2D" parent="Hollow"]
-position = Vector2(-1320, 4864)
+position = Vector2(-1320, 6400)
 script = ExtResource("23_dispatcher")
 
 [node name="OpeningDutyCollection" type="Area2D" parent="Hollow"]
-position = Vector2(-4800, 5632)
+position = Vector2(-4800, 7168)
 script = ExtResource("24_delivery")
 district_id = &"wickwork"
 job_id = &"open_the_gallery"
@@ -77,7 +77,7 @@ script = ExtResource("3_terrain")
 
 [node name="Player" type="CharacterBody2D" parent="."]
 physics_interpolation_mode = 1
-position = Vector2(-80, 4832)
+position = Vector2(-80, 6368)
 collision_layer = 1
 collision_mask = 1
 script = ExtResource("2_player")

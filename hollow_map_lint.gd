@@ -32,6 +32,9 @@ const MIN_FLANK_BEYOND := 1600.0
 ## Thinnest acceptable Firmament and floor slab.
 const MIN_FIRMAMENT := 1024.0
 const MIN_SLAB := 512.0
+## Longest unbroken walk (px) before the `flat` warning: about eight seconds at walking pace. A run is
+## already split wherever a step or landing breaks it, so its length is its flat stretch.
+const MAX_FLAT := 1600.0
 
 
 ## {"errors", "warnings", "info": Array[String], "pieces": Array[Dictionary], "reach": Dictionary}
@@ -39,6 +42,11 @@ static func run() -> Dictionary:
 	var rep := {"errors": [] as Array[String], "warnings": [] as Array[String], "info": [] as Array[String]}
 	rep["pieces"] = HollowMap.deck_pieces()
 	_check_grid_and_stack(rep)
+	_check_flat(rep)
+	_check_roofs(rep)
+	_check_domes(rep)
+	_check_doors(rep)
+	_check_halls(rep)
 	_check_ends(rep)
 	_check_stairs(rep)
 	_check_ladders(rep)
@@ -62,6 +70,12 @@ static func run_label(r: Dictionary) -> String:
 	return "run %s (y=%d x=%d..%d)" % [str(r["id"]), int(r["y"]), int(r["x0"]), int(r["x1"])]
 
 
+## A terrace offset: a whole number of tiles, between one tile and six (96 px), per the variety-pass
+## decision (small offsets only). The step stairs at its ends are checked by the end and stair rules.
+const TERRACE_MIN := 16.0
+const TERRACE_MAX := 96.0
+
+
 static func _on_grid(y: float, half_ok: bool) -> bool:
 	var step := HollowMap.LEVEL_GAP * (0.5 if half_ok else 1.0)
 	var k := (y - HollowMap.LEVEL_ORIGIN) / step
@@ -71,11 +85,16 @@ static func _on_grid(y: float, half_ok: bool) -> bool:
 static func _check_grid_and_stack(rep: Dictionary) -> void:
 	var runs := HollowMap.runs()
 	for r in runs:
-		var half_ok: bool = r["zone"] == &"mid_heart"
-		if not _on_grid(r["y"], half_ok):
+		var half_ok: bool = r["zone"] == &"mid_heart" or bool(r["landing"])
+		var dy: float = r["dy"]
+		if absf(dy) > EPS and (half_ok or absf(dy) < TERRACE_MIN - EPS or absf(dy) > TERRACE_MAX + EPS or absf(fposmod(absf(dy), 16.0)) > EPS):
+			_err(rep, "grid: %s has terrace offset %d (whole tiles, %d..%d px, never on Mid Heart or a landing)" % [run_label(r), int(dy), int(TERRACE_MIN), int(TERRACE_MAX)])
+		if not _on_grid(float(r["y"]) - dy, half_ok):
 			_err(rep, "grid: %s is off the %dpx level grid" % [run_label(r), int(HollowMap.LEVEL_GAP)])
 		if float(r["x1"]) - float(r["x0"]) < MIN_PIECE:
 			_err(rep, "end: %s is shorter than %dpx" % [run_label(r), int(MIN_PIECE)])
+		if fposmod(float(r["x0"]), 16.0) > EPS or fposmod(float(r["x1"]), 16.0) > EPS:
+			_err(rep, "tile: %s has an end that is not on a 16px tile (the rock between rooms is painted by tile)" % run_label(r))
 	for i in runs.size():
 		for j in range(i + 1, runs.size()):
 			var a: Dictionary = runs[i]
@@ -115,6 +134,162 @@ static func _joined(run: Dictionary, x: float) -> bool:
 	return false
 
 
+## Stepped halls: whole tiles, inside the civic cavity and clear of the Mouth, and nothing from a level above the
+## hall's top level reaches down into it. The steps inside are ordinary runs and stairs the other rules check.
+static func _check_halls(rep: Dictionary) -> void:
+	for h in HollowMap.halls():
+		var id := str(h["id"])
+		var x0: float = h["x0"]
+		var x1: float = h["x1"]
+		var kt: float = h["k_top"]
+		var kb: float = h["k_bottom"]
+		if kb <= kt:
+			_err(rep, "hall: %s must reach at least one level down" % id)
+		if fposmod(x0, 16.0) > EPS or fposmod(x1, 16.0) > EPS:
+			_err(rep, "hall: %s is not on 16px tiles" % id)
+		if x0 < HollowMap.WEST_WALL + EPS or x1 > HollowMap.EAST_WALL - EPS:
+			_err(rep, "hall: %s is not wholly inside the civic cavity" % id)
+		if x1 > HollowMap.MOUTH_L + EPS and x0 < HollowMap.MOUTH_R - EPS:
+			_err(rep, "hall: %s overlaps the Mouth" % id)
+		if not HollowMap.nothing_above(kt, x0, x1):
+			_err(rep, "hall: %s has a street directly above it; a hall needs solid rock above its ceiling" % id)
+		var inside := 0
+		for r in HollowMap.runs():
+			if float(r["k"]) >= kt - 0.01 and float(r["k"]) <= kb + 0.01 and float(r["x0"]) < x1 and float(r["x1"]) > x0:
+				inside += 1
+		if inside < 2:
+			_err(rep, "hall: %s has no steps in it (needs at least two runs on its levels)" % id)
+
+
+## Doors: on a dy-0 piece of an existing run, inside it (not at an end), clear of flights, shafts and gates.
+static func _check_doors(rep: Dictionary) -> void:
+	for d in HollowMap.doors():
+		var id := str(d["id"])
+		var x: float = d["x"]
+		var r := HollowMap.run_by_id(d["run"])
+		if r.is_empty():
+			_err(rep, "door: %s is on unknown run %s" % [id, str(d["run"])])
+			continue
+		if absf(float(r["dy"])) > EPS:
+			_err(rep, "door: %s is on terrace piece %s; doors go on band-line pieces" % [id, str(d["run"])])
+		if x < float(r["x0"]) + 96.0 or x > float(r["x1"]) - 96.0:
+			_err(rep, "door: %s at x=%d is too close to the end of %s" % [id, int(x), str(d["run"])])
+		if fposmod(x, 16.0) > EPS:
+			_err(rep, "door: %s at x=%d is not on a tile" % [id, int(x)])
+		var y: float = r["y"]
+		for s in HollowMap.stairs():
+			if absf(float(s["foot_y"]) - y) < EPS or absf(float(s["top_y"]) - y) < EPS:
+				var lo := minf(float(s["foot_x"]), float(s["top_x"])) - 128.0
+				var hi := maxf(float(s["foot_x"]), float(s["top_x"])) + 128.0
+				if x > lo and x < hi:
+					_err(rep, "door: %s at x=%d is too near stair %s" % [id, int(x), str(s["id"])])
+		for l in HollowMap.ladders():
+			if (absf(float(l["top_y"]) - y) < EPS or absf(float(l["bottom_y"]) - y) < EPS) and absf(float(l["open_x"]) + 32.0 - x) < 96.0:
+				_err(rep, "door: %s at x=%d stands in ladder %s's shaft" % [id, int(x), str(l["id"])])
+		for lf in HollowMap.lifts():
+			if (lf["stops"] as Array).has(y) and absf(float(lf["open_x"]) + 32.0 - x) < 96.0:
+				_err(rep, "door: %s at x=%d stands in lift %s's shaft" % [id, int(x), str(lf["id"])])
+		for g in HollowMap.gates():
+			if g["run"] == d["run"] and absf(float(g["x"]) - x) < 96.0:
+				_err(rep, "door: %s at x=%d is on top of gate %s" % [id, int(x), str(g["id"])])
+
+
+## Domes: carved up into the rock over one room, whole tiles, and only where nothing is built above the room
+## in that stretch (the dome reaches up to 192 px past the ceiling, into the level above's floor).
+static func _check_domes(rep: Dictionary) -> void:
+	for dome in HollowMap.domes():
+		var id := str(dome["id"])
+		var k: float = dome["k"]
+		var x0: float = dome["x0"]
+		var x1: float = dome["x1"]
+		var bands := 2 * int(dome["n"]) - 1
+		var band_w := (x1 - x0) / float(bands)
+		var h: float = dome["height"]
+		if h < 16.0 or h > 192.0 or fposmod(h / float(dome["n"]), 16.0) > EPS:
+			_err(rep, "dome: %s height %d must be 16-192 px in whole tiles per step" % [id, int(h)])
+		if fposmod(band_w, 16.0) > EPS or fposmod(x0, 16.0) > EPS:
+			_err(rep, "dome: %s bands are %.1fpx wide; they must be whole tiles" % [id, band_w])
+		if not _covered_by_pieces(k, x0, x1):
+			_err(rep, "dome: %s is not wholly over the street of level %d" % [id, int(k)])
+		if not HollowMap.nothing_above(k, x0, x1):
+			_err(rep, "dome: %s has a street above it; a dome needs solid rock to rise into" % id)
+		if HollowMap.lvl(k) - HollowMap.ROOM_HEIGHT - h < MIN_FIRMAMENT:
+			_err(rep, "dome: %s leaves the Firmament under %d px thick" % [id, int(MIN_FIRMAMENT)])
+
+
+## True when the pieces of band k together cover x0..x1 with no gap wider than a flight (<= 96 px).
+static func _covered_by_pieces(k: float, x0: float, x1: float) -> bool:
+	var spans: Array = []
+	for r in HollowMap.runs():
+		if float(r["k"]) == k and not bool(r["landing"]):
+			spans.append([float(r["x0"]), float(r["x1"])])
+	spans.sort_custom(func(a, b): return a[0] < b[0])
+	var cur := x0
+	for sp in spans:
+		if sp[1] <= cur:
+			continue
+		if sp[0] > cur + 96.0:
+			return false
+		cur = maxf(cur, sp[1])
+		if cur >= x1:
+			return true
+	return cur >= x1
+
+
+## Arched roofs: shallow enough to leave 160 px of air, whole tiles, over a band-line deck in a civic room,
+## and clear of every shaft and flight that passes through the room.
+static func _check_roofs(rep: Dictionary) -> void:
+	for roof in HollowMap.roofs():
+		var id := str(roof["id"])
+		var k: float = roof["k"]
+		var x0: float = roof["x0"]
+		var x1: float = roof["x1"]
+		var depth: float = roof["depth"]
+		var bands := 2 * int(roof["n"]) - 1
+		var band_w := (x1 - x0) / float(bands)
+		if depth < 16.0 or depth > HollowMap.ROOM_HEIGHT - 160.0 + EPS or fposmod(depth, 16.0) > EPS or fposmod(depth * 1.0 / float(roof["n"]), 16.0) > EPS:
+			_err(rep, "roof: %s depth %d must be whole tiles per step and leave 160px of air" % [id, int(depth)])
+		if fposmod(band_w, 16.0) > EPS or fposmod(x0, 16.0) > EPS:
+			_err(rep, "roof: %s bands are %.1fpx wide; they must be whole tiles" % [id, band_w])
+		if x0 < HollowMap.WEST_WALL + EPS or x1 > HollowMap.EAST_WALL - EPS:
+			_err(rep, "roof: %s is not wholly inside the civic cavity" % id)
+		var deck := HollowMap.lvl(k)
+		if not _covers(deck, x0, x1):
+			_err(rep, "roof: %s is not wholly over one band-line deck at level %d" % [id, int(k)])
+		var room_top := deck - HollowMap.ROOM_HEIGHT
+		for l in HollowMap.ladders():
+			if float(l["top_y"]) < deck - EPS and float(l["bottom_y"]) > room_top + EPS and float(l["open_x"]) - 16.0 < x1 and float(l["open_x"]) + HollowMap.SHAFT_OPENING + 16.0 > x0:
+				_err(rep, "roof: %s hangs in ladder %s's shaft" % [id, str(l["id"])])
+		for lf in HollowMap.lifts():
+			var stops: Array = lf["stops"]
+			if float(stops[0]) < deck - EPS and float(stops[stops.size() - 1]) > room_top + EPS and float(lf["open_x"]) - 16.0 < x1 and float(lf["open_x"]) + HollowMap.SHAFT_OPENING + 16.0 > x0:
+				_err(rep, "roof: %s hangs in lift %s's shaft" % [id, str(lf["id"])])
+		for s in HollowMap.stairs():
+			var lo := minf(float(s["foot_x"]), float(s["top_x"]))
+			var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
+			if float(s["top_y"]) < deck - EPS and float(s["foot_y"]) > room_top + EPS and lo < x1 and hi > x0:
+				_err(rep, "roof: %s hangs over the flight of stair %s" % [id, str(s["id"])])
+
+
+## Warning, not an error (variety-pass decision 4): a long run with no step, landing or terrace in it.
+static func _check_flat(rep: Dictionary) -> void:
+	var plain := HollowMap.plain_runs()
+	for r in HollowMap.runs():
+		if r["zone"] == &"mid_heart" or plain.has(r["id"]):
+			continue
+		var len := float(r["x1"]) - float(r["x0"])
+		if len > MAX_FLAT:
+			rep["warnings"].append("flat: %s is %dpx unbroken (over %d): add a step, landing or terrace, or list it in HollowMap.plain_runs()" % [run_label(r), int(len), int(MAX_FLAT)])
+
+
+## True when x is within a stepped hall (closed interval) whose levels include k.
+static func _in_hall(k: float, x: float) -> bool:
+	for h in HollowMap.halls():
+		if k >= float(h["k_top"]) - 0.01 and k <= float(h["k_bottom"]) + 0.01 and x >= float(h["x0"]) - EPS and x <= float(h["x1"]) + EPS:
+			return true
+	return false
+
+
 static func _check_ends(rep: Dictionary) -> void:
 	for r in HollowMap.runs():
 		var x0: float = r["x0"]
@@ -126,6 +301,12 @@ static func _check_ends(rep: Dictionary) -> void:
 			HollowMap.END_MOUTH:
 				if absf(x0 - HollowMap.MOUTH_R) > EPS:
 					_err(rep, "end: %s claims a Mouth lip on its left at x=%d; the east lip is x=%d" % [run_label(r), int(x0), int(HollowMap.MOUTH_R)])
+			HollowMap.END_OPEN:
+				if not _in_hall(float(r["k"]), x0):
+					_err(rep, "end: %s says its left end is open, but x=%d is not inside a stepped hall on its level" % [run_label(r), int(x0)])
+			HollowMap.END_LEDGE:
+				if not (x0 >= HollowMap.MOUTH_R - HollowMap.LEDGE_MAX - EPS and x0 < HollowMap.MOUTH_R - EPS):
+					_err(rep, "end: %s claims a Mouth ledge on its left at x=%d; it must reach 1..%dpx out from the east lip (x=%d)" % [run_label(r), int(x0), int(HollowMap.LEDGE_MAX), int(HollowMap.MOUTH_R)])
 			HollowMap.END_ROCK:
 				if not (x0 >= HollowMap.ENV_LEFT + MIN_FLANK_BEYOND - EPS and x0 < HollowMap.WEST_WALL):
 					_err(rep, "end: %s claims rock at x=%d, outside the west flank" % [run_label(r), int(x0)])
@@ -146,6 +327,12 @@ static func _check_ends(rep: Dictionary) -> void:
 			HollowMap.END_MOUTH:
 				if absf(x1 - HollowMap.MOUTH_L) > EPS:
 					_err(rep, "end: %s claims a Mouth lip on its right at x=%d; the west lip is x=%d" % [run_label(r), int(x1), int(HollowMap.MOUTH_L)])
+			HollowMap.END_OPEN:
+				if not _in_hall(float(r["k"]), x1):
+					_err(rep, "end: %s says its right end is open, but x=%d is not inside a stepped hall on its level" % [run_label(r), int(x1)])
+			HollowMap.END_LEDGE:
+				if not (x1 > HollowMap.MOUTH_L + EPS and x1 <= HollowMap.MOUTH_L + HollowMap.LEDGE_MAX + EPS):
+					_err(rep, "end: %s claims a Mouth ledge on its right at x=%d; it must reach 1..%dpx out from the west lip (x=%d)" % [run_label(r), int(x1), int(HollowMap.LEDGE_MAX), int(HollowMap.MOUTH_L)])
 			HollowMap.END_ROCK:
 				if not (x1 > HollowMap.EAST_WALL - EPS and x1 <= HollowMap.ENV_RIGHT - MIN_FLANK_BEYOND + EPS):
 					_err(rep, "end: %s claims rock at x=%d, outside the east flank" % [run_label(r), int(x1)])
@@ -269,8 +456,12 @@ static func _check_mouth(rep: Dictionary) -> void:
 	var crossing := false
 	for p in HollowMap.deck_pieces():
 		var inside: bool = float(p["x1"]) > HollowMap.MOUTH_L + EPS and float(p["x0"]) < HollowMap.MOUTH_R - EPS
-		if inside and HollowMap.run_by_id(p["run"])["zone"] != &"mid_heart":
-			_err(rep, "mouth: deck %s y=%d x=%d..%d is over the Devil's Mouth but is not Mid Heart" % [str(p["run"]), int(p["y"]), int(p["x0"]), int(p["x1"])])
+		var run := HollowMap.run_by_id(p["run"])
+		# a short ledge off a lip is allowed (USER 2026-10-02): the run says so with END_LEDGE, and it stays under LEDGE_MAX
+		var west_ledge: bool = run["r"] == HollowMap.END_LEDGE and float(p["x0"]) <= HollowMap.MOUTH_L + EPS and float(p["x1"]) <= HollowMap.MOUTH_L + HollowMap.LEDGE_MAX + EPS
+		var east_ledge: bool = run["l"] == HollowMap.END_LEDGE and float(p["x1"]) >= HollowMap.MOUTH_R - EPS and float(p["x0"]) >= HollowMap.MOUTH_R - HollowMap.LEDGE_MAX - EPS
+		if inside and run["zone"] != &"mid_heart" and not west_ledge and not east_ledge:
+			_err(rep, "mouth: deck %s y=%d x=%d..%d is over the Devil's Mouth but is not Mid Heart or a ledge of at most %dpx" % [str(p["run"]), int(p["y"]), int(p["x0"]), int(p["x1"]), int(HollowMap.LEDGE_MAX)])
 	for s in HollowMap.stairs():
 		var lo := minf(float(s["foot_x"]), float(s["top_x"]))
 		var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
@@ -579,7 +770,7 @@ static func _span(x: float, w: float) -> Vector2:
 ## Why a span on a level cannot hold dressing: a stair wedge, the street over a flight, a ladder or
 ## lift shaft, a closed gate bar. "" when it can.
 static func _dress_conflict(span: Vector2, k: int, allow_shaft: bool) -> String:
-	var y := HollowMap.lvl(float(k))
+	var y := HollowMap.deck_y_at((span.x + span.y) * 0.5, float(k))
 	for s in HollowMap.stairs():
 		var lo := minf(float(s["foot_x"]), float(s["top_x"]))
 		var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
@@ -624,7 +815,7 @@ static func _check_dressing(rep: Dictionary) -> void:
 		return "%s %s (x=%d level %d)" % [kind, str(id), int(x), k]
 	for p in HollowDressing.props():
 		var k: int = p["k"]
-		var y := HollowMap.lvl(float(k))
+		var y := HollowMap.deck_y_at(float(p["x"]), float(k))
 		var sp := _span(float(p["x"]), float(p["w"]))
 		var who: String = label.call("prop", p["id"], p["x"], k)
 		if not zone_ids.has(p["zone"]):
@@ -643,16 +834,16 @@ static func _check_dressing(rep: Dictionary) -> void:
 	for l in HollowDressing.lamps():
 		var lk: int = l["k"]
 		var lwho: String = label.call("lamp", l["zone"], l["x"], lk)
-		if not _covers(HollowMap.lvl(float(lk)), float(l["x"]) - 1.0, float(l["x"]) + 1.0):
+		if not _covers(HollowMap.deck_y_at(float(l["x"]), float(lk)), float(l["x"]) - 1.0, float(l["x"]) + 1.0):
 			_err(rep, "dress: %s does not hang over a deck" % lwho)
-		elif zone_of(Vector2(float(l["x"]), HollowMap.lvl(float(lk)) - 32.0)) != l["zone"]:
+		elif zone_of(Vector2(float(l["x"]), HollowMap.deck_y_at(float(l["x"]), float(lk)) - 32.0)) != l["zone"]:
 			_err(rep, "dress: %s is outside zone %s" % [lwho, str(l["zone"])])
 		if float(l["y_off"]) > _ceiling_at(float(l["x"])):
 			_err(rep, "dress: %s hangs above the ceiling" % lwho)
 	var seen_spans: Array[Dictionary] = []
 	for b in HollowDressing.buildings():
 		var bk: int = b["k"]
-		var by := HollowMap.lvl(float(bk))
+		var by := HollowMap.deck_y_at((float(b["x0"]) + float(b["x1"])) * 0.5, float(bk))
 		var bwho: String = label.call("building", b["id"], b["x0"], bk)
 		if not _covers(by, float(b["x0"]) + 1.0, float(b["x1"]) - 1.0):
 			_err(rep, "dress: %s is not wholly over one deck" % bwho)
@@ -675,7 +866,7 @@ static func _check_dressing(rep: Dictionary) -> void:
 				_err(rep, "dress: %s has a door at x=%d outside itself" % [bwho, int(dx)])
 	for a in HollowDressing.actors():
 		var ak: int = a["k"]
-		var ay := HollowMap.lvl(float(ak))
+		var ay := HollowMap.deck_y_at(float(a["x"]), float(ak))
 		var awho: String = label.call("person", a["id"], a["x"], ak)
 		var rng: float = a["range"]
 		var asp := Vector2(float(a["x"]) - 16.0 - rng, float(a["x"]) + 16.0 + rng)
@@ -692,9 +883,9 @@ static func _check_dressing(rep: Dictionary) -> void:
 	for st in HollowDressing.stations():
 		var sk: int = st["k"]
 		var swho: String = label.call("station", st["id"], st["x"], sk)
-		if not _covers(HollowMap.lvl(float(sk)), float(st["x"]) - 8.0, float(st["x"]) + 8.0):
+		if not _covers(HollowMap.deck_y_at(float(st["x"]), float(sk)), float(st["x"]) - 8.0, float(st["x"]) + 8.0):
 			_err(rep, "dress: %s is not on a deck" % swho)
-		elif zone_of(Vector2(float(st["x"]), HollowMap.lvl(float(sk)) - 32.0)) != st["zone"]:
+		elif zone_of(Vector2(float(st["x"]), HollowMap.deck_y_at(float(st["x"]), float(sk)) - 32.0)) != st["zone"]:
 			_err(rep, "dress: %s is outside zone %s" % [swho, str(st["zone"])])
 		var swhy := _dress_conflict(_span(float(st["x"]), 24.0), sk, false)
 		if swhy != "":
@@ -795,8 +986,8 @@ static func _lint_dressing_scene(scene: Node, rep: Dictionary) -> void:
 		var node := holder.get_node_or_null(path) as Node2D if holder != null else null
 		if node == null:
 			_err(rep, "scene: person %s was not built" % str(a["id"]))
-		elif absf(node.position.x - float(a["x"])) > float(a["range"]) + 14.0 or absf(node.position.y - (HollowMap.lvl(float(a["k"])) - float(a["y_off"]))) > EPS:
-			_err(rep, "scene: person %s stands at %s, the data says (%d, %d)" % [str(a["id"]), str(node.position), int(a["x"]), int(HollowMap.lvl(float(a["k"])) - float(a["y_off"]))])
+		elif absf(node.position.x - float(a["x"])) > float(a["range"]) + 14.0 or absf(node.position.y - (HollowMap.deck_y_at(float(a["x"]), float(a["k"])) - float(a["y_off"]))) > EPS:
+			_err(rep, "scene: person %s stands at %s, the data says (%d, %d)" % [str(a["id"]), str(node.position), int(a["x"]), int(HollowMap.deck_y_at(float(a["x"]), float(a["k"])) - float(a["y_off"]))])
 	for s in HollowDressing.stations():
 		var st := dressing.get_node_or_null("Station_%s" % str(s["id"])) as Node2D
 		if st == null:
@@ -813,7 +1004,13 @@ static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> v
 	var x := env.position.x + 8.0
 	var missing := 0
 	while x < env.end.x:
-		if not _solid_at(layers, x, 8.0) or not _solid_at(layers, x, HollowMap.ROCK_TOP - 8.0):
+		var firmament_floor := HollowMap.ROCK_TOP
+		for dr in HollowMap.dome_rects():
+			if x >= dr.position.x and x < dr.end.x:
+				firmament_floor = minf(firmament_floor, dr.position.y)
+				if _solid_at(layers, x, dr.position.y + 8.0):
+					missing += 1 # the dome air was not carved
+		if not _solid_at(layers, x, 8.0) or not _solid_at(layers, x, firmament_floor - 8.0):
 			missing += 1
 		x += 320.0
 	if missing > 0:
@@ -832,14 +1029,17 @@ static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> v
 	if slab_missing > 0:
 		_err(rep, "shell: the floor slab has %d unpainted samples under the civic walls" % slab_missing)
 	var edge_missing := 0
+	var first_missing := Vector2.ZERO
 	var y := HollowMap.ROCK_TOP + 8.0
 	while y < env.end.y:
 		for ex in [env.position.x + 8.0, env.end.x - 8.0, HollowMap.WEST_WALL - 8.0, HollowMap.EAST_WALL + 8.0]:
 			if not _solid_at(layers, ex, y) and not _is_carved_air(ex, y):
+				if edge_missing == 0:
+					first_missing = Vector2(ex, y)
 				edge_missing += 1
 		y += 320.0
 	if edge_missing > 0:
-		_err(rep, "shell: the side flanks have %d unpainted samples at the envelope edges and civic walls" % edge_missing)
+		_err(rep, "shell: the side flanks have %d unpainted samples at the envelope edges and civic walls (first at %d, %d)" % [edge_missing, int(first_missing.x), int(first_missing.y)])
 	# The civic cavity itself must be empty of rock at its centre line between decks.
 	if _solid_at(layers, HollowMap.HEART_X, HollowMap.ROCK_TOP + 64.0) or _solid_at(layers, HollowMap.HEART_X, HollowMap.CAVITY_BOTTOM - 64.0):
 		_err(rep, "shell: rock is filling the Mouth inside the civic cavity")
@@ -850,6 +1050,10 @@ static func _is_carved_air(x: float, y: float) -> bool:
 	var p := Vector2(x, y)
 	for rc in HollowMap.flank_air_rects(HollowMap.FLANK_CLEAR):
 		if rc.grow(8.0).has_point(p):
+			return true
+	# the one-way deck row of a flank run is not on the solid layers either
+	for r in HollowMap.runs():
+		if x >= float(r["x0"]) and x <= float(r["x1"]) and y >= float(r["y"]) - 8.0 and y <= float(r["y"]) + HollowMap.FLOOR_THICK + 8.0:
 			return true
 	return false
 
@@ -930,17 +1134,21 @@ static func lint_scene(scene: Node) -> Dictionary:
 		var dir := signf(float(s["top_x"]) - float(s["foot_x"]))
 		var bad_tread := 0
 		var bad_air := 0
+		var first_bad_air := -1.0
 		for i in range(steps + 1):
 			var x: float = float(s["foot_x"]) + dir * 16.0 * float(i) + 8.0
-			var y: float = lerpf(float(s["foot_y"]), float(s["top_y"]), float(i) / float(steps))
+			# the tread row is the lerped row rounded to a tile, exactly as paint_stairs does
+			var y: float = roundf(lerpf(float(s["foot_y"]), float(s["top_y"]), float(i) / float(steps)) / 16.0) * 16.0
 			if not _solid_at(layers, x, y + 8.0):
 				bad_tread += 1
 			if _solid_at(layers, x, y - 8.0) or _solid_at(layers, x, y - 24.0):
+				if bad_air == 0:
+					first_bad_air = x
 				bad_air += 1
 		if bad_tread > 0:
 			_err(rep, "stair: %s has %d unpainted tread columns" % [str(s["id"]), bad_tread])
 		if bad_air > 0:
-			_err(rep, "stair: %s has %d columns with no headroom above the tread" % [str(s["id"]), bad_air])
+			_err(rep, "stair: %s has %d columns with no headroom above the tread (first near x=%d)" % [str(s["id"]), bad_air, int(first_bad_air)])
 	# Walls.
 	for w in HollowMap.wall_rects():
 		var missing := 0

@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Claude Code local state / scratch
+.claude/settings.local.json
+tmp/

@@ -6,6 +6,9 @@ extends CharacterBody2D
 const SPEED := 200.0
 const JUMP_VELOCITY := -400.0
 const CLIMB_SPEED := 140.0
+## Dev only: X cycles a movement-speed multiplier so a tester can cross the Hollow fast (console: `speed <n>`).
+const DEV_SPEEDS: Array[float] = [1.0, 3.0, 6.0, 12.0]
+const DEV_SPEED_KEY := KEY_X
 const TILE := 32.0
 const WORLD_COLLISION_MASK := 1
 ## Body height used to convert deck-top Y → CharacterBody2D position (feet on deck).
@@ -73,8 +76,14 @@ var _was_on_floor := false
 var _land_impact := 0.0
 
 
+## Dev movement-speed multiplier (1 = normal). Scales walking, acceleration and ladder speed, not jumps.
+var dev_speed_scale := 1.0
+var _dev_speed_label: Label
+
+
 func _ready() -> void:
 	add_to_group("player")
+	_register_dev_speed()
 	floor_max_angle = deg_to_rad(50.0)
 	floor_snap_length = 8.0
 	if terrain == null:
@@ -89,6 +98,44 @@ func _ready() -> void:
 	_has_safe_pos = true
 	_was_on_floor = is_on_floor()
 	reset_physics_interpolation()
+
+
+## Dev speed: the X key cycles DEV_SPEEDS; `speed <n>` on the debug console sets any multiplier. A small label
+## shows while it is not 1.
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key != null and key.pressed and not key.echo and key.physical_keycode == DEV_SPEED_KEY:
+		var next := (DEV_SPEEDS.find(dev_speed_scale) + 1) % DEV_SPEEDS.size() if DEV_SPEEDS.has(dev_speed_scale) else 0
+		set_dev_speed(DEV_SPEEDS[next])
+		get_viewport().set_input_as_handled()
+
+
+func set_dev_speed(scale: float) -> void:
+	dev_speed_scale = clampf(scale, 0.1, 40.0)
+	if _dev_speed_label == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 5
+		_dev_speed_label = Label.new()
+		_dev_speed_label.position = Vector2(560.0, 8.0)
+		_dev_speed_label.add_theme_font_size_override("font_size", 14)
+		_dev_speed_label.modulate = Color(1.0, 0.85, 0.4, 0.9)
+		layer.add_child(_dev_speed_label)
+		add_child(layer)
+	_dev_speed_label.text = "DEV SPEED x%s (X cycles)" % str(snappedf(dev_speed_scale, 0.1))
+	_dev_speed_label.visible = not is_equal_approx(dev_speed_scale, 1.0)
+
+
+func _register_dev_speed() -> void:
+	var console := get_node_or_null("/root/DebugConsole")
+	if console != null and console.has_method("register_command"):
+		console.register_command("speed", "speed <multiplier> — dev movement speed (1 = normal, X also cycles 1/3/6/12).", Callable(self, "_debug_speed"))
+
+
+func _debug_speed(args: Array[String]) -> String:
+	if args.is_empty():
+		return "dev speed is x%s" % str(dev_speed_scale)
+	set_dev_speed(float(str(args[0])))
+	return "dev speed set to x%s" % str(dev_speed_scale)
 
 
 const InteractionScript := preload("res://interaction.gd")
@@ -221,7 +268,7 @@ func _physics_process(delta: float) -> void:
 		elif climb_y != 0.0 or not is_on_floor():
 			# Pass through deck/stair colliders while on the shaft.
 			collision_mask = 0
-			velocity.y = climb_y * CLIMB_SPEED
+			velocity.y = climb_y * CLIMB_SPEED * dev_speed_scale
 		else:
 			# Idle on a deck still overlapping the zone.
 			_stop_climbing(false)
@@ -383,7 +430,7 @@ func _ensure_contact_shadow() -> void:
 
 
 func _apply_horizontal_move(move_x: float, delta: float) -> void:
-	var x_speed := SPEED * (0.45 if _climbing else 1.0) * _hauling_speed_multiplier()
+	var x_speed := SPEED * (0.45 if _climbing else 1.0) * _hauling_speed_multiplier() * dev_speed_scale
 	var target := move_x * x_speed
 	if _climbing:
 		# Ladder hops stay snappy so W/S + slight A/D feel responsive.
@@ -394,7 +441,7 @@ func _apply_horizontal_move(move_x: float, delta: float) -> void:
 	var rate := ACCEL if on_ground else AIR_ACCEL
 	if move_x == 0.0:
 		rate = FRICTION if on_ground else AIR_FRICTION
-	velocity.x = move_toward(velocity.x, target, rate * delta)
+	velocity.x = move_toward(velocity.x, target, rate * dev_speed_scale * delta)
 
 
 ## QOL: if walking horizontally would bump a ledge exactly one tile (up to

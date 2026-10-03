@@ -6,12 +6,16 @@
 script = ExtResource("1")
 zone_id = &"seep_threshold"
 display_name = "Seep Gallery"
-world_origin = Vector2(7200, 6016)
+world_origin = Vector2(7200, 7552)
 seams = [{
 "edge": "north",
 "neighbor": "cistern_tanks",
-"position": 6016
+"position": 7552
+}, {
+"edge": "south",
+"neighbor": "east_rows_5",
+"position": 7936
 }]
 enclosed = true
-world_rect = Rect2(6400, 5760, 2880, 384)
+world_rect = Rect2(6400, 7296, 2880, 384)
 restricted = false

@@ -98,6 +98,9 @@ func _build_zone_anchors() -> void:
 
 func _build_stair_hints() -> void:
 	for st in HollowMap.stairs():
+		# A flight that tops out on a landing is walked down, not dropped onto from a street.
+		if HollowMap.is_step(st) or HollowMap.is_landing_at(float(st["top_x"]), float(st["top_y"])):
+			continue
 		var hint := Label.new()
 		hint.name = "StairHint_%s" % str(st["id"])
 		hint.text = STAIR_DOWN_HINT

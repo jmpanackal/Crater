@@ -8,6 +8,8 @@ const RockViewScript := preload("res://hollow_rock_view.gd")
 ## Drawing is split into chunks (a level band by a slice of the map) so the engine can skip
 ## whatever is off screen; one giant canvas item was 17,000 draw calls a frame.
 const FringeViewScript := preload("res://hollow_fringe_view.gd")
+const BackdropViewScript := preload("res://hollow_backdrop_view.gd")
+const StairwellViewScript := preload("res://hollow_stairwell_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -19,6 +21,8 @@ const RigScript := preload("res://rig_station.gd")
 
 func _ready() -> void:
 	_build_views()
+	_build_backdrop()
+	_build_stairwells()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -71,6 +75,29 @@ func _build_views() -> void:
 		add_child(fv)
 
 
+## Carved back wall behind the whole cavity (see HollowBackdropView), in 1024 px blocks.
+func _build_backdrop() -> void:
+	for r in HollowBackdropView.blocks(CHUNK):
+		var view := Node2D.new()
+		view.name = "Backdrop_%d_%d" % [int(r.position.x), int(r.position.y)]
+		view.set_script(BackdropViewScript)
+		view.set("rect", r)
+		add_child(view)
+
+
+## A carved back wall and ceiling behind every stair flight that sits in a room. Mid Heart's flights are
+## open treads over the Mouth (no rock there), so they stay bare.
+func _build_stairwells() -> void:
+	for st in HollowMap.stairs():
+		if st["zone"] == &"mid_heart" or HollowMap.is_step(st):
+			continue
+		var view := Node2D.new()
+		view.name = "Stairwell_%s" % str(st["id"])
+		view.set_script(StairwellViewScript)
+		view.set("stair", st)
+		add_child(view)
+
+
 ## Ragged rock over the edges the tile grid leaves straight (see HollowFringeView). Lives under Terrain so
 ## it draws after the tiles and behind the player.
 func _build_fringes() -> void:
@@ -105,7 +132,7 @@ func _set_chunk(node: Node2D, key: Vector2i) -> void:
 func _build_people() -> void:
 	var talk_parent: Node = get_parent().get_node_or_null("NPCs")
 	for a in HollowDressing.actors():
-		var pos := Vector2(float(a["x"]), HollowDressing.lvl(int(a["k"])) - float(a["y_off"]))
+		var pos := Vector2(float(a["x"]), HollowMap.deck_y_at(float(a["x"]), float(a["k"])) - float(a["y_off"]))
 		var roles: Dictionary = HollowDressing.ROLES.get(a["role"], HollowDressing.ROLES[&"resident"])
 		if bool(a["talk"]) and talk_parent != null:
 			var npc := Node2D.new()
@@ -157,4 +184,4 @@ func _build_stations() -> void:
 			&"rig":
 				node.set("radius", s["radius"])
 		add_child(node)
-		node.position = Vector2(float(s["x"]), HollowDressing.lvl(int(s["k"])) - 14.0)
+		node.position = Vector2(float(s["x"]), HollowMap.deck_y_at(float(s["x"]), float(s["k"])) - 14.0)

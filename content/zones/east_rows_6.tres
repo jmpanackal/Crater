@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"east_rows_6"
+display_name = "Cistern Mouth Rows, lowest row"
+world_origin = Vector2(6400, 8320)
+seams = [{
+"edge": "north",
+"neighbor": "east_rows_5",
+"position": 8320
+}]
+enclosed = true
+world_rect = Rect2(5808, 8064, 1200, 384)
+restricted = false

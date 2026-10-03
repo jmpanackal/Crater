@@ -7,17 +7,17 @@ script = ExtResource("1")
 envelope_id = &"west"
 pockets = [{
 "amount": 3,
-"cell": Vector2i(-362, 348),
+"cell": Vector2i(-362, 444),
 "material_id": &"sutral",
 "note": "First Expansion Gallery: a damp fungal seam in the unfinished west face, a few tiles in from the floor."
 }, {
 "amount": 2,
-"cell": Vector2i(-365, 345),
+"cell": Vector2i(-365, 441),
 "material_id": &"ravelstone",
 "note": "First Expansion Gallery: dense impact strata just above the sutral seam."
 }, {
 "amount": 2,
-"cell": Vector2i(-300, 356),
+"cell": Vector2i(-300, 452),
 "material_id": &"sutral",
 "note": "First Expansion Gallery: a pocket under the work floor, reached by digging down from the gallery."
 }]

@@ -56,7 +56,7 @@ func _mine(x: float) -> bool:
 func _draw() -> void:
 	if layer == HollowDressing.LAYER_BACK:
 		for r in HollowMap.runs():
-			if absf(float(r["y"]) - HollowMap.lvl(float(chunk_k))) < 1.0 or chunk_k == -999:
+			if absf(float(r["k"]) - float(chunk_k)) < 0.01 or chunk_k == -999:
 				_decor_for_run(r)
 		for b in HollowDressing.buildings():
 			if _band(int(b["k"])) and float(b["x1"]) > chunk_x0 and float(b["x0"]) < chunk_x1:
@@ -156,7 +156,7 @@ func _poly(points: PackedVector2Array, color: Color) -> void:
 ## ---------------------------------------------------------------- buildings
 
 func _draw_building(b: Dictionary) -> void:
-	var deck := HollowDressing.lvl(int(b["k"])) - float(b["y_off"])
+	var deck := HollowMap.deck_y_at((float(b["x0"]) + float(b["x1"])) * 0.5, float(b["k"])) - float(b["y_off"])
 	var x0: float = b["x0"]
 	var x1: float = b["x1"]
 	var h: float = b["height"]
@@ -233,7 +233,7 @@ func _draw_window(deck: float, x: float, up: float) -> void:
 ## ---------------------------------------------------------------- lamps
 
 func _draw_lamp(l: Dictionary) -> void:
-	var deck := HollowDressing.lvl(int(l["k"]))
+	var deck := HollowMap.deck_y_at(float(l["x"]), float(l["k"]))
 	var c: Color = GLOW[l["tone"]]
 	var p := Vector2(float(l["x"]), deck - float(l["y_off"]))
 	draw_circle(p, 56.0, Color(c.r, c.g, c.b, 0.04))
@@ -254,7 +254,7 @@ func _draw_lamp(l: Dictionary) -> void:
 ## ---------------------------------------------------------------- props
 
 func _draw_prop(p: Dictionary) -> void:
-	var deck := HollowDressing.lvl(int(p["k"])) - float(p["y_off"])
+	var deck := HollowMap.deck_y_at(float(p["x"]), float(p["k"])) - float(p["y_off"])
 	var x: float = p["x"]
 	var w: float = p["w"]
 	var h: float = p["h"]

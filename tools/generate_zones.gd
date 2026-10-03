@@ -27,10 +27,16 @@ func _run() -> void:
 			return
 		var ka := {"edge": edge_a, "neighbor": str(b), "position": int(pos)}
 		var kb := {"edge": edge_b, "neighbor": str(a), "position": int(pos)}
-		if not (seams[a] as Array).has(ka):
-			seams[a].append(ka)
-		if not (seams[b] as Array).has(kb):
-			seams[b].append(kb)
+		# one seam per neighbour and edge: a second link (another stair or ladder) between the same two
+		# zones keeps the first position, so the reciprocal check stays well defined
+		for existing in (seams[a] as Array):
+			if existing["edge"] == edge_a and existing["neighbor"] == str(b):
+				return
+		for existing in (seams[b] as Array):
+			if existing["edge"] == edge_b and existing["neighbor"] == str(a):
+				return
+		seams[a].append(ka)
+		seams[b].append(kb)
 	# Vertical links: the zone above gets "south", the zone below gets "north"; position = lower deck y.
 	var link_vertical := func(upper_pt: Vector2, lower_pt: Vector2) -> void:
 		var up := _zone_at(upper_pt)

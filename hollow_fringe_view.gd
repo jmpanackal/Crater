@@ -23,11 +23,6 @@ func _ready() -> void:
 
 
 func _draw() -> void:
-	# The Firmament over the cavity: the top band owns it.
-	if chunk_k == 0:
-		var seg := _clip(HollowMap.WEST_WALL, HollowMap.EAST_WALL)
-		if seg.y > seg.x:
-			_hang(seg.x, seg.y, HollowMap.ROCK_TOP, 1)
 	for b in HollowDressing.buildings():
 		if int(b["k"]) != chunk_k or bool(b.get("overlay", false)) or b["kind"] == &"nook":
 			continue
@@ -35,15 +30,23 @@ func _draw() -> void:
 			continue
 		var seg := _clip(float(b["x0"]), float(b["x1"]))
 		if seg.y > seg.x:
-			_hang(seg.x, seg.y, HollowMap.lvl(float(b["k"])) - float(b["height"]), 10)
+			_hang(seg.x, seg.y, HollowMap.deck_y_at((float(b["x0"]) + float(b["x1"])) * 0.5, float(b["k"])) - float(b["height"]), 10)
 	for r in HollowMap.runs():
-		if absf(float(r["y"]) - HollowMap.lvl(float(chunk_k))) > 1.0:
+		if absf(float(r["k"]) - float(chunk_k)) > 0.01:
 			continue
 		var deck: float = r["y"]
 		for s in _flank_segments(r):
 			var seg := _clip(s.x, s.y)
 			if seg.y > seg.x:
 				_hang(seg.x, seg.y, deck - HollowMap.FLANK_CLEAR, 20)
+		# a civic room with nothing built above it has the solid rock for a ceiling: ragged like the rest
+		var room_x0 := maxf(float(r["x0"]), HollowMap.WEST_WALL)
+		var room_x1 := minf(float(r["x1"]), HollowMap.EAST_WALL)
+		if r["zone"] != &"mid_heart" and not bool(r["landing"]) and room_x1 > room_x0 and HollowMap.nothing_above(float(r["k"]), room_x0, room_x1):
+			var room_seg := _clip(room_x0, room_x1)
+			if room_seg.y > room_seg.x:
+				for part in HollowMap.ceiling_segments(room_seg.x, room_seg.y, float(r["k"])):
+					_hang(part.x, part.y, part.z, 1)
 		if r["l"] == HollowMap.END_ROCK and float(r["x0"]) >= chunk_x0 and float(r["x0"]) < chunk_x1:
 			_end(float(r["x0"]), deck - HollowMap.FLANK_CLEAR, deck, 1.0, 30)
 		if r["r"] == HollowMap.END_ROCK and float(r["x1"]) > chunk_x0 and float(r["x1"]) <= chunk_x1:

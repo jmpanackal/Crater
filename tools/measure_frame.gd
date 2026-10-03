@@ -1,6 +1,6 @@
 extends SceneTree
 ## Dev probe (needs a real window): average frame time and draw calls at a spot, vsync off.
-## Run: godot --path . --windowed --resolution 1600x900 --script res://tools/measure_frame.gd -- at=-80,4864
+## Run: godot --path . --windowed --resolution 1600x900 --script res://tools/measure_frame.gd -- at=-80,6400
 
 
 func _init() -> void:
@@ -13,7 +13,7 @@ func _run() -> void:
 		quit(1)
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	var at := Vector2(-80.0, 4864.0)
+	var at := Vector2(-80.0, 6400.0)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("at="):
 			var p := a.trim_prefix("at=").split(",")
