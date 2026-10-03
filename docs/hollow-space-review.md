@@ -80,3 +80,11 @@ Built after the user's answers (three housing tiers: lower, mid, high/Ashram; do
 | **Mid-East street** (`E4`) | Terraced with a door, a bump and a dip, so the 7200 px gallery is no longer one strip | The Landing, the Approach and the dig-front gallery. |
 
 Still open: the Cistern's final size and growth, what a "rest point" hosts in each row, the housing costs and Ashram upgrade list (all OPEN in canon), the names above, and the High-West galleries and remaining long runs (`HW2`, `HW3`, `BW10-BW13`, `E9-E11`, the opening route's `LW8`).
+
+## 6. Structures pass: decisions and first build (2026-10-03)
+
+User decisions (also `art-direction.md` 24): growth is both new rooms (from the reserves) and changed contents; the Cistern is one tall pressure basin seen whole from galleries; lower west L9-L11 stays solid rock as Bottom-West's growth reserve; the east Mouth cliff L7-L11 becomes Cistern basin and tank space; unusual shapes go to the Ashram Heights summits, the Cistern basin and flood gate, and Mid Heart / the Pulse hall.
+
+Built (AI): the basin chamber `H_CI` (x 8096..9248, levels 11-14) now holds three full-height pressure tanks with sight glasses, headers and risers (`hollow_cistern_view.gd`, back layer, no collision). The fill follows the Cistern's condition through `EventBus.district_changed` (comfortable 0.9, stable 0.75, strained 0.5, shortage 0.3, critical 0.12: display values, not simulation). Test: `tests/test_hollow_cistern_view.gd`.
+
+Not built yet: widening the basin west into the east cliff, galleries and pump rooms around it, reserve growth rooms, the Mid Heart / Pulse hall shape, and annexes for the other empty spans.

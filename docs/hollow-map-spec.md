@@ -175,7 +175,8 @@ Power (LOCKED canon, `story.md` and `mechanics-canon.md` section 21/26): **Press
 - **Lift-only areas:** Ashram Heights (all tiers, both sides) can be reached only by the premium elevators (lint rule `lift_only`: with every lift ignored, none of those decks is reachable). The L5 Warden gates still stand beyond the lobbies.
 - **Cistern condition:** healthy runs at full speed; strained or short slows to 35 percent; critical parks a non-essential lift (a trip in progress finishes at a crawl). Essential lifts never park. An Access `gate` locks a lift ("Warden-run: not cleared yet"); none is set yet.
 - **Space:** a shaft is carved cab width + 16 px each side and passes only decks it stops at, with no ladder or flight in it. Freight cabs are 160 px so a cart or a bundle can ride; premium cabs are 96 px.
-- **Open (user):** the Pulse's role (does it ever power anything?), whether the Ashram elevators should be Warden-locked by `ashram_clearance` or open to the lobby, and rider capacity/cart rules for freight.
+- **Decided (USER, 2026-10-03, taking the AI recommendations):** (1) the Pulse powers nothing; elevators run on Presswater only, and a Pulse-cycle schedule for the Ashram lifts is a possible later add-on, not built. (2) The Ashram elevators are open to the lobby; the L5 `ashram_clearance` gates do the gating (a Warden boarding check at the lobby is a possible later upgrade once witness rules reach the Ashram). (3) Freight is free to ride with hauled goods, slow, and parks when the Cistern is critical; making freight a progression unlock ("powered hauling") is a later project, not built.
+- **Still open:** Pulse Binders versus Wardens as the people who tend or run the lifts; zone names and purposes are AI placeholders until confirmed.
 
 ### Travel times (200 px/s walking, 140 px/s ladders; rough, before the 384 px levels)
 

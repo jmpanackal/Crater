@@ -10,6 +10,7 @@ const RockViewScript := preload("res://hollow_rock_view.gd")
 const FringeViewScript := preload("res://hollow_fringe_view.gd")
 const BackdropViewScript := preload("res://hollow_backdrop_view.gd")
 const StairwellViewScript := preload("res://hollow_stairwell_view.gd")
+const CisternViewScript := preload("res://hollow_cistern_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -23,6 +24,7 @@ func _ready() -> void:
 	_build_views()
 	_build_backdrop()
 	_build_stairwells()
+	_build_cistern_basin()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -83,6 +85,14 @@ func _build_backdrop() -> void:
 		view.set_script(BackdropViewScript)
 		view.set("rect", r)
 		add_child(view)
+
+
+## The Cistern's pressure basin: tanks and pipes filling hall H_CI (see HollowCisternView).
+func _build_cistern_basin() -> void:
+	var view := Node2D.new()
+	view.name = "CisternBasin"
+	view.set_script(CisternViewScript)
+	add_child(view)
 
 
 ## A carved back wall and ceiling behind every stair flight that sits in a room. Mid Heart's flights are
