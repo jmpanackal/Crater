@@ -177,7 +177,7 @@ static func _terraces() -> Array[Dictionary]:
 		{"id": &"AL6", "zone": &"mid_allotments", "k": 10, "l": END_WALL, "r": END_FOOT, "pieces": [
 			[-2400.0, -2256.0, 0.0], [-2128.0, -1856.0, -64.0], [-1728.0, -1104.0, 0.0], [-1040.0, -704.0, -32.0], [-640.0, 640.0, 0.0]]},
 		{"id": &"AL7", "zone": &"mid_allotments", "k": 11, "l": END_FOOT, "r": END_WALL, "pieces": [
-			[-1280.0, -160.0, 0.0], [-112.0, 560.0, -48.0], [608.0, 1280.0, 0.0]]}, # the residences street is tucked back from the Mouth and closed off by rock
+			[-1280.0, -160.0, 0.0], [-112.0, 560.0, -48.0], [608.0, 1376.0, 0.0]]}, # the residences street is tucked back from the Mouth (a 64 px rock wall) and closed off by rock
 		# ---- Ashram Heights upper wards (2026-10-02): a zigzag of tiers climbing to the Firmament, joined by
 		# processional stairs. Each tier is a street the one below passes under; the top tier (L0) is directly
 		# under the Firmament (AI working layout, names and purposes for the user to confirm).
@@ -214,6 +214,8 @@ static func _terraces() -> Array[Dictionary]:
 		# ---- Cistern: the core, the tanks and the seep threshold, broken up (footprint unchanged)
 		{"id": &"E9", "zone": &"cistern", "k": 13, "l": END_FOOT, "r": END_OPEN, "pieces": [
 			[6400.0, 7312.0, 0.0], [7408.0, 7792.0, -48.0], [7888.0, 8096.0, 0.0]]}, # a maintenance balcony over the basin chamber
+		{"id": &"PF13", "zone": &"cistern", "k": 13, "l": END_OPEN, "r": END_OPEN, "pieces": [
+			[8672.0, 8928.0, 0.0]]}, # the freight elevator's landing: a pier in the basin chamber
 		{"id": &"E10", "zone": &"cistern_tanks", "k": 14, "l": END_FOOT, "r": END_WALL, "pieces": [
 			[7360.0, 7616.0, 0.0], [7680.0, 7904.0, 32.0], [7968.0, EAST_WALL, 0.0]]},
 		{"id": &"E11", "zone": &"seep_threshold", "k": 15, "l": END_WALL, "r": END_WALL, "pieces": [
@@ -364,7 +366,7 @@ static func nothing_above(k: float, x0: float, x1: float) -> bool:
 ## ---------------------------------------------------------------- derived: the rock between rooms
 
 ## Air in the civic cavity, as Rect2 (x, y, w, h) in px: every room (ceiling to the deck row), every flight
-## (112 px above each tread; a terrace step opens the whole room height), every ladder shaft, and
+## (112 px above each tread; a terrace step opens the whole room height), every ladder and lift shaft, and
 ## every dome. Everything else in the civic cavity, outside the Mouth, is solid rock (civic_rock_rows).
 static func air_rects() -> Array[Rect2]:
 	if _cache.has("air_rects"):
@@ -397,6 +399,9 @@ static func air_rects() -> Array[Rect2]:
 		if in_flank(float(l["open_x"])):
 			continue
 		out.append(Rect2(float(l["open_x"]) - 8.0, float(l["top_y"]), SHAFT_OPENING + 16.0, float(l["bottom_y"]) - float(l["top_y"])))
+	for lf in lifts():
+		var stops: Array = lf["stops"]
+		out.append(Rect2(float(lf["open_x"]) - 16.0, float(stops[0]), float(lf["width"]) + 32.0, float(stops[stops.size() - 1]) - float(stops[0])))
 	out.append_array(dome_rects())
 	out.append_array(hall_rects())
 	_cache["air_rects"] = out
@@ -678,16 +683,12 @@ static func ladders() -> Array[Dictionary]:
 		_ladder(&"LAD_EP12", &"east_rows_2", 5200.0, 11, 12),
 		_ladder(&"LAD_EP15", &"east_rows_4", 5600.0, 14, 15),
 		_ladder(&"LAD_EP16", &"east_rows_5", 5700.0, 15, 16),
-		_ladder(&"LAD_LP12", &"worker_return_ascent", 1152.0, 11, 12),
-		_ladder(&"LAD_LP13", &"lower_rows_1", 1296.0, 12, 13),
 		_ladder(&"LAD_LP16", &"lower_rows_4", 208.0, 15, 16),
 		_ladder(&"LAD_BW2", &"bottom_west_deeper", -3920.0, 15, 16),
 		_ladder(&"LAD_BW3", &"bottom_west_lowest", -4800.0, 16, 17),
-		# connections the three lifts used to make (lifts were removed 2026-10-02)
-		_ladder(&"LAD_A5", &"wickwork", -2560.0, 5, 6), # the Ashram promenade down to the High-West gallery
+		# (the Ashram is reached only by the premium lifts; the Lower Mouth Rows and the Mouth balconies on the west
+		# freight shaft are reached by that lift)
 		_ladder(&"LAD_HW2", &"high_west_front", -2688.0, 6, 7), # High-West upper gallery to the lower
-		_ladder(&"LAD_E1", &"glowbeds", 6416.0, 5, 6), # the east Ashram promenade down to Glowbeds
-		_ladder(&"LAD_MB10", &"mid_allotments", 1200.0, 9, 10),
 		_ladder(&"LAD_ME10", &"lower_east_homes", 4976.0, 9, 10),
 		_ladder(&"LAD_ME13", &"cistern_intake", 5520.0, 12, 13),
 		_ladder(&"LAD_LE2", &"lower_east_homes", 7360.0, 10, 11),
@@ -697,6 +698,47 @@ static func ladders() -> Array[Dictionary]:
 	]
 	_cache["ladders"] = out
 	return out
+
+
+## ---------------------------------------------------------------- lifts
+
+## Lifts are Presswater elevators (LOCKED: the Cistern's pressurized water drives lifts; Cistern condition
+## slows or parks them). Two classes (USER 2026-10-02): a large `freight` elevator that carries you through
+## several districts, and a small `premium` elevator, the only way up to Ashram Heights. The cab is
+## `width` px wide, the shaft is carved 16 px wider each side, and the lift stops only where a deck covers
+## the cab. `essential` lifts never park (they slow instead). `gate` names an Access gate that locks it.
+const LIFT_FREIGHT_WIDTH := 160.0
+const LIFT_PREMIUM_WIDTH := 96.0
+
+
+static func _lift(id: StringName, zone: StringName, open_x: float, width: float, stops_k: Array, kind: StringName, essential: bool = false, gate: StringName = FLAG_NONE) -> Dictionary:
+	var ys: Array[float] = []
+	for k in stops_k:
+		ys.append(lvl(float(k)))
+	ys.sort()
+	return {"id": id, "zone": zone, "open_x": open_x, "width": width, "stops": ys, "kind": kind, "essential": essential, "gate": gate}
+
+
+static func lifts() -> Array[Dictionary]:
+	if _cache.has("lifts"):
+		return _cache["lifts"]
+	var out: Array[Dictionary] = [
+		# West freight elevator: Wickwork down through the Allotments and the Lower Mouth Rows (skips level 14).
+		_lift(&"freight_west", &"wickwork", 1200.0, LIFT_FREIGHT_WIDTH, [8, 9, 10, 11, 12, 13, 15], &"freight"),
+		# East freight elevator: Mid-East down through Lower-East and the Cistern basin chamber to the tanks (it stops short of the flood gate).
+		_lift(&"freight_east", &"cistern_freight", 8704.0, LIFT_FREIGHT_WIDTH, [8, 11, 12, 13, 14], &"freight"),
+		# Premium Ashram elevators: Wickwork / Glowbeds up through the guarded galleries to the Ashram lobby.
+		_lift(&"ashram_west", &"wickwork", -2560.0, LIFT_PREMIUM_WIDTH, [5, 6, 7, 8], &"premium", true),
+		_lift(&"ashram_east", &"mid_east", 6416.0, LIFT_PREMIUM_WIDTH, [5, 6, 7, 8], &"premium", true),
+	]
+	_cache["lifts"] = out
+	return out
+
+
+## Zones reachable only by a lift: with every lift ignored they must be unreachable (lint rule `lift_only`).
+static func lift_only_zones() -> Array[StringName]:
+	return [&"ashram_west", &"ashram_west_3", &"ashram_west_2", &"ashram_west_1", &"ashram_west_0",
+		&"ashram_east", &"ashram_east_3", &"ashram_east_2", &"ashram_east_1", &"ashram_east_0"]
 
 
 ## ---------------------------------------------------------------- gates
@@ -889,10 +931,12 @@ static func zones() -> Array[Dictionary]:
 ## ---------------------------------------------------------------- derived: geometry
 
 static func run_by_id(id: StringName) -> Dictionary:
-	for r in runs():
-		if r["id"] == id:
-			return r
-	return {}
+	if not _cache.has("run_index"):
+		var idx: Dictionary = {}
+		for r in runs():
+			idx[r["id"]] = r
+		_cache["run_index"] = idx
+	return (_cache["run_index"] as Dictionary).get(id, {})
 
 
 ## Deck pieces: the runs themselves. Decks are one-way (HollowTerrain), so ladders and
@@ -940,8 +984,25 @@ static func stair_holes() -> Array[Dictionary]:
 	return out
 
 
+## Lift shaft openings (USER 2026-10-02): where an elevator shaft passes a street, the deck tiles are cut across the
+## cab's width at every stop, so the cab rides through an opening in the floor and not through solid-looking
+## tiles. Each stop keeps an invisible one-way landing plate (hollow_structures.gd) so nobody falls into the shaft.
+static func lift_holes() -> Array[Dictionary]:
+	if _cache.has("lift_holes"):
+		return _cache["lift_holes"]
+	var out: Array[Dictionary] = []
+	for lf in lifts():
+		for y in lf["stops"]:
+			out.append({"id": lf["id"], "x0": float(lf["open_x"]), "x1": float(lf["open_x"]) + float(lf["width"]), "y": float(y)})
+	_cache["lift_holes"] = out
+	return out
+
+
 static func in_hole(x: float, y: float) -> bool:
 	for h in stair_holes():
+		if absf(float(h["y"]) - y) < 0.5 and x >= float(h["x0"]) and x < float(h["x1"]):
+			return true
+	for h in lift_holes():
 		if absf(float(h["y"]) - y) < 0.5 and x >= float(h["x0"]) and x < float(h["x1"]):
 			return true
 	return false
@@ -952,7 +1013,10 @@ static func deck_rects() -> Array[Vector4]:
 	var out: Array[Vector4] = []
 	for p in deck_pieces():
 		var segs: Array[Vector2] = [Vector2(float(p["x0"]), float(p["x1"]))]
-		for h in stair_holes():
+		var holes: Array[Dictionary] = []
+		holes.append_array(stair_holes())
+		holes.append_array(lift_holes())
+		for h in holes:
 			if absf(float(h["y"]) - float(p["y"])) > 0.5:
 				continue
 			var next: Array[Vector2] = []

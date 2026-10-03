@@ -25,6 +25,7 @@ const HEART_COLOR := Color(1.0, 0.8, 0.45, 1.0)
 const STAIR_COLOR := Color(0.95, 0.5, 0.22, 0.9)
 const LADDER_COLOR := Color(0.5, 0.82, 0.72, 0.9)
 const GATE_CLOSED := Color(1.0, 0.32, 0.28, 0.95)
+const LIFT_COLOR := Color(0.38, 0.66, 1.0, 0.95)
 const GATE_OPEN := Color(0.45, 0.75, 0.5, 0.6)
 const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.7)
 
@@ -306,39 +307,72 @@ func _current_zone_name() -> String:
 	return str(zones.get_display_name(zone_id)) if zone_id != "" else ""
 
 
-func _draw() -> void:
-	var s := size
-	if s.x < 1.0 or s.y < 1.0:
-		s = custom_minimum_size
-	draw_style_box(_panel, Rect2(Vector2.ZERO, s))
+## The static map (shell, Mouth, level rows, zone outlines, decks, stairs, ladders, labels) is recorded once per
+## panel size into draw commands and replayed each redraw; only the player's row, the gates, the player and the
+## header are recomputed. (Recomputing it all, with dozens of zones and over a hundred decks, cost a visible
+## slice of every frame.)
+var _cmds: Array = []
+var _cmd_size := Vector2.ZERO
+var _gates_cache: Array[Dictionary] = []
+
+
+func _cline(a: Vector2, b: Vector2, color: Color, width: float) -> void:
+	_cmds.append([0, a, b, color, width])
+
+
+func _crect(r: Rect2, color: Color, filled: bool = true, width: float = 1.0) -> void:
+	if filled:
+		_cmds.append([1, r, color, true, width])
+		return
+	# An unfilled rect is drawn as four lines.
+	var tl := r.position
+	var tr := Vector2(r.end.x, r.position.y)
+	var br := r.end
+	var bl := Vector2(r.position.x, r.end.y)
+	_cline(tl, tr, color, width)
+	_cline(tr, br, color, width)
+	_cline(br, bl, color, width)
+	_cline(bl, tl, color, width)
+
+
+func _cstr(pos: Vector2, text: String, size_px: int, color: Color) -> void:
+	_cmds.append([2, pos, text, size_px, color])
+
+
+func _cline_world(a: Vector2, b: Vector2, color: Color, width: float, area: Rect2) -> void:
+	var ma := world_to_map(a)
+	var mb := world_to_map(b)
+	if not area.grow(2.0).has_point(ma) and not area.grow(2.0).has_point(mb):
+		return
+	_cline(ma, mb, color, width)
+
+
+func _build_static(s: Vector2) -> void:
+	_cmds.clear()
+	_gates_cache.clear()
 	var area := _content_rect()
-	var font := ThemeDB.fallback_font
 	var bounds := map_world_bounds()
-	draw_rect(area, Color(0.055, 0.075, 0.085, 1.0))
+	_crect(area, Color(0.055, 0.075, 0.085, 1.0))
 
 	# The rock shell: Firmament across the top, a flank each side, a slab under each wall. The
 	# civic cavity is left open between the walls, and the Mouth runs on down as the pit.
-	draw_rect(_rect_to_map(HollowMap.env_rect()).intersection(area), ROCK_FILL)
+	_crect(_rect_to_map(HollowMap.env_rect()).intersection(area), ROCK_FILL)
 	var firmament := _rect_to_map(Rect2(HollowMap.ENV_LEFT, HollowMap.ENV_TOP, HollowMap.ENV_RIGHT - HollowMap.ENV_LEFT, HollowMap.ROCK_TOP - HollowMap.ENV_TOP)).intersection(area)
-	draw_rect(firmament, FIRMAMENT_FILL)
-	draw_rect(_rect_to_map(HollowMap.cavity_rect()).intersection(area), CAVITY_FILL)
-	draw_string(font, Vector2(firmament.position.x + 4.0, firmament.end.y - 3.0), "FIRMAMENT", HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0.7, 0.75, 0.75, 0.35))
+	_crect(firmament, FIRMAMENT_FILL)
+	_crect(_rect_to_map(HollowMap.cavity_rect()).intersection(area), CAVITY_FILL)
+	_cstr(Vector2(firmament.position.x + 4.0, firmament.end.y - 3.0), "FIRMAMENT", LABEL_SIZE, Color(0.7, 0.75, 0.75, 0.35))
 
 	# The Mouth: open void between the lips, never a plug.
 	var mouth := _rect_to_map(Macro.MOUTH_BOUNDS).intersection(area)
-	draw_rect(mouth, Color(0.01, 0.02, 0.03, 0.85))
+	_crect(mouth, Color(0.01, 0.02, 0.03, 0.85))
 	var lip := Color(0.5, 0.62, 0.6, 0.4)
-	draw_line(Vector2(mouth.position.x, mouth.position.y), Vector2(mouth.position.x, mouth.end.y), lip, 1.0)
-	draw_line(Vector2(mouth.end.x, mouth.position.y), Vector2(mouth.end.x, mouth.end.y), lip, 1.0)
+	_cline(Vector2(mouth.position.x, mouth.position.y), Vector2(mouth.position.x, mouth.end.y), lip, 1.0)
+	_cline(Vector2(mouth.end.x, mouth.position.y), Vector2(mouth.end.x, mouth.end.y), lip, 1.0)
 
-	# Level rows: faint, the player's row brighter.
-	var player_row := -1
-	if _player != null and is_instance_valid(_player):
-		player_row = int(roundf((_player.global_position.y + 32.0 - HollowMap.LEVEL_ORIGIN) / HollowMap.LEVEL_GAP))
+	# Level rows: faint (the player's row is brightened per redraw).
 	for k in range(HollowMap.LEVELS):
 		var gy := HollowMap.lvl(float(k))
-		var on_row := k == player_row
-		_line(Vector2(bounds.position.x, gy), Vector2(bounds.end.x, gy), Color(0.4, 0.55, 0.55, 0.28 if on_row else 0.08), 1.0, area)
+		_cline_world(Vector2(bounds.position.x, gy), Vector2(bounds.end.x, gy), Color(0.4, 0.55, 0.55, 0.08), 1.0, area)
 
 	# Zones: outlines only; places held out at the start read warm, never solid fills.
 	var held_zones := _held_zone_ids()
@@ -347,26 +381,32 @@ func _draw() -> void:
 		if drawn.size.x <= 0.0 or drawn.size.y <= 0.0:
 			continue
 		var r := _rect_to_map(drawn).intersection(area)
-		draw_rect(r, ZONE_HELD if held_zones.has(district.id) else ZONE_LINE, false, 1.0)
+		_crect(r, ZONE_HELD if held_zones.has(district.id) else ZONE_LINE, false, 1.0)
 
-	# The map itself: decks, stairs, ladders, gates.
+	# The map itself: decks, stairs, ladders. (Gates are drawn per redraw: they open and close.)
 	for piece in HollowMap.deck_pieces():
 		var heart: bool = HollowMap.run_by_id(piece["run"])["zone"] == &"mid_heart"
-		_line(Vector2(piece["x0"], piece["y"]), Vector2(piece["x1"], piece["y"]), HEART_COLOR if heart else DECK_COLOR, 2.0 if heart else 1.6, area)
+		_cline_world(Vector2(piece["x0"], piece["y"]), Vector2(piece["x1"], piece["y"]), HEART_COLOR if heart else DECK_COLOR, 2.0 if heart else 1.6, area)
 	for stair in HollowMap.stairs():
-		_line(Vector2(stair["foot_x"], stair["foot_y"]), Vector2(stair["top_x"], stair["top_y"]), STAIR_COLOR, 1.4, area)
+		_cline_world(Vector2(stair["foot_x"], stair["foot_y"]), Vector2(stair["top_x"], stair["top_y"]), STAIR_COLOR, 1.4, area)
 	for ladder in HollowMap.ladders():
 		var lx: float = float(ladder["open_x"]) + 32.0
-		_line(Vector2(lx, ladder["top_y"]), Vector2(lx, ladder["bottom_y"]), LADDER_COLOR, 1.2, area)
-	var access := get_tree().root.get_node_or_null("Access")
+		_cline_world(Vector2(lx, ladder["top_y"]), Vector2(lx, ladder["bottom_y"]), LADDER_COLOR, 1.2, area)
+	for lift in HollowMap.lifts():
+		var stops: Array = lift["stops"]
+		var cx: float = float(lift["open_x"]) + float(lift["width"]) * 0.5
+		_cline_world(Vector2(cx, stops[0]), Vector2(cx, stops[stops.size() - 1]), LIFT_COLOR, 2.4, area)
+		for stop_y in stops:
+			var sp := world_to_map(Vector2(cx, stop_y))
+			if area.has_point(sp):
+				_crect(Rect2(sp - Vector2(1.5, 1.5), Vector2(3.0, 3.0)), LIFT_COLOR)
 	for gate in HollowMap.gates():
 		var run := HollowMap.run_by_id(gate["run"])
 		if run.is_empty():
 			continue
-		var open: bool = access != null and bool(access.is_open(gate["id"]))
 		var gp := world_to_map(Vector2(gate["x"], run["y"]))
 		if area.has_point(gp):
-			draw_line(gp + Vector2(0, -4), gp + Vector2(0, 1), GATE_OPEN if open else GATE_CLOSED, 2.0)
+			_gates_cache.append({"id": gate["id"], "pos": gp})
 
 	# Labels: soft shadow, nudged apart, centred on their zone footprint.
 	var placed: Array[Rect2] = []
@@ -383,8 +423,49 @@ func _draw() -> void:
 		label_rect.position.y = clampf(label_rect.position.y, area.position.y, area.end.y - label_rect.size.y)
 		placed.append(label_rect)
 		var at := Vector2(label_rect.position.x, label_rect.position.y + label_rect.size.y - 2.0)
-		draw_string(font, at + Vector2(1, 1), str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0, 0, 0, 0.55))
-		draw_string(font, at, str(marker.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, LABEL_COLOR)
+		_cstr(at + Vector2(1, 1), str(marker.name), LABEL_SIZE, Color(0, 0, 0, 0.55))
+		_cstr(at, str(marker.name), LABEL_SIZE, LABEL_COLOR)
+	_cmd_size = s
+
+
+func _draw() -> void:
+	var s := size
+	if s.x < 1.0 or s.y < 1.0:
+		s = custom_minimum_size
+	draw_style_box(_panel, Rect2(Vector2.ZERO, s))
+	if _cmds.is_empty() or _cmd_size != s:
+		_build_static(s)
+	var area := _content_rect()
+	var font := ThemeDB.fallback_font
+	var bounds := map_world_bounds()
+	for c in _cmds:
+		match int(c[0]):
+			0:
+				draw_line(c[1], c[2], c[3], c[4], true)
+			1:
+				# draw_rect(filled) stalled the main thread for ~15 ms per big rect in the Compatibility renderer;
+				# a coloured polygon of the same four corners costs microseconds.
+				var rr: Rect2 = c[1]
+				draw_colored_polygon(PackedVector2Array([rr.position, Vector2(rr.end.x, rr.position.y), rr.end, Vector2(rr.position.x, rr.end.y)]), c[2])
+			2:
+				draw_string(font, c[1], c[2], HORIZONTAL_ALIGNMENT_LEFT, -1, int(c[3]), c[4])
+
+	# The player's level row, brighter.
+	var player_row := -1
+	if _player != null and is_instance_valid(_player):
+		player_row = int(roundf((_player.global_position.y + 32.0 - HollowMap.LEVEL_ORIGIN) / HollowMap.LEVEL_GAP))
+	if player_row >= 0 and player_row < HollowMap.LEVELS:
+		var gy := HollowMap.lvl(float(player_row))
+		var ra := world_to_map(Vector2(bounds.position.x, gy))
+		var rb := world_to_map(Vector2(bounds.end.x, gy))
+		draw_line(ra, rb, Color(0.4, 0.55, 0.55, 0.2), 1.0, true)
+
+	# Gates: shut or open as they stand now.
+	var access := get_tree().root.get_node_or_null("Access")
+	for g in _gates_cache:
+		var open: bool = access != null and bool(access.is_open(g["id"]))
+		var gp: Vector2 = g["pos"]
+		draw_line(gp + Vector2(0, -4), gp + Vector2(0, 1), GATE_OPEN if open else GATE_CLOSED, 2.0)
 
 	# The player: a dot, nothing else.
 	if _player and is_instance_valid(_player):

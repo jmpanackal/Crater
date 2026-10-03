@@ -1,9 +1,10 @@
 extends Node2D
-## Builds every ladder, gate and zone anchor that HollowMap declares, so main.tscn
+## Builds every ladder, elevator, gate and zone anchor that HollowMap declares, so main.tscn
 ## carries none of them by hand and they cannot drift from the map (HollowMapLint.lint_scene
 ## checks the result). Place one of these as Hollow/Structures.
 
 const ClimbScript := preload("res://hollow_climb.gd")
+const ElevatorScript := preload("res://hollow_elevator.gd")
 const GateScript := preload("res://access_gate.gd")
 const ZoneAnchorScript := preload("res://zone_anchor.gd")
 
@@ -13,6 +14,7 @@ const GATE_BAR := Vector2(32.0, 128.0)
 
 func _ready() -> void:
 	_build_ladders()
+	_build_lifts()
 	_build_gates()
 	_build_zone_anchors()
 
@@ -34,6 +36,56 @@ func _build_ladders() -> void:
 		ladder.set("deck_open_width", 0.0)
 		ladder.set("upper_land_side", 0)
 		add_child(ladder)
+
+
+func _build_lifts() -> void:
+	for lf in HollowMap.lifts():
+		var lift := AnimatableBody2D.new()
+		lift.name = "Lift_%s" % str(lf["id"])
+		lift.set_script(ElevatorScript)
+		lift.set("lift_id", lf["id"])
+		add_child(lift)
+		_build_landings(lf, lift)
+
+
+## One landing per stop: an invisible one-way plate across the shaft opening in the floor (the cab and its riders pass
+## up through it, a walker is held up by it) and a door frame (two posts and a lintel) so the opening reads as a
+## doorway for the cab, which rides between the posts.
+func _build_landings(lf: Dictionary, lift: Node) -> void:
+	var w: float = lf["width"]
+	var premium: bool = lf["kind"] == &"premium"
+	var frame_col := Color(0.72, 0.58, 0.34, 0.9) if premium else Color(0.38, 0.42, 0.44, 0.9)
+	var post_h := 104.0 if premium else 120.0
+	var stops: Array = lf["stops"]
+	for i in range(stops.size()):
+		var plate := StaticBody2D.new()
+		plate.name = "Landing_%s_%d" % [str(lf["id"]), i]
+		plate.position = Vector2(float(lf["open_x"]), float(stops[i]))
+		plate.collision_layer = 1
+		plate.collision_mask = 0
+		var col := CollisionShape2D.new()
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2(w, 6.0)
+		col.shape = shape
+		col.position = Vector2(w * 0.5, 3.0)
+		col.one_way_collision = true
+		col.one_way_collision_margin = 4.0
+		plate.add_child(col)
+		lift.call("register_landing", i, col) # the plate opens (disables) while the cab is flush with this stop
+		for part in [
+			[Vector2(-10.0, -post_h), Vector2(8.0, post_h), frame_col], # left post
+			[Vector2(w + 2.0, -post_h), Vector2(8.0, post_h), frame_col], # right post
+			[Vector2(-10.0, -post_h - 8.0), Vector2(w + 20.0, 8.0), frame_col], # lintel
+			[Vector2(0.0, 0.0), Vector2(w, 3.0), Color(0.24, 0.2, 0.14, 0.9)], # the sill the cab slides past
+		]:
+			var r := ColorRect.new()
+			r.position = part[0]
+			r.size = part[1]
+			r.color = part[2]
+			r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			r.z_index = 2
+			plate.add_child(r)
+		add_child(plate)
 
 
 func _build_gates() -> void:

@@ -14,6 +14,7 @@ func _init() -> void:
 		"runs": _plain(HollowMap.runs()),
 		"stairs": _plain(HollowMap.stairs()),
 		"ladders": _plain(HollowMap.ladders()),
+		"lifts": _plain(HollowMap.lifts()),
 		"gates": _plain(HollowMap.gates()),
 		"zones": _plain(HollowMap.zones()),
 		"reserves": _plain(HollowMap.reserves()),

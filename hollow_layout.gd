@@ -210,6 +210,30 @@ static func ladder_defs() -> Array[Dictionary]:
 	return HollowMap.ladders()
 
 
+## --- Lifts (HollowMap.lifts) ---------------------------------------------------------------------------
+static func lift_data(lift_id: StringName) -> Dictionary:
+	for lf in HollowMap.lifts():
+		if lf["id"] == lift_id:
+			return lf
+	return {}
+
+
+static func stop_ys_for_lift(lift_id: StringName) -> Array[float]:
+	var lf := lift_data(lift_id)
+	if lf.is_empty():
+		return []
+	var out: Array[float] = []
+	for y in lf["stops"]:
+		out.append(float(y))
+	return out
+
+
+## Left edge of the cab.
+static func lift_x_for(lift_id: StringName) -> float:
+	var lf := lift_data(lift_id)
+	return float(lf["open_x"]) if not lf.is_empty() else 0.0
+
+
 static func ladder_open_end(open_x: float) -> float:
 	return open_x + LADDER_OPENING
 

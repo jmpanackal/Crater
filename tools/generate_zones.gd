@@ -53,6 +53,13 @@ func _run() -> void:
 		# the street over the flight's last stretch drops onto it
 		var over := Vector2(float(s["top_x"]) - dir * 48.0, float(s["top_y"]) - 32.0)
 		link_vertical.call(over, foot)
+	for lf in HollowMap.lifts():
+		var stops: Array = lf["stops"]
+		var cx: float = float(lf["open_x"]) + float(lf["width"]) * 0.5
+		for i in range(stops.size() - 1):
+			for side in [-48.0, 48.0]:
+				var px: float = cx + side
+				link_vertical.call(Vector2(px, float(stops[i]) - 32.0), Vector2(px, float(stops[i + 1]) - 32.0))
 	# Same-level neighbours: touching zone rects with continuous deck across the boundary.
 	var zs := HollowMap.zones()
 	for a in zs:

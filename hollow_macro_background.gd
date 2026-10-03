@@ -35,9 +35,12 @@ static func district_guides() -> Array[Dictionary]:
 	return out
 
 
-## Ladders, as vertical guides: {"name", "x", "label_y", "stops"}.
+## Lifts and ladders, as vertical guides: {"name", "x", "label_y", "stops"}.
 static func transport_guides() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	for lf in HollowMap.lifts():
+		var stops: Array = lf["stops"]
+		out.append({"name": "Presswater lift: %s" % str(lf["id"]), "x": float(lf["open_x"]), "label_y": float(stops[0]) - 40.0, "stops": stops})
 	for l in HollowMap.ladders():
 		out.append({"name": str(l["id"]), "x": float(l["open_x"]), "label_y": float(l["top_y"]) - 20.0, "stops": [l["top_y"], l["bottom_y"]], "ladder": true})
 	return out

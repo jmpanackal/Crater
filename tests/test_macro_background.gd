@@ -41,8 +41,8 @@ func _run() -> void:
 	for guide in guides:
 		if guide.get("ladder", false):
 			ladder_guides += 1
-	if ladder_guides != HollowMap.ladders().size() or guides.size() != ladder_guides:
-		push_error("FAIL transport guides drifted from HollowMap (ladders %s/%s)" % [ladder_guides, HollowMap.ladders().size()])
+	if ladder_guides != HollowMap.ladders().size() or guides.size() != ladder_guides + HollowMap.lifts().size():
+		push_error("FAIL transport guides drifted from HollowMap (ladders %s/%s, lifts %s)" % [ladder_guides, HollowMap.ladders().size(), HollowMap.lifts().size()])
 		quit(1)
 		return
 	var overlay := background.get_node_or_null("PlanningGuides")

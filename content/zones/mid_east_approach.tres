@@ -16,6 +16,10 @@ seams = [{
 "neighbor": "mid_east_service",
 "position": 5248
 }, {
+"edge": "south",
+"neighbor": "lower_east_services",
+"position": 6016
+}, {
 "edge": "west",
 "neighbor": "mid_east_landing",
 "position": 7040

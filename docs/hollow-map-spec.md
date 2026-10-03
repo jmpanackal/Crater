@@ -49,7 +49,7 @@ builds in ~3 s headless); `HollowMapLint` checks it (`shell`).
 Total world 27520 px wide, symmetric about the Mouth's centre (x=3200). Walkable deck length:
 west 39.2 k px, east 36.5 k px (ratio 0.93; the lint fails outside 0.8–1.25).
 
-Three structures move you: **stairs, ladders, and Mid Heart's own stairs and bridges**. (Lifts were removed 2026-10-02, USER.)
+Four structures move you: **stairs, ladders, Presswater elevators, and Mid Heart's own stairs and bridges**. (The old lifts were removed 2026-10-02 and redesigned as elevators the same day, USER.)
 Everything else is a room. Nothing floats.
 
 ### Decks are one-way
@@ -60,7 +60,7 @@ is what keeps the map readable:
 
 - a **stair opens through the street above it** (USER 2026-10-02): the deck is simply absent over the stretch of the flight just before its top (`HollowMap.stair_holes()`, 64 px of depth per unit of pitch plus two tiles). You climb out of an open stairwell and drop into it from either side; there is no covering and no key to press, and no "stairs down" cue. Terrace steps under 96 px have no street over them and no opening. The rest of the street still passes over the lower flight.
 - a **ladder has no hatch**. Climb up through the deck and land on it. **W or S in a ladder's zone climbs at once** (pressed or held, on the floor or in the air; no jump), and the ladder's hit box reaches 28 px above the deck so S on the deck over a ladder goes down.
-- **there are no lifts** (removed 2026-10-02, USER); ladders and stairs make every connection a lift used to.
+- an **elevator** is a cab on a carved shaft: stand on it and press W (up) or S (down) to ride to the next stop; press Interact at a landing to call it. Slow, physical, never fast travel.
 
 (The first version of this rebuild cut a 96/128 px hole in the deck above every stair and every shaft, which split streets; one-way decks replaced it; the stair opening is now back, but only over the last stretch of a flight, so the street still continues on both sides of it.)
 
@@ -161,9 +161,21 @@ Collapsed Side Chamber), `LAD_EA`, `LAD_EG`, `LAD_EG4` (Mid-East Landing up to G
 share an x across more than one level, so a ladder chain is never a full-height shaft (canon:
 lower-west workers use stairs, not a shaft).
 
-### Lifts
+### Elevators (4): Presswater, physical, never fast travel (USER 2026-10-02)
 
-None. The three Presswater lifts (`heart`, `east_passenger`, `freight`) were removed on 2026-10-02 (USER): they did not work with the 18 levels and the rock between districts. Their routes are `LAD_A5` (Ashram promenade down to High-West), `LAD_HW2` (High-West upper to lower), `LAD_E1` (east Ashram promenade down to Glowbeds) and the existing ladders and stairs. The Cistern freight route is the Lower-East ladders and the Cistern stairs. Any future lift is a new design.
+Power (LOCKED canon, `story.md` and `mechanics-canon.md` section 21/26): **Presswater, the Cistern's pressurized water, drives the lifts**, and Cistern strain slows or parks them. The Pulse (the surviving ship component at Mid Heart) is the civic timekeeper and is not a power source in canon (its original function is OPEN), so no elevator draws on it. Two classes, in `HollowMap.lifts()` (cab `width`, `kind`, `stops`, `essential`, optional Access `gate`):
+
+| Elevator | x | Cab | Stops | Role |
+| --- | --- | --- | --- | --- |
+| `freight_west` | 1200 | freight, 160 px, slow (140 px/s) | L8, L9, L10, L11, L12, L13, L15 | Wickwork down through the Allotments, the Mouth balcony, the Lower Mouth Rows (skips L14): the west backbone through five districts |
+| `freight_east` | 8704 | freight, 160 px | L8, L11, L12, L13, L14 | Mid-East down through Lower-East services into the Cistern basin chamber (pier `PF13` at L13) and the tanks; stops short of the flood gate |
+| `ashram_west` | -2560 | premium, 96 px, quick (220 px/s), essential | L8, L7, L6, L5 | Wickwork up through High-West to the Ashram lobby (west of `gate_ashram_west`) |
+| `ashram_east` | 6416 | premium, 96 px, essential | L8, L7, L6, L5 | Mid-East Landing up through Glowbeds to the Ashram lobby (west of `gate_ashram_east`) |
+
+- **Lift-only areas:** Ashram Heights (all tiers, both sides) can be reached only by the premium elevators (lint rule `lift_only`: with every lift ignored, none of those decks is reachable). The L5 Warden gates still stand beyond the lobbies.
+- **Cistern condition:** healthy runs at full speed; strained or short slows to 35 percent; critical parks a non-essential lift (a trip in progress finishes at a crawl). Essential lifts never park. An Access `gate` locks a lift ("Warden-run: not cleared yet"); none is set yet.
+- **Space:** a shaft is carved cab width + 16 px each side and passes only decks it stops at, with no ladder or flight in it. Freight cabs are 160 px so a cart or a bundle can ride; premium cabs are 96 px.
+- **Open (user):** the Pulse's role (does it ever power anything?), whether the Ashram elevators should be Warden-locked by `ashram_clearance` or open to the lobby, and rider capacity/cart rules for freight.
 
 ### Travel times (200 px/s walking, 140 px/s ladders; rough, before the 384 px levels)
 
@@ -172,7 +184,7 @@ None. The three Presswater lifts (`heart`, `east_passenger`, `freight`) were rem
 | Home Court → Mid Heart west lip | ~70 s | ~45 s |
 | Home Court → Bottom-West first gallery | ~35 s | — |
 | Mid Heart → Cistern (stairs + freight lift) | ~90 s | ~60 s |
-| Wickwork → High-West (ladder `LAD_WK4` and the sloped street) | — | — |
+| Wickwork → High-West → Ashram lobby (premium elevator `ashram_west`) | — | ~10 s |
 
 The 384 px levels shorten every flight and shaft by 40 % (a stair is `RISE` long; a ladder climbs
 384 px, not 640), so these are upper bounds now. If the trip still feels long in play, shorten

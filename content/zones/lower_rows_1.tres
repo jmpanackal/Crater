@@ -8,13 +8,17 @@ zone_id = &"lower_rows_1"
 display_name = "Lower Mouth Rows, first row"
 world_origin = Vector2(200, 6784)
 seams = [{
+"edge": "south",
+"neighbor": "lower_rows_2",
+"position": 7168
+}, {
 "edge": "north",
 "neighbor": "worker_return_ascent",
 "position": 6784
 }, {
 "edge": "south",
-"neighbor": "lower_rows_2",
-"position": 7168
+"neighbor": "lower_rows_3",
+"position": 7552
 }]
 enclosed = false
 world_rect = Rect2(-320, 6528, 1888, 384)

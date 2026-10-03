@@ -51,6 +51,7 @@ param(
 $PerTestTimeoutOverrides = @{
 	"test_home_court_navigation.gd" = 300
 	"test_hollow_traversal.gd" = 600
+	"test_hollow_elevators.gd" = 180
 	"test_hollow_map_lint.gd" = 120
 }
 
