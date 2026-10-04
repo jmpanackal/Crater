@@ -32,6 +32,8 @@ var _vents: Array[Vector2] = []
 var _pennants: Array[Dictionary] = []
 var _crane := {}
 var _carts: Array[Dictionary] = []
+var _furnaces: Array[Dictionary] = []
+var _wheels: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -46,6 +48,12 @@ func _ready() -> void:
 				_vents.append(Vector2(float(p["x"]) + float(p["w"]) * 0.5 + 7.0, deck - 34.0))
 			&"glow_fungi":
 				_fungi.append({"pos": Vector2(float(p["x"]), deck - 30.0), "ph": float(int(p["x"]) % 11)})
+			&"furnace":
+				_furnaces.append({"pos": Vector2(float(p["x"]), deck - float(p["h"]) * 0.32), "w": float(p["w"]) * 0.52, "h": float(p["h"]) * 0.42, "ph": float(int(p["x"]) % 9)})
+			&"forge_wheel":
+				_wheels.append({"pos": Vector2(float(p["x"]), deck - float(p["h"]) * 0.6), "r": float(p["h"]) * 0.46, "dir": 1.0 if int(p["x"]) % 2 == 0 else -1.0})
+			&"smokestack":
+				_vents.append(Vector2(float(p["x"]), deck - float(p["h"]) - 12.0))
 	for l in HollowDressing.lamps():
 		_lamps.append({"pos": Vector2(float(l["x"]), HollowMap.deck_y_at(float(l["x"]), float(l["k"])) - float(l["y_off"])), "tone": l["tone"], "ph": float(int(l["x"]) % 13)})
 	_build_mid_heart()
@@ -95,6 +103,12 @@ func _draw() -> void:
 	for f in _fungi:
 		if view.has_point(f["pos"]):
 			_draw_fungi_glow(f)
+	for fu in _furnaces:
+		if view.has_point(fu["pos"]):
+			_draw_furnace(fu)
+	for wh in _wheels:
+		if view.has_point(wh["pos"]):
+			_draw_wheel(wh)
 	for pn in _pennants:
 		if view.has_point(pn["pole"]):
 			_draw_pennant(pn)
@@ -220,3 +234,29 @@ func _draw_cart(c: Dictionary) -> void:
 	for wx in [-13.0, 13.0]:
 		draw_circle(Vector2(x + wx, y - 6.0), 6.0, Color(0.1, 0.1, 0.11))
 		draw_circle(Vector2(x + wx, y - 6.0), 2.5, STEEL_HI)
+
+
+## A furnace mouth: the fire flickers and breathes, and the glow spills a little onto the floor.
+func _draw_furnace(fu: Dictionary) -> void:
+	var c: Vector2 = fu["pos"]
+	var flick := 0.7 + 0.3 * sin(_t * 7.0 + float(fu["ph"])) * sin(_t * 2.3 + float(fu["ph"]) * 0.6)
+	var w: float = fu["w"]
+	var h: float = fu["h"]
+	draw_rect(Rect2(c.x - w * 0.5, c.y - h * 0.5, w, h), Color(1.0, 0.45, 0.12, 0.55 * flick))
+	draw_rect(Rect2(c.x - w * 0.34, c.y - h * 0.3, w * 0.68, h * 0.6), Color(1.0, 0.8, 0.35, 0.7 * flick))
+	draw_circle(c, 46.0, Color(1.0, 0.5, 0.15, 0.07 * flick))
+
+
+## A gear wheel turning slowly: a rim, spokes and teeth that rotate on their hub.
+func _draw_wheel(wh: Dictionary) -> void:
+	var c: Vector2 = wh["pos"]
+	var r: float = wh["r"]
+	var a: float = _t * 0.45 * float(wh["dir"])
+	draw_arc(c, r * 0.82, 0.0, TAU, 28, Color(0.5, 0.3, 0.2), 4.0)
+	for i in range(6):
+		var ang := a + float(i) * TAU / 6.0
+		draw_line(c, c + Vector2(cos(ang), sin(ang)) * r * 0.82, Color(0.45, 0.28, 0.18), 3.0)
+	for i in range(16):
+		var ang2 := a + float(i) * TAU / 16.0
+		draw_rect(Rect2(c + Vector2(cos(ang2), sin(ang2)) * r - Vector2(3.0, 3.0), Vector2(6.0, 6.0)), Color(0.55, 0.35, 0.22))
+	draw_circle(c, 6.0, Color(0.25, 0.16, 0.12))

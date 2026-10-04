@@ -9,8 +9,8 @@ display_name = "High-West Dig Front"
 world_origin = Vector2(-3000, 4096)
 seams = [{
 "edge": "south",
-"neighbor": "wickwork",
-"position": 4864
+"neighbor": "high_west_lower",
+"position": 4480
 }, {
 "edge": "north",
 "neighbor": "ashram_west",
@@ -21,5 +21,5 @@ seams = [{
 "position": 1440
 }]
 enclosed = false
-world_rect = Rect2(-5760, 3840, 7200, 768)
+world_rect = Rect2(-5760, 3840, 7200, 384)
 restricted = false

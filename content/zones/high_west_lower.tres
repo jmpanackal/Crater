@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"high_west_lower"
+display_name = "High-West Lower Gallery"
+world_origin = Vector2(-3000, 4480)
+seams = [{
+"edge": "north",
+"neighbor": "high_west_front",
+"position": 4480
+}, {
+"edge": "south",
+"neighbor": "wickwork",
+"position": 4864
+}]
+enclosed = false
+world_rect = Rect2(-5760, 4224, 4992, 384)
+restricted = false

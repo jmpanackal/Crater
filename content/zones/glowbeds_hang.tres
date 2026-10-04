@@ -17,8 +17,8 @@ seams = [{
 "position": 4096
 }, {
 "edge": "south",
-"neighbor": "mid_east_approach",
-"position": 4864
+"neighbor": "glowbeds_lower",
+"position": 4480
 }, {
 "edge": "south",
 "neighbor": "mid_east_landing",

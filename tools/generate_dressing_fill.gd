@@ -26,7 +26,7 @@ const THEMES := {
 		"tones": [&"warm", &"cool", &"warm"], "per_k": 6.0, "lamp_k": 2.4, "building": &"facade", "building_k": 1.2,
 	},
 	&"works": {
-		"props": [[&"workbench", 3, 0.0], [&"rack", 2, 0.0], [&"beam_stack", 2, 0.0], [&"pipe", 1, 120.0], [&"turntable", 1, 0.0], [&"crate", 2, 0.0], [&"barrel", 1, 0.0], [&"gauge", 1, 70.0]],
+		"props": [[&"workbench", 2, 0.0], [&"rack", 2, 0.0], [&"beam_stack", 1, 0.0], [&"pipe", 1, 120.0], [&"turntable", 1, 0.0], [&"crate", 1, 0.0], [&"barrel", 1, 0.0], [&"gauge", 1, 70.0], [&"furnace", 3, 0.0], [&"anvil", 2, 0.0], [&"forge_wheel", 2, 0.0], [&"smokestack", 2, 0.0]],
 		"tones": [&"cool", &"amber", &"cool"], "per_k": 6.0, "lamp_k": 2.4, "building": &"facade", "building_k": 0.9,
 	},
 	&"market": {
@@ -242,7 +242,7 @@ func _add_building(r: Dictionary, kind: StringName, x0: float, x1: float) -> voi
 		doors.append(snappedf(x0 + w * _rng.randf_range(0.7, 0.85), 2.0))
 	windows.append(snappedf(x0 + w * 0.6, 2.0))
 	var b := {"id": StringName("fill_%s_%d" % [str(r["id"]), int(x0)]), "zone": r["zone"], "kind": kind, "x0": snappedf(x0, 2.0), "x1": snappedf(x1, 2.0), "k": int(r["k"]),
-		"height": FULL if kind != &"nook" else 120.0, "doors": doors, "windows": windows, "y_off": 0.0}
+		"height": (FULL if not (HollowMap.in_flank(x0) or HollowMap.in_flank(x1)) else HollowMap.FLANK_CLEAR - 8.0) if kind != &"nook" else 120.0, "doors": doors, "windows": windows, "y_off": 0.0}
 	if kind == &"facade":
 		b["homely"] = true
 	if kind == &"unit":

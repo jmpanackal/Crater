@@ -453,6 +453,29 @@ func _draw_prop(p: Dictionary) -> void:
 			var drop_x := x - w * 0.5 + 12.0
 			draw_rect(Rect2(drop_x - ph * 0.5, deck, ph, maxf(float(p["y_off"]) - 44.0, 8.0)), Color(0.5, 0.3, 0.18))
 			draw_circle(Vector2(drop_x, deck + ph * 0.1), ph * 0.9, Color(0.5, 0.3, 0.18))
+		&"furnace":
+			# a brick furnace with a dark mouth (the fire in it is drawn by hollow_motion_view.gd, which flickers)
+			_box(deck, x, 0.0, w, h, Color(0.32, 0.2, 0.15))
+			_box(deck, x, 0.0, w, 6.0, Color(0.16, 0.12, 0.1))
+			_box(deck, x, 6.0, w * 0.6, h * 0.5, Color(0.07, 0.05, 0.04))
+			_box(deck, x, h - 10.0, w + 6.0, 8.0, IRON)
+			_box(deck, x + w * 0.32, h, 10.0, 26.0, IRON)
+		&"anvil":
+			_box(deck, x, 0.0, w * 0.5, 12.0, IRON)
+			_box(deck, x, 12.0, w, 8.0, Color(0.42, 0.44, 0.46))
+			_box(deck, x + w * 0.5, 14.0, 12.0, 4.0, Color(0.42, 0.44, 0.46))
+		&"forge_wheel":
+			# a big gear wheel on its mount: the frame and the hub (the spokes and teeth turn, so hollow_motion_view.gd draws them)
+			_box(deck, x - h * 0.42, 0.0, 5.0, h * 0.62, IRON)
+			_box(deck, x + h * 0.42, 0.0, 5.0, h * 0.62, IRON)
+			_box(deck, x, h * 0.62 - 3.0, h * 0.9, 5.0, IRON)
+		&"smokestack":
+			# a tall rusty flue with riveted bands (the smoke is drawn by hollow_motion_view.gd)
+			_box(deck, x, 0.0, w, h, Color(0.38, 0.22, 0.14))
+			_box(deck, x - w * 0.5 + 5.0, 0.0, 5.0, h, Color(0.52, 0.33, 0.2))
+			for i in range(int(h / 40.0)):
+				_box(deck, x, 20.0 + float(i) * 40.0, w + 6.0, 6.0, Color(0.2, 0.13, 0.1))
+			_box(deck, x, h, w + 8.0, 8.0, Color(0.2, 0.13, 0.1))
 		&"planter":
 			# a stepped planter bed: a timber trough of dark soil with rows of luminous fungal caps (muted teal and amber)
 			_box(deck, x, 0.0, w, 16.0, TIMBER_DARK)

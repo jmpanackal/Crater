@@ -53,6 +53,7 @@ static func run() -> Dictionary:
 	_check_gates(rep)
 	_check_lift_only(rep)
 	_check_mouth(rep)
+	_check_cliff(rep)
 	_check_reserves(rep)
 	_check_zones(rep)
 	_check_reach(rep)
@@ -488,6 +489,28 @@ static func _check_gates(rep: Dictionary) -> void:
 				known = true
 		if not known:
 			_err(rep, "gate: closed_at_start names %s, which does not exist" % str(id))
+
+
+## The bulging cliff faces stay out of every deck, ledge, flight, ladder and Mid Heart: they only ever fill rock rows.
+static func _check_cliff(rep: Dictionary) -> void:
+	var bulges := HollowMap.cliff_bulges()
+	for row in bulges.keys():
+		var b: Vector2 = bulges[row]
+		if b == Vector2.ZERO:
+			continue
+		var y0 := float(row) * 16.0
+		var west := Rect2(HollowMap.MOUTH_L, y0, b.x, 16.0)
+		var east := Rect2(HollowMap.MOUTH_R - b.y, y0, b.y, 16.0)
+		for r in HollowMap.runs():
+			var deck := Rect2(float(r["x0"]), float(r["y"]) - HollowMap.ROOM_HEIGHT, float(r["x1"]) - float(r["x0"]), HollowMap.ROOM_HEIGHT + HollowMap.FLOOR_THICK)
+			if (b.x > 0.0 and west.intersects(deck)) or (b.y > 0.0 and east.intersects(deck)):
+				_err(rep, "cliff: a cliff bulge at row %d overlaps %s" % [int(row), run_label(r)])
+				return
+		for st in HollowMap.stairs():
+			var wedge := Rect2(minf(st["foot_x"], st["top_x"]), float(st["top_y"]) - 112.0, absf(float(st["top_x"]) - float(st["foot_x"])), absf(float(st["foot_y"]) - float(st["top_y"])) + 112.0)
+			if (b.x > 0.0 and west.intersects(wedge)) or (b.y > 0.0 and east.intersects(wedge)):
+				_err(rep, "cliff: a cliff bulge at row %d overlaps stair %s" % [int(row), str(st["id"])])
+				return
 
 
 static func _check_mouth(rep: Dictionary) -> void:

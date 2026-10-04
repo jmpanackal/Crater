@@ -4,18 +4,18 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"wickwork_annex"
-display_name = "Wickwork Expansion Bay"
-world_origin = Vector2(-4800, 4864)
+zone_id = &"wickwork_upper"
+display_name = "Wickwork Gantry"
+world_origin = Vector2(1500, 4480)
 seams = [{
 "edge": "south",
-"neighbor": "wickwork_slag",
-"position": 5248
-}, {
-"edge": "east",
 "neighbor": "wickwork",
-"position": -3680
+"position": 4864
+}, {
+"edge": "south",
+"neighbor": "mid_heart",
+"position": 4864
 }]
 enclosed = true
-world_rect = Rect2(-5440, 4608, 1760, 384)
+world_rect = Rect2(1200, 4224, 560, 384)
 restricted = false

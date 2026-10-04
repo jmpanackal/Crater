@@ -79,7 +79,11 @@ func _run() -> void:
 	var next := cell + Vector2i(0, -1)
 	mc.set("aim_override", terrain.to_global(terrain.map_to_local(next)))
 	Input.action_press("mine")
-	await _frames(8)
+	# hold until the crack shows (a loaded machine can take a few frames to start it), but let go well before it breaks
+	for _i in range(16):
+		await _frames(1)
+		if mc.damage_at(next) > 0.0:
+			break
 	Input.action_release("mine")
 	if mc.damage_at(next) <= 0.0:
 		_fail("a started tile should carry damage")

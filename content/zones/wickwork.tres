@@ -9,12 +9,16 @@ display_name = "Wickwork"
 world_origin = Vector2(-2160, 4864)
 seams = [{
 "edge": "north",
-"neighbor": "high_west_front",
+"neighbor": "high_west_lower",
 "position": 4864
 }, {
 "edge": "south",
 "neighbor": "mid_allotments",
 "position": 5632
+}, {
+"edge": "north",
+"neighbor": "wickwork_upper",
+"position": 4864
 }, {
 "edge": "north",
 "neighbor": "mid_heart",

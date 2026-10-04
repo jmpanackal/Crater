@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://content/zone_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+zone_id = &"wickwork_slag"
+display_name = "Wickwork Slag Gallery"
+world_origin = Vector2(-5000, 5248)
+seams = [{
+"edge": "north",
+"neighbor": "wickwork_annex",
+"position": 5248
+}, {
+"edge": "south",
+"neighbor": "wickwork_casting",
+"position": 5632
+}]
+enclosed = true
+world_rect = Rect2(-5440, 4992, 1760, 384)
+restricted = false

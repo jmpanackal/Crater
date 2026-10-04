@@ -227,7 +227,7 @@ static func _terraces() -> Array[Dictionary]:
 		{"id": &"HW2", "zone": &"high_west_front", "k": 6, "l": END_ROCK, "r": END_LEDGE, "pieces": [
 			[WEST_FLANK_LEFT, -4304.0, 0.0], [-4240.0, -3984.0, 32.0], [-3920.0, -2400.0, 0.0], [-2304.0, -1888.0, -48.0],
 			[-1792.0, -352.0, 0.0], [-224.0, 288.0, -64.0], [416.0, 1696.0, 0.0]]}, # the rail ledge reaches 256 px out toward Mid Heart
-		{"id": &"HW3", "zone": &"high_west_front", "k": 7, "l": END_ROCK, "r": END_FOOT, "pieces": [
+		{"id": &"HW3", "zone": &"high_west_lower", "k": 7, "l": END_ROCK, "r": END_FOOT, "pieces": [
 			[WEST_FLANK_LEFT, -4352.0, 0.0], [-4224.0, -3872.0, -64.0], [-3744.0, -2336.0, 0.0], [-2240.0, -1888.0, 48.0],
 			[-1792.0, -800.0, 0.0]]},
 		# ---- Bottom-West deeper galleries (behind the service-run gate): more lateral dig frontier
@@ -235,6 +235,15 @@ static func _terraces() -> Array[Dictionary]:
 			[WEST_FLANK_LEFT, -4560.0, 0.0], [-4464.0, -4144.0, 48.0], [-4048.0, -3328.0, 0.0]]},
 		{"id": &"BW13", "zone": &"bottom_west_lowest", "k": 17, "l": END_ROCK, "r": END_WALL, "pieces": [
 			[WEST_FLANK_LEFT, -4688.0, 0.0], [-4592.0, -4336.0, -32.0], [-4240.0, -4064.0, 0.0]]},
+		# ---- Wickwork Foundry (USER 2026-10-04: Wickwork needs far more room): behind the growth gate the Expansion Bay now runs
+		# down through a slag gallery to a casting floor, a three-level foundry stack in the west flank; and on the public side
+		# a gantry level hangs toward Mid Heart above the street.
+		{"id": &"WK9F", "zone": &"wickwork_slag", "k": 9, "l": END_WALL, "r": END_WALL, "pieces": [
+			[-5440.0, -4640.0, 0.0], [-4544.0, -4288.0, -32.0], [-4192.0, -3712.0, 0.0]]},
+		{"id": &"WC10", "zone": &"wickwork_casting", "k": 10, "l": END_WALL, "r": END_WALL, "pieces": [
+			[-5440.0, -4480.0, 0.0], [-4384.0, -4096.0, -48.0], [-4000.0, -3040.0, 0.0]]},
+		{"id": &"WK7", "zone": &"wickwork_upper", "k": 7, "l": END_WALL, "r": END_LEDGE, "pieces": [
+			[1232.0, 1760.0, 0.0]]}, # the gantry level: a public ledge 320 px out toward Mid Heart
 		# ---- Cistern: the core, the tanks and the seep threshold, broken up (footprint unchanged)
 		{"id": &"E9", "zone": &"cistern", "k": 13, "l": END_FOOT, "r": END_OPEN, "pieces": [
 			[6400.0, 7312.0, 0.0], [7408.0, 7792.0, -48.0], [7888.0, 8096.0, 0.0]]}, # a maintenance balcony over the basin chamber
@@ -290,6 +299,10 @@ static func _terraces() -> Array[Dictionary]:
 			[4704.0, 5584.0, 0.0]]}, # a long terrace reaching 256 px out toward Mid Heart
 		{"id": &"E3B", "zone": &"glowbeds_hang", "k": 6, "l": END_OPEN, "r": END_FOOT, "pieces": [
 			[5792.0, 7200.0, 0.0], [7232.0, 7392.0, -32.0], [7424.0, 8000.0, 0.0]]},
+		# Glowbeds lower gardens (USER 2026-10-04: Glowbeds needs more room): a public level 7 east of the lift, reached by
+		# ladders from the hang above and the Mid-East Approach below.
+		{"id": &"GL7", "zone": &"glowbeds_lower", "k": 7, "l": END_WALL, "r": END_WALL, "pieces": [
+			[6656.0, 7168.0, 0.0], [7264.0, 7552.0, -32.0], [7648.0, 8000.0, 0.0]]},
 		# Glowbeds recovery and cultures wing (USER 2026-10-04, AI-built): rest cots, culture shelves and prepared stock
 		# on the level the move freed, a gated growth room (gate_glowbeds_wing).
 		{"id": &"GW7", "zone": &"glowbeds_wing", "k": 7, "l": END_WALL, "r": END_WALL, "pieces": [
@@ -404,6 +417,7 @@ static func air_rects() -> Array[Rect2]:
 	if _cache.has("air_rects"):
 		return _cache["air_rects"]
 	var out: Array[Rect2] = []
+	var room_rects: Array[Rect2] = []
 	for r in runs():
 		if HollowMap.is_heart_zone(r["zone"]):
 			continue
@@ -414,6 +428,8 @@ static func air_rects() -> Array[Rect2]:
 		var y: float = r["y"]
 		var top := y - 160.0 if bool(r["landing"]) else minf(y, lvl(float(r["k"]))) - ROOM_HEIGHT
 		out.append(Rect2(x0, top, x1 - x0, y + FLOOR_THICK - top))
+		room_rects.append(out[out.size() - 1])
+	_cache["room_rects"] = room_rects
 	for s in stairs():
 		var fx: float = s["foot_x"]
 		var tx: float = s["top_x"]
@@ -440,6 +456,134 @@ static func air_rects() -> Array[Rect2]:
 	return out
 
 
+## Room coves (USER 2026-10-04: rooms read as dark rectangles with straight vertical ends): where a room ends in a wall, its
+## upper corner is cut away by a sloped rock cove, 4 to 8 tiles wide at the ceiling, narrowing to nothing a hand's width
+## above the headroom line, so a room is a cave and not a box. Only the top 128 px of the 256 px room is ever filled, so
+## the 96 px of headroom over every deck is untouched. Returns {row: Array[Vector2(x0, x1)]} of extra rock, already
+## minus any flight, shaft, dome or hall that crosses it.
+static func cove_rows() -> Dictionary:
+	if _cache.has("cove_rows"):
+		return _cache["cove_rows"]
+	air_rects()
+	var rooms: Array = _cache["room_rects"]
+	var others: Array[Rect2] = []
+	for rc in air_rects():
+		if not rooms.has(rc):
+			others.append(rc)
+	var out: Dictionary = {}
+	for r in runs():
+		if HollowMap.is_heart_zone(r["zone"]) or bool(r["landing"]):
+			continue
+		var x0 := float(r["x0"])
+		var x1 := float(r["x1"])
+		if x1 - x0 < 640.0 or x0 < WEST_WALL or x1 > EAST_WALL:
+			continue
+		var top := minf(float(r["y"]), lvl(float(r["k"]))) - ROOM_HEIGHT
+		var row0 := int(roundf(top / 16.0))
+		for side in range(2):
+			var end_type: StringName = r["l"] if side == 0 else r["r"]
+			if end_type != END_WALL:
+				continue
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash(str(r["id"])) + side * 13
+			var n := rng.randi_range(6, 10)
+			for i in range(n):
+				var w := float(n - i) * 16.0
+				var span := Vector2(x0, x0 + w) if side == 0 else Vector2(x1 - w, x1)
+				var row := row0 + i
+				var pieces: Array[Vector2] = [span]
+				for o in others:
+					if float(row) * 16.0 >= o.end.y or float(row + 1) * 16.0 <= o.position.y:
+						continue
+					var next: Array[Vector2] = []
+					for p in pieces:
+						if o.end.x <= p.x or o.position.x >= p.y:
+							next.append(p)
+							continue
+						if o.position.x > p.x:
+							next.append(Vector2(p.x, o.position.x))
+						if o.end.x < p.y:
+							next.append(Vector2(o.end.x, p.y))
+					pieces = next
+				if not out.has(row):
+					out[row] = []
+				for p in pieces:
+					if p.y > p.x:
+						(out[row] as Array).append(p)
+	_cache["cove_rows"] = out
+	return out
+
+
+## The Mouth's cliff faces are ragged, not a ruled line (USER 2026-10-04: the reference reads as organic cliffs with
+## bulging shelves and overhangs). Wherever the rock at a Mouth lip is a solid mass between rooms (no room, ledge, flight or
+## shaft reaches the lip on those rows), it bulges out into the void, up to CLIFF_MAX px, in a deterministic seeded profile,
+## quantised to whole tiles. Rows of Mid Heart's band and any row a room touches keep the straight lip. Returns
+## {row: Vector2(west_bulge, east_bulge)} in px.
+const CLIFF_MAX := 192.0
+const CLIFF_SEED := 90417
+
+
+static func cliff_bulges() -> Dictionary:
+	if _cache.has("cliff_bulges"):
+		return _cache["cliff_bulges"]
+	var first_row := int(ROCK_TOP / 16.0)
+	var last_row := int(CAVITY_BOTTOM / 16.0) - 1
+	var touched_w: Dictionary = {}
+	var touched_e: Dictionary = {}
+	for rc in air_rects():
+		var r0 := int(floorf(rc.position.y / 16.0))
+		var r1 := int(ceilf(rc.end.y / 16.0))
+		var hits_w: bool = rc.end.x > MOUTH_L - 48.0 and rc.position.x < MOUTH_L + 48.0
+		var hits_e: bool = rc.position.x < MOUTH_R + 48.0 and rc.end.x > MOUTH_R - 48.0
+		if not (hits_w or hits_e):
+			continue
+		for row in range(r0, r1):
+			if hits_w:
+				touched_w[row] = true
+			if hits_e:
+				touched_e[row] = true
+	# Mid Heart's band keeps its straight lips (the rafts, moorings and anchor plates sit on them)
+	var band_lo := int(floorf((lvl(5.0) - ROOM_HEIGHT - 96.0) / 16.0))
+	var band_hi := int(ceilf((lvl(9.5) + 96.0) / 16.0))
+	for row in range(band_lo, band_hi + 1):
+		touched_w[row] = true
+		touched_e[row] = true
+	var out: Dictionary = {}
+	for row in range(first_row, last_row + 1):
+		out[row] = Vector2.ZERO
+	for side in range(2):
+		var touched: Dictionary = touched_w if side == 0 else touched_e
+		var row := first_row
+		while row <= last_row:
+			if touched.has(row):
+				row += 1
+				continue
+			var start := row
+			while row <= last_row and not touched.has(row):
+				row += 1
+			var n := row - start
+			if n < 4:
+				continue
+			var rng := RandomNumberGenerator.new()
+			rng.seed = CLIFF_SEED + start * 31 + side * 7
+			var amp := minf(CLIFF_MAX, float(n) * 16.0 * 0.62) * rng.randf_range(0.55, 1.0)
+			var lean := rng.randf_range(0.25, 0.75) # where the bulge peaks along the mass
+			for i in range(n):
+				var t := (float(i) + 0.5) / float(n)
+				var shape := sin(PI * pow(t, log(0.5) / log(lean)))
+				var off := clampf(roundf(amp * pow(maxf(shape, 0.0), 0.8) / 16.0) * 16.0, 0.0, CLIFF_MAX)
+				if i < 2 or i >= n - 2:
+					off = minf(off, 32.0) # tuck into the rooms above and below
+				var v: Vector2 = out[start + i]
+				if side == 0:
+					v.x = off
+				else:
+					v.y = off
+				out[start + i] = v
+	_cache["cliff_bulges"] = out
+	return out
+
+
 ## The solid civic rock as {row: Array[Vector2(x0, x1)]} in px, row = y / 16, from the Firmament line to
 ## the floor slab. The Mouth stays open; the diggable shell (Firmament, flanks, slab) is not in here.
 static func civic_rock_rows() -> Dictionary:
@@ -453,9 +597,11 @@ static func civic_rock_rows() -> Dictionary:
 			if not per_row.has(row):
 				per_row[row] = []
 			(per_row[row] as Array).append(Vector2(rc.position.x, rc.end.x))
-	var sides := [Vector2(WEST_WALL, MOUTH_L), Vector2(MOUTH_R, EAST_WALL)]
+	var bulges := cliff_bulges()
 	var out: Dictionary = {}
 	for row in range(first_row, last_row + 1):
+		var bulge: Vector2 = bulges.get(row, Vector2.ZERO)
+		var sides := [Vector2(WEST_WALL, MOUTH_L + bulge.x), Vector2(MOUTH_R - bulge.y, EAST_WALL)]
 		var cuts: Array = per_row.get(row, [])
 		cuts.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
 		var spans: Array[Vector2] = []
@@ -469,6 +615,18 @@ static func civic_rock_rows() -> Dictionary:
 				cur = maxf(cur, c.y)
 			if cur < side.y:
 				spans.append(Vector2(cur, side.y))
+		# add the room coves, then merge touching spans
+		var coves: Dictionary = cove_rows()
+		if coves.has(row):
+			spans.append_array(coves[row])
+			spans.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+			var merged: Array[Vector2] = []
+			for sp in spans:
+				if not merged.is_empty() and sp.x <= merged[merged.size() - 1].y:
+					merged[merged.size() - 1].y = maxf(merged[merged.size() - 1].y, sp.y)
+				else:
+					merged.append(sp)
+			spans = merged
 		out[row] = spans
 	_cache["civic_rock_rows"] = out
 	return out
@@ -643,7 +801,7 @@ static func stairs() -> Array[Dictionary]:
 	var out: Array[Dictionary] = [
 		# West: every stair sits at a corridor end and rises away from it.
 		_stair(&"S_A1", &"ashram_west", -160.0, 5, 1, 1.0, 1.5), ## Ashram: promenade up to the overlook
-		_stair(&"S_HW3", &"high_west_front", -800.0, 7, 1, 1.0, 4.0, 160.0), # a sloped street, 1536 px long ## High-West lower gallery up to the terrace
+		_stair(&"S_HW3", &"high_west_lower", -800.0, 7, 1, 1.0, 4.0, 160.0), # a sloped street, 1536 px long ## High-West lower gallery up to the terrace
 		_stair(&"S_WK5", &"wickwork", -1280.0, 9, -1, 1.0, 3.0, 160.0), # Wickwork's diagonal descent, a sloped street ## Wickwork repair bays up to the street
 		_stair(&"S_AL6", &"mid_allotments", 640.0, 10, 1), ## Allotments up to Wickwork's dock
 		_stair(&"S_AL7", &"mid_allotments", -1280.0, 11, -1), ## Allotment street up to the residences
@@ -713,9 +871,13 @@ static func ladders() -> Array[Dictionary]:
 		_ladder(&"LAD_AL2", &"mid_allotments", 0.0, 9, 10),
 		_ladder(&"LAD_AL", &"mid_allotments", -400.0, 10, 11),
 		_ladder(&"LAD_BW", &"bottom_west", -5120.0, 14, 15),
+		_ladder(&"LAD_WS1", &"wickwork_slag", -4900.0, 8, 9), # the Expansion Bay down to the slag gallery
+		_ladder(&"LAD_WS2", &"wickwork_casting", -4000.0, 9, 10), # the slag gallery down to the casting floor
+		_ladder(&"LAD_WK7", &"wickwork_upper", 1340.0, 7, 8), # the street up to the gantry level
 		_ladder(&"LAD_GW", &"glowbeds_wing", 5280.0, 6, 7), # the hang down into the recovery wing
 		_ladder(&"LAD_EG", &"glowbeds", 7040.0, 5, 6),
-		_ladder(&"LAD_EG4", &"glowbeds_hang", 7520.0, 6, 8), ## a long way up from the Mid-East Landing, past the open level between
+		_ladder(&"LAD_GL", &"glowbeds_lower", 6720.0, 6, 7), # the hang down to the lower gardens
+		_ladder(&"LAD_GM", &"glowbeds_lower", 7800.0, 7, 8), # the lower gardens down to the Mid-East Approach
 		_ladder(&"LAD_EP11", &"east_rows_1", 5072.0, 10, 11),
 		_ladder(&"LAD_EP12", &"east_rows_2", 5200.0, 11, 12),
 		_ladder(&"LAD_EP15", &"east_rows_4", 5600.0, 14, 15),
@@ -839,8 +1001,8 @@ static func early_zones() -> Array[StringName]:
 		&"east_rows_1", &"east_rows_2", &"east_rows_3", &"east_rows_4", &"east_rows_5", &"east_rows_6",
 		&"lower_rows_1", &"lower_rows_2", &"lower_rows_3", &"lower_rows_4", &"lower_rows_5",
 		&"lower_lift_landing", &"bottom_west_approach", &"bottom_west_threshold", &"first_expansion_gallery", &"collapsed_side_chamber",
-		&"wickwork", &"mid_allotments", &"mid_heart", &"mid_heart_upper",
-		&"mid_east_landing", &"mid_east_approach", &"mid_east_service", &"glowbeds", &"glowbeds_hang",
+		&"wickwork", &"wickwork_upper", &"mid_allotments", &"mid_heart", &"mid_heart_upper",
+		&"mid_east_landing", &"mid_east_approach", &"mid_east_service", &"glowbeds", &"glowbeds_hang", &"glowbeds_lower",
 		&"lower_east_homes", &"lower_east_services", &"cistern_freight", &"cistern_intake", &"cistern", &"cistern_tanks", &"seep_threshold",
 	]
 
@@ -865,6 +1027,8 @@ static func held_points() -> Array[Vector2]:
 		Vector2(-5000.0, lvl(17)), ## Bottom-West lowest gallery
 		Vector2(9000.0, lvl(15)), ## Cistern flood gate side
 		Vector2(-4800.0, lvl(8)), ## Wickwork expansion bay
+		Vector2(-5000.0, lvl(9)), ## Wickwork slag gallery
+		Vector2(-5000.0, lvl(10)), ## Wickwork casting floor
 		Vector2(9100.0, lvl(5)), ## Glowbeds expansion court
 		Vector2(10000.0, lvl(14)), ## Cistern tank annex
 	]
@@ -916,8 +1080,12 @@ static func zones() -> Array[Dictionary]:
 		_zone(&"ashram_west_2", "Ashram Heights (west), second tier", -960.0, 448.0, 2, 2, -300.0, 2),
 		_zone(&"ashram_west_1", "Ashram Heights (west), first tier", -2000.0, -208.0, 1, 1, -1000.0, 1),
 		_zone(&"ashram_west_0", "Ashram Heights (west), summit", -608.0, 448.0, 0, 0, -100.0, 0),
-		_zone(&"high_west_front", "High-West Dig Front", WEST_FLANK_LEFT, 1440.0, 6, 7, -3000.0, 6),
+		_zone(&"high_west_front", "High-West Dig Front", WEST_FLANK_LEFT, 1440.0, 6, 6, -3000.0, 6),
+		_zone(&"high_west_lower", "High-West Lower Gallery", WEST_FLANK_LEFT, -768.0, 7, 7, -3000.0, 7),
 		_zone(&"wickwork_annex", "Wickwork Expansion Bay", -5440.0, -3680.0, 8, 8, -4800.0, 8, true),
+		_zone(&"wickwork_slag", "Wickwork Slag Gallery", -5440.0, -3680.0, 9, 9, -5000.0, 9, true),
+		_zone(&"wickwork_casting", "Wickwork Casting Floor", -5440.0, -3008.0, 10, 10, -5000.0, 10, true),
+		_zone(&"wickwork_upper", "Wickwork Gantry", 1200.0, 1760.0, 7, 7, 1500.0, 7, true),
 		_zone(&"wickwork", "Wickwork", -3680.0, 1440.0, 8, 9, -2160.0, 8, true),
 		_zone(&"mid_allotments", "Mid Allotments", -2400.0, 1440.0 + ledge_max(10.0), 10, 11, -1500.0, 10),
 		_zone(&"west_dispatch_yard", "West Dispatch Yard", -1600.0, -800.0, 12, 12, -1320.0, 12, true),
@@ -950,6 +1118,7 @@ static func zones() -> Array[Dictionary]:
 		_zone(&"glowbeds_annex", "Glowbeds Expansion Court", 8800.0, 10432.0, 5, 5, 9100.0, 5),
 		_zone(&"glowbeds_hang", "Glowbeds Hang", MOUTH_R - ledge_max(6.0), 8000.0, 6, 6, 7200.0, 6),
 		_zone(&"glowbeds_wing", "Glowbeds Recovery Wing", 5184.0, 6368.0, 7, 7, 5600.0, 7),
+		_zone(&"glowbeds_lower", "Glowbeds Lower Gardens", 6560.0, 8100.0, 7, 7, 6800.0, 7),
 		_zone(&"mid_east_landing", "Mid-East Landing", MOUTH_R, 7040.0, 8, 8, 5840.0, 8),
 		_zone(&"mid_east_approach", "Mid-East Approach", 7040.0, EAST_WALL, 8, 8, 7680.0, 8),
 		_zone(&"mid_east_dig_front", "Mid-East Dig Front", EAST_WALL, EAST_FLANK_RIGHT, 8, 8, 9600.0, 8),
