@@ -453,6 +453,51 @@ func _draw_prop(p: Dictionary) -> void:
 			var drop_x := x - w * 0.5 + 12.0
 			draw_rect(Rect2(drop_x - ph * 0.5, deck, ph, maxf(float(p["y_off"]) - 44.0, 8.0)), Color(0.5, 0.3, 0.18))
 			draw_circle(Vector2(drop_x, deck + ph * 0.1), ph * 0.9, Color(0.5, 0.3, 0.18))
+		&"planter":
+			# a stepped planter bed: a timber trough of dark soil with rows of luminous fungal caps (muted teal and amber)
+			_box(deck, x, 0.0, w, 16.0, TIMBER_DARK)
+			_box(deck, x, 16.0, w - 8.0, 8.0, Color(0.16, 0.13, 0.1))
+			for i in range(5):
+				var fx := x - w * 0.5 + 12.0 + float(i) * (w - 24.0) / 4.0
+				var fh := 14.0 + float((i * 7) % 11)
+				draw_line(Vector2(fx, deck - 24.0), Vector2(fx, deck - 24.0 - fh), Color(0.62, 0.7, 0.56), 2.0)
+				_poly(PackedVector2Array([Vector2(fx - 7.0, deck - 24.0 - fh), Vector2(fx + 7.0, deck - 24.0 - fh), Vector2(fx + 4.0, deck - 31.0 - fh), Vector2(fx - 4.0, deck - 31.0 - fh)]), Color(0.3, 0.72, 0.68, 0.9) if i % 2 == 0 else Color(0.92, 0.7, 0.36, 0.9))
+				draw_circle(Vector2(fx, deck - 28.0 - fh), 11.0, Color(0.3, 0.8, 0.74, 0.07))
+		&"glow_fungi":
+			# a stand of luminous fungi: tall stems, domed teal caps, a soft glow (muted, not neon)
+			for i in range(4):
+				var fx := x - w * 0.5 + 10.0 + float(i) * (w - 20.0) / 3.0
+				var fh := 26.0 + float((i * 13) % 30)
+				draw_line(Vector2(fx, deck), Vector2(fx, deck - fh), Color(0.5, 0.62, 0.52), 3.0)
+				draw_circle(Vector2(fx, deck - fh), 18.0, Color(0.3, 0.8, 0.76, 0.07))
+				_poly(PackedVector2Array([Vector2(fx - 11.0, deck - fh + 2.0), Vector2(fx - 8.0, deck - fh - 7.0), Vector2(fx, deck - fh - 11.0), Vector2(fx + 8.0, deck - fh - 7.0), Vector2(fx + 11.0, deck - fh + 2.0)]), Color(0.3, 0.7, 0.66, 0.92) if i % 3 != 0 else Color(0.86, 0.66, 0.34, 0.92))
+		&"fiber_rack":
+			# an A-frame rack with pale fibre hung to dry
+			draw_line(Vector2(x - w * 0.5, deck), Vector2(x - w * 0.5 + 8.0, deck - h), TIMBER_DARK, 3.0)
+			draw_line(Vector2(x + w * 0.5, deck), Vector2(x + w * 0.5 - 8.0, deck - h), TIMBER_DARK, 3.0)
+			draw_line(Vector2(x - w * 0.5 + 8.0, deck - h), Vector2(x + w * 0.5 - 8.0, deck - h), TIMBER, 3.0)
+			for i in range(6):
+				var fx := x - w * 0.5 + 14.0 + float(i) * (w - 28.0) / 5.0
+				draw_line(Vector2(fx, deck - h), Vector2(fx + float(i % 2) * 2.0 - 1.0, deck - h + 40.0 + float((i * 5) % 12)), Color(0.78, 0.72, 0.56, 0.85), 2.0)
+		&"harvest_basket":
+			# a woven basket heaped with pale caps
+			_poly(PackedVector2Array([Vector2(x - w * 0.5, deck - h), Vector2(x + w * 0.5, deck - h), Vector2(x + w * 0.38, deck), Vector2(x - w * 0.38, deck)]), Color(0.52, 0.38, 0.22))
+			draw_line(Vector2(x - w * 0.45, deck - h * 0.5), Vector2(x + w * 0.45, deck - h * 0.5), Color(0.34, 0.24, 0.14), 1.5)
+			for i in range(3):
+				draw_circle(Vector2(x - 8.0 + float(i) * 8.0, deck - h - 2.0), 5.0, Color(0.78, 0.76, 0.6))
+		&"culture_shelf":
+			# shelves of culture jars, each softly lit, amber and teal
+			_box(deck, x - w * 0.5 + 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			_box(deck, x + w * 0.5 - 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			for row in range(3):
+				var ry := 6.0 + float(row) * (h - 12.0) / 3.0
+				_box(deck, x, ry, w, 3.0, TIMBER)
+				for j in range(3):
+					var jx := x - w * 0.5 + 14.0 + float(j) * (w - 28.0) / 2.0
+					var warm := (row + j) % 2 == 0
+					var jc := Color(0.9, 0.68, 0.34, 0.9) if warm else Color(0.3, 0.7, 0.66, 0.9)
+					_box(deck, jx, ry + 3.0, 12.0, 16.0, jc)
+					draw_circle(Vector2(jx, deck - ry - 11.0), 12.0, Color(jc.r, jc.g, jc.b, 0.06))
 		&"pump":
 			# a pressure pump: squat base, tall cylinder, a piston rod and a flanged outlet
 			_box(deck, x, 0.0, w, 14.0, IRON)

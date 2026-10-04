@@ -835,6 +835,13 @@ static func _dress_conflict(span: Vector2, k: int, allow_shaft: bool) -> String:
 		var gr := HollowMap.run_by_id(g["run"])
 		if not gr.is_empty() and absf(float(gr["y"]) - y) < EPS and span.x < float(g["x"]) + 32.0 and span.y > float(g["x"]) - 32.0:
 			return "gate %s" % str(g["id"])
+	for lf in HollowMap.lifts():
+		if (lf["stops"] as Array).has(y) and span.x < float(lf["open_x"]) + float(lf["width"]) + 48.0 and span.y > float(lf["open_x"]) - 48.0:
+			return "lift %s's shaft" % str(lf["id"])
+	for d in HollowMap.doors():
+		var dr := HollowMap.run_by_id(d["run"])
+		if not dr.is_empty() and absf(float(dr["y"]) - y) < EPS and span.x < float(d["x"]) + 72.0 and span.y > float(d["x"]) - 72.0 and not allow_shaft:
+			return "door %s" % str(d["id"])
 	return ""
 
 

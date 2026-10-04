@@ -18,8 +18,14 @@ extends Node
 ## Access via get_tree().root.get_node("SaveLoad") (no class_name, matching
 ## the existing project convention — see resources.gd).
 
-const SAVE_PATH := "user://krater_save.json"
-const SAVE_TEMP_PATH := "user://krater_save.json.tmp"
+## The test runner gives each parallel test process its own save file (KRATER_SAVE_SLOT), so they never share one.
+static func _slot() -> String:
+	var slot := OS.get_environment("KRATER_SAVE_SLOT")
+	return "" if slot == "" else "_" + slot
+
+
+var SAVE_PATH := "user://krater_save%s.json" % _slot()
+var SAVE_TEMP_PATH := "user://krater_save%s.json.tmp" % _slot()
 
 ## Spec 02: schema version stored in every save file; a mismatch is rejected
 ## loudly, never silently loaded as-is. This restarts the counter under the

@@ -41,7 +41,10 @@
 param(
     [string]$Filter = "",
     [string]$GodotPath,
-    [int]$TimeoutSeconds = 30
+    [int]$TimeoutSeconds = 30,
+    # How many tests run at once. Each test is its own headless Godot process that loads the whole Hollow, so they are
+    # CPU-bound and independent; running several at once cuts the wall-clock a lot. 1 = the old one-at-a-time run.
+    [int]$Jobs = 6
 )
 
 # Tests that are legitimately slow rather than hung, so they need more than
@@ -106,67 +109,92 @@ Write-Host ""
 Push-Location $projectRoot
 try {
     $results = @()
-    foreach ($file in $testFiles) {
-        $rel = "tests/$($file.Name)"
-        Write-Host "--- $rel ---" -ForegroundColor Cyan
+    $suiteClock = [System.Diagnostics.Stopwatch]::StartNew()
 
-        # Launched via raw System.Diagnostics.Process, NOT Start-Process:
-        # Start-Process -PassThru's returned object reliably reports
-        # HasExited=True but leaves ExitCode $null on Windows PowerShell 5.1
-        # (confirmed while writing this script) — every test would silently
-        # read as failed. Reading stdout/stderr via ReadToEndAsync (started
-        # before WaitForExit, not read sequentially after) avoids the classic
-        # redirected-pipe deadlock without needing event-based BeginRead.
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = $godot
-        $psi.Arguments = "--headless --path . --script $rel"
-        $psi.RedirectStandardOutput = $true
-        $psi.RedirectStandardError = $true
-        $psi.UseShellExecute = $false
-        $psi.CreateNoWindow = $true
+    # Slowest tests first, so the long ones start at once and the short ones fill the gaps.
+    $queue = New-Object System.Collections.Generic.List[object]
+    $order = $testFiles | Sort-Object { if ($PerTestTimeoutOverrides.ContainsKey($_.Name)) { -$PerTestTimeoutOverrides[$_.Name] } else { 0 } }, Name
+    $slot = 0
+    foreach ($file in $order) { $slot++; $queue.Add([PSCustomObject]@{ File = $file; Slot = $slot }) }
+    $running = New-Object System.Collections.Generic.List[object]
 
-        $proc = [System.Diagnostics.Process]::Start($psi)
-        $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
-        $stderrTask = $proc.StandardError.ReadToEndAsync()
+    while ($queue.Count -gt 0 -or $running.Count -gt 0) {
+        while ($running.Count -lt $Jobs -and $queue.Count -gt 0) {
+            $item = $queue[0]
+            $queue.RemoveAt(0)
+            $file = $item.File
+            $rel = "tests/$($file.Name)"
 
-        $effectiveTimeout = $TimeoutSeconds
-        if ($PerTestTimeoutOverrides.ContainsKey($file.Name) -and $PerTestTimeoutOverrides[$file.Name] -gt $TimeoutSeconds) {
-            $effectiveTimeout = $PerTestTimeoutOverrides[$file.Name]
-        }
-        $finished = $proc.WaitForExit($effectiveTimeout * 1000)
-        $timedOut = -not $finished
-        if ($timedOut) {
-            try { $proc.Kill() } catch {}
-            $exitCode = -1
-        }
-        else {
-            # WaitForExit(int) can return before the process's I/O buffers are
-            # fully flushed; the parameterless overload blocks until they are,
-            # so ExitCode is guaranteed valid after it.
-            $proc.WaitForExit()
-            $exitCode = $proc.ExitCode
-        }
+            # Launched via raw System.Diagnostics.Process, NOT Start-Process:
+            # Start-Process -PassThru's returned object reliably reports
+            # HasExited=True but leaves ExitCode $null on Windows PowerShell 5.1
+            # (confirmed while writing this script) - every test would silently
+            # read as failed. Reading stdout/stderr via ReadToEndAsync (started
+            # before WaitForExit, not read sequentially after) avoids the classic
+            # redirected-pipe deadlock without needing event-based BeginRead.
+            $psi = New-Object System.Diagnostics.ProcessStartInfo
+            $psi.FileName = $godot
+            $psi.Arguments = "--headless --path . --script $rel"
+            $psi.RedirectStandardOutput = $true
+            $psi.RedirectStandardError = $true
+            $psi.UseShellExecute = $false
+            $psi.CreateNoWindow = $true
+            # Tests that save and load use the one save file; give each process its own so parallel runs never collide.
+            $psi.EnvironmentVariables["KRATER_SAVE_SLOT"] = "t$($item.Slot)"
 
-        [System.Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask), 5000) | Out-Null
-        if ($stdoutTask.IsCompleted -and $stdoutTask.Result) {
-            $stdoutTask.Result -split "`r?`n" | ForEach-Object { Write-Host $_ }
-        }
-        if ($stderrTask.IsCompleted -and $stderrTask.Result) {
-            $stderrTask.Result -split "`r?`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow }
+            $proc = [System.Diagnostics.Process]::Start($psi)
+            $effectiveTimeout = $TimeoutSeconds
+            if ($PerTestTimeoutOverrides.ContainsKey($file.Name) -and $PerTestTimeoutOverrides[$file.Name] -gt $TimeoutSeconds) {
+                $effectiveTimeout = $PerTestTimeoutOverrides[$file.Name]
+            }
+            $running.Add([PSCustomObject]@{
+                File = $file; Rel = $rel; Proc = $proc; Timeout = $effectiveTimeout
+                Out = $proc.StandardOutput.ReadToEndAsync(); Err = $proc.StandardError.ReadToEndAsync()
+                Clock = [System.Diagnostics.Stopwatch]::StartNew()
+            })
         }
 
-        if ($timedOut) {
-            Write-Host "TIMEOUT after ${effectiveTimeout}s - killed. Likely an uncaught error that never reached quit()." -ForegroundColor Red
-        }
+        foreach ($job in $running.ToArray()) {
+            $timedOut = $false
+            if (-not $job.Proc.HasExited) {
+                if ($job.Clock.Elapsed.TotalSeconds -le $job.Timeout) { continue }
+                $timedOut = $true
+                try { $job.Proc.Kill() } catch {}
+                $exitCode = -1
+            }
+            else {
+                # WaitForExit(int) can return before the process's I/O buffers are
+                # fully flushed; the parameterless overload blocks until they are,
+                # so ExitCode is guaranteed valid after it.
+                $job.Proc.WaitForExit()
+                $exitCode = $job.Proc.ExitCode
+            }
+            $running.Remove($job) | Out-Null
+            $seconds = [math]::Round($job.Clock.Elapsed.TotalSeconds, 1)
 
-        $results += [PSCustomObject]@{
-            Test     = $file.Name
-            Passed   = ((-not $timedOut) -and ($exitCode -eq 0))
-            ExitCode = $exitCode
-            TimedOut = $timedOut
+            Write-Host "--- $($job.Rel) ($seconds s) ---" -ForegroundColor Cyan
+            [System.Threading.Tasks.Task]::WaitAll(@($job.Out, $job.Err), 5000) | Out-Null
+            if ($job.Out.IsCompleted -and $job.Out.Result) {
+                $job.Out.Result -split "`r?`n" | ForEach-Object { Write-Host $_ }
+            }
+            if ($job.Err.IsCompleted -and $job.Err.Result) {
+                $job.Err.Result -split "`r?`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow }
+            }
+            if ($timedOut) {
+                Write-Host "TIMEOUT after $($job.Timeout)s - killed. Likely an uncaught error that never reached quit()." -ForegroundColor Red
+            }
+            $results += [PSCustomObject]@{
+                Test     = $job.File.Name
+                Passed   = ((-not $timedOut) -and ($exitCode -eq 0))
+                ExitCode = $exitCode
+                TimedOut = $timedOut
+                Seconds  = $seconds
+            }
+            Write-Host ""
         }
-        Write-Host ""
+        Start-Sleep -Milliseconds 200
     }
+    $results = @($results | Sort-Object Test)
 }
 finally {
     Pop-Location
@@ -195,7 +223,7 @@ $failed = @($results | Where-Object { -not $_.Passed })
 $passCount = $results.Count - $failed.Count
 Write-Host ""
 $summaryColor = if ($failed.Count -eq 0) { "Green" } else { "Red" }
-Write-Host "$passCount/$($results.Count) passed" -ForegroundColor $summaryColor
+Write-Host "$passCount/$($results.Count) passed in $([math]::Round($suiteClock.Elapsed.TotalSeconds, 0)) s ($Jobs at a time)" -ForegroundColor $summaryColor
 
 if ($failed.Count -gt 0) {
     exit 1

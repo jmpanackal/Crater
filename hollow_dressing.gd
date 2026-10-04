@@ -29,6 +29,7 @@ const SIZES := {
 	&"fragment": Vector2(14, 10), &"supply_rack": Vector2(72, 72), &"gauge": Vector2(40, 40), &"pipe": Vector2(160, 11),
 	&"bench": Vector2(60, 22), &"sort_table": Vector2(64, 32), &"sealed_hatch": Vector2(48, 96), &"observation_window": Vector2(48, 32),
 	&"notice": Vector2(28, 36), &"brace": Vector2(64, 128), &"step": Vector2(48, 10),
+	&"planter": Vector2(96, 40), &"glow_fungi": Vector2(70, 64), &"fiber_rack": Vector2(64, 74), &"harvest_basket": Vector2(30, 22), &"culture_shelf": Vector2(72, 84),
 	&"pump": Vector2(56, 120), &"valve_wheel": Vector2(40, 40), &"awning": Vector2(170, 64), &"niche": Vector2(26, 44), &"herbs": Vector2(48, 38), &"crystal": Vector2(28, 20),
 }
 
@@ -61,6 +62,9 @@ const SLICE_ZONES := {
 	&"first_expansion_gallery": {"props": 6, "lamps": 3, "actors": 3},
 	&"collapsed_side_chamber": {"props": 4, "lamps": 1, "actors": 0},
 }
+
+## The generated, evenly spread placeholder dressing (tools/generate_dressing_fill.gd), appended to the hand-authored lists.
+const Fill := preload("res://hollow_dressing_fill.gd")
 
 static var _cache: Dictionary = {}
 
@@ -110,6 +114,15 @@ static func _station(id: StringName, zone: StringName, kind: StringName, x: floa
 ## ---------------------------------------------------------------- buildings
 
 static func buildings() -> Array[Dictionary]:
+	if _cache.has("all_buildings"):
+		return _cache["all_buildings"]
+	var all: Array[Dictionary] = authored_buildings()
+	all.append_array(Fill.BUILDINGS)
+	_cache["all_buildings"] = all
+	return all
+
+
+static func authored_buildings() -> Array[Dictionary]:
 	if _cache.has("buildings"):
 		return _cache["buildings"]
 	var out: Array[Dictionary] = [
@@ -140,6 +153,19 @@ static func buildings() -> Array[Dictionary]:
 ## ---------------------------------------------------------------- props
 
 static func props() -> Array[Dictionary]:
+	if _cache.has("all_props"):
+		return _cache["all_props"]
+	var all: Array[Dictionary] = authored_props().duplicate()
+	var base := all.size()
+	for i in Fill.PROPS.size():
+		var p: Dictionary = Fill.PROPS[i].duplicate()
+		p["id"] = StringName("%s_%s_%d" % [str(p["zone"]), str(p["kind"]), base + i])
+		all.append(p)
+	_cache["all_props"] = all
+	return all
+
+
+static func authored_props() -> Array[Dictionary]:
 	if _cache.has("props"):
 		return _cache["props"]
 	var hc := &"home_court"
@@ -291,15 +317,35 @@ static func props() -> Array[Dictionary]:
 		_prop(&"wickwork_annex", &"crate", -5120.0, 8),
 		_prop(&"wickwork_annex", &"workbench", -4700.0, 8),
 		_prop(&"wickwork_annex", &"crate", -3900.0, 8),
-		_prop(&"glowbeds_annex", &"fungal_mat", 8960.0, 6),
-		_prop(&"glowbeds_annex", &"fungal_mat", 9020.0, 6),
-		_prop(&"glowbeds_annex", &"herbs", 9100.0, 6),
-		_prop(&"glowbeds_annex", &"crystal", 9170.0, 6),
+		_prop(&"glowbeds_annex", &"fungal_mat", 8960.0, 5),
+		_prop(&"glowbeds_annex", &"fungal_mat", 9020.0, 5),
+		_prop(&"glowbeds_annex", &"herbs", 9100.0, 5),
+		_prop(&"glowbeds_annex", &"crystal", 9170.0, 5),
 		_prop(&"cistern_annex", &"pump", 9950.0, 14),
 		_prop(&"cistern_annex", &"valve_wheel", 10150.0, 14, {"y_off": 40.0}),
 		_prop(&"cistern_annex", &"gauge", 10050.0, 14, {"y_off": 60.0}),
 		_prop(&"cistern_annex", &"pipe", 10300.0, 14, {"y_off": 110.0}),
 		_prop(&"cistern_annex", &"barrel", 10440.0, 14),
+		# ---- Glowbeds (USER 2026-10-04: make it read as the lore: tidy cultivation, stepped planters, fibre racks, harvest
+		# baskets, luminous fungi, recovery; amber and muted teal, never neon or a pristine greenhouse). AI-placed greybox.
+		_prop(&"glowbeds_hang", &"planter", 5860.0, 6),
+		_prop(&"glowbeds_hang", &"planter", 5980.0, 6),
+		_prop(&"glowbeds_hang", &"glow_fungi", 6100.0, 6),
+		_prop(&"glowbeds_hang", &"fiber_rack", 6220.0, 6),
+		_prop(&"glowbeds_hang", &"harvest_basket", 6300.0, 6),
+		_prop(&"glowbeds_hang", &"planter", 6620.0, 6),
+		_prop(&"glowbeds_hang", &"planter", 6730.0, 6),
+		_prop(&"glowbeds_hang", &"glow_fungi", 6840.0, 6),
+		_prop(&"glowbeds_hang", &"culture_shelf", 6960.0, 6),
+		_prop(&"glowbeds_wing", &"bed", 5560.0, 7),
+		_prop(&"glowbeds_wing", &"bed", 5660.0, 7),
+		_prop(&"glowbeds_wing", &"bed", 5760.0, 7),
+		_prop(&"glowbeds_wing", &"culture_shelf", 5860.0, 7),
+		_prop(&"glowbeds_wing", &"culture_shelf", 5950.0, 7),
+		_prop(&"glowbeds_wing", &"basin", 6030.0, 7),
+		_prop(&"glowbeds_wing", &"glow_fungi", 6110.0, 7),
+		_prop(&"glowbeds_wing", &"herbs", 6180.0, 7),
+		_prop(&"glowbeds_wing", &"harvest_basket", 6240.0, 7),
 	]
 	for i in out.size():
 		out[i]["id"] = StringName("%s_%s_%d" % [str(out[i]["zone"]), str(out[i]["kind"]), i])
@@ -311,6 +357,15 @@ static func props() -> Array[Dictionary]:
 
 ## tone: warm (a wicklamp niche), cool (a work lamp), amber / red (a warning lamp).
 static func lamps() -> Array[Dictionary]:
+	if _cache.has("all_lamps"):
+		return _cache["all_lamps"]
+	var all: Array[Dictionary] = authored_lamps().duplicate()
+	all.append_array(Fill.LAMPS)
+	_cache["all_lamps"] = all
+	return all
+
+
+static func authored_lamps() -> Array[Dictionary]:
 	if _cache.has("lamps"):
 		return _cache["lamps"]
 	var out: Array[Dictionary] = [
@@ -336,7 +391,10 @@ static func lamps() -> Array[Dictionary]:
 		_lamp(&"cistern_tanks", 7560.0, 14, 130.0, &"cool"), _lamp(&"cistern_tanks", 8160.0, 14, 130.0, &"amber"),
 		_lamp(&"seep_threshold", 8540.0, 15, 120.0, &"red"),
 		_lamp(&"wickwork_annex", -5250.0, 8, 130.0, &"cool"), _lamp(&"wickwork_annex", -4700.0, 8, 130.0, &"warm"),
-		_lamp(&"glowbeds_annex", 9040.0, 6, 130.0, &"cool"), _lamp(&"glowbeds_annex", 9180.0, 6, 120.0, &"warm"),
+		_lamp(&"glowbeds_annex", 9040.0, 5, 130.0, &"cool"), _lamp(&"glowbeds_annex", 9180.0, 5, 120.0, &"warm"),
+		_lamp(&"glowbeds_hang", 5900.0, 6, 140.0, &"warm"), _lamp(&"glowbeds_hang", 6140.0, 6, 130.0, &"cool"),
+		_lamp(&"glowbeds_hang", 6660.0, 6, 140.0, &"warm"), _lamp(&"glowbeds_hang", 6900.0, 6, 130.0, &"cool"),
+		_lamp(&"glowbeds_wing", 5610.0, 7, 130.0, &"warm"), _lamp(&"glowbeds_wing", 5900.0, 7, 130.0, &"cool"), _lamp(&"glowbeds_wing", 6150.0, 7, 120.0, &"warm"),
 		_lamp(&"cistern_annex", 9960.0, 14, 130.0, &"cool"), _lamp(&"cistern_annex", 10320.0, 14, 130.0, &"amber"),
 	]
 	_cache["lamps"] = out
