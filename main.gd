@@ -3,6 +3,9 @@ extends Node2D
 ## F11 toggles fullscreen; Esc closes Journal before returning to title.
 
 const UiStyleRef := preload("res://ui_style.gd")
+const HudScript := preload("res://hud.gd")
+const StandingScript := preload("res://standing_panel.gd")
+const RigPanelScript := preload("res://rig_panel.gd")
 
 @onready var _dialogue: CanvasLayer = $UI/DialoguePanel
 @onready var _journal: CanvasLayer = $UI/JournalHud
@@ -55,6 +58,32 @@ func _apply_hud_chrome() -> void:
 	var notice := get_node_or_null("UI/NoticeLabel") as Label
 	if notice:
 		UiStyleRef.apply_label(notice, &"body")
+	_build_canon_hud()
+
+
+## The HUD the canon describes (section 55, the invisible interface): small and quiet, with Trust, the Rig, orders, the
+## Journal and the map as panels you open. The old top-left stack (Materials, cycle, Trust, hint) and the always-on
+## district chip are scaffolding from before the canon and are no longer shown; their nodes stay only because the
+## Approved Gear panel and a few tests still read them.
+func _build_canon_hud() -> void:
+	var ui := get_node_or_null("UI")
+	if ui == null or ui.get_node_or_null("Hud") != null:
+		return
+	for legacy in ["PrimaryHud", "SalvageLabel", "CycleLabel", "TrustLabel", "MeaningHint"]:
+		var n := ui.get_node_or_null(legacy) as CanvasItem
+		if n:
+			n.visible = false
+	var hud := Control.new()
+	hud.set_script(HudScript)
+	ui.add_child(hud)
+	var standing := Control.new()
+	standing.name = "StandingPanel"
+	standing.set_script(StandingScript)
+	ui.add_child(standing)
+	var rig := Control.new()
+	rig.name = "RigPanel"
+	rig.set_script(RigPanelScript)
+	ui.add_child(rig)
 
 
 func _process(delta: float) -> void:

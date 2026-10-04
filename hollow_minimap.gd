@@ -6,6 +6,10 @@ const Macro := preload("res://hollow_macro_background.gd")
 const TOGGLE_ACTION := "toggle_minimap"
 
 const MAP_SIZE := Vector2(440, 204)
+## A small map is a glance, not a gazetteer: the header names where you are, the streets show the way, and the district
+## names stay off it (their label geometry is still computed for the tests).
+const DRAW_LABELS := false
+const MAP_VIEW_SCALE := 0.46
 const PAD := 8.0
 ## Strip above the map for the current place name.
 const HEADER_H := 16.0
@@ -30,7 +34,7 @@ const GATE_OPEN := Color(0.45, 0.75, 0.5, 0.6)
 const LABEL_COLOR := Color(0.82, 0.86, 0.84, 0.7)
 
 var _player: Node2D
-var _panel: StyleBoxFlat
+var _panel: StyleBox
 
 
 func _ready() -> void:
@@ -38,13 +42,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = MAP_SIZE
 	size = MAP_SIZE
-	_panel = StyleBoxFlat.new()
-	_panel.bg_color = PANEL_BG
-	_panel.border_color = PANEL_BORDER
-	_panel.set_border_width_all(1)
-	_panel.set_corner_radius_all(4)
-	_panel.shadow_color = Color(0, 0, 0, 0.35)
-	_panel.shadow_size = 3
+	# drawn small: a glance in the corner, scaled about its top-right corner so the layout and the tests still see a full-size map
+	scale = Vector2(MAP_VIEW_SCALE, MAP_VIEW_SCALE)
+	pivot_offset = Vector2(MAP_SIZE.x, 0.0)
+	_panel = preload("res://ui_style.gd").panel_style(&"copper")
 	modulate = Color(1.0, 1.0, 1.0, 0.94)
 	visible = true
 	set_process(true)
@@ -424,8 +425,9 @@ func _build_static(s: Vector2) -> void:
 		label_rect.position.y = clampf(label_rect.position.y, area.position.y, area.end.y - label_rect.size.y)
 		placed.append(label_rect)
 		var at := Vector2(label_rect.position.x, label_rect.position.y + label_rect.size.y - 2.0)
-		_cstr(at + Vector2(1, 1), str(marker.name), LABEL_SIZE, Color(0, 0, 0, 0.55))
-		_cstr(at, str(marker.name), LABEL_SIZE, LABEL_COLOR)
+		if DRAW_LABELS:
+			_cstr(at + Vector2(1, 1), str(marker.name), LABEL_SIZE, Color(0, 0, 0, 0.55))
+			_cstr(at, str(marker.name), LABEL_SIZE, LABEL_COLOR)
 	_cmd_size = s
 
 

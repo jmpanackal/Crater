@@ -3,6 +3,7 @@ extends Control
 ## Quiet INMOST-leaning presentation: ink void, lantern warmth, soft vignette.
 
 const UiStyleRef := preload("res://ui_style.gd")
+const BackdropScript := preload("res://title_backdrop.gd")
 
 @onready var _continue_btn: Button = $Center/VBox/ContinueButton
 @onready var _new_btn: Button = $Center/VBox/NewGameButton
@@ -22,7 +23,7 @@ func _ready() -> void:
 	if _blurb:
 		_blurb.text = (
 			"A secret dig in the Hollow.\n"
-			+ "Climb the terraces (W/S). Keep Harvest. Keep Trust."
+			+ "Climb the terraces (W/S). Dig, deliver, keep Trust."
 		)
 	if _continue_btn:
 		_continue_btn.focus_mode = Control.FOCUS_ALL
@@ -38,8 +39,14 @@ func _ready() -> void:
 
 func _apply_chrome() -> void:
 	if _title:
-		_title.add_theme_font_size_override("font_size", 52)
-		_title.add_theme_color_override("font_color", Color(0.88, 0.9, 0.86, 0.96))
+		_title.add_theme_font_size_override("font_size", 60)
+		_title.add_theme_color_override("font_color", Color(1.0, 0.84, 0.55, 0.98))
+		_title.add_theme_color_override("font_outline_color", Color(0.18, 0.1, 0.04, 0.95))
+		_title.add_theme_constant_override("outline_size", 6)
+		var spaced := FontVariation.new()
+		spaced.base_font = ThemeDB.fallback_font
+		spaced.spacing_glyph = 6
+		_title.add_theme_font_override("font", spaced)
 	if _subtitle:
 		UiStyleRef.apply_label(_subtitle, &"teal")
 		_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -54,6 +61,12 @@ func _apply_chrome() -> void:
 
 func _process(delta: float) -> void:
 	_breathe_t += delta
+	var plate := get_node_or_null("MenuPlate") as Panel
+	var vbox := get_node_or_null("Center/VBox") as Control
+	if plate and vbox:
+		var r := vbox.get_global_rect().grow(36.0)
+		plate.global_position = r.position
+		plate.size = r.size
 	var glow := get_node_or_null("WarmGlow") as ColorRect
 	if glow:
 		# Barely-there lantern breathe — presence, not sparkle.
@@ -63,10 +76,25 @@ func _process(delta: float) -> void:
 func _ensure_quiet_atmosphere() -> void:
 	var backdrop := get_node_or_null("Backdrop") as ColorRect
 	if backdrop:
-		backdrop.color = Color(0.04, 0.07, 0.08, 1.0)
+		backdrop.color = Color(0.02, 0.035, 0.06, 1.0)
+		# the Hollow as a picture (greybox, drawn in code): cliffs of lit homes, Mid Heart on its trusses, the Pulse
+		var art := Control.new()
+		art.name = "Cavern"
+		art.set_script(BackdropScript)
+		art.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(art)
+		move_child(art, backdrop.get_index() + 1)
+		# an iron plate behind the menu, sized to it each frame
+		var plate := Panel.new()
+		plate.name = "MenuPlate"
+		plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		plate.add_theme_stylebox_override("panel", UiStyleRef.modal_panel_style())
+		add_child(plate)
+		move_child(plate, art.get_index() + 1)
 
 	var glow := get_node_or_null("WarmGlow") as ColorRect
 	if glow:
+		glow.visible = false
 		glow.color = Color(0.45, 0.26, 0.1, 0.16)
 		glow.offset_left = 120.0
 		glow.offset_top = 240.0

@@ -30,12 +30,12 @@ func get_interact_prompt() -> String:
 	var lift := _elevator()
 	if lift == null:
 		return ""
+	# A prompt means Interact does something: nothing to offer when the cab is here, locked or parked (the lift's own
+	# hint above the cab already says why), so no key cap is shown for an action that would do nothing.
 	if lift.current_stop_index() == stop_index and not lift.is_moving():
-		return "Lift is here"
-	if lift.is_locked():
-		return "Lift (Warden-run, not cleared)"
-	if lift.is_parked():
-		return "Lift (Presswater out)"
+		return ""
+	if lift.is_locked() or lift.is_parked():
+		return ""
 	return "Call lift"
 
 

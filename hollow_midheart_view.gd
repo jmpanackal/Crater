@@ -141,8 +141,7 @@ func _ritual(x0: float, x1: float, y: float) -> void:
 		draw_rect(Rect2(px, y - 300.0, 24.0, 300.0), STEEL)
 		draw_rect(Rect2(px - 6.0, y - 300.0, 36.0, 14.0), STEEL_HI)
 		draw_rect(Rect2(px - 6.0, y - 24.0, 36.0, 24.0), STEEL_LO)
-		draw_rect(Rect2(px + 24.0 if px < x0 + 400.0 else px - 56.0, y - 280.0, 56.0, 120.0), CLOTH_A)
-		draw_rect(Rect2(px + 24.0 if px < x0 + 400.0 else px - 56.0, y - 280.0, 56.0, 8.0), CLOTH_C)
+		# (the pennant flaps, so hollow_motion_view.gd draws it)
 	for bx in [x0 + 190.0, x1 - 210.0]:
 		draw_rect(Rect2(bx - 18.0, y - 40.0, 36.0, 12.0), STEEL_LO)
 		draw_rect(Rect2(bx - 4.0, y - 28.0, 8.0, 28.0), STEEL)
@@ -181,10 +180,7 @@ func _dock(x0: float, x1: float, y: float) -> void:
 	draw_rect(Rect2(mid + 180.0, y - 190.0, 10.0, 190.0), STEEL)
 	draw_rect(Rect2(mid - 200.0, y - 200.0, 400.0, 14.0), STEEL_HI)
 	draw_rect(Rect2(mid - 200.0, y - 186.0, 400.0, 4.0), STEEL_LO)
-	draw_rect(Rect2(mid - 20.0, y - 180.0, 40.0, 14.0), COPPER)
-	draw_line(Vector2(mid, y - 166.0), Vector2(mid, y - 70.0), STEEL_HI, 2.0)
-	draw_rect(Rect2(mid - 8.0, y - 70.0, 16.0, 10.0), COPPER)
-	draw_rect(Rect2(mid - 30.0, y - 60.0, 60.0, 60.0), TIMBER.darkened(0.1))
+	# (the trolley, hook and the crate it carries move, so hollow_motion_view.gd draws them)
 	# dispatch booth at the west end
 	draw_rect(Rect2(x0 + 30.0, y - 100.0, 90.0, 100.0), STEEL_LO)
 	draw_rect(Rect2(x0 + 36.0, y - 94.0, 78.0, 70.0), Color(0.16, 0.14, 0.11))

@@ -13,6 +13,7 @@ const StairwellViewScript := preload("res://hollow_stairwell_view.gd")
 const CisternViewScript := preload("res://hollow_cistern_view.gd")
 const PulseViewScript := preload("res://hollow_pulse_view.gd")
 const MidHeartViewScript := preload("res://hollow_midheart_view.gd")
+const MotionViewScript := preload("res://hollow_motion_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -29,6 +30,7 @@ func _ready() -> void:
 	_build_cistern_basin()
 	_build_pulse()
 	_build_midheart()
+	_build_motion()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -104,6 +106,14 @@ func _build_midheart() -> void:
 	var view := Node2D.new()
 	view.name = "MidHeartStructure"
 	view.set_script(MidHeartViewScript)
+	add_child(view)
+
+
+## The moving parts: pistons, valves, steam, pennants, the crane and a cart, flickering lamps, breathing fungi.
+func _build_motion() -> void:
+	var view := Node2D.new()
+	view.name = "MovingParts"
+	view.set_script(MotionViewScript)
 	add_child(view)
 
 

@@ -16,6 +16,9 @@ const CallScript := preload("res://elevator_call.gd")
 @export var thin_speed_mult := 0.35
 const CALL_RANGE := 240.0
 var auto_call := true ## the cab answers a player waiting on its landing
+var ambient := true ## idle cabs make the odd trip on their own while the player is far away: people use the lifts
+var _ambient_timer := 25.0
+const AMBIENT_QUIET_RANGE := 1400.0 ## no ambient trips while the player is this close to the shaft
 
 var kind: StringName = &"freight"
 var width := 160.0
@@ -275,6 +278,7 @@ func _physics_process(delta: float) -> void:
 			_moving = true
 	if not _moving:
 		_auto_call()
+		_ambient_trip(delta)
 	if not _moving:
 		position.y = _stops[_stop_index]
 		_update_cable()
@@ -317,6 +321,25 @@ func _update_cable() -> void:
 	_cable.position.y = top_local
 	_cable.size.y = maxf(0.0, _cable_top_offset - top_local)
 	_update_landings()
+
+
+## Society using its lifts: every so often an idle cab, with nobody near, goes to another stop and sits there until the
+## next call. Only while service is up (a parked or locked lift stays put), and never while the player is close, so it
+## cannot move a cab under someone about to board it.
+func _ambient_trip(delta: float) -> void:
+	if not ambient or _riders > 0 or _parked or _stops.size() < 2:
+		return
+	_ambient_timer -= delta
+	if _ambient_timer > 0.0:
+		return
+	_ambient_timer = randf_range(30.0, 60.0)
+	for body in get_tree().get_nodes_in_group("player"):
+		var p := body as Node2D
+		if p != null and p.global_position.distance_to(position + Vector2(width * 0.5, 0.0)) < AMBIENT_QUIET_RANGE:
+			return
+	var next := randi_range(0, _stops.size() - 1)
+	if next != _stop_index:
+		call_to(next)
 
 
 ## The cab comes to you: a player standing on a stop's deck near the shaft, with the cab elsewhere and nobody

@@ -12,6 +12,7 @@ extends PanelContainer
 ## canon autoloads: Orders, Wallet, Trust, District, Storage, Clock.
 
 const UiStyleRef := preload("res://ui_style.gd")
+const DistrictGaugeScript := preload("res://ui_district_gauge.gd")
 
 @onready var _content: VBoxContainer = $Margin/Content
 @onready var _condition_label: Label = $Margin/Content/DistrictConditionLabel
@@ -130,6 +131,19 @@ func _apply_chrome() -> void:
 	UiStyleRef.apply_label(_condition_label, &"teal")
 	if _condition_label:
 		_condition_label.modulate.a = 0.9
+		# the district's condition as lamps on a pressure line, on the Approved Gear panel's title (the chip is gone)
+		var title := _req_panel.get_node_or_null("Margin/VBox/Title") as Label if _req_panel else null
+		if title:
+			var gauge := Control.new()
+			gauge.name = "DistrictGauge"
+			gauge.set_script(DistrictGaugeScript)
+			gauge.anchor_left = 1.0
+			gauge.anchor_right = 1.0
+			gauge.offset_left = -50.0
+			gauge.offset_right = -4.0
+			gauge.offset_top = 3.0
+			gauge.offset_bottom = 15.0
+			title.add_child(gauge)
 	UiStyleRef.tip(
 		_condition_label,
 		"How a district's Capacity/Demand/Reserves balance is holding up right now."
@@ -167,7 +181,7 @@ func _ensure_requisition_open_btn() -> void:
 		_req_open_btn.name = "RequisitionExpandHint"
 		_content.add_child(_req_open_btn)
 	_req_open_btn.focus_mode = Control.FOCUS_NONE
-	_req_open_btn.text = "Requisition  [Q]"
+	_req_open_btn.text = "Approved Gear  [Q]"
 	_req_open_btn.custom_minimum_size = Vector2(0, 22)
 	UiStyleRef.apply_button(_req_open_btn, true)
 	UiStyleRef.tip(_req_open_btn, "Order Approved Gear — spend Tallies and authorized District Output.")
@@ -348,14 +362,14 @@ static func notice_color_for(tone: StringName) -> Color:
 
 
 func _refresh() -> void:
-	visible = true
+	visible = false # the always-on chip is retired (canon section 55); Approved Gear opens with [Q]
 	_refresh_district_condition()
 	_refresh_requisition_status()
 	_refresh_requisition_buttons()
 	_set_requisition_visible(_req_expanded)
 	if _req_open_btn:
 		_req_open_btn.visible = true
-		_req_open_btn.text = "Close requisition  [Q]" if _req_expanded else "Requisition  [Q]"
+		_req_open_btn.text = "Close gear orders  [Q]" if _req_expanded else "Approved Gear  [Q]"
 	call_deferred("_fit_to_content")
 
 

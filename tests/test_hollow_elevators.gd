@@ -33,6 +33,8 @@ func _run() -> void:
 		await process_frame
 	var player: CharacterBody2D = scene.get_node("Player")
 	var structures: Node = scene.get_node("Hollow/Structures")
+	for lf0 in HollowMap.lifts():
+		structures.get_node("Lift_%s" % str(lf0["id"])).ambient = false # idle trips are checked separately; they would move cabs under this test
 	var rode := 0
 	for lf in HollowMap.lifts():
 		var lift: Node = structures.get_node("Lift_%s" % str(lf["id"]))
@@ -44,6 +46,7 @@ func _run() -> void:
 		# a cab sits flush with its landing: the deck, the cab floor and the call point agree
 		var cab_x: float = float(lf["open_x"]) + float(lf["width"]) * 0.5
 		lift.auto_call = false
+		lift.ambient = false
 		# with the cab at the bottom, the landing at the top stop still holds a walker up (the floor is open, the plate is not)
 		_reset(player)
 		player.global_position = Vector2(cab_x, float(stops[0]) - 64.0)
