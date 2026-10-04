@@ -85,7 +85,7 @@ static func _on_grid(y: float, half_ok: bool) -> bool:
 static func _check_grid_and_stack(rep: Dictionary) -> void:
 	var runs := HollowMap.runs()
 	for r in runs:
-		var half_ok: bool = r["zone"] == &"mid_heart" or bool(r["landing"])
+		var half_ok: bool = HollowMap.is_heart_zone(r["zone"]) or bool(r["landing"])
 		var dy: float = r["dy"]
 		if absf(dy) > EPS and (half_ok or absf(dy) < TERRACE_MIN - EPS or absf(dy) > TERRACE_MAX + EPS or absf(fposmod(absf(dy), 16.0)) > EPS):
 			_err(rep, "grid: %s has terrace offset %d (whole tiles, %d..%d px, never on Mid Heart or a landing)" % [run_label(r), int(dy), int(TERRACE_MIN), int(TERRACE_MAX)])
@@ -275,7 +275,7 @@ static func _check_roofs(rep: Dictionary) -> void:
 static func _check_flat(rep: Dictionary) -> void:
 	var plain := HollowMap.plain_runs()
 	for r in HollowMap.runs():
-		if r["zone"] == &"mid_heart" or plain.has(r["id"]):
+		if HollowMap.is_heart_zone(r["zone"]) or plain.has(r["id"]):
 			continue
 		var len := float(r["x1"]) - float(r["x0"])
 		if len > MAX_FLAT:
@@ -305,8 +305,9 @@ static func _check_ends(rep: Dictionary) -> void:
 				if not _in_hall(float(r["k"]), x0):
 					_err(rep, "end: %s says its left end is open, but x=%d is not inside a stepped hall on its level" % [run_label(r), int(x0)])
 			HollowMap.END_LEDGE:
-				if not (x0 >= HollowMap.MOUTH_R - HollowMap.LEDGE_MAX - EPS and x0 < HollowMap.MOUTH_R - EPS):
-					_err(rep, "end: %s claims a Mouth ledge on its left at x=%d; it must reach 1..%dpx out from the east lip (x=%d)" % [run_label(r), int(x0), int(HollowMap.LEDGE_MAX), int(HollowMap.MOUTH_R)])
+				var lmax := HollowMap.ledge_max(float(r["k"]))
+				if not (x0 >= HollowMap.MOUTH_R - lmax - EPS and x0 < HollowMap.MOUTH_R - EPS):
+					_err(rep, "end: %s claims a Mouth ledge on its left at x=%d; on level %s it must reach 1..%dpx out from the east lip (x=%d)" % [run_label(r), int(x0), str(r["k"]), int(lmax), int(HollowMap.MOUTH_R)])
 			HollowMap.END_ROCK:
 				if not (x0 >= HollowMap.ENV_LEFT + MIN_FLANK_BEYOND - EPS and x0 < HollowMap.WEST_WALL):
 					_err(rep, "end: %s claims rock at x=%d, outside the west flank" % [run_label(r), int(x0)])
@@ -331,8 +332,9 @@ static func _check_ends(rep: Dictionary) -> void:
 				if not _in_hall(float(r["k"]), x1):
 					_err(rep, "end: %s says its right end is open, but x=%d is not inside a stepped hall on its level" % [run_label(r), int(x1)])
 			HollowMap.END_LEDGE:
-				if not (x1 > HollowMap.MOUTH_L + EPS and x1 <= HollowMap.MOUTH_L + HollowMap.LEDGE_MAX + EPS):
-					_err(rep, "end: %s claims a Mouth ledge on its right at x=%d; it must reach 1..%dpx out from the west lip (x=%d)" % [run_label(r), int(x1), int(HollowMap.LEDGE_MAX), int(HollowMap.MOUTH_L)])
+				var lmax := HollowMap.ledge_max(float(r["k"]))
+				if not (x1 > HollowMap.MOUTH_L + EPS and x1 <= HollowMap.MOUTH_L + lmax + EPS):
+					_err(rep, "end: %s claims a Mouth ledge on its right at x=%d; on level %s it must reach 1..%dpx out from the west lip (x=%d)" % [run_label(r), int(x1), str(r["k"]), int(lmax), int(HollowMap.MOUTH_L)])
 			HollowMap.END_ROCK:
 				if not (x1 > HollowMap.EAST_WALL - EPS and x1 <= HollowMap.ENV_RIGHT - MIN_FLANK_BEYOND + EPS):
 					_err(rep, "end: %s claims rock at x=%d, outside the east flank" % [run_label(r), int(x1)])
@@ -494,14 +496,15 @@ static func _check_mouth(rep: Dictionary) -> void:
 		var inside: bool = float(p["x1"]) > HollowMap.MOUTH_L + EPS and float(p["x0"]) < HollowMap.MOUTH_R - EPS
 		var run := HollowMap.run_by_id(p["run"])
 		# a short ledge off a lip is allowed (USER 2026-10-02): the run says so with END_LEDGE, and it stays under LEDGE_MAX
-		var west_ledge: bool = run["r"] == HollowMap.END_LEDGE and float(p["x0"]) <= HollowMap.MOUTH_L + EPS and float(p["x1"]) <= HollowMap.MOUTH_L + HollowMap.LEDGE_MAX + EPS
-		var east_ledge: bool = run["l"] == HollowMap.END_LEDGE and float(p["x1"]) >= HollowMap.MOUTH_R - EPS and float(p["x0"]) >= HollowMap.MOUTH_R - HollowMap.LEDGE_MAX - EPS
-		if inside and run["zone"] != &"mid_heart" and not west_ledge and not east_ledge:
-			_err(rep, "mouth: deck %s y=%d x=%d..%d is over the Devil's Mouth but is not Mid Heart or a ledge of at most %dpx" % [str(p["run"]), int(p["y"]), int(p["x0"]), int(p["x1"]), int(HollowMap.LEDGE_MAX)])
+		var lmax := HollowMap.ledge_max(float(run["k"]))
+		var west_ledge: bool = run["r"] == HollowMap.END_LEDGE and float(p["x0"]) <= HollowMap.MOUTH_L + EPS and float(p["x1"]) <= HollowMap.MOUTH_L + lmax + EPS
+		var east_ledge: bool = run["l"] == HollowMap.END_LEDGE and float(p["x1"]) >= HollowMap.MOUTH_R - EPS and float(p["x0"]) >= HollowMap.MOUTH_R - lmax - EPS
+		if inside and not HollowMap.is_heart_zone(run["zone"]) and not west_ledge and not east_ledge:
+			_err(rep, "mouth: deck %s y=%d x=%d..%d is over the Devil's Mouth but is not Mid Heart or a ledge of at most %dpx" % [str(p["run"]), int(p["y"]), int(p["x0"]), int(p["x1"]), int(lmax)])
 	for s in HollowMap.stairs():
 		var lo := minf(float(s["foot_x"]), float(s["top_x"]))
 		var hi := maxf(float(s["foot_x"]), float(s["top_x"]))
-		if hi > HollowMap.MOUTH_L + EPS and lo < HollowMap.MOUTH_R - EPS and s["zone"] != &"mid_heart":
+		if hi > HollowMap.MOUTH_L + EPS and lo < HollowMap.MOUTH_R - EPS and not HollowMap.is_heart_zone(s["zone"]):
 			_err(rep, "mouth: stair %s is over the Devil's Mouth but is not Mid Heart" % str(s["id"]))
 	for l in HollowMap.ladders():
 		if float(l["open_x"]) > HollowMap.MOUTH_L - 64.0 and float(l["open_x"]) < HollowMap.MOUTH_R:
@@ -515,9 +518,9 @@ static func _check_mouth(rep: Dictionary) -> void:
 		var n: Dictionary = nodes[i]
 		if absf(float(n["y"]) - HollowLayout.HEART_Y) < EPS:
 			if absf(float(n["x1"]) - HollowMap.MOUTH_L) < EPS or (float(n["x0"]) <= HollowMap.MOUTH_L and float(n["x1"]) > HollowMap.MOUTH_L):
-				if HollowMap.run_by_id(n["run"])["zone"] == &"mid_heart":
+				if HollowMap.is_heart_zone(HollowMap.run_by_id(n["run"])["zone"]):
 					west = i
-			if float(n["x1"]) >= HollowMap.MOUTH_R - EPS and HollowMap.run_by_id(n["run"])["zone"] == &"mid_heart":
+			if float(n["x1"]) >= HollowMap.MOUTH_R - EPS and HollowMap.is_heart_zone(HollowMap.run_by_id(n["run"])["zone"]):
 				east = i
 	if west == -1 or east == -1:
 		_err(rep, "mouth: Mid Heart has no west or east raft touching the lips")
@@ -525,7 +528,7 @@ static func _check_mouth(rep: Dictionary) -> void:
 	# BFS restricted to Mid Heart nodes.
 	var heart_nodes: Dictionary = {}
 	for i in nodes.size():
-		if HollowMap.run_by_id(nodes[i]["run"])["zone"] == &"mid_heart":
+		if HollowMap.is_heart_zone(HollowMap.run_by_id(nodes[i]["run"])["zone"]):
 			heart_nodes[i] = true
 	var seen := {west: true}
 	var queue: Array[int] = [west]

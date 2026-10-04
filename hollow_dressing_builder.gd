@@ -12,6 +12,7 @@ const BackdropViewScript := preload("res://hollow_backdrop_view.gd")
 const StairwellViewScript := preload("res://hollow_stairwell_view.gd")
 const CisternViewScript := preload("res://hollow_cistern_view.gd")
 const PulseViewScript := preload("res://hollow_pulse_view.gd")
+const MidHeartViewScript := preload("res://hollow_midheart_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -27,6 +28,7 @@ func _ready() -> void:
 	_build_stairwells()
 	_build_cistern_basin()
 	_build_pulse()
+	_build_midheart()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -43,7 +45,7 @@ func _build_views() -> void:
 	var back: Dictionary = {}
 	var front: Dictionary = {}
 	for r in HollowMap.runs():
-		if r["zone"] == &"mid_heart":
+		if HollowMap.is_heart_zone(r["zone"]):
 			continue
 		for cx in _chunk_range(float(r["x0"]) - 12.0, float(r["x1"]) + 12.0):
 			back[Vector2i(int(r["k"]), cx)] = true
@@ -97,6 +99,14 @@ func _build_cistern_basin() -> void:
 	add_child(view)
 
 
+## Mid Heart's girders, rails and civic character (see hollow_midheart_view.gd).
+func _build_midheart() -> void:
+	var view := Node2D.new()
+	view.name = "MidHeartStructure"
+	view.set_script(MidHeartViewScript)
+	add_child(view)
+
+
 ## The Pulse on the Ritual Raft at Mid Heart (see hollow_pulse_view.gd).
 func _build_pulse() -> void:
 	var view := Node2D.new()
@@ -109,7 +119,7 @@ func _build_pulse() -> void:
 ## open treads over the Mouth (no rock there), so they stay bare.
 func _build_stairwells() -> void:
 	for st in HollowMap.stairs():
-		if st["zone"] == &"mid_heart" or HollowMap.is_step(st):
+		if HollowMap.is_heart_zone(st["zone"]) or HollowMap.is_step(st):
 			continue
 		var view := Node2D.new()
 		view.name = "Stairwell_%s" % str(st["id"])
@@ -131,7 +141,7 @@ func _build_fringes() -> void:
 		for cx in _chunk_range(float(b["x0"]), float(b["x1"])):
 			keys[Vector2i(int(b["k"]), cx)] = true
 	for r in HollowMap.runs():
-		if r["zone"] == &"mid_heart":
+		if HollowMap.is_heart_zone(r["zone"]):
 			continue
 		for cx in _chunk_range(float(r["x0"]) - 16.0, float(r["x1"]) + 16.0):
 			keys[Vector2i(int(r["k"]), cx)] = true

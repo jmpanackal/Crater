@@ -21,5 +21,5 @@ seams = [{
 "position": 4864
 }]
 enclosed = false
-world_rect = Rect2(5008, 4224, 2992, 384)
+world_rect = Rect2(4640, 4224, 3360, 384)
 restricted = false

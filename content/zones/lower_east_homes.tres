@@ -13,6 +13,10 @@ seams = [{
 "position": 6016
 }, {
 "edge": "north",
+"neighbor": "mid_heart",
+"position": 5632
+}, {
+"edge": "north",
 "neighbor": "mid_east_service",
 "position": 5632
 }, {
@@ -21,5 +25,5 @@ seams = [{
 "position": 6016
 }]
 enclosed = false
-world_rect = Rect2(4864, 5376, 3136, 384)
+world_rect = Rect2(4704, 5376, 3296, 384)
 restricted = false

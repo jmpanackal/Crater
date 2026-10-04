@@ -152,7 +152,7 @@ West: `S_A1` (Ashram), `S_HW3` (High-West), `S_WK5` (Wickwork), `S_AL6`, `S_AL7`
 Bottom-West Approach), `S_BW2` (Approach down to the dig threshold).
 East: `S_EA1`, `S_EG3`, `S_EM5`, `S_LE6`, `S_LS7` (with `S_LE6` it forms the continuous
 **Lower-East Stair** diagonal), `S_CF` (with `S_CL10`: the **Cistern Stair**).
-Mid Heart: `H_RIT_W`, `H_RIT_E` (over the raised Ritual deck), `H_FRT_W`, `H_FRT_E` (the lower freight tier).
+Mid Heart: `H_RIT_W`, `H_RIT_E` (over the raised Ritual deck), `H_FRT_W`, `H_FRT_E` (the lower freight tier), `H_WG`, `H_WG2`, `H_EG`, `H_EG2` (the two galleries).
 
 ### Ladders (14) — local shortcuts, one level each
 
@@ -202,10 +202,10 @@ such as High-West ↔ Mid-East are the design target (see the memory note on the
 
 One cluster over the Mouth, and nothing else may touch the Mouth:
 
-- **West Exchange raft** (L8, x 1440–2528): Joss's counter, Approved Gear orders. Continuous with Wickwork's street.
+- **West Exchange** (L8 lip landing x 1440–1632, the **Exchange gallery** at half level 7.5 x 1824–2144, a landing x 2336–2528): Joss's counter, Approved Gear orders. Continuous with Wickwork's street; the crossing steps up over the gallery and down again (`H_WG`, `H_WG2`).
 - **Ritual Raft** (y 3136, x 2720–3680): the raised hall. The main crossing climbs `H_RIT_W`
   (192 px) over it and descends `H_RIT_E` — a walkable crossing that is never flat.
-- **East Service raft** (L8, x 3872–4960): care, notices, civic offices. Continuous with the Mid-East Landing.
+- **East Service** (L8 landing x 3872–4064, the **Stewards' gallery** at 7.5 x 4256–4576, a landing x 4768–4960): care, notices, civic offices. Continuous with the Mid-East Landing (`H_EG`, `H_EG2`).
 - **Lower freight tier** (y 3520, x 1632–4768): carts and cargo. A second route across, reached
   only from the cliffs (Wickwork's lower dock by `H_FRT_W`, the Mid-East Service Court by `H_FRT_E`),
   never from the Ritual deck.
@@ -230,6 +230,9 @@ Warden's Ashram Heights, the two guarded dig fronts, and the sealed deep runs:
 | `gate_mid_east_dig` | L8 x 9280 | `mid_east_survey_cleared` | Mid-East Dig Front |
 | `gate_bw_deep` | L15 x −4480 | `bottom_west_service_open` | the deeper Bottom-West run |
 | `gate_cistern_deep` | L15 x 8640 | `cistern_flood_gate_open` | the sealed flood-gate side |
+| `gate_wickwork_growth` | L8 x -3600 | `wickwork_expansion` | Wickwork Expansion Bay (growth room) |
+| `gate_glowbeds_growth` | L6 x 8720 | `glowbeds_expansion` | Glowbeds Expansion Court (growth room) |
+| `gate_cistern_growth` | L14 x 9280 | `cistern_expansion` | Cistern Tank Annex (growth room) |
 
 The lint proves two things: with every gate open every deck is reachable, and with the start-closed
 gates shut every zone in `early_zones()` is still reachable **and** every point in `held_points()`
@@ -243,11 +246,18 @@ story later wants the lift Warden-run again, add the gate back and put those zon
 
 ## 7. Growth space
 
+**Growth rooms (USER 2026-10-03: a district gains rooms at its milestones; AI-built).** Three of the four reserves are now real rooms behind start-closed bulkhead gates, so the map gains rooms the same way it opens everything else: a story flag. The flag names are AI-proposed. What earns each flag (the district upgrade rules) is OPEN and not designed, so today they stay shut until story sets them (`/flag`-style debug, or the console).
+
+| Growth room | District | Where | Gate (flag) |
+| --- | --- | --- | --- |
+| Wickwork Expansion Bay (`wickwork_annex`) | Wickwork | street `WK4` runs 1760 px further west, level 8, x -5440..-3680 | `gate_wickwork_growth` (`wickwork_expansion`) |
+| Glowbeds Expansion Court (`glowbeds_annex`) | Glowbeds | street `E2` runs on past the planter court to x 9248, level 6 | `gate_glowbeds_growth` (`glowbeds_expansion`) |
+| Cistern Tank Annex (`cistern_annex`) | Cistern | tank street `E10` runs out through the east wall into the flank, level 14, x 9280..10592 | `gate_cistern_growth` (`cistern_expansion`) |
+
+Each is held back until its gate opens (lint `reach`, `held_points`), is dressed with a few props, and replaces the old reserve (`R_WICKWORK`, `R_GLOWBEDS`, `R_CISTERN` are gone). One reserve is left:
+
 | Reserve | District | Size | Meaning |
 | --- | --- | --- | --- |
-| `R_WICKWORK` | Wickwork | 1760 × 640 west of the bay | next workshop tier |
-| `R_GLOWBEDS` | Glowbeds | 480 × 640 past the planter court | next cultivation tier |
-| `R_CISTERN` | Cistern | 1280 × 1024 east of the flood gate | pressure basin / tank expansion |
 | `R_BW_DEEP` | Bottom-West | 320 × 352 | the locked service run continues |
 
 Dig fronts grow by digging into the flank rock; High-West, Bottom-West and Mid-East each end in
@@ -310,4 +320,16 @@ how mouse mining works: [`hollow-slice-opening-route.md`](hollow-slice-opening-r
   - the west flank has none yet.
 - `hollow_lift.gd` got an `access_gate_id` lock; the Warden lock is evaluated by `Access`.
 - The east flank has one dig front (Mid-East) to the west flank's four galleries; the Cistern
-  reserve is where a second east front would go.
+  reserve is gone: the Cistern Tank Annex now uses that space.
+
+**Mid Heart gets a vertical dimension (USER 2026-10-03: "needs another level at least, it doesn't feel how it sounds in the lore"; AI-built from `story.md` and `hollow-build-brief.md`).** The lore: a moored floating civic district of three or four rafts plus smaller attached decks, 7-10 offset terraces, with Upper Heart (Ritual, Council), Mid Heart (market, delivery) and Lower Heart (freight, dispatch) as three vertical anchors, the Ritual Raft a two-level hall, and never one island or one bridge. Now:
+
+- **Upper Heart: the Council Terrace** (`HM_UC`, zone `mid_heart_upper`, level 6, x 2736-3664) above the Ritual Raft, so the Ritual hall is two levels with the Pulse standing between. Its ends are riveted bulkheads (wall columns clad in hull plating).
+- **Two masts** (freight elevators `heart_mast_west` x 2752 and `heart_mast_east` x 3488, stops Council Terrace 6, Ritual Raft 7.5, lowered dock 9) carry you up and down the Ritual hall. They are Presswater elevators like the others.
+- **Lower Heart: a lowered freight dock** (`HM_LH`, level 9, x 2736-3664) in the middle of the freight tier: the tier now dips down to it by `H_LH1` and `H_LH2` (`HM_F`, `HM_F2` are the two tier wings), with a gantry crane, a dispatch booth and cargo.
+- **Moorings:** catch-cables run from the terrace and the galleries to anchor plates on both cliffs.
+- 11 decks across the cluster (the brief asks for 7-10); the crossing is still West Exchange, galleries, Ritual, East Service, plus the freight loop.
+
+**Terraces reach further near Mid Heart (USER 2026-10-04, AI steps).** A Mouth ledge may reach `HollowMap.ledge_max(k)` over the Mouth: 320 px on levels 7 and 9, 256 on 6 and 10, 192 on 5 and 11, 128 beyond. Extended: east `E3` (L7, 320), `E2` (L6, 256), `ME10` (L10, 256), `E1` (L5, 192), `EP11` (L11, 192); west `HW2` rail ledge (L6, 256), `MB10` (L10, 256). The Mid Heart zone rect now starts at level 8's room top so the level-7 terraces do not overlap it. The Upper Heart Council Terrace is 1504 px wide (x 2448-3952) with a lit council hall. A west level-7 terrace was tried and dropped: its band is the High-West gallery zone.
+
+**Mid Heart structure (AI, 2026-10-03).** `hollow_midheart_view.gd` draws girders and trusses under every deck, rails, and a character for each part: Exchange counter, stalls and rate board; Ritual pillars, pennants and braziers either side of the Pulse; Service notice boards and office doors; canopies on the galleries; a gantry crane and cargo on the lower freight tier. Visual only, drawn from the Mid Heart runs.

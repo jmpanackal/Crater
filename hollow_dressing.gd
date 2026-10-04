@@ -285,6 +285,21 @@ static func props() -> Array[Dictionary]:
 		_prop(&"cistern_tanks", &"barrel", 8140.0, 14),
 		_prop(&"seep_threshold", &"warning_sign", 8560.0, 15),
 		_prop(&"seep_threshold", &"rubble", 8500.0, 15),
+		# ---- Growth rooms behind their bulkheads (AI, 2026-10-03): a little furniture so they do not read as bare rock
+		_prop(&"wickwork_annex", &"workbench", -5300.0, 8),
+		_prop(&"wickwork_annex", &"rack", -5200.0, 8),
+		_prop(&"wickwork_annex", &"crate", -5120.0, 8),
+		_prop(&"wickwork_annex", &"workbench", -4700.0, 8),
+		_prop(&"wickwork_annex", &"crate", -3900.0, 8),
+		_prop(&"glowbeds_annex", &"fungal_mat", 8960.0, 6),
+		_prop(&"glowbeds_annex", &"fungal_mat", 9020.0, 6),
+		_prop(&"glowbeds_annex", &"herbs", 9100.0, 6),
+		_prop(&"glowbeds_annex", &"crystal", 9170.0, 6),
+		_prop(&"cistern_annex", &"pump", 9950.0, 14),
+		_prop(&"cistern_annex", &"valve_wheel", 10150.0, 14, {"y_off": 40.0}),
+		_prop(&"cistern_annex", &"gauge", 10050.0, 14, {"y_off": 60.0}),
+		_prop(&"cistern_annex", &"pipe", 10300.0, 14, {"y_off": 110.0}),
+		_prop(&"cistern_annex", &"barrel", 10440.0, 14),
 	]
 	for i in out.size():
 		out[i]["id"] = StringName("%s_%s_%d" % [str(out[i]["zone"]), str(out[i]["kind"]), i])
@@ -320,6 +335,9 @@ static func lamps() -> Array[Dictionary]:
 		_lamp(&"cistern_freight", 5860.0, 12, 140.0, &"warm"), _lamp(&"cistern_freight", 6200.0, 12, 140.0, &"cool"),
 		_lamp(&"cistern_tanks", 7560.0, 14, 130.0, &"cool"), _lamp(&"cistern_tanks", 8160.0, 14, 130.0, &"amber"),
 		_lamp(&"seep_threshold", 8540.0, 15, 120.0, &"red"),
+		_lamp(&"wickwork_annex", -5250.0, 8, 130.0, &"cool"), _lamp(&"wickwork_annex", -4700.0, 8, 130.0, &"warm"),
+		_lamp(&"glowbeds_annex", 9040.0, 6, 130.0, &"cool"), _lamp(&"glowbeds_annex", 9180.0, 6, 120.0, &"warm"),
+		_lamp(&"cistern_annex", 9960.0, 14, 130.0, &"cool"), _lamp(&"cistern_annex", 10320.0, 14, 130.0, &"amber"),
 	]
 	_cache["lamps"] = out
 	return out

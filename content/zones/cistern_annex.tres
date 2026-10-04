@@ -4,14 +4,14 @@
 
 [resource]
 script = ExtResource("1")
-zone_id = &"high_west_ledge"
-display_name = "High-West Rail Ledge"
-world_origin = Vector2(1456, 4096)
+zone_id = &"cistern_annex"
+display_name = "Cistern Tank Annex"
+world_origin = Vector2(10000, 7168)
 seams = [{
 "edge": "west",
-"neighbor": "high_west_front",
-"position": 1440
+"neighbor": "cistern_tanks",
+"position": 9280
 }]
-enclosed = false
-world_rect = Rect2(1440, 3840, 256, 384)
+enclosed = true
+world_rect = Rect2(9280, 6912, 1312, 384)
 restricted = false

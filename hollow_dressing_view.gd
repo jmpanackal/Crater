@@ -77,7 +77,7 @@ func _rnd(a: float, b: float, salt: int) -> float:
 ## Moss, hanging strands and glow crystals on the rock under a floor: the living detail on the
 ## stone (the rock itself is hollow_rock_view.gd). Slots are fixed in world space.
 func _decor_for_run(r: Dictionary) -> void:
-	if r["zone"] == &"mid_heart":
+	if HollowMap.is_heart_zone(r["zone"]):
 		return
 	var x0: float = r["x0"]
 	var x1: float = r["x1"]

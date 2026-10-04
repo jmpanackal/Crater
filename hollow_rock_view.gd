@@ -114,7 +114,7 @@ func _jagged_end(x: float, y0: float, y1: float, side: float, salt: int) -> void
 
 
 func _slab(r: Dictionary) -> void:
-	if r["zone"] == &"mid_heart":
+	if HollowMap.is_heart_zone(r["zone"]):
 		return
 	var x0: float = r["x0"]
 	var x1: float = r["x1"]
@@ -143,7 +143,7 @@ func _slab(r: Dictionary) -> void:
 ## The dim cobble back wall of the dug galleries (FLANK_CLEAR tall). The civic cavity has its own
 ## (HollowBackdropView).
 func _gallery_back(r: Dictionary) -> void:
-	if r["zone"] == &"mid_heart":
+	if HollowMap.is_heart_zone(r["zone"]):
 		return
 	var deck: float = r["y"]
 	var x0: float = r["x0"]
@@ -170,7 +170,7 @@ func _roof(b: Dictionary) -> void:
 	var deck := HollowMap.deck_y_at((x0 + x1) * 0.5, float(b["k"]))
 	var above := deck - HollowMap.LEVEL_GAP
 	for r in HollowMap.runs():
-		if absf(float(r["y"]) - above) < 1.0 and float(r["x0"]) <= x1 and float(r["x1"]) >= x0 and r["zone"] != &"mid_heart":
+		if absf(float(r["y"]) - above) < 1.0 and float(r["x0"]) <= x1 and float(r["x1"]) >= x0 and not HollowMap.is_heart_zone(r["zone"]):
 			return
 	var seg := _in_chunk(x0 - 12.0, x1 + 12.0)
 	if seg.y <= seg.x:

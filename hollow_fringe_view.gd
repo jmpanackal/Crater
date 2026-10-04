@@ -42,7 +42,7 @@ func _draw() -> void:
 		# a civic room with nothing built above it has the solid rock for a ceiling: ragged like the rest
 		var room_x0 := maxf(float(r["x0"]), HollowMap.WEST_WALL)
 		var room_x1 := minf(float(r["x1"]), HollowMap.EAST_WALL)
-		if r["zone"] != &"mid_heart" and not bool(r["landing"]) and room_x1 > room_x0 and HollowMap.nothing_above(float(r["k"]), room_x0, room_x1):
+		if not HollowMap.is_heart_zone(r["zone"]) and not bool(r["landing"]) and room_x1 > room_x0 and HollowMap.nothing_above(float(r["k"]), room_x0, room_x1):
 			var room_seg := _clip(room_x0, room_x1)
 			if room_seg.y > room_seg.x:
 				for part in HollowMap.ceiling_segments(room_seg.x, room_seg.y, float(r["k"])):

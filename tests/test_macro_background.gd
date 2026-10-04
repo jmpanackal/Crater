@@ -78,7 +78,7 @@ func _run() -> void:
 			or name.begins_with("Lower-East")
 			or name.begins_with("Seep")
 		)
-		if is_east_wall and region.bounds.position.x < HollowLayout.PIT_RIGHT - HollowMap.LEDGE_MAX - 0.5: # a Mouth ledge may reach LEDGE_MAX over the lip
+		if is_east_wall and region.bounds.position.x < HollowLayout.PIT_RIGHT - HollowMap.LEDGE_REACH_MAX - 0.5: # a Mouth ledge may reach LEDGE_MAX over the lip
 			push_error(
 				"FAIL east district '%s' overlaps Mouth (x0=%s)"
 				% [name, region.bounds.position.x]

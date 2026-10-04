@@ -26,9 +26,14 @@ func _run() -> void:
 	var dig := scene.get_node("Terrain") as TileMapLayer
 	var rooms := 0
 	for r in HollowMap.runs():
-		if r["zone"] == &"mid_heart" or bool(r["landing"]) or HollowMap.in_flank(float(r["x0"])) or HollowMap.in_flank(float(r["x1"])):
+		if HollowMap.is_heart_zone(r["zone"]) or bool(r["landing"]) or HollowMap.in_flank(float(r["x0"])) or HollowMap.in_flank(float(r["x1"])):
 			continue
+		# a Mouth ledge hangs out over the void: look at the part of the room that is inside the cliff
+		var span_x0: float = maxf(float(r["x0"]), HollowMap.MOUTH_R) if r["l"] == HollowMap.END_LEDGE else float(r["x0"])
+		var span_x1: float = minf(float(r["x1"]), HollowMap.MOUTH_L) if r["r"] == HollowMap.END_LEDGE else float(r["x1"])
 		var x := (float(r["x0"]) + float(r["x1"])) * 0.5
+		if x > HollowMap.MOUTH_L and x < HollowMap.MOUTH_R:
+			x = (span_x0 + span_x1) * 0.5
 		var y: float = r["y"]
 		if hollow.get_cell_source_id(_cell(Vector2(x, y - 64.0))) != -1:
 			_fail("room %s is not open air at its middle" % r["id"])

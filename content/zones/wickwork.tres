@@ -20,6 +20,10 @@ seams = [{
 "neighbor": "mid_heart",
 "position": 5248
 }, {
+"edge": "west",
+"neighbor": "wickwork_annex",
+"position": -3680
+}, {
 "edge": "east",
 "neighbor": "mid_heart",
 "position": 1440

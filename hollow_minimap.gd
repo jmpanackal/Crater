@@ -94,6 +94,7 @@ const PANEL_LABELS := {
 	&"home_court": "Home Court",
 	&"bottom_west_threshold": "Bottom-West",
 	&"mid_heart": "Mid Heart",
+	&"mid_heart_upper": "Upper Heart",
 	&"ashram_east": "Ashram East",
 	&"glowbeds": "Glowbeds",
 	&"mid_east_dig_front": "Dig Front",
@@ -181,7 +182,7 @@ static func district_draw_bounds(bounds: Rect2) -> Rect2:
 		bounds.position.x >= HollowLayout.PIT_LEFT - 0.5
 		and bounds.end.x <= HollowLayout.PIT_RIGHT + 0.5
 	)
-	if fully_in_mouth and bounds.size.x <= HollowMap.LEDGE_MAX:
+	if fully_in_mouth and bounds.size.x <= HollowMap.LEDGE_REACH_MAX:
 		return Rect2() # a Mouth ledge strip: its deck is drawn with its run, the void stays open
 	if fully_in_mouth:
 		return bounds
@@ -385,7 +386,7 @@ func _build_static(s: Vector2) -> void:
 
 	# The map itself: decks, stairs, ladders. (Gates are drawn per redraw: they open and close.)
 	for piece in HollowMap.deck_pieces():
-		var heart: bool = HollowMap.run_by_id(piece["run"])["zone"] == &"mid_heart"
+		var heart: bool = HollowMap.is_heart_zone(HollowMap.run_by_id(piece["run"])["zone"])
 		_cline_world(Vector2(piece["x0"], piece["y"]), Vector2(piece["x1"], piece["y"]), HEART_COLOR if heart else DECK_COLOR, 2.0 if heart else 1.6, area)
 	for stair in HollowMap.stairs():
 		_cline_world(Vector2(stair["foot_x"], stair["foot_y"]), Vector2(stair["top_x"], stair["top_y"]), STAIR_COLOR, 1.4, area)

@@ -74,7 +74,22 @@ const END_JOIN := &"join" ## continues into the neighbouring run (Mouth cluster)
 const END_OPEN := &"open" ## an edge or pier end inside a stepped hall: no wall, the floor just stops (you can drop down)
 const END_LEDGE := &"ledge" ## a short cantilevered ledge reaching out over the Mouth (at most LEDGE_MAX)
 ## How far a ledge may reach over the Mouth (USER 2026-10-02). Mid Heart stays the only thing that spans it.
-const LEDGE_MAX := 128.0
+const LEDGE_MAX := 128.0 ## the reach of a Mouth ledge far from Mid Heart
+const LEDGE_REACH_MAX := 320.0 ## the longest ledge anywhere (the levels beside Mid Heart)
+
+
+## How far a Mouth ledge may reach over the Mouth on level k. USER 2026-10-04: the terraces near Mid Heart are longer
+## and more pronounced the closer they sit to it; the steps are AI-proposed (a level or two either side of the
+## cluster reaches farthest, and everything past three levels away keeps the old 128 px).
+static func ledge_max(k: float) -> float:
+	var d := absf(k - 8.0)
+	if d <= 1.0:
+		return 320.0
+	if d <= 2.0:
+		return 256.0
+	if d <= 3.0:
+		return 192.0
+	return LEDGE_MAX
 ## A door is a rock partition across a room, from the ceiling down to DOOR_OPENING above the deck, DOOR_THICK wide.
 const DOOR_OPENING := 96.0
 const DOOR_THICK := 32.0
@@ -134,14 +149,25 @@ static func runs() -> Array[Dictionary]:
 		# Bottom-West deeper galleries (behind the service-run gate): more lateral dig frontier
 
 		# ---- MID HEART (the only structure over the Mouth) ----
-		_run(&"HM_W", &"mid_heart", MOUTH_L, RITUAL_LEFT - 0.5 * RISE, 8, END_JOIN, END_FOOT),
+		_run(&"HM_W", &"mid_heart", MOUTH_L, 1632.0, 8, END_JOIN, END_FOOT),
 		_run(&"HM_R", &"mid_heart", RITUAL_LEFT, RITUAL_RIGHT, 7.5, END_TOP, END_TOP),
-		_run(&"HM_E", &"mid_heart", RITUAL_RIGHT + 0.5 * RISE, MOUTH_R, 8, END_FOOT, END_JOIN),
-		_run(&"HM_F", &"mid_heart", MOUTH_L + 0.5 * RISE, MOUTH_R - 0.5 * RISE, 8.5, END_TOP, END_TOP),
+		_run(&"HM_E", &"mid_heart", RITUAL_RIGHT + 0.5 * RISE, 4064.0, 8, END_FOOT, END_FOOT),
+		# Lower Heart (AI, 2026-10-03, user: Mid Heart needs another level): the freight tier dips into a lowered dock
+		_run(&"HM_F", &"mid_heart", MOUTH_L + 0.5 * RISE, 2544.0, 8.5, END_TOP, END_TOP),
+		_run(&"HM_LH", &"mid_heart", 2736.0, 3664.0, 9, END_FOOT, END_FOOT), # the lowered freight dock: cranes, dispatch, recovery
+		_run(&"HM_F2", &"mid_heart", 3856.0, MOUTH_R - 0.5 * RISE, 8.5, END_TOP, END_TOP),
+		# Upper Heart: the Council Terrace over the Ritual Raft (the Ritual hall is two levels), reached by the two masts
+		_run(&"HM_UC", &"mid_heart_upper", 2448.0, 3952.0, 6, END_WALL, END_WALL),
+		# Mid Heart variety (AI, 2026-10-03): two galleries above the exchange and service rafts, and a freight crane dock hung under the tier
+		# the crossing now steps over a gallery on each side of the Ritual Raft: lip, landing, gallery, landing, Ritual
+		_run(&"HM_W2", &"mid_heart", 2336.0, RITUAL_LEFT - 0.5 * RISE, 8, END_FOOT, END_FOOT), # the Exchange landing before the Ritual flight
+		_run(&"HM_WG", &"mid_heart", 1824.0, 2144.0, 7.5, END_TOP, END_TOP), # the Exchange gallery
+		_run(&"HM_EG", &"mid_heart", 4256.0, 4576.0, 7.5, END_TOP, END_TOP), # the Stewards' gallery
+		_run(&"HM_E2", &"mid_heart", 4768.0, MOUTH_R, 8, END_FOOT, END_JOIN), # the service landing at the east lip
 		# ---- EAST WALL ----
 		# Mouth balconies (2026-10-02): short pockets at the lips, each reached by a ladder from the street above
-		_run(&"MB10", &"mid_allotments", 1056.0, 1568.0, 10, END_WALL, END_LEDGE), # west, 128 px out
-		_run(&"ME10", &"lower_east_homes", 4864.0, 5136.0, 10, END_LEDGE, END_WALL), # east, 96 px out
+		_run(&"MB10", &"mid_allotments", 1056.0, 1696.0, 10, END_WALL, END_LEDGE), # west, 256 px out
+		_run(&"ME10", &"lower_east_homes", 4704.0, 5136.0, 10, END_LEDGE, END_WALL), # east, 256 px out
 		_run(&"ME13", &"cistern_intake", 4864.0, 5600.0, 13, END_LEDGE, END_WALL), # east, 96 px out
 		# Lower-East Stair landing: two flights (S_LE6a steep, S_LE6b shallow) around a half-level landing.
 		_landing(&"E5L", &"lower_east_homes", 5440.0, 5568.0, 9.5, END_FOOT, END_TOP),
@@ -171,7 +197,7 @@ static func _terraces() -> Array[Dictionary]:
 		{"id": &"A1", "zone": &"ashram_west", "k": 5, "l": END_WALL, "r": END_FOOT, "pieces": [
 			[-2720.0, -1408.0, 0.0], [-1152.0, -1040.0, -64.0], [-912.0, -160.0, 0.0]]}, # a long ramp up, a short drop
 		{"id": &"WK4", "zone": &"wickwork", "k": 8, "l": END_ROCK, "r": END_JOIN, "pieces": [
-			[-3680.0, -2096.0, 0.0], [-2000.0, -1808.0, -48.0], [-1712.0, -304.0, 0.0], [-176.0, 256.0, -64.0], [384.0, 1440.0, 0.0]]},
+			[-5440.0, -4560.0, 0.0], [-4464.0, -4144.0, -48.0], [-4048.0, -3584.0, 0.0], [-3488.0, -3232.0, 32.0], [-3136.0, -2096.0, 0.0], [-2000.0, -1808.0, -48.0], [-1712.0, -304.0, 0.0], [-176.0, 256.0, -64.0], [384.0, 1440.0, 0.0]]},
 		{"id": &"WK5", "zone": &"wickwork", "k": 9, "l": END_FOOT, "r": END_MOUTH, "pieces": [
 			[-1280.0, 160.0, 0.0], [304.0, 560.0, 48.0], [656.0, 1440.0, 0.0]]},
 		{"id": &"AL6", "zone": &"mid_allotments", "k": 10, "l": END_WALL, "r": END_FOOT, "pieces": [
@@ -202,7 +228,7 @@ static func _terraces() -> Array[Dictionary]:
 		# ---- High-West galleries (flank dig gallery and the civic part to the Mouth rail ledge, 48 px)
 		{"id": &"HW2", "zone": &"high_west_front", "k": 6, "l": END_ROCK, "r": END_LEDGE, "pieces": [
 			[WEST_FLANK_LEFT, -4304.0, 0.0], [-4240.0, -3984.0, 32.0], [-3920.0, -2400.0, 0.0], [-2304.0, -1888.0, -48.0],
-			[-1792.0, -352.0, 0.0], [-224.0, 288.0, -64.0], [416.0, 1488.0, 0.0]]},
+			[-1792.0, -352.0, 0.0], [-224.0, 288.0, -64.0], [416.0, 1696.0, 0.0]]}, # the rail ledge reaches 256 px out toward Mid Heart
 		{"id": &"HW3", "zone": &"high_west_front", "k": 7, "l": END_ROCK, "r": END_FOOT, "pieces": [
 			[WEST_FLANK_LEFT, -4352.0, 0.0], [-4224.0, -3872.0, -64.0], [-3744.0, -2336.0, 0.0], [-2240.0, -1888.0, 48.0],
 			[-1792.0, -800.0, 0.0]]},
@@ -216,8 +242,8 @@ static func _terraces() -> Array[Dictionary]:
 			[6400.0, 7312.0, 0.0], [7408.0, 7792.0, -48.0], [7888.0, 8096.0, 0.0]]}, # a maintenance balcony over the basin chamber
 		{"id": &"PF13", "zone": &"cistern", "k": 13, "l": END_OPEN, "r": END_OPEN, "pieces": [
 			[8672.0, 8928.0, 0.0]]}, # the freight elevator's landing: a pier in the basin chamber
-		{"id": &"E10", "zone": &"cistern_tanks", "k": 14, "l": END_FOOT, "r": END_WALL, "pieces": [
-			[7360.0, 7616.0, 0.0], [7680.0, 7904.0, 32.0], [7968.0, EAST_WALL, 0.0]]},
+		{"id": &"E10", "zone": &"cistern_tanks", "k": 14, "l": END_FOOT, "r": END_ROCK, "pieces": [
+			[7360.0, 7616.0, 0.0], [7680.0, 7904.0, 32.0], [7968.0, 9376.0, 0.0], [9472.0, 9760.0, -48.0], [9856.0, 10560.0, 0.0]]}, # past the wall: the tank annex (growth room, gate_cistern_growth)
 		{"id": &"E11", "zone": &"seep_threshold", "k": 15, "l": END_WALL, "r": END_WALL, "pieces": [
 			[6400.0, 7328.0, 0.0], [7424.0, 7760.0, 48.0], [7856.0, EAST_WALL, 0.0]]},
 		# ---- Mid-East street: the Landing, the Approach and the dig-front gallery
@@ -240,7 +266,7 @@ static func _terraces() -> Array[Dictionary]:
 			[-800.0, 96.0, 0.0]]},
 		# ---- Lower-East / Cistern Mouth Rows: the east cliff, mirroring the west rows (AI working layout)
 		{"id": &"EP11", "zone": &"east_rows_1", "k": 11, "l": END_LEDGE, "r": END_WALL, "pieces": [
-			[4864.0, 6240.0, 0.0]]},
+			[4768.0, 6240.0, 0.0]]},
 		{"id": &"EP12", "zone": &"east_rows_2", "k": 12, "l": END_LEDGE, "r": END_WALL, "pieces": [
 			[4864.0, 5376.0, 0.0]]},
 		{"id": &"EP14", "zone": &"east_rows_3", "k": 14, "l": END_LEDGE, "r": END_FOOT, "pieces": [
@@ -253,13 +279,13 @@ static func _terraces() -> Array[Dictionary]:
 			[5808.0, 7008.0, 0.0]]},
 		# ---- East civic
 		{"id": &"E1", "zone": &"ashram_east", "k": 5, "l": END_LEDGE, "r": END_FOOT, "pieces": [
-			[4864.0, 5600.0, 0.0], [5632.0, 5856.0, 16.0], [5888.0, 6560.0, 0.0], [6608.0, 6880.0, -48.0], [6928.0, 8000.0, 0.0]]}, # the east Ashram promenade runs out to a Mouth overlook (96 px)
+			[4768.0, 5600.0, 0.0], [5632.0, 5856.0, 16.0], [5888.0, 6560.0, 0.0], [6608.0, 6880.0, -48.0], [6928.0, 8000.0, 0.0]]}, # the east Ashram promenade runs out to a Mouth overlook (96 px)
 		{"id": &"E2", "zone": &"glowbeds", "k": 6, "l": END_LEDGE, "r": END_WALL, "pieces": [
-			[4864.0, 5520.0, 0.0], [5568.0, 5888.0, -48.0], [5936.0, 6560.0, 0.0], [6624.0, 6880.0, -64.0], [6944.0, 7216.0, 0.0], [7264.0, 7872.0, -48.0], [7920.0, 8800.0, 0.0]]},
+			[4704.0, 5520.0, 0.0], [5568.0, 5888.0, -48.0], [5936.0, 6560.0, 0.0], [6624.0, 6880.0, -64.0], [6944.0, 7216.0, 0.0], [7264.0, 7872.0, -48.0], [7920.0, 9248.0, 0.0]]},
 		# Glowbeds stepped planter court: a 3-level hall (GB) with the promenade and the terrace as bridges and a
 		# cascade of planter terraces down to the Hang floor (E3, GL1, S_GB_1, S_GB_2).
-		{"id": &"E3", "zone": &"glowbeds_hang", "k": 7, "l": END_WALL, "r": END_FOOT, "pieces": [
-			[5008.0, 5584.0, 0.0]]},
+		{"id": &"E3", "zone": &"glowbeds_hang", "k": 7, "l": END_LEDGE, "r": END_FOOT, "pieces": [
+			[4640.0, 5584.0, 0.0]]}, # a long terrace reaching 320 px out toward Mid Heart
 		{"id": &"E3B", "zone": &"glowbeds_hang", "k": 7, "l": END_OPEN, "r": END_FOOT, "pieces": [
 			[5792.0, 7200.0, 0.0], [7232.0, 7392.0, -32.0], [7424.0, 8000.0, 0.0]]},
 		{"id": &"E5", "zone": &"mid_east_service", "k": 9, "l": END_FOOT, "r": END_FOOT, "pieces": [
@@ -373,7 +399,7 @@ static func air_rects() -> Array[Rect2]:
 		return _cache["air_rects"]
 	var out: Array[Rect2] = []
 	for r in runs():
-		if r["zone"] == &"mid_heart":
+		if HollowMap.is_heart_zone(r["zone"]):
 			continue
 		var x0 := maxf(float(r["x0"]), WEST_WALL)
 		var x1 := minf(float(r["x1"]), EAST_WALL)
@@ -623,6 +649,12 @@ static func stairs() -> Array[Dictionary]:
 		_stair(&"H_RIT_E", &"mid_heart", RITUAL_RIGHT + 0.5 * RISE, 8, -1, 0.5),
 		_stair(&"H_FRT_W", &"mid_heart", MOUTH_L, 9, 1, 0.5), ## Wickwork dock to the lower freight tier
 		_stair(&"H_FRT_E", &"mid_heart", MOUTH_R, 9, -1, 0.5), ## Mid-East service court to the tier
+		_stair(&"H_LH1", &"mid_heart", 2736.0, 9, -1, 0.5), ## the tier down to the lowered dock
+		_stair(&"H_LH2", &"mid_heart", 3664.0, 9, 1, 0.5), ## the dock back up to the tier
+		_stair(&"H_WG", &"mid_heart", 1632.0, 8, 1, 0.5), ## west lip landing up to the Exchange gallery
+		_stair(&"H_WG2", &"mid_heart", 2336.0, 8, -1, 0.5), ## the gallery down to the Exchange landing
+		_stair(&"H_EG", &"mid_heart", 4064.0, 8, 1, 0.5), ## the service landing up to the Stewards' gallery
+		_stair(&"H_EG2", &"mid_heart", 4768.0, 8, -1, 0.5), ## the gallery down to the east lip landing
 		# East
 		_stair(&"S_EA1", &"ashram_east", 8000.0, 5, 1, 1.0, 2.0, 160.0),
 		# Ashram upper wards: processional stairs, alternating direction, one level each
@@ -728,6 +760,9 @@ static func lifts() -> Array[Dictionary]:
 		# East freight elevator: Mid-East down through Lower-East and the Cistern basin chamber to the tanks (it stops short of the flood gate).
 		_lift(&"freight_east", &"cistern_freight", 8704.0, LIFT_FREIGHT_WIDTH, [8, 11, 12, 13, 14], &"freight"),
 		# Premium Ashram elevators: Wickwork / Glowbeds up through the guarded galleries to the Ashram lobby.
+		# Mid Heart masts: freight cabs up the Ritual hall from the freight tier to the Ritual Raft and the Council Terrace
+		_lift(&"heart_mast_west", &"mid_heart", 2752.0, LIFT_FREIGHT_WIDTH, [6, 7.5, 9], &"freight"),
+		_lift(&"heart_mast_east", &"mid_heart", 3488.0, LIFT_FREIGHT_WIDTH, [6, 7.5, 9], &"freight"),
 		_lift(&"ashram_west", &"wickwork", -2560.0, LIFT_PREMIUM_WIDTH, [5, 6, 7, 8], &"premium", true),
 		_lift(&"ashram_east", &"mid_east", 6416.0, LIFT_PREMIUM_WIDTH, [5, 6, 7, 8], &"premium", true),
 	]
@@ -767,6 +802,14 @@ static func gates() -> Array[Dictionary]:
 			"Wardens keep the Heights gate. Residents and cleared workers only.", true, &"", &"ashram_clearance"),
 		_gate(&"gate_mid_east_dig", &"E4_4", EAST_WALL, "Mid-East dig front gate",
 			"The Mid-East front opens once the Stewards clear the shock-fault survey.", true, &"", &"mid_east_survey_cleared"),
+		# Growth rooms (USER 2026-10-03: a district gains rooms at its milestones). Flag names are AI-proposed; what
+		# earns each flag is OPEN (the upgrade rules are not designed), so today they stay shut until story sets them.
+		_gate(&"gate_wickwork_growth", &"WK4_2", -3600.0, "Wickwork expansion bulkhead",
+			"The bay west of here is sealed. The workshop expansion is not authorized yet.", true, &"", &"wickwork_expansion", &"", -1),
+		_gate(&"gate_glowbeds_growth", &"E2_6", 8720.0, "Glowbeds expansion bulkhead",
+			"The planter court's far end is sealed. The next cultivation tier is not open yet.", true, &"", &"glowbeds_expansion"),
+		_gate(&"gate_cistern_growth", &"E10_2", EAST_WALL, "Cistern tank bulkhead",
+			"The tank annex is sealed. The pressure expansion is not authorized yet.", true, &"", &"cistern_expansion"),
 		_gate(&"gate_cistern_deep", &"E11_2", 8640.0, "Cistern flood gate",
 			"The flood gate is sealed. Nothing past it is safe or sanctioned.", true, &"", &"cistern_flood_gate_open"),
 	]
@@ -776,7 +819,7 @@ static func gates() -> Array[Dictionary]:
 
 ## Gates that are shut at the start of Act 1 and block walking.
 static func closed_at_start() -> Array[StringName]:
-	return [&"gate_ashram_west", &"gate_high_west", &"gate_high_west_low", &"gate_bw_deep", &"gate_ashram_east", &"gate_mid_east_dig", &"gate_cistern_deep"]
+	return [&"gate_ashram_west", &"gate_high_west", &"gate_high_west_low", &"gate_bw_deep", &"gate_ashram_east", &"gate_mid_east_dig", &"gate_cistern_deep", &"gate_wickwork_growth", &"gate_glowbeds_growth", &"gate_cistern_growth"]
 
 
 ## Zones a new player must be able to reach with every start-closed gate shut: every main district
@@ -789,7 +832,7 @@ static func early_zones() -> Array[StringName]:
 		&"east_rows_1", &"east_rows_2", &"east_rows_3", &"east_rows_4", &"east_rows_5", &"east_rows_6",
 		&"lower_rows_1", &"lower_rows_2", &"lower_rows_3", &"lower_rows_4", &"lower_rows_5",
 		&"lower_lift_landing", &"bottom_west_approach", &"bottom_west_threshold", &"first_expansion_gallery", &"collapsed_side_chamber",
-		&"wickwork", &"mid_allotments", &"mid_heart",
+		&"wickwork", &"mid_allotments", &"mid_heart", &"mid_heart_upper",
 		&"mid_east_landing", &"mid_east_approach", &"mid_east_service", &"glowbeds", &"glowbeds_hang",
 		&"lower_east_homes", &"lower_east_services", &"cistern_freight", &"cistern_intake", &"cistern", &"cistern_tanks", &"seep_threshold",
 	]
@@ -814,6 +857,9 @@ static func held_points() -> Array[Vector2]:
 		Vector2(-5000.0, lvl(16)), ## Bottom-West deeper gallery (behind the service-run gate)
 		Vector2(-5000.0, lvl(17)), ## Bottom-West lowest gallery
 		Vector2(9000.0, lvl(15)), ## Cistern flood gate side
+		Vector2(-4800.0, lvl(8)), ## Wickwork expansion bay
+		Vector2(9100.0, lvl(6)), ## Glowbeds expansion court
+		Vector2(10000.0, lvl(14)), ## Cistern tank annex
 	]
 
 
@@ -829,12 +875,7 @@ static func reserves() -> Array[Dictionary]:
 	if _cache.has("reserves"):
 		return _cache["reserves"]
 	var out: Array[Dictionary] = [
-		_reserve(&"R_WICKWORK", &"wickwork", Rect2(-5440.0, lvl(8) - ROOM_HEIGHT, 1760.0, ROOM_HEIGHT + LEVEL_GAP),
-			"Wickwork's next workshop tier: the bay keeps running west into the rock."),
-		_reserve(&"R_GLOWBEDS", &"glowbeds", Rect2(8800.0 + WALL_THICK, lvl(6) - ROOM_HEIGHT, 480.0, ROOM_HEIGHT + LEVEL_GAP),
-			"Glowbeds' next cultivation tier past the planter court."),
-		_reserve(&"R_CISTERN", &"cistern_tanks", Rect2(EAST_WALL + WALL_THICK, lvl(13) - ROOM_HEIGHT, 1280.0, ROOM_HEIGHT + LEVEL_GAP * 2.0),
-			"Cistern pressure basin and tank expansion, east of the sealed flood gate."),
+		# R_WICKWORK, R_GLOWBEDS and R_CISTERN became growth rooms (USER 2026-10-03): see the gate_*_growth gates.
 		_reserve(&"R_BW_DEEP", &"bottom_west", Rect2(-3200.0 + WALL_THICK, lvl(15) - ROOM_HEIGHT, 320.0, ROOM_HEIGHT + 96.0),
 			"Bottom-West's locked deeper service run continues toward the civic wall."),
 	]
@@ -862,19 +903,20 @@ static func zones() -> Array[Dictionary]:
 		return _cache["zones"]
 	var out: Array[Dictionary] = [
 		# West
-		_zone(&"ashram_west", "Ashram Heights (west)", -2720.0, 1440.0 + LEDGE_MAX, 4, 5, -200.0, 4),
-		_zone(&"high_west_ledge", "High-West Rail Ledge", 1440.0, 1488.0, 6, 6, 1456.0, 6),
+		_zone(&"ashram_west", "Ashram Heights (west)", -2720.0, 1440.0 + ledge_max(4.0), 4, 5, -200.0, 4),
+		_zone(&"high_west_ledge", "High-West Rail Ledge", 1440.0, 1440.0 + ledge_max(6.0), 6, 6, 1456.0, 6),
 		_zone(&"ashram_west_3", "Ashram Heights (west), third tier", -2400.0, -480.0, 3, 3, -1500.0, 3),
 		_zone(&"ashram_west_2", "Ashram Heights (west), second tier", -960.0, 448.0, 2, 2, -300.0, 2),
 		_zone(&"ashram_west_1", "Ashram Heights (west), first tier", -2000.0, -208.0, 1, 1, -1000.0, 1),
 		_zone(&"ashram_west_0", "Ashram Heights (west), summit", -608.0, 448.0, 0, 0, -100.0, 0),
 		_zone(&"high_west_front", "High-West Dig Front", WEST_FLANK_LEFT, 1440.0, 6, 7, -3000.0, 6),
+		_zone(&"wickwork_annex", "Wickwork Expansion Bay", -5440.0, -3680.0, 8, 8, -4800.0, 8, true),
 		_zone(&"wickwork", "Wickwork", -3680.0, 1440.0, 8, 9, -2160.0, 8, true),
-		_zone(&"mid_allotments", "Mid Allotments", -2400.0, 1440.0 + LEDGE_MAX, 10, 11, -1500.0, 10),
+		_zone(&"mid_allotments", "Mid Allotments", -2400.0, 1440.0 + ledge_max(10.0), 10, 11, -1500.0, 10),
 		_zone(&"west_dispatch_yard", "West Dispatch Yard", -1600.0, -800.0, 12, 12, -1320.0, 12, true),
 		_zone(&"lower_switchback", "Lower Switchback", -800.0, -320.0, 12, 12, -560.0, 12, true),
 		_zone(&"home_court", "Home Court", -320.0, 160.0, 12, 12, -80.0, 12, true),
-		_zone(&"worker_return_ascent", "Worker Stair Hall", 160.0, 1440.0 + LEDGE_MAX, 12, 12, 400.0, 12),
+		_zone(&"worker_return_ascent", "Worker Stair Hall", 160.0, 1440.0 + ledge_max(12.0), 12, 12, 400.0, 12),
 		_zone(&"lower_rows_1", "Lower Mouth Rows, first row", -320.0, 1568.0, 13, 13, 200.0, 13),
 		_zone(&"lower_rows_2", "Lower Mouth Rows, second row", -640.0, 1440.0, 14, 14, -300.0, 14),
 		_zone(&"lower_rows_3", "Lower Mouth Rows, third row", -160.0, 1568.0, 15, 15, 300.0, 15),
@@ -889,23 +931,25 @@ static func zones() -> Array[Dictionary]:
 		_zone(&"collapsed_side_chamber", "Collapsed Side Chamber", WEST_FLANK_LEFT, -4480.0, 15, 15, -5440.0, 15, true),
 		_zone(&"bottom_west_deep", "Bottom-West Service Run", -4480.0, -3200.0, 15, 15, -4000.0, 15, true),
 		# Mid Heart
-		_zone(&"mid_heart", "Mid Heart", MOUTH_L, MOUTH_R, 7.5, 8.5, 3200.0, 7.5),
+		_zone(&"mid_heart", "Mid Heart", MOUTH_L, MOUTH_R, 8, 9, 3200.0, 7.5),
+		_zone(&"mid_heart_upper", "Upper Heart, the Council Terrace", 2416.0, 3984.0, 6, 6, 3200.0, 6),
 		# East
-		_zone(&"ashram_east", "Ashram Heights (east)", 4864.0, 8800.0, 4, 5, 6800.0, 4),
+		_zone(&"ashram_east", "Ashram Heights (east)", MOUTH_R - ledge_max(5.0), 8800.0, 4, 5, 6800.0, 4),
 		_zone(&"ashram_east_3", "Ashram Heights (east), third tier", 8208.0, 9248.0, 3, 3, 8700.0, 3),
 		_zone(&"ashram_east_2", "Ashram Heights (east), second tier", 6608.0, 8496.0, 2, 2, 6900.0, 2),
 		_zone(&"ashram_east_1", "Ashram Heights (east), first tier", 8096.0, 9248.0, 1, 1, 8600.0, 1),
 		_zone(&"ashram_east_0", "Ashram Heights (east), summit", 6896.0, 8304.0, 0, 0, 7500.0, 0),
-		_zone(&"glowbeds", "Glowbeds", 4864.0, 8800.0, 6, 6, 5200.0, 6),
-		_zone(&"glowbeds_hang", "Glowbeds Hang", 5008.0, 8000.0, 7, 7, 7200.0, 7),
+		_zone(&"glowbeds", "Glowbeds", MOUTH_R - ledge_max(6.0), 8800.0, 6, 6, 5200.0, 6),
+		_zone(&"glowbeds_annex", "Glowbeds Expansion Court", 8800.0, EAST_WALL, 6, 6, 9100.0, 6),
+		_zone(&"glowbeds_hang", "Glowbeds Hang", MOUTH_R - ledge_max(7.0), 8000.0, 7, 7, 7200.0, 7),
 		_zone(&"mid_east_landing", "Mid-East Landing", MOUTH_R, 7040.0, 8, 8, 5840.0, 8),
 		_zone(&"mid_east_approach", "Mid-East Approach", 7040.0, EAST_WALL, 8, 8, 7680.0, 8),
 		_zone(&"mid_east_dig_front", "Mid-East Dig Front", EAST_WALL, EAST_FLANK_RIGHT, 8, 8, 9600.0, 8),
 		_zone(&"mid_east_service", "Mid-East Service Court", MOUTH_R, 7360.0, 9, 9, 6080.0, 9),
-		_zone(&"lower_east_homes", "Lower-East Homes", 4864.0, 8000.0, 10, 10, 6800.0, 10),
+		_zone(&"lower_east_homes", "Lower-East Homes", MOUTH_R - ledge_max(10.0), 8000.0, 10, 10, 6800.0, 10),
 		_zone(&"lower_east_services", "Lower-East Services", 6720.0, EAST_WALL, 11, 11, 7200.0, 11),
 		_zone(&"cistern_freight", "Cistern Freight Landing", 5440.0, EAST_WALL, 12, 12, 7360.0, 12),
-		_zone(&"east_rows_1", "Lower-East Mouth Rows, first row", 4864.0, 6240.0, 11, 11, 5600.0, 11),
+		_zone(&"east_rows_1", "Lower-East Mouth Rows, first row", MOUTH_R - ledge_max(11.0), 6240.0, 11, 11, 5600.0, 11),
 		_zone(&"east_rows_2", "Lower-East Mouth Rows, second row", 4864.0, 5376.0, 12, 12, 5000.0, 12),
 		_zone(&"east_rows_3", "Cistern Mouth Rows, first row", 4896.0, 6208.0, 14, 14, 5400.0, 14, true),
 		_zone(&"east_rows_4", "Cistern Mouth Rows, second row", 5200.0, 6304.0, 15, 15, 5800.0, 15, true),
@@ -914,6 +958,7 @@ static func zones() -> Array[Dictionary]:
 		_zone(&"cistern_intake", "Cistern Intake Ledge", 4864.0, 5600.0, 13, 13, 5200.0, 13, true),
 		_zone(&"cistern", "Cistern", 6400.0, EAST_WALL, 13, 13, 7200.0, 13, true),
 		_zone(&"cistern_tanks", "Cistern Tanks", 7360.0, EAST_WALL, 14, 14, 8000.0, 14, true),
+		_zone(&"cistern_annex", "Cistern Tank Annex", EAST_WALL, 10592.0, 14, 14, 10000.0, 14, true),
 		_zone(&"seep_threshold", "Seep Gallery", 6400.0, EAST_WALL, 15, 15, 7200.0, 15, true),
 	]
 	# Dig volumes: the rock shell, not places you stand. No seams, no deck. Where a gallery zone
@@ -1033,6 +1078,11 @@ static func deck_rects() -> Array[Vector4]:
 			if sg.y - sg.x >= 16.0:
 				out.append(Vector4(sg.x, sg.y, p["y"], FLOOR_THICK))
 	return out
+
+
+## Mid Heart and the Upper Heart over it: the zones of the one cluster over the Mouth (no rock, no rooms).
+static func is_heart_zone(zone: StringName) -> bool:
+	return zone == &"mid_heart" or zone == &"mid_heart_upper"
 
 
 ## Wall columns for every END_WALL run side: Rect2 (x, y_top, w, h), standing on the deck.

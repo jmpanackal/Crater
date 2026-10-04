@@ -184,7 +184,7 @@ func _run() -> void:
 		var drawn: Rect2 = minimap.call("district_draw_bounds", district.bounds)
 		if drawn.size.x <= 0.0 or drawn.size.y <= 0.0:
 			continue
-		if name.begins_with("Mid Heart"):
+		if name.begins_with("Mid Heart") or name.begins_with("Upper Heart"):
 			continue
 		if drawn.intersects(mouth_inner):
 			push_error(

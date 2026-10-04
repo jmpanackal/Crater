@@ -1,5 +1,5 @@
 extends SceneTree
-## Mouth ledges reach out over the Mouth by at most LEDGE_MAX and nothing but Mid Heart spans it; a door is
+## Mouth ledges reach out over the Mouth by at most HollowMap.ledge_max(k) and nothing but Mid Heart spans it; a door is
 ## solid rock from the ceiling down to its opening, with the doorway open above the deck.
 
 
@@ -25,12 +25,12 @@ func _run() -> void:
 	var decks: TileMapLayer = hollow.deck_layer()
 	var ledges := 0
 	for r in HollowMap.runs():
-		if r["zone"] == &"mid_heart":
+		if HollowMap.is_heart_zone(r["zone"]):
 			continue
 		if r["r"] == HollowMap.END_LEDGE:
 			var reach := float(r["x1"]) - HollowMap.MOUTH_L
-			if reach <= 0.0 or reach > HollowMap.LEDGE_MAX:
-				_fail("ledge %s reaches %d px (max %d)" % [r["id"], int(reach), int(HollowMap.LEDGE_MAX)])
+			if reach <= 0.0 or reach > HollowMap.ledge_max(float(r["k"])):
+				_fail("ledge %s reaches %d px (max %d on level %s)" % [r["id"], int(reach), int(HollowMap.ledge_max(float(r["k"]))), str(r["k"])])
 				return
 			# the deck is painted out over the Mouth, and the Mouth beyond it is still open
 			if decks.get_cell_source_id(_cell(Vector2(HollowMap.MOUTH_L + reach - 8.0, float(r["y"]) + 8.0))) == -1:
@@ -59,5 +59,5 @@ func _run() -> void:
 			_fail("door %s blocks the floor" % d["id"])
 			return
 		doors += 1
-	print("PASS %d ledge(s) within %d px of the lip, %d door(s) solid above a clear doorway" % [ledges, int(HollowMap.LEDGE_MAX), doors])
+	print("PASS %d ledge(s) within their reach of the lip (up to %d px beside Mid Heart), %d door(s) solid above a clear doorway" % [ledges, int(HollowMap.LEDGE_REACH_MAX), doors])
 	quit(0)

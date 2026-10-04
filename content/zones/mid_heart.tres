@@ -9,12 +9,20 @@ display_name = "Mid Heart"
 world_origin = Vector2(3200, 4672)
 seams = [{
 "edge": "south",
+"neighbor": "lower_east_homes",
+"position": 5632
+}, {
+"edge": "south",
 "neighbor": "wickwork",
 "position": 5248
 }, {
 "edge": "south",
 "neighbor": "mid_east_service",
 "position": 5248
+}, {
+"edge": "north",
+"neighbor": "mid_heart_upper",
+"position": 4672
 }, {
 "edge": "west",
 "neighbor": "wickwork",
@@ -25,5 +33,5 @@ seams = [{
 "position": 4960
 }]
 enclosed = false
-world_rect = Rect2(1440, 4416, 3520, 768)
+world_rect = Rect2(1440, 4608, 3520, 768)
 restricted = false

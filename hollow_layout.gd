@@ -178,7 +178,7 @@ static func expansion_stair_rects() -> Array[Vector4]:
 static func heart_deck_rects() -> Array[Vector4]:
 	var out: Array[Vector4] = []
 	for p in HollowMap.deck_pieces():
-		if p["x1"] > PIT_LEFT and p["x0"] < PIT_RIGHT and HollowMap.run_by_id(p["run"])["zone"] == &"mid_heart":
+		if p["x1"] > PIT_LEFT and p["x0"] < PIT_RIGHT and HollowMap.is_heart_zone(HollowMap.run_by_id(p["run"])["zone"]):
 			out.append(Vector4(p["x0"], p["x1"], p["y"], BRIDGE_THICKNESS))
 	return out
 
