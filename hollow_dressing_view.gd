@@ -453,6 +453,21 @@ func _draw_prop(p: Dictionary) -> void:
 			var drop_x := x - w * 0.5 + 12.0
 			draw_rect(Rect2(drop_x - ph * 0.5, deck, ph, maxf(float(p["y_off"]) - 44.0, 8.0)), Color(0.5, 0.3, 0.18))
 			draw_circle(Vector2(drop_x, deck + ph * 0.1), ph * 0.9, Color(0.5, 0.3, 0.18))
+		&"pump":
+			# a pressure pump: squat base, tall cylinder, a piston rod and a flanged outlet
+			_box(deck, x, 0.0, w, 14.0, IRON)
+			_box(deck, x, 14.0, w * 0.62, h - 30.0, Color(0.3, 0.36, 0.4))
+			_box(deck, x - w * 0.18, 14.0, 6.0, h - 30.0, Color(0.46, 0.54, 0.58))
+			_box(deck, x, h - 16.0, w * 0.74, 8.0, IRON)
+			_box(deck, x, h - 8.0, 6.0, 16.0, Color(0.7, 0.72, 0.72))
+			_box(deck, x + w * 0.5, 30.0, 14.0, 8.0, COPPER)
+		&"valve_wheel":
+			# a wall valve: spoked wheel on a stem and bracket
+			draw_circle(Vector2(x, deck - h * 0.5), h * 0.5, IRON)
+			draw_circle(Vector2(x, deck - h * 0.5), h * 0.38, Color(0.2, 0.16, 0.13))
+			draw_line(Vector2(x - h * 0.45, deck - h * 0.5), Vector2(x + h * 0.45, deck - h * 0.5), COPPER, 3.0)
+			draw_line(Vector2(x, deck - h * 0.95), Vector2(x, deck - h * 0.05), COPPER, 3.0)
+			draw_circle(Vector2(x, deck - h * 0.5), 4.0, COPPER)
 		&"awning":
 			# draped canvas on a pole frame
 			_poly(PackedVector2Array([Vector2(x - w * 0.5, deck - h), Vector2(x + w * 0.5, deck - h), Vector2(x + w * 0.5, deck - h * 0.25), Vector2(x + w * 0.2, deck - h * 0.05), Vector2(x - w * 0.1, deck - h * 0.3), Vector2(x - w * 0.5, deck - h * 0.15)]), Color(0.26, 0.34, 0.36))

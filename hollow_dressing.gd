@@ -29,7 +29,7 @@ const SIZES := {
 	&"fragment": Vector2(14, 10), &"supply_rack": Vector2(72, 72), &"gauge": Vector2(40, 40), &"pipe": Vector2(160, 11),
 	&"bench": Vector2(60, 22), &"sort_table": Vector2(64, 32), &"sealed_hatch": Vector2(48, 96), &"observation_window": Vector2(48, 32),
 	&"notice": Vector2(28, 36), &"brace": Vector2(64, 128), &"step": Vector2(48, 10),
-	&"awning": Vector2(170, 64), &"niche": Vector2(26, 44), &"herbs": Vector2(48, 38), &"crystal": Vector2(28, 20),
+	&"pump": Vector2(56, 120), &"valve_wheel": Vector2(40, 40), &"awning": Vector2(170, 64), &"niche": Vector2(26, 44), &"herbs": Vector2(48, 38), &"crystal": Vector2(28, 20),
 }
 
 ## A civic building fills its room: the whole 256px of air. The map's floor slab above it (the
@@ -130,6 +130,8 @@ static func buildings() -> Array[Dictionary]:
 		_building(&"old_home_c", &"bottom_west_approach", &"unit", -2170.0, -2030.0, 13, 140.0, {"doors": [-2100.0], "windows": [], "overlay": true}),
 		# Threshold: the shift hut by the tunnel mouth.
 		_building(&"shift_hut", &"bottom_west_threshold", &"unit", -4100.0, -3940.0, 14, 130.0, {"doors": [-4020.0], "windows": [-3960.0]}),
+		# Cistern pump house: a facade of pressure doors along the back wall, the pumps standing in front of it.
+		_building(&"pump_house", &"cistern", &"facade", 6704.0, 6960.0, 13, FULL, {"doors": [6720.0], "windows": [6850.0]}),
 	]
 	_cache["buildings"] = out
 	return out
@@ -259,6 +261,30 @@ static func props() -> Array[Dictionary]:
 		_prop(ch, &"warning_sign", -4540.0, 15),
 		_prop(ch, &"crystal", -5600.0, 15),
 		_prop(ch, &"crystal", -4760.0, 15, {"w": 18.0}),
+		# ---- Cistern (AI, 2026-10-03): the hydraulic district's pump house, valve runs and freight landing
+		_prop(&"cistern", &"pump", 6740.0, 13),
+		_prop(&"cistern", &"valve_wheel", 6810.0, 13, {"y_off": 36.0}),
+		_prop(&"cistern", &"pump", 6880.0, 13, {"h": 100.0}),
+		_prop(&"cistern", &"gauge", 6940.0, 13, {"y_off": 70.0}),
+		_prop(&"cistern", &"pipe", 6820.0, 13, {"y_off": 150.0}),
+		_prop(&"cistern", &"barrel", 7200.0, 13, {"w": 20.0}),
+		_prop(&"cistern", &"crate", 7240.0, 13),
+		_prop(&"cistern", &"valve_wheel", 7140.0, 13, {"y_off": 40.0}),
+		_prop(&"cistern", &"notice", 7280.0, 13, {"y_off": 60.0}),
+		_prop(&"cistern_freight", &"cart", 5820.0, 12),
+		_prop(&"cistern_freight", &"crate", 5900.0, 12),
+		_prop(&"cistern_freight", &"crate", 5930.0, 12, {"h": 30.0}),
+		_prop(&"cistern_freight", &"supply_rack", 6120.0, 12),
+		_prop(&"cistern_freight", &"notice", 6240.0, 12, {"y_off": 70.0}),
+		_prop(&"cistern_freight", &"barrel", 5990.0, 12),
+		_prop(&"cistern_freight", &"cart", 6980.0, 12),
+		_prop(&"cistern_freight", &"valve_wheel", 7300.0, 12, {"y_off": 44.0}),
+		_prop(&"cistern_tanks", &"pump", 7520.0, 14),
+		_prop(&"cistern_tanks", &"gauge", 7440.0, 14, {"y_off": 60.0}),
+		_prop(&"cistern_tanks", &"pipe", 8060.0, 14, {"y_off": 120.0}),
+		_prop(&"cistern_tanks", &"barrel", 8140.0, 14),
+		_prop(&"seep_threshold", &"warning_sign", 8560.0, 15),
+		_prop(&"seep_threshold", &"rubble", 8500.0, 15),
 	]
 	for i in out.size():
 		out[i]["id"] = StringName("%s_%s_%d" % [str(out[i]["zone"]), str(out[i]["kind"]), i])
@@ -289,6 +315,11 @@ static func lamps() -> Array[Dictionary]:
 		_lamp(&"first_expansion_gallery", -4800.0, 14, 130.0, &"cool"), _lamp(&"first_expansion_gallery", -5000.0, 14, 130.0, &"cool"),
 		_lamp(&"first_expansion_gallery", -5260.0, 14, 130.0, &"cool"), _lamp(&"first_expansion_gallery", -5600.0, 14, 130.0, &"amber"),
 		_lamp(&"collapsed_side_chamber", -5200.0, 15, 100.0, &"amber"),
+		_lamp(&"cistern", 6730.0, 13, 140.0, &"cool"), _lamp(&"cistern", 6930.0, 13, 140.0, &"cool"),
+		_lamp(&"cistern", 7200.0, 13, 130.0, &"cool"),
+		_lamp(&"cistern_freight", 5860.0, 12, 140.0, &"warm"), _lamp(&"cistern_freight", 6200.0, 12, 140.0, &"cool"),
+		_lamp(&"cistern_tanks", 7560.0, 14, 130.0, &"cool"), _lamp(&"cistern_tanks", 8160.0, 14, 130.0, &"amber"),
+		_lamp(&"seep_threshold", 8540.0, 15, 120.0, &"red"),
 	]
 	_cache["lamps"] = out
 	return out

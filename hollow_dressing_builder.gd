@@ -11,6 +11,7 @@ const FringeViewScript := preload("res://hollow_fringe_view.gd")
 const BackdropViewScript := preload("res://hollow_backdrop_view.gd")
 const StairwellViewScript := preload("res://hollow_stairwell_view.gd")
 const CisternViewScript := preload("res://hollow_cistern_view.gd")
+const PulseViewScript := preload("res://hollow_pulse_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -25,6 +26,7 @@ func _ready() -> void:
 	_build_backdrop()
 	_build_stairwells()
 	_build_cistern_basin()
+	_build_pulse()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -92,6 +94,14 @@ func _build_cistern_basin() -> void:
 	var view := Node2D.new()
 	view.name = "CisternBasin"
 	view.set_script(CisternViewScript)
+	add_child(view)
+
+
+## The Pulse on the Ritual Raft at Mid Heart (see hollow_pulse_view.gd).
+func _build_pulse() -> void:
+	var view := Node2D.new()
+	view.name = "Pulse"
+	view.set_script(PulseViewScript)
 	add_child(view)
 
 
