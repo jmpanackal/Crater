@@ -19,6 +19,8 @@ const GlowbedsViewScript := preload("res://hollow_glowbeds_view.gd")
 const MotherCultureScript := preload("res://hollow_mother_culture.gd")
 const WickworkViewScript := preload("res://hollow_wickwork_view.gd")
 const AllotmentsViewScript := preload("res://hollow_allotments_view.gd")
+const MidEastViewScript := preload("res://hollow_mideast_view.gd")
+const PitViewScript := preload("res://hollow_pit_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -142,6 +144,14 @@ func _build_glowbeds() -> void:
 	homes.name = "AllotmentsDistrict"
 	homes.set_script(AllotmentsViewScript)
 	add_child(homes)
+	var mideast := Node2D.new()
+	mideast.name = "MidEastDistrict"
+	mideast.set_script(MidEastViewScript)
+	add_child(mideast)
+	var pit := Node2D.new()
+	pit.name = "PitPool"
+	pit.set_script(PitViewScript)
+	add_child(pit)
 
 
 ## The moving parts: pistons, valves, steam, pennants, the crane and a cart, flickering lamps, breathing fungi.

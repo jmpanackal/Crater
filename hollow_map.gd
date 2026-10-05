@@ -350,7 +350,7 @@ static func _domes() -> Array[Dictionary]:
 		{"id": &"D_AL", "k": 10, "x0": -2752.0, "x1": -1696.0, "height": 384.0, "n": 2}, # the vault over the allotment cavern
 		{"id": &"D_WK4", "k": 8, "x0": -496.0, "x1": 1184.0, "height": 384.0, "n": 4}, # the great vault over Wickwork's whole hall: a 640 px ceiling (USER 2026-10-04)
 		{"id": &"D_E1", "k": 4, "x0": 5024.0, "x1": 5584.0, "height": 192.0, "n": 3}, # the east Ashram overlook
-		{"id": &"D_E4", "k": 8, "x0": 8544.0, "x1": 9264.0, "height": 160.0, "n": 5}, # the Mid-East Approach hall
+		{"id": &"D_E4", "k": 8, "x0": 8544.0, "x1": 9264.0, "height": 384.0, "n": 1}, # the tall vault over the Mid-East shaft
 	]
 
 
@@ -649,7 +649,7 @@ static func _halls() -> Array[Dictionary]:
 		{"id": &"H_AL", "x0": -2752.0, "x1": -1696.0, "k_top": 10, "k_bottom": 11}, # the allotment cavern
 		{"id": &"H_GB", "x0": 5008.0, "x1": 8000.0, "k_top": 4, "k_bottom": 6},
 		# Cistern pressure-basin chamber: levels 11-14 at the east end; services street and freight gantry cross it.
-		{"id": &"H_CI", "x0": 8096.0, "x1": 9248.0, "k_top": 11, "k_bottom": 14},
+		{"id": &"H_CI", "x0": 8096.0, "x1": 9248.0, "k_top": 8, "k_bottom": 14}, # one great shaft from the Mid-East street down to the Cistern floor (USER 2026-10-04)
 	]
 
 

@@ -31,7 +31,12 @@ func _draw() -> void:
 			if x1 - x0 < 64.0:
 				continue
 			_bridge(x0, x1, float(r["y"]), floor_y)
-		_ceiling_vines(hx0, hx1, HollowMap.lvl(kt) - HollowMap.ROOM_HEIGHT)
+		var vaulted := false
+		for dome in HollowMap.domes():
+			if absf(float(dome["k"]) - kt) < 0.01 and float(dome["x0"]) < hx1 and float(dome["x1"]) > hx0:
+				vaulted = true # a vault rises above this ceiling line, so vines hung from it would float in mid-air
+		if not vaulted:
+			_ceiling_vines(hx0, hx1, HollowMap.lvl(kt) - HollowMap.ROOM_HEIGHT)
 
 
 func _bridge(x0: float, x1: float, y: float, floor_y: float) -> void:

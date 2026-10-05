@@ -41,7 +41,7 @@ func _ready() -> void:
 	z_index = -1
 	for h in HollowMap.halls():
 		if h["id"] == HALL_ID:
-			var top := HollowMap.lvl(float(h["k_top"])) - HollowMap.ROOM_HEIGHT
+			var top := HollowMap.lvl(11.0) - HollowMap.ROOM_HEIGHT # the tanks stand in the basin chamber, not up the whole Mid-East shaft
 			_rect = Rect2(float(h["x0"]), top, float(h["x1"]) - float(h["x0"]), HollowMap.lvl(float(h["k_bottom"])) - top)
 	var district := get_node_or_null("/root/District")
 	if district != null and district.has_method("get_condition"):
