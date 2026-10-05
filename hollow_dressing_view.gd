@@ -167,9 +167,13 @@ func _draw_building(b: Dictionary) -> void:
 		draw_rect(Rect2(x0, deck - h, w, 4.0), Color(0.07, 0.06, 0.05))
 		draw_rect(Rect2(x0 + 6.0, deck - h * 0.45, w - 12.0, 3.0), TIMBER_DARK)
 		return
+	var adobe := str(b["zone"]).begins_with("ashram")
 	# Warm dressed stone for homes, cooler for the working yards, both dimmed so props read.
 	var warm := (kind == &"unit" and float(b.get("warm", 0.0)) > 0.0) or (kind == &"facade" and bool(b.get("homely", false)))
-	var stone := Color(0.5, 0.4, 0.29) if warm else Color(0.36, 0.34, 0.3)
+	var stone := Color(0.62, 0.55, 0.45) if adobe else (Color(0.5, 0.4, 0.29) if warm else Color(0.36, 0.34, 0.3))
+	if adobe:
+		_draw_adobe(b, deck, minf(h, 184.0))
+		return
 	var wall_tex := RockTextures.brick(96, 96, stone)
 	var dim := Color(0.78, 0.78, 0.8)
 	var lo := maxf(x0, chunk_x0)
@@ -201,6 +205,37 @@ func _draw_building(b: Dictionary) -> void:
 	for dx in b["doors"]:
 		if _mine(float(dx)):
 			_draw_door(deck, float(dx), 56.0)
+	for wx in b["windows"]:
+		if _mine(float(wx)):
+			_draw_window(deck, float(wx), minf(h * 0.55, 96.0))
+
+
+## An Ashram home: whitewashed plaster with a stepped parapet, a cloth awning over the door, lit arched windows.
+func _draw_adobe(b: Dictionary, deck: float, h: float) -> void:
+	var x0: float = b["x0"]
+	var x1: float = b["x1"]
+	var lo := maxf(x0, chunk_x0)
+	var hi := minf(x1, chunk_x1)
+	var plaster := Color(0.46, 0.4, 0.33)
+	draw_rect(Rect2(lo, deck - h, hi - lo, h), plaster)
+	draw_rect(Rect2(lo, deck - 20.0, hi - lo, 20.0), Color(0.3, 0.26, 0.22))
+	var mx := x0 + 14.0
+	var j := 0
+	while mx < x1 - 24.0:
+		if mx >= lo and mx < hi:
+			draw_rect(Rect2(mx, deck - h + 20.0 + float((j * 37) % 40), 22.0, 6.0), Color(0.36, 0.31, 0.26, 0.5))
+		mx += 46.0
+		j += 1
+	draw_rect(Rect2(lo - 4.0 if _mine(x0) else lo, deck - h - 8.0, (hi - lo) + 8.0, 10.0), Color(0.34, 0.31, 0.29))
+	draw_rect(Rect2(lo - 4.0 if _mine(x0) else lo, deck - h - 8.0, (hi - lo) + 8.0, 3.0), Color(0.5, 0.46, 0.42))
+	for dx in b["doors"]:
+		if _mine(float(dx)):
+			_draw_door(deck, float(dx), 56.0)
+			var c: Color = [Color(0.62, 0.3, 0.2), Color(0.28, 0.5, 0.5), Color(0.72, 0.55, 0.28)][int(absf(float(dx)) / 7.0) % 3]
+			var ay := deck - 96.0
+			draw_colored_polygon(PackedVector2Array([Vector2(float(dx) - 34.0, ay), Vector2(float(dx) + 34.0, ay), Vector2(float(dx) + 44.0, ay + 18.0), Vector2(float(dx) - 44.0, ay + 18.0)]), c)
+			for s in 6:
+				draw_circle(Vector2(float(dx) - 40.0 + float(s) * 16.0, ay + 18.0), 6.0, c.darkened(0.15))
 	for wx in b["windows"]:
 		if _mine(float(wx)):
 			_draw_window(deck, float(wx), minf(h * 0.55, 96.0))

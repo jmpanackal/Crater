@@ -63,6 +63,7 @@ func _draw() -> void:
 	_gauge_wall()
 	_seeps()
 	_fall()
+	_catwalks()
 	_tower()
 	_sign(Vector2(5600.0, _deck - 170.0), "TRADE ROW")
 	_sign(Vector2(6000.0, HollowMap.lvl(9.0) - 150.0), "SERVICE COURT")
@@ -272,6 +273,74 @@ func _tower() -> void:
 	draw_line(Vector2(tx, beam_y + 6.0), Vector2(tx, beam_y + 6.0 + drop), PIPE_HI, 2.0)
 	draw_rect(Rect2(tx - 15.0, beam_y + 6.0 + drop, 30.0, 22.0), Color(0.4, 0.3, 0.22))
 	_sign(Vector2((x0 + x1) * 0.5, top - 30.0), "DISPATCH")
+
+
+## Railed catwalks on every bridge in the shaft, with lantern posts, crate stacks and gas cylinders (the Cistern reference look).
+## Skips the lift shaft and the fall; only ever draws over the bridge's own deck.
+func _catwalks() -> void:
+	var hx0 := _rect.position.x
+	var hx1 := _rect.end.x
+	var n := 0
+	for r in HollowMap.runs():
+		var k := float(r["k"])
+		if k < 8.0 - 0.01 or k >= 14.0 - 0.01 or HollowMap.is_heart_zone(r["zone"]):
+			continue
+		var x0 := maxf(float(r["x0"]), hx0 + 24.0)
+		var x1 := minf(float(r["x1"]), hx1 - 24.0)
+		if x1 - x0 < 128.0:
+			continue
+		var y := float(r["y"])
+		var x := x0
+		while x < x1:
+			var gap := (x > 8600.0 and x < 8810.0) or absf(x - FALL_X) < 40.0
+			if not gap:
+				draw_rect(Rect2(x - 2.0, y - 34.0, 4.0, 34.0), STEEL)
+				if x + 32.0 < x1 and not ((x + 32.0 > 8600.0 and x + 32.0 < 8810.0) or absf(x + 32.0 - FALL_X) < 40.0):
+					draw_line(Vector2(x, y - 34.0), Vector2(x + 32.0, y - 34.0), PIPE_HI, 3.0)
+					draw_line(Vector2(x, y - 17.0), Vector2(x + 32.0, y - 17.0), STEEL, 2.0)
+			x += 32.0
+		# lantern posts and stacked cargo, spaced by run so no two decks match
+		var px := x0 + 90.0 + float((n * 131) % 160)
+		while px < x1 - 120.0:
+			var blocked := (px > 8560.0 and px < 8850.0) or absf(px - FALL_X) < 90.0 or (px > TOWER_X0 - 40.0 and px < TOWER_X1 + 40.0 and absf(y - _deck) < 2.0)
+			if not blocked:
+				var kind := int(floorf(px / 97.0)) % 3
+				if kind == 0:
+					_crates(px, y)
+				elif kind == 1:
+					_cylinders(px, y)
+				else:
+					_lantern(px, y)
+			px += 260.0 + float((int(px) * 7) % 140)
+		n += 1
+
+
+func _crates(x: float, y: float) -> void:
+	draw_rect(Rect2(x, y - 30.0, 34.0, 30.0), RUST.darkened(0.3))
+	draw_rect(Rect2(x, y - 30.0, 34.0, 4.0), RUST)
+	draw_line(Vector2(x, y - 30.0), Vector2(x + 34.0, y), RUST.darkened(0.5), 2.0)
+	draw_rect(Rect2(x + 6.0, y - 58.0, 26.0, 28.0), RUST.darkened(0.15))
+	draw_rect(Rect2(x + 6.0, y - 58.0, 26.0, 4.0), RUST.lightened(0.1))
+	draw_rect(Rect2(x + 36.0, y - 22.0, 22.0, 22.0), RUST.darkened(0.4))
+
+
+func _cylinders(x: float, y: float) -> void:
+	for i in range(3):
+		var cx := x + float(i) * 16.0
+		var col := VERDIGRIS.darkened(0.25 + 0.1 * float(i % 2))
+		draw_rect(Rect2(cx, y - 42.0, 12.0, 42.0), col)
+		draw_circle(Vector2(cx + 6.0, y - 42.0), 6.0, col)
+		draw_rect(Rect2(cx + 4.0, y - 52.0, 4.0, 6.0), BRASS)
+		draw_rect(Rect2(cx, y - 24.0, 12.0, 3.0), BRASS.darkened(0.3))
+	draw_line(Vector2(x - 2.0, y - 14.0), Vector2(x + 50.0, y - 14.0), STEEL, 2.0)
+
+
+func _lantern(x: float, y: float) -> void:
+	draw_rect(Rect2(x - 2.0, y - 96.0, 4.0, 96.0), STEEL)
+	draw_line(Vector2(x, y - 96.0), Vector2(x + 16.0, y - 96.0), STEEL, 3.0)
+	var flick := 0.8 + 0.2 * sin(_t * 5.0 + x)
+	draw_circle(Vector2(x + 16.0, y - 88.0), 26.0, Color(WARM.r, WARM.g, WARM.b, 0.07 * flick))
+	draw_rect(Rect2(x + 12.0, y - 94.0, 8.0, 12.0), Color(WARM.r, WARM.g, WARM.b, 0.95))
 
 
 func _sign(at: Vector2, text: String) -> void:
