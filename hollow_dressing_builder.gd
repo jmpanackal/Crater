@@ -22,6 +22,7 @@ const AllotmentsViewScript := preload("res://hollow_allotments_view.gd")
 const MidEastViewScript := preload("res://hollow_mideast_view.gd")
 const PitViewScript := preload("res://hollow_pit_view.gd")
 const AshramViewScript := preload("res://hollow_ashram_view.gd")
+const LowerEastViewScript := preload("res://hollow_lowereast_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -149,6 +150,10 @@ func _build_glowbeds() -> void:
 	mideast.name = "MidEastDistrict"
 	mideast.set_script(MidEastViewScript)
 	add_child(mideast)
+	var rows := Node2D.new()
+	rows.name = "LowerEastDistrict"
+	rows.set_script(LowerEastViewScript)
+	add_child(rows)
 	var ashram := Node2D.new()
 	ashram.name = "AshramDistrict"
 	ashram.set_script(AshramViewScript)
