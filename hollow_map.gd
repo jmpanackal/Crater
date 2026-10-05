@@ -198,10 +198,14 @@ static func _terraces() -> Array[Dictionary]:
 			[-2720.0, -1408.0, 0.0], [-1152.0, -1040.0, -64.0], [-912.0, -160.0, 0.0]]}, # a long ramp up, a short drop
 		{"id": &"WK4", "zone": &"wickwork", "k": 8, "l": END_ROCK, "r": END_JOIN, "pieces": [
 			[-5440.0, -4560.0, 0.0], [-4464.0, -4144.0, -48.0], [-4048.0, -3584.0, 0.0], [-3488.0, -3232.0, 32.0], [-3136.0, -2096.0, 0.0], [-2000.0, -1808.0, -48.0], [-1712.0, 1440.0, 0.0]]}, # one long flat bridge through the repair hall (USER 2026-10-04: Wickwork needs height and room)
-		{"id": &"WK5", "zone": &"wickwork", "k": 9, "l": END_FOOT, "r": END_MOUTH, "pieces": [
+		{"id": &"WK5", "zone": &"wickwork", "k": 9, "l": END_WALL, "r": END_MOUTH, "pieces": [
 			[-1280.0, 160.0, 0.0], [304.0, 560.0, 48.0], [656.0, 1440.0, 0.0]]},
 		{"id": &"AL6", "zone": &"mid_allotments", "k": 10, "l": END_WALL, "r": END_FOOT, "pieces": [
-			[-2400.0, -2256.0, 0.0], [-2128.0, -1856.0, -64.0], [-1728.0, -1104.0, 0.0], [-1040.0, -704.0, -32.0], [-640.0, 640.0, 0.0]]},
+			[-2752.0, -2256.0, 0.0], [-2192.0, -1856.0, -64.0], [-1792.0, -1104.0, 0.0], [-1040.0, -704.0, -32.0], [-640.0, 640.0, 0.0]]},
+		# The allotment gardens (USER 2026-10-04: the Allotments need to be a district, tall and distinct): a lower garden floor
+		# under the street in the west, so the street is a bridge across one tall cavern (hall H_AL, vault D_AL).
+		{"id": &"AL7W", "zone": &"mid_allotments", "k": 11, "l": END_WALL, "r": END_WALL, "pieces": [
+			[-2752.0, -1696.0, 0.0]]},
 		{"id": &"AL7", "zone": &"mid_allotments", "k": 11, "l": END_FOOT, "r": END_WALL, "pieces": [
 			[-1280.0, -160.0, 0.0], [-112.0, 560.0, -48.0], [608.0, 1376.0, 0.0]]}, # the residences street is tucked back from the Mouth (a 64 px rock wall) and closed off by rock
 		# ---- Ashram Heights upper wards (2026-10-02): a zigzag of tiers climbing to the Firmament, joined by
@@ -326,7 +330,6 @@ static func _terraces() -> Array[Dictionary]:
 static func _roofs() -> Array[Dictionary]:
 	return [
 		{"id": &"R_A1", "k": 5, "x0": -2400.0, "x1": -1760.0, "depth": 96.0, "n": 3},
-		{"id": &"R_AL6", "k": 10, "x0": -1712.0, "x1": -1232.0, "depth": 96.0, "n": 3},
 		{"id": &"R_HW2", "k": 6, "x0": -1600.0, "x1": -960.0, "depth": 96.0, "n": 3},
 		{"id": &"R_E5", "k": 9, "x0": 6416.0, "x1": 7056.0, "depth": 96.0, "n": 3},
 		{"id": &"R_LP14", "k": 14, "x0": -480.0, "x1": 160.0, "depth": 96.0, "n": 3},
@@ -344,6 +347,7 @@ static func _domes() -> Array[Dictionary]:
 		{"id": &"D_A0", "k": 4, "x0": 512.0, "x1": 1232.0, "height": 160.0, "n": 5},
 		{"id": &"D_AW0", "k": 0, "x0": -448.0, "x1": 352.0, "height": 192.0, "n": 3}, # summit rotunda, into the Firmament
 		{"id": &"D_AE0", "k": 0, "x0": 7168.0, "x1": 7968.0, "height": 192.0, "n": 3},
+		{"id": &"D_AL", "k": 10, "x0": -2752.0, "x1": -1696.0, "height": 384.0, "n": 2}, # the vault over the allotment cavern
 		{"id": &"D_WK4", "k": 8, "x0": -496.0, "x1": 1184.0, "height": 384.0, "n": 4}, # the great vault over Wickwork's whole hall: a 640 px ceiling (USER 2026-10-04)
 		{"id": &"D_E1", "k": 4, "x0": 5024.0, "x1": 5584.0, "height": 192.0, "n": 3}, # the east Ashram overlook
 		{"id": &"D_E4", "k": 8, "x0": 8544.0, "x1": 9264.0, "height": 160.0, "n": 5}, # the Mid-East Approach hall
@@ -642,6 +646,7 @@ static func _halls() -> Array[Dictionary]:
 		# (WS) and the repair bay below. x -800..640, levels 8-9.
 		{"id": &"H_WK", "x0": -800.0, "x1": 1184.0, "k_top": 8, "k_bottom": 9},
 		# Glowbeds stepped planter court: levels 5-7, x 5008..6320.
+		{"id": &"H_AL", "x0": -2752.0, "x1": -1696.0, "k_top": 10, "k_bottom": 11}, # the allotment cavern
 		{"id": &"H_GB", "x0": 5008.0, "x1": 8000.0, "k_top": 4, "k_bottom": 6},
 		# Cistern pressure-basin chamber: levels 11-14 at the east end; services street and freight gantry cross it.
 		{"id": &"H_CI", "x0": 8096.0, "x1": 9248.0, "k_top": 11, "k_bottom": 14},
@@ -801,7 +806,7 @@ static func stairs() -> Array[Dictionary]:
 		# West: every stair sits at a corridor end and rises away from it.
 		_stair(&"S_A1", &"ashram_west", -160.0, 5, 1, 1.0, 1.5), ## Ashram: promenade up to the overlook
 		# (the long slope S_HW3 is gone: it filled the rock band above Wickwork, and the lower gallery has two ladders up)
-		_stair(&"S_WK5", &"wickwork", -1280.0, 9, -1, 1.0, 3.0, 160.0), # Wickwork's diagonal descent, a sloped street ## Wickwork repair bays up to the street
+		# (the long slope S_WK5 is gone: it ran across the rock band above the allotments, which is now their cavern and vault)
 		_stair(&"S_AL6", &"mid_allotments", 640.0, 10, 1), ## Allotments up to Wickwork's dock
 		_stair(&"S_AL7", &"mid_allotments", -1280.0, 11, -1), ## Allotment street up to the residences
 		_stair(&"S_LW", &"lower_worker", 640.0, 12, 1), ## Worker Stair: Home Court up to the allotments
@@ -868,6 +873,8 @@ static func ladders() -> Array[Dictionary]:
 		_ladder(&"LAD_WK4", &"wickwork", -1280.0, 7, 8),
 		_ladder(&"LAD_WK5", &"wickwork", -640.0, 8, 9),
 		_ladder(&"LAD_AL2", &"mid_allotments", 0.0, 9, 10),
+		_ladder(&"LAD_ALW1", &"mid_allotments", -2320.0, 10, 11), # the bridge down into the allotment gardens
+		_ladder(&"LAD_ALW2", &"mid_allotments", -1760.0, 10, 11),
 		_ladder(&"LAD_AL", &"mid_allotments", -400.0, 10, 11),
 		_ladder(&"LAD_BW", &"bottom_west", -5120.0, 14, 15),
 		_ladder(&"LAD_WS1", &"wickwork_slag", -4900.0, 8, 9), # the Expansion Bay down to the slag gallery
@@ -1086,7 +1093,7 @@ static func zones() -> Array[Dictionary]:
 		_zone(&"wickwork_casting", "Wickwork Casting Floor", -5440.0, -3008.0, 10, 10, -5000.0, 10, true),
 		_zone(&"wickwork_upper", "Wickwork Gantry", 1200.0, 1760.0, 7, 7, 1500.0, 7, true),
 		_zone(&"wickwork", "Wickwork", -3680.0, 1440.0, 8, 9, -2160.0, 8, true),
-		_zone(&"mid_allotments", "Mid Allotments", -2400.0, 1440.0 + ledge_max(10.0), 10, 11, -1500.0, 10),
+		_zone(&"mid_allotments", "Mid Allotments", -2752.0, 1440.0 + ledge_max(10.0), 10, 11, -1500.0, 10),
 		_zone(&"west_dispatch_yard", "West Dispatch Yard", -1600.0, -800.0, 12, 12, -1320.0, 12, true),
 		_zone(&"lower_switchback", "Lower Switchback", -800.0, -320.0, 12, 12, -560.0, 12, true),
 		_zone(&"home_court", "Home Court", -320.0, 160.0, 12, 12, -80.0, 12, true),

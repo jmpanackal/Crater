@@ -18,6 +18,7 @@ const HallViewScript := preload("res://hollow_hall_view.gd")
 const GlowbedsViewScript := preload("res://hollow_glowbeds_view.gd")
 const MotherCultureScript := preload("res://hollow_mother_culture.gd")
 const WickworkViewScript := preload("res://hollow_wickwork_view.gd")
+const AllotmentsViewScript := preload("res://hollow_allotments_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -137,6 +138,10 @@ func _build_glowbeds() -> void:
 	works.name = "WickworkDistrict"
 	works.set_script(WickworkViewScript)
 	add_child(works)
+	var homes := Node2D.new()
+	homes.name = "AllotmentsDistrict"
+	homes.set_script(AllotmentsViewScript)
+	add_child(homes)
 
 
 ## The moving parts: pistons, valves, steam, pennants, the crane and a cart, flickering lamps, breathing fungi.
@@ -228,30 +233,38 @@ func _build_people() -> void:
 
 func _build_stations() -> void:
 	for s in HollowDressing.stations():
-		var node: Area2D = null
-		match s["kind"]:
-			&"rest":
-				node = RestScript.new()
-			&"storage":
-				node = StorageScript.new()
-				node.set("residence_id", &"lower")
-				node.set("prompt", s["prompt"])
-			&"rig":
-				node = RigScript.new()
-				node.set("station_kind", s.get("station", &"home"))
-				node.set("prompt", s["prompt"])
-			&"fragment":
-				node = FragmentScript.new()
-				node.set("prompt", s["prompt"])
+		if bool(s.get("interior", false)):
+			continue # the home's bed, lockbox and workbench stand in the room (home_interior.gd), not in the street
+		var node := make_station(s)
 		if node == null:
 			continue
 		node.name = "Station_%s" % str(s["id"])
-		match s["kind"]:
-			&"rest", &"fragment":
-				node.set("interact_radius", s["radius"])
-			&"storage":
-				node.set("interact_radius", s["radius"])
-			&"rig":
-				node.set("radius", s["radius"])
 		add_child(node)
 		node.position = Vector2(float(s["x"]), HollowMap.deck_y_at(float(s["x"]), float(s["k"])) - 14.0)
+
+
+## One station node (a Spec 10 interactable) for a HollowDressing.stations() entry; null for an unknown kind.
+static func make_station(s: Dictionary) -> Area2D:
+	var node: Area2D = null
+	match s["kind"]:
+		&"rest":
+			node = RestScript.new()
+		&"storage":
+			node = StorageScript.new()
+			node.set("residence_id", &"lower")
+			node.set("prompt", s["prompt"])
+		&"rig":
+			node = RigScript.new()
+			node.set("station_kind", s.get("station", &"home"))
+			node.set("prompt", s["prompt"])
+		&"fragment":
+			node = FragmentScript.new()
+			node.set("prompt", s["prompt"])
+	if node == null:
+		return null
+	match s["kind"]:
+		&"rest", &"fragment", &"storage":
+			node.set("interact_radius", s["radius"])
+		&"rig":
+			node.set("radius", s["radius"])
+	return node

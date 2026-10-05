@@ -30,6 +30,7 @@ const SIZES := {
 	&"bench": Vector2(60, 22), &"sort_table": Vector2(64, 32), &"sealed_hatch": Vector2(48, 96), &"observation_window": Vector2(48, 32),
 	&"notice": Vector2(28, 36), &"brace": Vector2(64, 128), &"step": Vector2(48, 10),
 	&"furnace": Vector2(88, 76), &"anvil": Vector2(36, 26), &"forge_wheel": Vector2(96, 96), &"smokestack": Vector2(36, 200),
+	&"plot": Vector2(96, 56), &"wash_trough": Vector2(96, 44), &"long_table": Vector2(120, 44), &"shed": Vector2(76, 84),
 	&"cable_drum": Vector2(104, 108), &"spool_rack": Vector2(84, 88), &"harness_rack": Vector2(76, 92), &"repair_counter": Vector2(112, 56),
 	&"culture_vat": Vector2(60, 112), &"press": Vector2(84, 76), &"stock_rack": Vector2(84, 88), &"ration_counter": Vector2(112, 52), &"mother_culture_base": Vector2(128, 36),
 	&"glass_dome": Vector2(168, 104), &"planter": Vector2(96, 40), &"glow_fungi": Vector2(70, 64), &"fiber_rack": Vector2(64, 74), &"harvest_basket": Vector2(30, 22), &"culture_shelf": Vector2(72, 84),
@@ -129,6 +130,8 @@ static func authored_buildings() -> Array[Dictionary]:
 	if _cache.has("buildings"):
 		return _cache["buildings"]
 	var out: Array[Dictionary] = [
+		# The Mid Reach residence block: the better-kept two-room apartments on the bridge over the allotment gardens
+		_building(&"mid_reach_block", &"mid_allotments", &"facade", -2700.0, -2384.0, 10, FULL, {"doors": [-2640.0, -2480.0], "windows": [-2560.0, -2420.0], "homely": true}),
 		# Home Court: the private unit, and the neighbours' doors onto the shared court.
 		_building(&"home_unit", &"home_court", &"unit", -320.0, -96.0, 12, FULL, {"doors": [-112.0], "windows": [-250.0], "warm": 1.0}),
 		_building(&"court_wall", &"home_court", &"facade", -96.0, 160.0, 12, FULL, {"doors": [-40.0, 104.0], "windows": [16.0], "homely": true}),
@@ -329,6 +332,14 @@ static func authored_props() -> Array[Dictionary]:
 		_prop(&"cistern_annex", &"gauge", 10050.0, 14, {"y_off": 60.0}),
 		_prop(&"cistern_annex", &"pipe", 10300.0, 14, {"y_off": 110.0}),
 		_prop(&"cistern_annex", &"barrel", 10440.0, 14),
+		# ---- Mid Allotments (USER 2026-10-04: allotments are the families' small garden plots and homes; shared wash, cook and
+		# table; the Mid Reach residence block near them). AI-placed greybox in the allotment cavern (hall H_AL).
+		_prop(&"mid_allotments", &"shed", -2690.0, 11),
+		_prop(&"mid_allotments", &"plot", -2590.0, 11),
+		_prop(&"mid_allotments", &"plot", -2480.0, 11),
+		_prop(&"mid_allotments", &"plot", -2410.0, 11, {"w": 64.0}),
+		_prop(&"mid_allotments", &"wash_trough", -1890.0, 11),
+		_prop(&"mid_allotments", &"barrel", -1800.0, 11),
 		# ---- Wickwork (USER 2026-10-04: Wickwork is fabrication, "not merely a blacksmith": cable, bindings, harnesses, seals, lamp
 		# housings, tether and Rig gear, repairs; its racks show strain). AI-placed greybox, laid out as working areas.
 		# Harness and binding shop (L8, west)
@@ -498,9 +509,10 @@ static func stations() -> Array[Dictionary]:
 	if _cache.has("stations"):
 		return _cache["stations"]
 	var out: Array[Dictionary] = [
-		_station(&"home_bed", &"home_court", &"rest", -272.0, 12, "Sleep until Rousing", {"radius": 30.0}),
-		_station(&"home_lockbox", &"home_court", &"storage", -204.0, 12, "Open storage", {"radius": 24.0}),
-		_station(&"home_workbench", &"home_court", &"rig", -150.0, 12, "Refit Rig (workbench)", {"radius": 24.0, "station": &"home"}),
+		# The home's own stations stand in the room (home_interior.gd, USER 2026-10-04): x is the room's local x, not a street x.
+		_station(&"home_bed", &"home_court", &"rest", -216.0, 12, "Sleep until Rousing", {"radius": 44.0, "interior": true}),
+		_station(&"home_lockbox", &"home_court", &"storage", -130.0, 12, "Open storage", {"radius": 28.0, "interior": true}),
+		_station(&"home_workbench", &"home_court", &"rig", 150.0, 12, "Refit Rig (workbench)", {"radius": 40.0, "station": &"home", "interior": true}),
 		_station(&"chamber_fragment", &"collapsed_side_chamber", &"fragment", -5470.0, 15, "Examine the corroded fragment", {"radius": 32.0}),
 	]
 	_cache["stations"] = out

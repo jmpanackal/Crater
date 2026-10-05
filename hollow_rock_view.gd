@@ -189,6 +189,9 @@ func _roof(b: Dictionary) -> void:
 	var x1: float = b["x1"]
 	if HollowMap.in_flank(x0) or HollowMap.in_flank(x1):
 		return
+	for dome in HollowMap.domes():
+		if absf(float(dome["k"]) - float(b["k"])) < 0.01 and float(dome["x0"]) < x1 and float(dome["x1"]) > x0:
+			return # under a vault: the rock above is carved away, no roof slab here
 	var deck := HollowMap.deck_y_at((x0 + x1) * 0.5, float(b["k"]))
 	var above := deck - HollowMap.LEVEL_GAP
 	for r in HollowMap.runs():

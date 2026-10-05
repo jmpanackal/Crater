@@ -476,6 +476,37 @@ func _draw_prop(p: Dictionary) -> void:
 			for i in range(int(h / 40.0)):
 				_box(deck, x, 20.0 + float(i) * 40.0, w + 6.0, 6.0, Color(0.2, 0.13, 0.1))
 			_box(deck, x, h, w + 8.0, 8.0, Color(0.2, 0.13, 0.1))
+		&"plot":
+			# a fenced allotment plot: a low timber fence round dark soil with rows of pale cultivated caps and a number post
+			_box(deck, x, 0.0, w, 10.0, Color(0.2, 0.15, 0.1))
+			_box(deck, x, 10.0, w - 8.0, 6.0, Color(0.14, 0.11, 0.08))
+			for i in range(6):
+				var px := x - w * 0.5 + 12.0 + float(i) * (w - 24.0) / 5.0
+				draw_line(Vector2(px, deck - 16.0), Vector2(px, deck - 16.0 - 10.0 - float((i * 7) % 9)), Color(0.58, 0.66, 0.5), 2.0)
+				draw_circle(Vector2(px, deck - 28.0 - float((i * 7) % 9)), 4.0, Color(0.8, 0.78, 0.62) if i % 2 == 0 else Color(0.5, 0.78, 0.66))
+			_box(deck, x - w * 0.5, 0.0, 4.0, 30.0, TIMBER_DARK)
+			_box(deck, x + w * 0.5, 0.0, 4.0, 30.0, TIMBER_DARK)
+			_box(deck, x, 24.0, w, 3.0, TIMBER)
+			_box(deck, x - w * 0.5 + 8.0, 36.0, 12.0, 10.0, Color(0.7, 0.62, 0.42))
+		&"wash_trough":
+			# a long stone wash trough on legs with a drain pipe and a scrubbing board
+			_box(deck, x, 14.0, w, 14.0, Color(0.34, 0.34, 0.36))
+			_box(deck, x, 28.0, w - 10.0, 4.0, Color(0.28, 0.5, 0.56, 0.9))
+			_box(deck, x - w * 0.4, 0.0, 6.0, 14.0, TIMBER_DARK)
+			_box(deck, x + w * 0.4, 0.0, 6.0, 14.0, TIMBER_DARK)
+			_box(deck, x + w * 0.5 + 6.0, 6.0, 10.0, 5.0, IRON)
+			_box(deck, x - 14.0, 30.0, 26.0, 14.0, Color(0.5, 0.4, 0.3))
+		&"long_table":
+			_box(deck, x, 20.0, w, 6.0, TIMBER)
+			_box(deck, x - w * 0.42, 0.0, 6.0, 20.0, TIMBER_DARK)
+			_box(deck, x + w * 0.42, 0.0, 6.0, 20.0, TIMBER_DARK)
+			_box(deck, x, 0.0, w * 0.8, 8.0, TIMBER_DARK)
+		&"shed":
+			# a plot-holder's tool shed: plank walls, a tin roof, a door and a window
+			_box(deck, x, 0.0, w, h - 14.0, Color(0.38, 0.28, 0.2))
+			_poly(PackedVector2Array([Vector2(x - w * 0.56, deck - h + 14.0), Vector2(x + w * 0.56, deck - h + 14.0), Vector2(x + w * 0.4, deck - h), Vector2(x - w * 0.4, deck - h)]), Color(0.42, 0.44, 0.44))
+			_box(deck, x - w * 0.18, 0.0, 18.0, 40.0, Color(0.2, 0.14, 0.1))
+			_box(deck, x + w * 0.22, 30.0, 16.0, 16.0, Color(0.95, 0.74, 0.4, 0.8))
 		&"cable_drum":
 			# the frame of a cable drum: two upright cheeks and a base (the drum itself, wound with cable, turns in hollow_wickwork_view.gd)
 			_box(deck, x, 0.0, w, 12.0, TIMBER_DARK)

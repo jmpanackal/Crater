@@ -957,6 +957,8 @@ static func _check_dressing(rep: Dictionary) -> void:
 			_err(rep, "dress: %s has unknown role %s" % [awho, str(a["role"])])
 	var used: Array[Dictionary] = []
 	for st in HollowDressing.stations():
+		if bool(st.get("interior", false)):
+			continue # stands in the home's room, not on a street
 		var sk: int = st["k"]
 		var swho: String = label.call("station", st["id"], st["x"], sk)
 		if not _covers(HollowMap.deck_y_at(float(st["x"]), float(sk)), float(st["x"]) - 8.0, float(st["x"]) + 8.0):
@@ -1065,7 +1067,8 @@ static func _lint_dressing_scene(scene: Node, rep: Dictionary) -> void:
 		elif absf(node.position.x - float(a["x"])) > float(a["range"]) + 14.0 or absf(node.position.y - (HollowMap.deck_y_at(float(a["x"]), float(a["k"])) - float(a["y_off"]))) > EPS:
 			_err(rep, "scene: person %s stands at %s, the data says (%d, %d)" % [str(a["id"]), str(node.position), int(a["x"]), int(HollowMap.deck_y_at(float(a["x"]), float(a["k"])) - float(a["y_off"]))])
 	for s in HollowDressing.stations():
-		var st := dressing.get_node_or_null("Station_%s" % str(s["id"])) as Node2D
+		var home := scene.get_node_or_null("HomeInterior")
+		var st := (home.get_node_or_null("Station_%s" % str(s["id"])) if bool(s.get("interior", false)) and home != null else dressing.get_node_or_null("Station_%s" % str(s["id"]))) as Node2D
 		if st == null:
 			_err(rep, "scene: station %s was not built" % str(s["id"]))
 		elif not st.has_method("get_interact_prompt") and not st.has_method("on_interact"):

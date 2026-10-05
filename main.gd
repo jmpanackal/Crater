@@ -3,6 +3,7 @@ extends Node2D
 ## F11 toggles fullscreen; Esc closes Journal before returning to title.
 
 const UiStyleRef := preload("res://ui_style.gd")
+const HomeInteriorScript := preload("res://home_interior.gd")
 const HudScript := preload("res://hud.gd")
 const StandingScript := preload("res://standing_panel.gd")
 const RigPanelScript := preload("res://rig_panel.gd")
@@ -59,6 +60,7 @@ func _apply_hud_chrome() -> void:
 	if notice:
 		UiStyleRef.apply_label(notice, &"body")
 	_build_canon_hud()
+	_build_home_interior()
 
 
 ## The HUD the canon describes (section 55, the invisible interface): small and quiet, with Trust, the Rig, orders, the
@@ -84,6 +86,15 @@ func _build_canon_hud() -> void:
 	rig.name = "RigPanel"
 	rig.set_script(RigPanelScript)
 	ui.add_child(rig)
+
+
+## The player's home, enterable (home_interior.gd). Built after the Hollow so its door can stand in the street.
+func _build_home_interior() -> void:
+	if get_node_or_null("HomeInterior") != null:
+		return
+	var home := Node2D.new()
+	home.set_script(HomeInteriorScript)
+	add_child(home)
 
 
 func _process(delta: float) -> void:

@@ -71,7 +71,8 @@ func _run() -> void:
 	print("PASS the Foreman and the Warden talk")
 
 	# --- The bed: sleeping is only allowed from Gathering. ---
-	var bed: Node = dressing.get_node("Station_home_bed")
+	var home: Node = scene.get_node("HomeInterior")
+	var bed: Node = home.get_node("Station_home_bed")
 	var clock: Node = root.get_node("Clock")
 	var fatigue: Node = root.get_node("Fatigue")
 	root.get_node("DebugConsole").execute("force_phase working")
@@ -95,10 +96,10 @@ func _run() -> void:
 
 	# --- Lockbox and workbench are the real Storage and Rig access points. ---
 	var opened: Array = []
-	var box: Node = dressing.get_node("Station_home_lockbox")
+	var box: Node = home.get_node("Station_home_lockbox")
 	box.opened.connect(func(_id: StringName, storage: Node) -> void: opened.append(storage))
 	box.on_interact(null)
-	var bench: Node = dressing.get_node("Station_home_workbench")
+	var bench: Node = home.get_node("Station_home_workbench")
 	var refit: Array = []
 	bench.opened.connect(func(_s: Node, rig: Node) -> void: refit.append(rig))
 	bench.on_interact(null)
@@ -109,7 +110,9 @@ func _run() -> void:
 
 	# --- The player's own Interaction finds the nearest thing when standing at it. ---
 	var player: CharacterBody2D = scene.get_node("Player") as CharacterBody2D
-	player.global_position = Vector2(-204.0 - 16.0, HollowLayout.WEST_LW_UPPER_Y - 32.0)
+	home.enter() # the lockbox stands in the room now
+	await _frames(60)
+	player.global_position = home.global_position + Vector2(-130.0 - 16.0, -17.0)
 	player.velocity = Vector2.ZERO
 	await _frames(12)
 	var prompt: String = str(player.get_interaction().get_current_prompt())
