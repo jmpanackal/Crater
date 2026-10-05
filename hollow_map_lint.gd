@@ -206,8 +206,18 @@ static func _check_domes(rep: Dictionary) -> void:
 		var bands := 2 * int(dome["n"]) - 1
 		var band_w := (x1 - x0) / float(bands)
 		var h: float = dome["height"]
-		if h < 16.0 or h > 192.0 or fposmod(h / float(dome["n"]), 16.0) > EPS:
-			_err(rep, "dome: %s height %d must be 16-192 px in whole tiles per step" % [id, int(h)])
+		# a dome may rise until 96 px of rock is left under the nearest street above it (192 px when that is far)
+		var base_y := HollowMap.lvl(k) - HollowMap.ROOM_HEIGHT
+		var cap := 192.0
+		var lowest_underside := -1.0e9
+		for r in HollowMap.runs():
+			if float(r["k"]) < k - 0.01 and float(r["x0"]) < x1 and float(r["x1"]) > x0:
+				lowest_underside = maxf(lowest_underside, float(r["y"]) + HollowMap.FLOOR_THICK)
+		if lowest_underside > -1.0e8:
+			var room := base_y - lowest_underside - 96.0
+			cap = minf(384.0, room) if room >= 192.0 else room
+		if h < 16.0 or h > cap or fposmod(h / float(dome["n"]), 16.0) > EPS:
+			_err(rep, "dome: %s height %d must be 16-%d px in whole tiles per step (96 px of rock must stay under the street above)" % [id, int(h), int(cap)])
 		if fposmod(band_w, 16.0) > EPS or fposmod(x0, 16.0) > EPS:
 			_err(rep, "dome: %s bands are %.1fpx wide; they must be whole tiles" % [id, band_w])
 		if not _covered_by_pieces(k, x0, x1):
@@ -1069,6 +1079,7 @@ static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> v
 	var cavity := HollowMap.cavity_rect()
 	var x := env.position.x + 8.0
 	var missing := 0
+	var first_bad := Vector2.ZERO
 	while x < env.end.x:
 		var firmament_floor := HollowMap.ROCK_TOP
 		for dr in HollowMap.dome_rects():
@@ -1076,11 +1087,13 @@ static func _lint_shell_scene(layers: Array[TileMapLayer], rep: Dictionary) -> v
 				firmament_floor = minf(firmament_floor, dr.position.y)
 				if _solid_at(layers, x, dr.position.y + 8.0):
 					missing += 1 # the dome air was not carved
+					first_bad = Vector2(x, dr.position.y + 8.0)
 		if not _solid_at(layers, x, 8.0) or not _solid_at(layers, x, firmament_floor - 8.0):
 			missing += 1
+			first_bad = Vector2(x, firmament_floor - 8.0)
 		x += 320.0
 	if missing > 0:
-		_err(rep, "shell: the Firmament has %d unpainted samples along the top of the world" % missing)
+		_err(rep, "shell: the Firmament has %d unpainted samples along the top of the world (last at %d, %d)" % [missing, int(first_bad.x), int(first_bad.y)])
 	var slab_missing := 0
 	x = cavity.position.x + 8.0
 	while x < cavity.end.x:

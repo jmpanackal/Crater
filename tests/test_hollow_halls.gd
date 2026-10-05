@@ -51,7 +51,7 @@ func _run() -> void:
 			if float(s["air"]) < 160.0:
 				_fail("sloped street %s should have 160 px of air" % s["id"])
 				return
-	if slopes < 4:
+	if slopes < 3:
 		_fail("expected several sloped streets, found %d" % slopes)
 		return
 	print("PASS %d hall samples open air; %d sloped streets with 160 px of air" % [open, slopes])

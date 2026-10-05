@@ -476,6 +476,99 @@ func _draw_prop(p: Dictionary) -> void:
 			for i in range(int(h / 40.0)):
 				_box(deck, x, 20.0 + float(i) * 40.0, w + 6.0, 6.0, Color(0.2, 0.13, 0.1))
 			_box(deck, x, h, w + 8.0, 8.0, Color(0.2, 0.13, 0.1))
+		&"cable_drum":
+			# the frame of a cable drum: two upright cheeks and a base (the drum itself, wound with cable, turns in hollow_wickwork_view.gd)
+			_box(deck, x, 0.0, w, 12.0, TIMBER_DARK)
+			_box(deck, x - w * 0.42, 12.0, 8.0, h - 14.0, IRON)
+			_box(deck, x + w * 0.42, 12.0, 8.0, h - 14.0, IRON)
+			_box(deck, x, h - 6.0, w, 6.0, IRON)
+		&"spool_rack":
+			# a rack of cable spools in different colours and sizes
+			_box(deck, x - w * 0.5 + 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			_box(deck, x + w * 0.5 - 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			for i in range(3):
+				var sy := 4.0 + float(i) * (h - 8.0) / 3.0
+				_box(deck, x, sy, w, 3.0, TIMBER)
+				for j in range(3):
+					var sx := x - w * 0.5 + 14.0 + float(j) * (w - 28.0) / 2.0
+					var spool_tone: Color = [Color(0.72, 0.45, 0.26), Color(0.62, 0.62, 0.6), Color(0.82, 0.72, 0.5)][(i + j) % 3]
+					_box(deck, sx, sy + 3.0, 14.0, 18.0, spool_tone)
+					_box(deck, sx, sy + 3.0, 18.0, 3.0, TIMBER_DARK)
+					_box(deck, sx, sy + 18.0, 18.0, 3.0, TIMBER_DARK)
+		&"harness_rack":
+			# a pegboard with harness straps, buckles and a coil of tether hanging from it
+			_box(deck, x, 8.0, w, h - 8.0, Color(0.3, 0.22, 0.16))
+			_box(deck, x, h - 4.0, w, 4.0, TIMBER_DARK)
+			for i in range(4):
+				var hx := x - w * 0.5 + 10.0 + float(i) * (w - 20.0) / 3.0
+				draw_line(Vector2(hx, deck - h + 6.0), Vector2(hx, deck - h + 40.0 + float((i * 13) % 14)), Color(0.62, 0.42, 0.24), 4.0)
+				draw_rect(Rect2(hx - 4.0, deck - h + 38.0 + float((i * 13) % 14), 8.0, 7.0), IRON_LIGHT)
+			draw_arc(Vector2(x, deck - h * 0.32), 11.0, 0.0, TAU, 14, Color(0.8, 0.68, 0.46), 3.0)
+		&"repair_counter":
+			# the repair intake counter: a counter with a tool board behind it and a ticket spike
+			_box(deck, x, 0.0, w, h - 18.0, TIMBER)
+			_box(deck, x, h - 18.0, w + 8.0, 5.0, TIMBER_DARK)
+			_box(deck, x, h - 8.0, w * 0.7, 40.0, Color(0.26, 0.2, 0.15))
+			for i in range(5):
+				draw_line(Vector2(x - w * 0.3 + float(i) * 14.0, deck - h - 28.0), Vector2(x - w * 0.3 + float(i) * 14.0, deck - h + 4.0), IRON_LIGHT, 2.0)
+			_box(deck, x + w * 0.34, h - 14.0, 3.0, 14.0, IRON)
+		&"culture_vat":
+			# a glass culture vat on a brass base: a tall cylinder of glowing liquid with a lid and a pipe (the bubbles rise
+			# in hollow_glowbeds_view.gd)
+			_box(deck, x, 0.0, w, 10.0, Color(0.5, 0.36, 0.2))
+			_box(deck, x, 10.0, w - 10.0, h - 22.0, Color(0.16, 0.36, 0.36, 0.9))
+			_box(deck, x, 10.0, w - 22.0, h - 34.0, Color(0.3, 0.72, 0.6, 0.55))
+			_box(deck, x - w * 0.3, 14.0, 4.0, h - 40.0, Color(1, 1, 1, 0.22))
+			_box(deck, x, h - 12.0, w, 8.0, Color(0.5, 0.36, 0.2))
+			_box(deck, x + w * 0.5, h * 0.5, 10.0, 6.0, COPPER)
+		&"press":
+			# a screw press with a collecting trough and a drying tray
+			_box(deck, x, 0.0, w, 14.0, TIMBER_DARK)
+			_box(deck, x - w * 0.34, 14.0, 8.0, h - 14.0, TIMBER)
+			_box(deck, x + w * 0.34, 14.0, 8.0, h - 14.0, TIMBER)
+			_box(deck, x, h - 10.0, w * 0.86, 10.0, TIMBER)
+			_box(deck, x, h, 6.0, 22.0, IRON)
+			_box(deck, x, h + 22.0, 34.0, 5.0, IRON_LIGHT)
+			_box(deck, x, 14.0, w * 0.5, 12.0, Color(0.42, 0.5, 0.34))
+		&"stock_rack":
+			# an empty stock frame: three shelves. What stands on them (prepared goods) follows the district's condition
+			# and is drawn by hollow_glowbeds_view.gd.
+			_box(deck, x - w * 0.5 + 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			_box(deck, x + w * 0.5 - 2.0, 0.0, 4.0, h, TIMBER_DARK)
+			for i in range(3):
+				_box(deck, x, 4.0 + float(i) * (h - 8.0) / 3.0, w, 4.0, TIMBER)
+		&"ration_counter":
+			# the ration counter: a counter under an awning, where the district hands food out
+			_box(deck, x, 0.0, w, h - 14.0, TIMBER)
+			_box(deck, x, h - 14.0, w + 8.0, 5.0, TIMBER_DARK)
+			_box(deck, x - w * 0.5 + 4.0, h - 10.0, 4.0, 48.0, TIMBER_DARK)
+			_box(deck, x + w * 0.5 - 4.0, h - 10.0, 4.0, 48.0, TIMBER_DARK)
+			_box(deck, x, h + 36.0, w + 14.0, 14.0, Color(0.34, 0.5, 0.4))
+			_box(deck, x - 18.0, h - 8.0, 14.0, 10.0, Color(0.7, 0.62, 0.42))
+			_box(deck, x + 14.0, h - 8.0, 18.0, 8.0, Color(0.55, 0.43, 0.3))
+		&"mother_culture_base":
+			# the basin the Mother Culture grows from: a stone ring with root-like pipes (the column is drawn behind)
+			_box(deck, x, 0.0, w, 14.0, Color(0.32, 0.28, 0.24))
+			_box(deck, x, 14.0, w - 24.0, 16.0, Color(0.26, 0.5, 0.42))
+			_box(deck, x, 30.0, w - 8.0, 6.0, Color(0.32, 0.28, 0.24))
+		&"glass_dome":
+			# a glass-domed cultivation house: a low brick base, a ribbed glass dome and the warm, green light inside
+			_box(deck, x, 0.0, w, 22.0, Color(0.34, 0.26, 0.2))
+			_box(deck, x, 22.0, w - 8.0, 3.0, TIMBER_DARK)
+			var cy := deck - 22.0
+			var pts := PackedVector2Array()
+			for i in range(13):
+				var a := PI * float(i) / 12.0
+				pts.append(Vector2(x - cos(a) * (w * 0.5 - 6.0), cy - sin(a) * (h - 22.0)))
+			draw_colored_polygon(pts, Color(0.28, 0.62, 0.52, 0.32))
+			draw_colored_polygon(pts, Color(0.5, 0.85, 0.7, 0.12))
+			for i in range(1, 6):
+				var rx := x - (w * 0.5 - 6.0) + float(i) * (w - 12.0) / 6.0
+				draw_line(Vector2(rx, cy), Vector2(x + (rx - x) * 0.25, cy - (h - 22.0) * 1.0), Color(0.6, 0.78, 0.7, 0.55), 1.0)
+			draw_polyline(pts, Color(0.7, 0.88, 0.8, 0.8), 1.5)
+			draw_circle(Vector2(x, cy - 18.0), 10.0, Color(1.0, 0.82, 0.45, 0.5))
+			for i in range(3):
+				draw_circle(Vector2(x - 30.0 + float(i) * 30.0, cy - 8.0), 6.0, Color(0.3, 0.8, 0.6, 0.55))
 		&"planter":
 			# a stepped planter bed: a timber trough of dark soil with rows of luminous fungal caps (muted teal and amber)
 			_box(deck, x, 0.0, w, 16.0, TIMBER_DARK)

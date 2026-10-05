@@ -125,6 +125,28 @@ func _slab(r: Dictionary) -> void:
 	if HollowMap.in_flank(x1):
 		x1 = HollowMap.EAST_WALL
 	var deck: float = r["y"]
+	# inside a stepped hall the street is a bridge over open air: no slab under it (hollow_hall_view.gd hangs its girders)
+	var parts: Array[Vector2] = [Vector2(x0, x1)]
+	for h in HollowMap.halls():
+		if float(r["k"]) < float(h["k_top"]) - 0.01 or float(r["k"]) >= float(h["k_bottom"]) - 0.01:
+			continue
+		var next: Array[Vector2] = []
+		for p in parts:
+			if float(h["x1"]) <= p.x or float(h["x0"]) >= p.y:
+				next.append(p)
+				continue
+			if float(h["x0"]) > p.x:
+				next.append(Vector2(p.x, float(h["x0"])))
+			if float(h["x1"]) < p.y:
+				next.append(Vector2(float(h["x1"]), p.y))
+		parts = next
+	for p in parts:
+		if p.y - p.x >= 32.0:
+			_slab_part(r, p.x, p.y)
+
+
+func _slab_part(r: Dictionary, x0: float, x1: float) -> void:
+	var deck: float = r["y"]
 	var top := deck + 16.0
 	var seg := _in_chunk(x0 - 12.0, x1 + 12.0)
 	if seg.y <= seg.x:

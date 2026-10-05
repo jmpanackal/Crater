@@ -197,7 +197,7 @@ static func _terraces() -> Array[Dictionary]:
 		{"id": &"A1", "zone": &"ashram_west", "k": 5, "l": END_WALL, "r": END_FOOT, "pieces": [
 			[-2720.0, -1408.0, 0.0], [-1152.0, -1040.0, -64.0], [-912.0, -160.0, 0.0]]}, # a long ramp up, a short drop
 		{"id": &"WK4", "zone": &"wickwork", "k": 8, "l": END_ROCK, "r": END_JOIN, "pieces": [
-			[-5440.0, -4560.0, 0.0], [-4464.0, -4144.0, -48.0], [-4048.0, -3584.0, 0.0], [-3488.0, -3232.0, 32.0], [-3136.0, -2096.0, 0.0], [-2000.0, -1808.0, -48.0], [-1712.0, -304.0, 0.0], [-176.0, 256.0, -64.0], [384.0, 1440.0, 0.0]]},
+			[-5440.0, -4560.0, 0.0], [-4464.0, -4144.0, -48.0], [-4048.0, -3584.0, 0.0], [-3488.0, -3232.0, 32.0], [-3136.0, -2096.0, 0.0], [-2000.0, -1808.0, -48.0], [-1712.0, 1440.0, 0.0]]}, # one long flat bridge through the repair hall (USER 2026-10-04: Wickwork needs height and room)
 		{"id": &"WK5", "zone": &"wickwork", "k": 9, "l": END_FOOT, "r": END_MOUTH, "pieces": [
 			[-1280.0, 160.0, 0.0], [304.0, 560.0, 48.0], [656.0, 1440.0, 0.0]]},
 		{"id": &"AL6", "zone": &"mid_allotments", "k": 10, "l": END_WALL, "r": END_FOOT, "pieces": [
@@ -227,7 +227,7 @@ static func _terraces() -> Array[Dictionary]:
 		{"id": &"HW2", "zone": &"high_west_front", "k": 6, "l": END_ROCK, "r": END_LEDGE, "pieces": [
 			[WEST_FLANK_LEFT, -4304.0, 0.0], [-4240.0, -3984.0, 32.0], [-3920.0, -2400.0, 0.0], [-2304.0, -1888.0, -48.0],
 			[-1792.0, -352.0, 0.0], [-224.0, 288.0, -64.0], [416.0, 1696.0, 0.0]]}, # the rail ledge reaches 256 px out toward Mid Heart
-		{"id": &"HW3", "zone": &"high_west_lower", "k": 7, "l": END_ROCK, "r": END_FOOT, "pieces": [
+		{"id": &"HW3", "zone": &"high_west_lower", "k": 7, "l": END_ROCK, "r": END_WALL, "pieces": [
 			[WEST_FLANK_LEFT, -4352.0, 0.0], [-4224.0, -3872.0, -64.0], [-3744.0, -2336.0, 0.0], [-2240.0, -1888.0, 48.0],
 			[-1792.0, -800.0, 0.0]]},
 		# ---- Bottom-West deeper galleries (behind the service-run gate): more lateral dig frontier
@@ -326,7 +326,6 @@ static func _terraces() -> Array[Dictionary]:
 static func _roofs() -> Array[Dictionary]:
 	return [
 		{"id": &"R_A1", "k": 5, "x0": -2400.0, "x1": -1760.0, "depth": 96.0, "n": 3},
-		{"id": &"R_WK4", "k": 8, "x0": -1104.0, "x1": -464.0, "depth": 96.0, "n": 3},
 		{"id": &"R_AL6", "k": 10, "x0": -1712.0, "x1": -1232.0, "depth": 96.0, "n": 3},
 		{"id": &"R_HW2", "k": 6, "x0": -1600.0, "x1": -960.0, "depth": 96.0, "n": 3},
 		{"id": &"R_E5", "k": 9, "x0": 6416.0, "x1": 7056.0, "depth": 96.0, "n": 3},
@@ -345,7 +344,7 @@ static func _domes() -> Array[Dictionary]:
 		{"id": &"D_A0", "k": 4, "x0": 512.0, "x1": 1232.0, "height": 160.0, "n": 5},
 		{"id": &"D_AW0", "k": 0, "x0": -448.0, "x1": 352.0, "height": 192.0, "n": 3}, # summit rotunda, into the Firmament
 		{"id": &"D_AE0", "k": 0, "x0": 7168.0, "x1": 7968.0, "height": 192.0, "n": 3},
-		{"id": &"D_WK4", "k": 8, "x0": 480.0, "x1": 1200.0, "height": 160.0, "n": 5}, # Wickwork's eastern hall
+		{"id": &"D_WK4", "k": 8, "x0": -496.0, "x1": 1184.0, "height": 384.0, "n": 4}, # the great vault over Wickwork's whole hall: a 640 px ceiling (USER 2026-10-04)
 		{"id": &"D_E1", "k": 4, "x0": 5024.0, "x1": 5584.0, "height": 192.0, "n": 3}, # the east Ashram overlook
 		{"id": &"D_E4", "k": 8, "x0": 8544.0, "x1": 9264.0, "height": 160.0, "n": 5}, # the Mid-East Approach hall
 	]
@@ -641,9 +640,9 @@ static func _halls() -> Array[Dictionary]:
 	return [
 		# Wickwork's repair hall: the street is a bridge (with a hump) over a tall stepped hall; a hanging shelf
 		# (WS) and the repair bay below. x -800..640, levels 8-9.
-		{"id": &"H_WK", "x0": -800.0, "x1": 640.0, "k_top": 8, "k_bottom": 9},
+		{"id": &"H_WK", "x0": -800.0, "x1": 1184.0, "k_top": 8, "k_bottom": 9},
 		# Glowbeds stepped planter court: levels 5-7, x 5008..6320.
-		{"id": &"H_GB", "x0": 5008.0, "x1": 6320.0, "k_top": 4, "k_bottom": 6},
+		{"id": &"H_GB", "x0": 5008.0, "x1": 8000.0, "k_top": 4, "k_bottom": 6},
 		# Cistern pressure-basin chamber: levels 11-14 at the east end; services street and freight gantry cross it.
 		{"id": &"H_CI", "x0": 8096.0, "x1": 9248.0, "k_top": 11, "k_bottom": 14},
 	]
@@ -801,7 +800,7 @@ static func stairs() -> Array[Dictionary]:
 	var out: Array[Dictionary] = [
 		# West: every stair sits at a corridor end and rises away from it.
 		_stair(&"S_A1", &"ashram_west", -160.0, 5, 1, 1.0, 1.5), ## Ashram: promenade up to the overlook
-		_stair(&"S_HW3", &"high_west_lower", -800.0, 7, 1, 1.0, 4.0, 160.0), # a sloped street, 1536 px long ## High-West lower gallery up to the terrace
+		# (the long slope S_HW3 is gone: it filled the rock band above Wickwork, and the lower gallery has two ladders up)
 		_stair(&"S_WK5", &"wickwork", -1280.0, 9, -1, 1.0, 3.0, 160.0), # Wickwork's diagonal descent, a sloped street ## Wickwork repair bays up to the street
 		_stair(&"S_AL6", &"mid_allotments", 640.0, 10, 1), ## Allotments up to Wickwork's dock
 		_stair(&"S_AL7", &"mid_allotments", -1280.0, 11, -1), ## Allotment street up to the residences

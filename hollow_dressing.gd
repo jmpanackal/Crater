@@ -30,7 +30,9 @@ const SIZES := {
 	&"bench": Vector2(60, 22), &"sort_table": Vector2(64, 32), &"sealed_hatch": Vector2(48, 96), &"observation_window": Vector2(48, 32),
 	&"notice": Vector2(28, 36), &"brace": Vector2(64, 128), &"step": Vector2(48, 10),
 	&"furnace": Vector2(88, 76), &"anvil": Vector2(36, 26), &"forge_wheel": Vector2(96, 96), &"smokestack": Vector2(36, 200),
-	&"planter": Vector2(96, 40), &"glow_fungi": Vector2(70, 64), &"fiber_rack": Vector2(64, 74), &"harvest_basket": Vector2(30, 22), &"culture_shelf": Vector2(72, 84),
+	&"cable_drum": Vector2(104, 108), &"spool_rack": Vector2(84, 88), &"harness_rack": Vector2(76, 92), &"repair_counter": Vector2(112, 56),
+	&"culture_vat": Vector2(60, 112), &"press": Vector2(84, 76), &"stock_rack": Vector2(84, 88), &"ration_counter": Vector2(112, 52), &"mother_culture_base": Vector2(128, 36),
+	&"glass_dome": Vector2(168, 104), &"planter": Vector2(96, 40), &"glow_fungi": Vector2(70, 64), &"fiber_rack": Vector2(64, 74), &"harvest_basket": Vector2(30, 22), &"culture_shelf": Vector2(72, 84),
 	&"pump": Vector2(56, 120), &"valve_wheel": Vector2(40, 40), &"awning": Vector2(170, 64), &"niche": Vector2(26, 44), &"herbs": Vector2(48, 38), &"crystal": Vector2(28, 20),
 }
 
@@ -327,16 +329,61 @@ static func authored_props() -> Array[Dictionary]:
 		_prop(&"cistern_annex", &"gauge", 10050.0, 14, {"y_off": 60.0}),
 		_prop(&"cistern_annex", &"pipe", 10300.0, 14, {"y_off": 110.0}),
 		_prop(&"cistern_annex", &"barrel", 10440.0, 14),
+		# ---- Wickwork (USER 2026-10-04: Wickwork is fabrication, "not merely a blacksmith": cable, bindings, harnesses, seals, lamp
+		# housings, tether and Rig gear, repairs; its racks show strain). AI-placed greybox, laid out as working areas.
+		# Harness and binding shop (L8, west)
+		_prop(&"wickwork", &"harness_rack", -1640.0, 8),
+		_prop(&"wickwork", &"harness_rack", -1550.0, 8),
+		_prop(&"wickwork", &"workbench", -1460.0, 8),
+		# Lamp housings and seals bench (L8, by the hall)
+		_prop(&"wickwork", &"workbench", -1080.0, 8),
+		_prop(&"wickwork", &"anvil", -980.0, 8),
+		_prop(&"wickwork", &"workbench", -900.0, 8),
+		# Cable works (L9 repair bay, west): spools and the great drum's machine
+		_prop(&"wickwork", &"spool_rack", -1200.0, 9),
+		_prop(&"wickwork", &"spool_rack", -1110.0, 9),
+		_prop(&"wickwork", &"spool_rack", -1020.0, 9),
+		_prop(&"wickwork", &"workbench", -920.0, 9),
+		_prop(&"wickwork", &"cable_drum", -250.0, 9),
+		# Stores (L9): stock racks whose goods follow Wickwork's condition
+		_prop(&"wickwork", &"stock_rack", -480.0, 9),
+		_prop(&"wickwork", &"stock_rack", -380.0, 9),
+		# (the Foundry Tower stands at the forge end, x 560..1110; hollow_wickwork_view.gd draws it)
+		# Repair intake and the Rig and tether bench (L9, east)
+		_prop(&"wickwork", &"repair_counter", 740.0, 9),
+		_prop(&"wickwork", &"workbench", 840.0, 9),
+		_prop(&"wickwork", &"harness_rack", -330.0, 8),
+		_prop(&"wickwork", &"spool_rack", -430.0, 8),
 		# ---- Glowbeds (USER 2026-10-04: make it read as the lore: tidy cultivation, stepped planters, fibre racks, harvest
 		# baskets, luminous fungi, recovery; amber and muted teal, never neon or a pristine greenhouse). AI-placed greybox.
-		_prop(&"glowbeds_hang", &"planter", 5860.0, 6),
-		_prop(&"glowbeds_hang", &"planter", 5980.0, 6),
-		_prop(&"glowbeds_hang", &"glow_fungi", 6100.0, 6),
 		_prop(&"glowbeds_hang", &"fiber_rack", 6220.0, 6),
 		_prop(&"glowbeds_hang", &"harvest_basket", 6300.0, 6),
 		_prop(&"glowbeds_hang", &"planter", 6620.0, 6),
-		_prop(&"glowbeds_hang", &"planter", 6860.0, 6),
-		_prop(&"glowbeds_hang", &"glow_fungi", 6960.0, 6),
+		# Culture vats (L6 hang, west): the fungal cultures grown in glass vats, fed by pipes from the Mother Culture
+		_prop(&"glowbeds_hang", &"culture_vat", 5860.0, 6),
+		_prop(&"glowbeds_hang", &"culture_vat", 5950.0, 6),
+		_prop(&"glowbeds_hang", &"culture_vat", 6040.0, 6),
+		_prop(&"glowbeds_hang", &"culture_vat", 6130.0, 6),
+		# The Mother Culture: the central living culture every bed in Glowbeds is seeded from (see hollow_mother_culture.gd)
+		_prop(&"glowbeds_hang", &"mother_culture_base", 6900.0, 6),
+		# Press and drying (L6 hang, east): where the harvest is pressed, dried and prepared
+		_prop(&"glowbeds_hang", &"press", 7480.0, 6),
+		_prop(&"glowbeds_hang", &"fiber_rack", 7600.0, 6),
+		_prop(&"glowbeds_hang", &"harvest_basket", 7690.0, 6),
+		_prop(&"glowbeds_hang", &"crate", 7760.0, 6),
+		# Plantation (L5 street): rows of planter beds on the terraces
+		_prop(&"glowbeds", &"planter", 5260.0, 5),
+		_prop(&"glowbeds", &"planter", 5370.0, 5),
+		_prop(&"glowbeds", &"planter", 5470.0, 5),
+		# Stores and rations (L7 lower gardens): prepared stock on racks (full when Glowbeds is healthy, bare when strained)
+		_prop(&"glowbeds_lower", &"stock_rack", 6900.0, 7),
+		_prop(&"glowbeds_lower", &"stock_rack", 7000.0, 7),
+		_prop(&"glowbeds_lower", &"ration_counter", 7106.0, 7),
+		_prop(&"glowbeds_lower", &"stock_rack", 7700.0, 7),
+		_prop(&"glowbeds_lower", &"stock_rack", 7940.0, 7),
+		_prop(&"glowbeds", &"glass_dome", 6020.0, 5),
+		_prop(&"glowbeds", &"glass_dome", 8100.0, 5),
+		_prop(&"glowbeds", &"glass_dome", 8560.0, 5),
 		_prop(&"glowbeds_wing", &"bed", 5560.0, 7),
 		_prop(&"glowbeds_wing", &"bed", 5660.0, 7),
 		_prop(&"glowbeds_wing", &"bed", 5760.0, 7),

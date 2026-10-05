@@ -31,6 +31,7 @@ var _lamps: Array[Dictionary] = []
 var _vents: Array[Vector2] = []
 var _pennants: Array[Dictionary] = []
 var _crane := {}
+var _falls: Array[Dictionary] = []
 var _carts: Array[Dictionary] = []
 var _furnaces: Array[Dictionary] = []
 var _wheels: Array[Dictionary] = []
@@ -103,6 +104,9 @@ func _draw() -> void:
 	for f in _fungi:
 		if view.has_point(f["pos"]):
 			_draw_fungi_glow(f)
+	for fl in _falls:
+		if view.has_point(Vector2(fl["x"], (float(fl["top"]) + float(fl["bottom"])) * 0.5)):
+			_draw_fall(fl)
 	for fu in _furnaces:
 		if view.has_point(fu["pos"]):
 			_draw_furnace(fu)
@@ -260,3 +264,19 @@ func _draw_wheel(wh: Dictionary) -> void:
 		var ang2 := a + float(i) * TAU / 16.0
 		draw_rect(Rect2(c + Vector2(cos(ang2), sin(ang2)) * r - Vector2(3.0, 3.0), Vector2(6.0, 6.0)), Color(0.55, 0.35, 0.22))
 	draw_circle(c, 6.0, Color(0.25, 0.16, 0.12))
+
+
+## A waterfall: a faint sheet of teal water with bright drops running down it, and a soft mist where it lands.
+func _draw_fall(fl: Dictionary) -> void:
+	var x: float = fl["x"]
+	var y0: float = fl["top"]
+	var y1: float = fl["bottom"]
+	var h := y1 - y0
+	draw_rect(Rect2(x - 7.0, y0, 14.0, h), Color(0.3, 0.75, 0.8, 0.12))
+	for i in range(10):
+		var f := fposmod(_t * 0.55 + float(i) * 0.1 + x * 0.0007, 1.0)
+		var lane := (float(i % 3) - 1.0) * 4.0
+		draw_rect(Rect2(x + lane - 1.0, y0 + f * h, 2.0, 18.0), Color(0.7, 0.95, 0.95, 0.55))
+	for j in range(5):
+		var m := fposmod(_t * 0.3 + float(j) * 0.2, 1.0)
+		draw_circle(Vector2(x + (float(j) - 2.0) * 9.0, y1 - 6.0 - m * 18.0), 6.0 + 8.0 * m, Color(0.7, 0.95, 0.95, 0.1 * (1.0 - m)))

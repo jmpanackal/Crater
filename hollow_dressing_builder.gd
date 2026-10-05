@@ -14,6 +14,10 @@ const CisternViewScript := preload("res://hollow_cistern_view.gd")
 const PulseViewScript := preload("res://hollow_pulse_view.gd")
 const MidHeartViewScript := preload("res://hollow_midheart_view.gd")
 const MotionViewScript := preload("res://hollow_motion_view.gd")
+const HallViewScript := preload("res://hollow_hall_view.gd")
+const GlowbedsViewScript := preload("res://hollow_glowbeds_view.gd")
+const MotherCultureScript := preload("res://hollow_mother_culture.gd")
+const WickworkViewScript := preload("res://hollow_wickwork_view.gd")
 const CHUNK := 1024.0
 const AmbientScript := preload("res://hollow_ambient.gd")
 const NpcScript := preload("res://hollow_npc.gd")
@@ -31,6 +35,8 @@ func _ready() -> void:
 	_build_pulse()
 	_build_midheart()
 	_build_motion()
+	_build_halls()
+	_build_glowbeds()
 	_build_fringes()
 	_build_people()
 	_build_stations()
@@ -107,6 +113,30 @@ func _build_midheart() -> void:
 	view.name = "MidHeartStructure"
 	view.set_script(MidHeartViewScript)
 	add_child(view)
+
+
+## Girders under the bridges inside every stepped hall, and vines from its ceiling (see hollow_hall_view.gd).
+func _build_halls() -> void:
+	var view := Node2D.new()
+	view.name = "HallStructure"
+	view.set_script(HallViewScript)
+	add_child(view)
+
+
+## Glowbeds as one district: water system, growth, light and entrance arches (see hollow_glowbeds_view.gd).
+func _build_glowbeds() -> void:
+	var view := Node2D.new()
+	view.name = "GlowbedsDistrict"
+	view.set_script(GlowbedsViewScript)
+	add_child(view)
+	var heart := Node2D.new()
+	heart.name = "MotherCulture"
+	heart.set_script(MotherCultureScript)
+	add_child(heart)
+	var works := Node2D.new()
+	works.name = "WickworkDistrict"
+	works.set_script(WickworkViewScript)
+	add_child(works)
 
 
 ## The moving parts: pistons, valves, steam, pennants, the crane and a cart, flickering lamps, breathing fungi.
