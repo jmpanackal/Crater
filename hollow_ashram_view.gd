@@ -27,11 +27,13 @@ const LEAF := Color(0.3, 0.5, 0.28)
 var _t := 0.0
 var _view := Rect2()
 var _houses: Array[Dictionary] = []
+var _stalls: Array[Dictionary] = []
 
 
 func _ready() -> void:
 	z_index = 0
 	_houses = _plan_houses()
+	_stalls = _plan_stalls()
 
 
 func _process(delta: float) -> void:
@@ -47,6 +49,9 @@ func _draw() -> void:
 	for h in _houses:
 		if _view.intersects(Rect2(h["x"], h["y"] - 260.0, h["w"], 270.0)):
 			_house(h)
+	for st in _stalls:
+		if _view.intersects(Rect2(st["x"], st["y"] - 120.0, 120.0, 130.0)):
+			_stall(st)
 	for g in HollowMap.gates():
 		if str(g["id"]).begins_with("gate_ashram"):
 			_gate(g)
@@ -80,6 +85,51 @@ func _plan_houses() -> Array[Dictionary]:
 			x += w + 54.0 + float((i * 37) % 80)
 			i += 1
 	return out
+
+
+## Market stalls on the two promenades (L4 and L5), in the gaps between houses: a cloth canopy on poles, a counter with
+## goods, crates and barrels, and now and then a cart. The concept's lower walkway market, kept to the public streets.
+func _plan_stalls() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for r in HollowMap.runs():
+		if not (str(r["zone"]) in ["ashram_west", "ashram_east"]) or bool(r["landing"]) or float(r["x1"]) - float(r["x0"]) < 200.0:
+			continue
+		var x := float(r["x0"]) + 50.0
+		var n := 0
+		while x + 110.0 < float(r["x1"]) - 40.0:
+			var clear := _free(x - 12.0, x + 122.0, float(r["k"]), float(r["y"]))
+			for h in _houses:
+				if absf(float(h["y"]) - float(r["y"])) < 40.0 and x + 122.0 > float(h["x"]) - 10.0 and x - 12.0 < float(h["x"]) + float(h["w"]) + 10.0:
+					clear = false
+			if clear:
+				out.append({"x": x, "y": r["y"], "i": n + int(absf(x) / 16.0)})
+				n += 1
+				x += 150.0
+			else:
+				x += 40.0
+	return out
+
+
+func _stall(st: Dictionary) -> void:
+	var x: float = st["x"]
+	var y: float = st["y"]
+	var i: int = st["i"]
+	var c: Color = CLOTHS[i % CLOTHS.size()]
+	for px in [x + 4.0, x + 106.0]:
+		draw_rect(Rect2(px - 2.0, y - 96.0, 4.0, 96.0), TIMBER)
+	draw_colored_polygon(PackedVector2Array([Vector2(x - 6.0, y - 98.0), Vector2(x + 116.0, y - 98.0), Vector2(x + 126.0, y - 76.0), Vector2(x - 16.0, y - 76.0)]), c)
+	for s in range(8):
+		draw_circle(Vector2(x - 12.0 + float(s) * 16.0 + 6.0, y - 76.0), 6.0, c.darkened(0.15))
+	draw_rect(Rect2(x + 10.0, y - 34.0, 90.0, 6.0), TIMBER)
+	draw_rect(Rect2(x + 14.0, y - 28.0, 82.0, 28.0), TIMBER.darkened(0.25))
+	for j in range(5):
+		var gc: Color = [Color(0.7, 0.55, 0.3), Color(0.35, 0.55, 0.4), Color(0.6, 0.3, 0.25)][(i + j) % 3]
+		draw_circle(Vector2(x + 24.0 + float(j) * 16.0, y - 38.0), 5.0, gc)
+	draw_rect(Rect2(x - 14.0, y - 28.0, 20.0, 28.0), Color(0.4, 0.27, 0.19))
+	draw_rect(Rect2(x - 14.0, y - 20.0, 20.0, 3.0), Color(0.2, 0.15, 0.1))
+	if i % 3 == 0:
+		draw_rect(Rect2(x + 104.0, y - 24.0, 24.0, 24.0), Color(0.36, 0.26, 0.18))
+	_lantern(Vector2(x + 55.0, y - 60.0), 0.8)
 
 
 func _free(a: float, b: float, k: float, y: float) -> bool:
@@ -284,7 +334,7 @@ func _rotunda(cx: float, y: float, label: String) -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(cx - 6.0, y - 62.0), Vector2(cx + 6.0, y - 62.0), Vector2(cx, y - 62.0 - 26.0 * f2)]), Color(1.0, 0.92, 0.6, 0.95))
 	_warden(Vector2(cx - 150.0, y), 1.0)
 	_warden(Vector2(cx + 150.0, y), -1.0)
-	_sign(Vector2(cx, y - 262.0), label)
+	_sign(Vector2(cx, y - 346.0), label)
 
 
 ## ---------------------------------------------------------------- the procession
