@@ -25,6 +25,7 @@ const IRON := Color(0.16, 0.17, 0.19)
 const MARKS := [Color(0.75, 0.32, 0.25), Color(0.3, 0.55, 0.6), Color(0.8, 0.62, 0.28), Color(0.45, 0.6, 0.35), Color(0.6, 0.4, 0.6)]
 const TARPS := [Color(0.5, 0.36, 0.2), Color(0.32, 0.42, 0.48), Color(0.55, 0.3, 0.24), Color(0.42, 0.4, 0.3)]
 
+const Util := preload("res://hollow_view_util.gd")
 const COURT_X := 6440.0 ## Standpipe Court spans COURT_X .. COURT_X + 460 on the L10 street
 const K_HOMES := 10.0
 const K_YARD := 11.0
@@ -130,41 +131,8 @@ func _court() -> void:
 ## a household colour painted on the door frame, a number plate and a hanging pot.
 func _lean_to(x: float, i: int) -> void:
 	var y := HollowMap.deck_y_at(x + 70.0, K_HOMES)
-	if not _view.intersects(Rect2(x - 10.0, y - 190.0, 200.0, 200.0)):
-		return
-	var w := 120.0 + float((i * 23) % 3) * 20.0
-	var h := 96.0 + float((i * 17) % 3) * 16.0
-	draw_rect(Rect2(x, y - h, w, h), Color(0.3, 0.22, 0.16))
-	for j in range(int(w / 12.0)):
-		draw_rect(Rect2(x + 3.0 + float(j) * 12.0, y - h + 6.0, 2.0, h - 10.0), Color(0.22, 0.16, 0.11))
-	# a sloped ribbed tin roof
-	draw_colored_polygon(PackedVector2Array([Vector2(x - 10.0, y - h + 4.0), Vector2(x + w + 10.0, y - h - 14.0), Vector2(x + w + 10.0, y - h - 6.0), Vector2(x - 10.0, y - h + 12.0)]), TIN)
-	for j in range(int(w / 14.0) + 1):
-		var rx := x - 8.0 + float(j) * 14.0
-		draw_line(Vector2(rx, y - h + 5.0 - (rx - x) * 0.14), Vector2(rx, y - h + 11.0 - (rx - x) * 0.14), TIN_HI, 1.5)
-	# a patched tarp hung over one side
-	var tarp: Color = TARPS[i % TARPS.size()]
-	draw_colored_polygon(PackedVector2Array([Vector2(x + w * 0.5, y - h + 10.0), Vector2(x + w + 12.0, y - h + 2.0), Vector2(x + w + 16.0, y - h + 50.0), Vector2(x + w * 0.5 + 8.0, y - h + 44.0)]), tarp)
-	draw_rect(Rect2(x + w * 0.6, y - h + 20.0, 14.0, 10.0), tarp.lightened(0.18)) # the patch
-	# the door and its household mark
-	var dx := x + w * 0.3
-	var mark: Color = MARKS[i % MARKS.size()]
-	draw_rect(Rect2(dx - 18.0, y - 62.0, 36.0, 62.0), mark.darkened(0.35))
-	draw_rect(Rect2(dx - 14.0, y - 58.0, 28.0, 58.0), Color(0.14, 0.1, 0.07))
-	draw_rect(Rect2(dx - 20.0, y - 64.0, 4.0, 64.0), mark)
-	draw_rect(Rect2(dx + 16.0, y - 64.0, 4.0, 64.0), mark)
-	draw_rect(Rect2(dx - 8.0, y - 76.0, 16.0, 9.0), Color(0.82, 0.78, 0.66))
-	draw_string(ThemeDB.fallback_font, Vector2(dx - 5.0, y - 68.0), str(11 + i * 3), HORIZONTAL_ALIGNMENT_LEFT, -1.0, 8, Color(0.15, 0.1, 0.08))
-	# the stoop: two stacked crates for steps
-	draw_rect(Rect2(dx - 26.0, y - 10.0, 22.0, 10.0), TIMBER)
-	draw_rect(Rect2(dx - 14.0, y - 20.0, 22.0, 10.0), TIMBER.lightened(0.08))
-	# a hanging pot and a washing basket on the other side
-	draw_line(Vector2(x + w * 0.78, y - h + 14.0), Vector2(x + w * 0.78, y - 70.0), IRON, 1.5)
-	draw_circle(Vector2(x + w * 0.78, y - 64.0), 7.0, COPPER.darkened(0.2))
-	draw_rect(Rect2(x + w * 0.66, y - 22.0, 24.0, 22.0), Color(0.5, 0.38, 0.22))
-	draw_rect(Rect2(x + w * 0.66, y - 22.0, 24.0, 4.0), Color(0.62, 0.5, 0.3))
-	# a lit window slit
-	draw_rect(Rect2(x + w * 0.62, y - h + 26.0, 12.0, 8.0), Color(WARM.r, WARM.g, WARM.b, 0.5 + 0.1 * sin(_t * 2.0 + float(i))))
+	if _view.intersects(Rect2(x - 10.0, y - 190.0, 200.0, 200.0)):
+		Util.lean_to(self, x, y, i, _t)
 
 
 ## ---------------------------------------------------------------- the balcony

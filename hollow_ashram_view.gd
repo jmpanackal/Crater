@@ -12,6 +12,7 @@ extends Node2D
 ##   light        a warm lantern-amber wash with a cool teal-grey fill high up.
 ## Greybox, drawn in code, replaced by real art later. Visual only. Only what is on screen is drawn.
 
+const Util := preload("res://hollow_view_util.gd")
 const WARM := Color(1.0, 0.74, 0.42)
 const COOL := Color(0.45, 0.75, 0.78)
 const PLASTER := Color(0.6, 0.53, 0.43)
@@ -133,31 +134,7 @@ func _stall(st: Dictionary) -> void:
 
 
 func _free(a: float, b: float, k: float, y: float) -> bool:
-	for st in HollowMap.stairs():
-		if absf(float(st["foot_y"]) - y) < 40.0 or absf(float(st["top_y"]) - y) < 40.0:
-			var lo := minf(float(st["foot_x"]), float(st["top_x"])) - 40.0
-			var hi := maxf(float(st["foot_x"]), float(st["top_x"])) + 40.0
-			if b > lo and a < hi:
-				return false
-	for l in HollowMap.ladders():
-		if absf(float(l["open_x"]) - (a + b) * 0.5) < (b - a) * 0.5 + 40.0 and (absf(float(l["top_y"]) - y) < 40.0 or absf(float(l["bottom_y"]) - y) < 40.0):
-			return false
-	for l in HollowMap.lifts():
-		if absf(float(l["open_x"]) - (a + b) * 0.5) < (b - a) * 0.5 + 150.0:
-			return false
-	for g in HollowMap.gates():
-		if absf(float(g["x"]) - (a + b) * 0.5) < (b - a) * 0.5 + 150.0:
-			return false
-	for dr in HollowMap.doors():
-		if absf(float(dr["x"]) - (a + b) * 0.5) < (b - a) * 0.5 + 60.0:
-			return false
-	for d in HollowMap.domes():
-		if absf(float(d["k"]) - k) < 0.01 and b > float(d["x0"]) - 30.0 and a < float(d["x1"]) + 30.0 and k > 3.5:
-			return false
-	for bd in HollowDressing.buildings():
-		if absf(HollowMap.deck_y_at(float(bd["x0"]), float(bd["k"])) - y) < 40.0 and b > float(bd["x0"]) - 20.0 and a < float(bd["x1"]) + 20.0:
-			return false
-	return true
+	return Util.span_free(a, b, k, y)
 
 
 ## ---------------------------------------------------------------- houses
